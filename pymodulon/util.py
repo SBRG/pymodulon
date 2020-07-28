@@ -13,10 +13,6 @@ def rename_imodulon(ica_data, old_name, new_name):
     ica_data.set_imodulon_names(name_list)
 
 
-def rename_sample(ica_data, old_name, new_name):
-    """ Rename a sample """
-
-
 def compute_threshold(k, s_matrix, dagostino_cutoff):
     """Computes D'agostino-test-based threshold for a component of an S matrix
         s_matrix: Component matrix with gene weights
@@ -24,14 +20,22 @@ def compute_threshold(k, s_matrix, dagostino_cutoff):
         dagostino_cutoff: Minimum D'agostino test statistic value to determine threshold
     """
     i = 0
+
     # Sort genes based on absolute value
     ordered_genes = abs(s_matrix[k]).sort_values()
+
+    # Compute k2-statistic
     ksquare, p = stats.normaltest(s_matrix.loc[:, k])
+
+    # Iteratively remove gene with largest weight until k2-statistic is below cutoff
     while ksquare > dagostino_cutoff:
         i -= 1
-        # Check if K statistic is below cutoff
         ksquare, p = stats.normaltest(s_matrix.loc[ordered_genes.index[:i], k])
+
+    # Select genes in iModulon
     comp_genes = ordered_genes.iloc[i:]
+
+    # Slightly modify threshold to improve plotting visibility
     if len(comp_genes) == len(s_matrix.index):
         return max(comp_genes) + .05
     else:

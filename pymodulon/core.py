@@ -14,8 +14,8 @@ class IcaData(object):
 
     def __init__(self, s_matrix, a_matrix,
                  x_matrix=None, imodulons=None,
-                 gene_table=None,sample_table=None,
-                 imodulon_table=None,
+                 gene_table=None, sample_table=None,
+                 imodulon_table=None, trn=None,
                  dagostino_cutoff=550):
         """
         Required Args:
@@ -75,11 +75,16 @@ class IcaData(object):
 
         if sample_table is None:
             sample_table = pd.DataFrame(index=self._sample_names)
-        self.sample_info = sample_table
+        self.sample_table = sample_table
 
         if imodulon_table is None:
             imodulon_table = pd.DataFrame(index=self._imod_names)
-        self.gene_info = imodulon_table
+        self.imodulon_table = imodulon_table
+
+        # Set TRN
+        if trn is None:
+            trn = pd.DataFrame()
+        self.trn = trn
 
     @property
     def S(self):
@@ -144,9 +149,15 @@ class IcaData(object):
 
     @imodulon_names.setter
     def imodulon_names(self, new_names):
+
+        # Check length of new_names
         if len(new_names) != len(self._imod_names):
-            raise ValueError('imodulons has {:d} elements, but should contain {:d} elements'.format(
+            raise ValueError('new_names has {:d} elements, but should contain {:d} elements'.format(
                 len(new_names), len(self._imod_names)))
+
+        # Check for duplicates in new_names
+        if len(new_names) != len(set(new_names)):
+            raise ValueError('new_names contains duplicate names')
 
         self._imod_names = new_names
 
@@ -158,6 +169,9 @@ class IcaData(object):
         convert_dict = dict(zip(new_names, self._imod_names))
         self._thresholds = {new_names: self._thresholds[convert_dict[x]] for x in new_names}
 
+        # TODO: Update imod_table
+
+
     @property
     def sample_names(self):
         return self._sample_names
@@ -166,14 +180,15 @@ class IcaData(object):
     def gene_names(self):
         return self._gene_names
 
-    # Gene and sample tables
+    # Gene, sample and iModulon tables
+    # TODO: Add checking
     @property
     def gene_table(self):
         return self._gene_table
 
     @gene_table.setter
     def gene_table(self, new_table):
-        pass
+        self._gene_table = new_table
 
     @property
     def sample_table(self):
@@ -181,4 +196,21 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        pass
+        self._sample_table = new_table
+
+    @property
+    def imodulon_table(self):
+        return self._imod_table
+
+    @imodulon_table.setter
+    def imodulon_table(self, new_table):
+        self._imod_table = new_table
+
+    # TRN
+    @property
+    def trn(self):
+        return self._trn
+
+    @trn.setter
+    def trn(self, new_trn):
+        self._trn = new_trn
