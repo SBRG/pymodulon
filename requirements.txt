@@ -1,0 +1,5 @@
+setuptools==49.2.0
+pandas==1.0.5
+numpy==1.19.1
+scipy==1.5.0
+statsmodels==0.11.1
