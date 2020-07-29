@@ -12,19 +12,20 @@ class IcaData(object):
 
     """
 
-    def __init__(self, s_matrix, a_matrix,
+    def __init__(self, s_matrix: pd.DataFrame, a_matrix: pd.DataFrame,
                  x_matrix=None, imodulons=None,
                  gene_table=None, sample_table=None,
                  imodulon_table=None, trn=None,
                  dagostino_cutoff=550):
+        # TODO: Add type hinting
         """
         Required Args:
             s_matrix: S matrix from ICA
             a_matrix: A matrix from ICA
         Optional Args:
             x_matrix: log-TPM expression values (not normalized to reference)
-            gene_table: Table containing relevant gene information # TODO: convert to tidydata format
-            sample_table: Table containing relevant sample metadata # TODO: convert to tidydata format
+            gene_table: Table containing relevant gene information
+            sample_table: Table containing relevant sample metadata
             imodulons: List of iModulon names
             dagostino_cutoff: Cut-off value for iModulon threshold calculation (default: 550)
             TODO: Fill in
@@ -170,7 +171,6 @@ class IcaData(object):
         self._thresholds = {new_names: self._thresholds[convert_dict[x]] for x in new_names}
 
         # TODO: Update imod_table
-
 
     @property
     def sample_names(self):
