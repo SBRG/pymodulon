@@ -33,7 +33,14 @@ class IcaData(object):
 
         # Check S and A matrices
         if isinstance(s_matrix, pd.DataFrame) and isinstance(a_matrix, pd.DataFrame):
-            if s_matrix.columns != a_matrix.index:
+
+            # Convert column names of S to ints if necessary
+            try:
+                s_matrix.columns = s_matrix.columns.astype(int)
+            except TypeError:
+                pass
+
+            if s_matrix.columns.tolist() != a_matrix.index.tolist():
                 raise ValueError('S and A matrices have different iModulon names')
 
             # Initialize sample and gene names
@@ -45,23 +52,27 @@ class IcaData(object):
             self._s = s_matrix
             self._a = a_matrix
         else:
-            raise ValueError('S and A must be pandas dataframes or file names')
+            raise TypeError('S and A must be pandas dataframes or file names')
             # TODO: Allow S and A to be filenames
 
         # Initialize thresholds
         self._thresholds = {k: compute_threshold(k, self._s, dagostino_cutoff) for k in self._imod_names}
 
         # Check X matrix [optional]
-        if isinstance(x_matrix, pd.DataFrame):
-            if x_matrix.columns != self._sample_names:
+        if x_matrix is None:
+            self._x = None
+        elif isinstance(x_matrix, pd.DataFrame):
+            if x_matrix.columns.tolist() != self._sample_names:
                 raise ValueError('X and A matrices have different sample names')
-            if x_matrix.index != self._gene_names:
+            if x_matrix.index.tolist() != self._gene_names:
+                print(x_matrix.index.tolist())
+                print(self._gene_names)
                 raise ValueError('X and S matrices have different gene names')
 
             # Store X
             self._x = x_matrix
         else:
-            raise ValueError('X must be a pandas dataframe or filename')
+            raise TypeError('X must be a pandas dataframe or filename')
             # TODO: Allow X to be filename
             # TODO: Move to X setter function?
 
@@ -135,7 +146,7 @@ class IcaData(object):
         elif isinstance(new_thresholds, list):
             self._thresholds = dict(zip(self._imod_names, new_thresholds))
         else:
-            raise ValueError('new_thresholds must be list or dict')
+            raise TypeError('new_thresholds must be list or dict')
 
     def update_threshold(self, name, value):
         """ Set threshold for specific iModulon """
