@@ -1,4 +1,3 @@
-import pandas as pd
 from pymodulon.util import *
 
 
@@ -56,7 +55,7 @@ class IcaData(object):
             # TODO: Allow S and A to be filenames
 
         # Initialize thresholds
-        self._thresholds = {k: compute_threshold(k, self._s, dagostino_cutoff) for k in self._imod_names}
+        self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imod_names}
 
         # Check X matrix [optional]
         if x_matrix is None:
@@ -148,9 +147,12 @@ class IcaData(object):
         else:
             raise TypeError('new_thresholds must be list or dict')
 
-    def update_threshold(self, name, value):
-        """ Set threshold for specific iModulon """
-        self._thresholds[name] = value
+    def update_threshold(self, imodulon: ImodName, value):
+        """ Set threshold for an iModulon
+            name: Name of iModulon
+            value: New threshold
+        """
+        self._thresholds[imodulon] = value
 
     # Gene, sample and iModulon name properties
 
@@ -225,3 +227,16 @@ class IcaData(object):
     @trn.setter
     def trn(self, new_trn):
         self._trn = new_trn
+
+    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str):
+        pass
+
+    def compute_trn_enrichment(self, fdr: float = 1e-5, max_regs: int = 1, save: bool = False) -> pd.DataFrame:
+        """
+        Compare iModulons against all regulons
+        :param fdr: False detection rate (default: 1e-5)
+        :param max_regs: Maximum number of regulators to include in complex regulon (default: 1)
+        :param save: Save regulons with highest enrichment scores to the imodulon_table
+        :return: Pandas Dataframe of statistically significant enrichments
+        """
+        pass
