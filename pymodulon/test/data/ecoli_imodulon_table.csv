@@ -1,4 +1,4 @@
-component,name,TF,log_odds,f1score,pvalue,precision,recall,TP,n_genes,n_tf,Regulator,Function,Category,threshold
+,name,TF,log_odds,f1score,pvalue,precision,recall,TP,n_genes,n_tf,Regulator,Function,Category,threshold
 0,YieP,,,,,,,,11,1,YieP,Unknown,Regulator Discovery,0.0897668131094
 1,GlpR,glpR,inf,4,0,1,1,9,9,1,GlpR,Glycerol catabolism,Carbon Source Utilization,0.0668007683189
 2,YgbI,,,,,,,,9,1,YgbI,Unknown Function,Regulator Discovery,0.0822402752227
@@ -29,7 +29,7 @@ component,name,TF,log_odds,f1score,pvalue,precision,recall,TP,n_genes,n_tf,Regul
 27,GcvA,gcvA,9.3719488871726,5.33333333333333,1.59E-09,0.75,0.75,3,4,1,GcvA,Glycine cleavage system,Miscellaneous Metabolism,0.11508462086645
 28,XylR,xylR,8.1168861859657,6.66666666666667,2.38E-15,0.461538461538462,0.857142857142857,6,13,1,XylR,Xylose catabolism,Carbon Source Utilization,0.0894670864819
 29,fur-KO,,,,,,,,13,0,,Accounts for fur knock-out,Genomic Alterations,0.07819265767595
-30,RpoH,rpoH,inf,22.9230769230769,5.90E-20,1,0.095588235294118,13,13,1,RpoH,Heat shock response,Stress Response,0.09858715297455
+30,RpoH,rpoH,inf,22.9230769230769,5.9E-20,1,0.095588235294118,13,13,1,RpoH,Heat shock response,Stress Response,0.09858715297455
 31,GadEWX,gadE+gadW+gadX,8.62668800621252,5.6,9.08E-25,0.588235294117647,0.909090909090909,10,17,3,GadE and GadW and GadX,Acid stress response,Stress Response,0.0471955794132
 32,translation,,,,,,,,24,0,,Enriched in translation machinery,Biological Enrichment,0.06883556896475
 33,PrpR,prpR,8.96597318421035,5.5,7.61E-12,0.666666666666667,0.8,4,6,1,PrpR,Propionate catabolism,Carbon Source Utilization,0.1076962555464
@@ -65,7 +65,7 @@ component,name,TF,log_odds,f1score,pvalue,precision,recall,TP,n_genes,n_tf,Regul
 63,AllR/AraC/FucR,allR/araC/fucR,inf,5.33333333333333,1.19E-41,1,0.6,18,18,3,AllR or AraC or FucR,"Allantoin, glyoxylate, L-arabinose, and L-fucose catabolism",Carbon Source Utilization,0.08699579655295
 64,Cra,cra,4.81291117161902,25,7.06E-16,0.8,0.088888888888889,12,15,1,Cra,Central carbon metabolism,Carbon Source Utilization,0.0617186501389
 65,ArcA-2,arcA,3.73795826022505,45.6190476190476,1.15E-16,0.84,0.04625550660793,21,25,1,ArcA,Electron Transport Chain,Energy Metabolism,0.08111314538925
-66,EvgA,evgA,6.47620283611065,7.2,6.20E-21,0.5,0.625,10,20,1,EvgA,Acid and osmotic stress response,Stress Response,0.06665543853925
+66,EvgA,evgA,6.47620283611065,7.2,6.2E-21,0.5,0.625,10,20,1,EvgA,Acid and osmotic stress response,Stress Response,0.06665543853925
 67,uncharacterized-2,,,,,,,,42,0,,Unknown Function,Uncharacterized,0.05656200840805
 68,Zinc,zntR/zur,inf,5.42857142857143,2.81E-19,0.583333333333333,1,7,12,2,ZntR or Zur,Zinc homeostasis,Metal Homeostasis,0.06329057840885
 69,SoxS,soxS,5.10027284928885,8.17391304347826,6.76E-35,0.560975609756098,0.433962264150943,23,41,1,SoxS,Oxidative stress response,Stress Response,0.05773654354515
@@ -81,7 +81,7 @@ component,name,TF,log_odds,f1score,pvalue,precision,recall,TP,n_genes,n_tf,Regul
 79,crp-KO,,,,,,,,14,0,,Accounts for crp knock-out,Genomic Alterations,0.09678985515585
 80,GntR/TyrR,gntR/tyrR,7.74186920944193,6,3.18E-29,0.866666666666667,0.541666666666667,13,15,2,GntR or TyrR,Gluconate catabolism and tyrosine biosynthesis,Carbon Source Utilization,0.08078128811645
 81,purR-KO,,,,,,,,3,0,,Accounts for purR knock-out,Genomic Alterations,0.119782028703
-82,RpoS,rpoS,2.08758039856623,20.5,1.10E-18,0.373831775700935,0.132013201320132,40,107,1,RpoS,General stress response,Stress Response,0.0401879623066
+82,RpoS,rpoS,2.08758039856623,20.5,1.1E-18,0.373831775700935,0.132013201320132,40,107,1,RpoS,General stress response,Stress Response,0.0401879623066
 83,membrane,,,,,,,,15,0,,Enriched in membrane-bound proteins,Biological Enrichment,0.09567831326605
 84,duplication-1,,,,,,,,84,0,,Large duplication of 129 genes during evolution,Genomic Alterations,0.06091436617225
 85,uncharacterized-3,,,,,,,,2,0,,Unknown Function,Uncharacterized,0.1379015097868

@@ -60,7 +60,14 @@ def test_core():
             imodulon_list == ica_data.A.index.tolist() and
             imodulon_list == ica_data.imodulon_table.index.tolist())
 
-    ica_data.view_imodulon(1)
+    # Check if gene names are used
+    assert(ica_data.gene_names[0] == 'thrA')
+
+    # Check if renaming works for iModulons
+    ica_data.rename_imodulons({2:'YgbI'})
+    assert(ica_data.imodulon_names[2] == 'YgbI' and
+           ica_data.A.index[2] == 'YgbI' and
+           ica_data.S.columns[2] == 'YgbI')
 
     # TODO: Test loading all tables
 

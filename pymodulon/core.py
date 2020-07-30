@@ -43,7 +43,7 @@ class IcaData(object):
         elif not isinstance(a_matrix, pd.DataFrame):
             raise TypeError('a_matrix must be either a DataFrame or filename')
 
-        # Convert column names of S to ints if possible
+        # Convert column names of S to int if possible
         try:
             s_matrix.columns = s_matrix.columns.astype(int)
         except TypeError:
@@ -53,17 +53,25 @@ class IcaData(object):
         if s_matrix.columns.tolist() != a_matrix.index.tolist():
             raise ValueError('S and A matrices have different iModulon names')
 
-        # Initialize sample and gene names
-        self._gene_names = s_matrix.index.tolist()
-        self._sample_names = a_matrix.columns.tolist()
-        self._imod_names = s_matrix.columns.tolist()
+        # Ensure that S and A matrices have unique indices/columns
+        if s_matrix.index.duplicated().any():
+            raise ValueError('S matrix contains duplicate gene names')
+        if a_matrix.columns.duplicated().any():
+            raise ValueError('A matrix contains duplicate sample names')
+        if s_matrix.columns.duplicated().any():
+            raise ValueError('S and A matrices contain duplicate iModulon names')
 
         # Store S and A
         self._s = s_matrix
         self._a = a_matrix
 
+        # Initialize sample and gene names
+        self._gene_names = s_matrix.index.tolist()
+        self._sample_names = a_matrix.columns.tolist()
+        self._imodulon_names = s_matrix.columns.tolist()
+
         # Initialize thresholds
-        self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imod_names}
+        self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imodulon_names}
 
         #################
         # Load X matrix #
@@ -79,11 +87,14 @@ class IcaData(object):
         # Load data tables #
         ####################
 
+        # Use gene names if possible
         self.gene_table = gene_table
         self.sample_table = sample_table
         self.imodulon_table = imodulon_table
 
-        # Set TRN
+        ############
+        # Load TRN #
+        ############
         if trn is None:
             trn = pd.DataFrame()
             # TODO: Add TF info to gene table
@@ -114,9 +125,9 @@ class IcaData(object):
             raise TypeError('X must be a pandas DataFrame or filename')
 
         # Check that gene and sample names conform to S and A matrices
-        if df.columns.tolist() != self.sample_names:
+        if df.columns.tolist() != self.A.columns.tolist():
             raise ValueError('X and A matrices have different sample names')
-        if df.index.tolist() != self.gene_names:
+        if df.index.tolist() != self.S.index.tolist():
             raise ValueError('X and S matrices have different gene names')
 
         # Set x_matrix
@@ -137,61 +148,39 @@ class IcaData(object):
     @thresholds.setter
     def thresholds(self, new_thresholds):
         """ Set thresholds """
-        if len(new_thresholds) != len(self._imod_names):
+        if len(new_thresholds) != len(self._imodulon_names):
             raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
-                new_thresholds), len(self._imod_names)))
+                new_thresholds), len(self._imodulon_names)))
         if isinstance(new_thresholds, dict):
             self._thresholds = new_thresholds
         elif isinstance(new_thresholds, list):
-            self._thresholds = dict(zip(self._imod_names, new_thresholds))
+            self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
         else:
             raise TypeError('new_thresholds must be list or dict')
 
     def update_threshold(self, imodulon: ImodName, value):
-        """ Set threshold for an iModulon
-            name: Name of iModulon
-            value: New threshold
+        """
+        Set threshold for an iModulon
+        :param imodulon: name of iModulon
+        :param value: New threshold
         """
         self._thresholds[imodulon] = value
 
     # Gene, sample and iModulon name properties
-
     @property
     def imodulon_names(self):
         """ Get iModulon names """
-        return self._imod_names
-
-    @imodulon_names.setter
-    def imodulon_names(self, new_names):
-
-        # Check length of new_names
-        if len(new_names) != len(self._imod_names):
-            raise ValueError('new_names has {:d} elements, but should contain {:d} elements'.format(
-                len(new_names), len(self._imod_names)))
-
-        # Check for duplicates in new_names
-        if len(new_names) != len(set(new_names)):
-            raise ValueError('new_names contains duplicate names')
-
-        self._imod_names = new_names
-
-        # Rename S and A matrices
-        self._s.columns = new_names
-        self._a.index = new_names
-
-        # Update threshold dict
-        convert_dict = dict(zip(new_names, self._imod_names))
-        self._thresholds = {new_names: self._thresholds[convert_dict[x]] for x in new_names}
-
-        # TODO: Update imod_table
+        return self._imodulon_table.index.tolist()
 
     @property
-    def sample_names(self):
-        return self._sample_names
+    def sample_names(self) -> List:
+        """ Get sample names """
+        return self._sample_table.index.tolist()
 
     @property
-    def gene_names(self):
-        return self._gene_names
+    def gene_names(self) -> List:
+        """ Get gene names """
+        return self._gene_table.index.tolist()
 
     # Gene, sample and iModulon tables
     # TODO: Add checking
@@ -201,7 +190,23 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        self._gene_table = _check_table(new_table, self.gene_names, 'gene')
+        good_table = _check_table(new_table, self._gene_names, 'gene')
+        # Use gene names as index if possible
+        if good_table.index.name != 'gene_name' and 'gene_name' in good_table.columns:
+            # Make sure gene names are unique
+            if good_table.gene_name.duplicated().any():
+                warn('Gene names are not unique. Default index will be locus tags.')
+            else:
+                good_table.set_index('gene_name', inplace=True)
+
+        self._gene_table = good_table
+
+        # Update gene names
+        names = good_table.index
+        self._gene_names = names
+        self._s.index = names
+        if self._x is not None:
+            self._x.index = names
 
     @property
     def sample_table(self):
@@ -209,15 +214,36 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        self._sample_table = _check_table(new_table, self.sample_names, 'sample')
+        table = _check_table(new_table, self._sample_names, 'sample')
+        names = table.index
+        self._sample_table = table
+
+        # Update sample names
+        self._sample_names = names
+        self._a.columns = names
+        if self._x is not None:
+            self._x.columns = names
 
     @property
     def imodulon_table(self):
-        return self._imod_table
+        return self._imodulon_table
 
     @imodulon_table.setter
     def imodulon_table(self, new_table):
-        self._imod_table = _check_table(new_table, self.imodulon_names, 'imodulon')
+        table = _check_table(new_table, self._imodulon_names, 'imodulon')
+        self._imodulon_table = table
+        self._update_imodulon_names(table.index)
+
+    def _update_imodulon_names(self, new_names):
+        # Update thresholds
+        for old_name, new_name in zip(self._imodulon_names, new_names):
+            self._thresholds[new_name] = self._thresholds.pop(old_name)
+
+        # Update iModulon names
+        self._imodulon_names = new_names
+        self._a.index = new_names
+        self._s.columns = new_names
+        self._imodulon_table.index = new_names
 
     # Show enriched
     def view_imodulon(self, imodulon: ImodName):
@@ -235,6 +261,15 @@ class IcaData(object):
         final_rows = pd.concat([gene_weights, gene_rows])
 
         return final_rows
+
+    def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
+        """
+        Rename an iModulon
+        :param name_dict: Dictionary mapping old iModulon names to new names (e.g. {old_name:new_name})
+        """
+
+        new_names = [name_dict[name] if name in name_dict.keys() else name for name in self.imodulon_names]
+        self._update_imodulon_names(new_names)
 
     # TRN
     @property

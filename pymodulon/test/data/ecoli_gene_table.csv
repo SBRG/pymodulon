@@ -19,7 +19,7 @@ b4412,16750,16903,-,hokC,153,mokC-hokC,No COG Annotation
 b0019,17488,18655,+,nhaA,1167,nhaAR,Inorganic ion transport and metabolism
 b0020,18714,19620,+,nhaR,906,nhaAR,Transcription
 b0021,19810,20314,-,insB1,504,insAB-1A-1B-1,"Replication, recombination and repair"
-b0022,20232,20508,-,insA,276,insAB-1A-1B-1,"Replication, recombination and repair"
+b0022,20232,20508,-,insA1,276,insAB-1A-1B-1,"Replication, recombination and repair"
 b0023,20814,21078,-,rpsT,264,rpsT,"Translation, ribosomal structure and biogenesis"
 b0024,21180,21399,+,yaaY,219,yaaY,Function unknown
 b0025,21406,22348,+,ribF,942,ribF-ileS-lspA-fkpB-ispH,Coenzyme transport and metabolism
@@ -250,7 +250,7 @@ b0252,267183,268005,-,yafZ,822,ykfA-yafZ,Function unknown
 b0253,268096,268960,-,ykfA,864,ykfA-yafZ,Function unknown
 b0254,269288,270182,-,perR,894,perR,Transcription
 b4587_1,270277,270535,+,insN_1,258,insN_1,No COG Annotation
-b0256,270602,271754,+,insI1,1152,insN-1I-1O-1,"Replication, recombination and repair"
+b0256,270602,271754,+,InsI1_1,1152,insN-1I-1O-1,"Replication, recombination and repair"
 b4587_2,271763,272189,+,insN_2,426,insN_2,No COG Annotation
 b0258,272846,273954,+,ykfC,1108,ykfC,No COG Annotation
 b0259,274100,275117,-,insH1,1017,insH-1,"Replication, recombination and repair"
@@ -258,9 +258,9 @@ b0260,275324,276728,+,mmuP,1404,mmuPM,Amino acid transport and metabolism
 b0261,276714,277647,+,mmuM,933,mmuPM,Amino acid transport and metabolism
 b0262,277755,278802,-,afuC,1047,insAB-2A-2B-2-afuBC,Amino acid transport and metabolism
 b0263,278813,279161,-,afuB,348,insAB-2A-2B-2-afuBC,No COG Annotation
-b0264,279177,279681,-,insB1,504,insAB-2A-2B-2-afuBC,"Replication, recombination and repair"
-b0265,279599,279875,-,insA,276,insAB-2A-2B-2-afuBC,"Replication, recombination and repair"
-b4708,279930,280104,+,insI1,174,insI1,No COG Annotation
+b0264,279177,279681,-,insB2,504,insAB-2A-2B-2-afuBC,"Replication, recombination and repair"
+b0265,279599,279875,-,insA2,276,insAB-2A-2B-2-afuBC,"Replication, recombination and repair"
+b4708,279930,280104,+,InsI1_2,174,insI1,No COG Annotation
 b4505,280113,280362,-,insX,249,yagAB-insX,No COG Annotation
 b0266,280426,280735,-,yagB,309,yagAB-insX,No COG Annotation
 b0267,280828,281983,-,yagA,1155,yagAB-insX,"Replication, recombination and repair"
@@ -271,7 +271,7 @@ b0271,286788,288399,+,yagH,1611,yagGH,Carbohydrate transport and metabolism
 b0272,288403,289162,-,yagI,759,xynR,Transcription
 b0273,289300,290305,-,argF,1005,argF,Amino acid transport and metabolism
 b4688,290428,290633,+,ykgS,205,ykgS,No COG Annotation
-b0274,290648,291152,-,insB1,504,insAB-3A-3B-3,"Replication, recombination and repair"
+b0274,290648,291152,-,insB3,504,insAB-3A-3B-3,"Replication, recombination and repair"
 b0275,291070,291346,-,insA,276,insAB-3A-3B-3,"Replication, recombination and repair"
 b0276,291403,292231,+,yagJ,828,yagJ,No COG Annotation
 b0277,292321,292948,-,yagK,627,yagK,Function unknown
@@ -369,8 +369,8 @@ b0367,386970,387798,+,tauC,828,tauABCD,Inorganic ion transport and metabolism
 b0368,387794,388646,+,tauD,852,tauABCD,"Secondary metabolites biosynthesis, transport and catabolism"
 b0369,388752,389727,-,hemB,975,hemB,Coenzyme transport and metabolism
 b4580_1,390250,391708,+,yaiT_1,1458,yaiT_1,No COG Annotation
-b0372,391738,392605,-,insF1,867,insEF-2E-2F-2,"Replication, recombination and repair"
-b0373,392601,392901,-,insE1,300,insEF-2E-2F-2,"Replication, recombination and repair"
+b0372,391738,392605,-,insF2,867,insEF-2E-2F-2,"Replication, recombination and repair"
+b0373,392601,392901,-,insE2,300,insEF-2E-2F-2,"Replication, recombination and repair"
 b4580_2,392969,394418,+,yaiT_2,1449,yaiT_2,No COG Annotation
 b0375,394505,395129,+,yaiV,624,iprA,Transcription
 b0376,395129,396287,-,ampH,1158,ampH,Defense mechanisms
@@ -536,8 +536,8 @@ b4633,565857,566079,-,xisD,222,xisD,No COG Annotation
 b0539,566097,566376,-,exoD,279,ybcC,No COG Annotation
 b4508,566375,566687,+,peaD,312,peaD,No COG Annotation
 b0542_1,566683,566776,+,renD_1,93,renD-emrE,No COG Annotation
-b0540,566841,567141,+,insE1,300,insE-3EF-3F-3,"Replication, recombination and repair"
-b0541,567137,568004,+,insF1,867,insE-3EF-3F-3,"Replication, recombination and repair"
+b0540,566841,567141,+,insE3,300,insE-3EF-3F-3,"Replication, recombination and repair"
+b0541,567137,568004,+,insF3,867,insE-3EF-3F-3,"Replication, recombination and repair"
 b0542_2,568034,568247,+,renD_2,213,renD-emrE,No COG Annotation
 b0543,568314,568647,+,emrE,333,renD-emrE,Inorganic ion transport and metabolism
 b0544,568901,570428,+,ybcK,1527,ybcK,"Replication, recombination and repair"
@@ -551,7 +551,7 @@ b0550,573370,573733,+,rusA,363,ybcN-ninE-ybcO-rusA-ylcG,"Replication, recombinat
 b4509,573729,573870,+,ylcG,141,ybcN-ninE-ybcO-rusA-ylcG,No COG Annotation
 b0551,573955,574339,+,quuD,384,ybcQ,Transcription
 b0553_2,574528,574586,-,nmpC_2,58,nmpC,No COG Annotation
-b0552,574736,575753,-,insH1,1017,insH-2,"Replication, recombination and repair"
+b0552,574736,575753,-,insH2,1017,insH-2,"Replication, recombination and repair"
 b0553_1,575785,576825,-,nmpC_1,1040,nmpC,No COG Annotation
 b0554,577397,577613,+,essD,216,essD-rrrD-rzpD,Function unknown
 b0555,577612,578110,+,rrrD,498,essD-rrrD-rzpD,Function unknown
@@ -586,7 +586,7 @@ b0579,605517,605886,-,ybdF,369,ybdF,Function unknown
 b0580,605950,606199,-,ybdJ,249,ybdJ,Function unknown
 b0581,606264,607383,-,ybdK,1119,ybdK,Function unknown
 b4415,607835,607988,+,hokE,153,hokE,Function unknown
-b0582,608064,609177,+,insL1,1113,insL-2,"Replication, recombination and repair"
+b0582,608064,609177,+,insL2,1113,insL-2,"Replication, recombination and repair"
 b0583,609458,610079,-,entD,621,fepA-entD,"Secondary metabolites biosynthesis, transport and catabolism"
 b0584,610253,612494,-,fepA,2241,fepA-entD,Inorganic ion transport and metabolism
 b0585,612736,613939,+,fes,1203,fes-ybdZ-entF-fepE,Inorganic ion transport and metabolism
@@ -661,7 +661,7 @@ b0652,684529,685255,-,gltL,726,gltI-sroC-gltJKL,Amino acid transport and metabol
 b0653,685254,685929,-,gltK,675,gltI-sroC-gltJKL,Amino acid transport and metabolism
 b0654,685928,686669,-,gltJ,741,gltI-sroC-gltJKL,Amino acid transport and metabolism
 b0655,686838,687747,-,gltI,909,gltI-sroC-gltJKL,Amino acid transport and metabolism
-b0656,687996,689013,-,insH1,1017,insH-3,"Replication, recombination and repair"
+b0656,687996,689013,-,insH3,1017,insH-3,"Replication, recombination and repair"
 b0657,689342,690881,-,lnt,1539,ybeZYX-lnt,Cell wall/membrane/envelope biogenesis
 b0658,690905,691784,-,ybeX,879,ybeZYX-lnt,Inorganic ion transport and metabolism
 b0659,691873,692341,-,ybeY,468,ybeZYX-lnt,Function unknown
@@ -977,8 +977,8 @@ b0984,1045848,1047945,-,gfcD,2097,gfcBCD,Function unknown
 b0985,1047944,1048691,-,gfcC,747,gfcBCD,Function unknown
 b0986,1048687,1049332,-,gfcB,645,gfcBCD,Cell wall/membrane/envelope biogenesis
 b0987,1049438,1049744,-,gfcA,306,gfcA,No COG Annotation
-b4516,1049832,1050108,+,insA,276,insA,"Replication, recombination and repair"
-b0988,1050026,1050530,+,insB1,504,insA-4AB-4B-4,"Replication, recombination and repair"
+b4516,1049832,1050108,+,insA4,276,insA,"Replication, recombination and repair"
+b0988,1050026,1050530,+,insB4,504,insA-4AB-4B-4,"Replication, recombination and repair"
 b0989,1050962,1051175,-,cspH,213,cspH,Transcription
 b0990,1051460,1051673,+,cspG,213,cspG,Transcription
 b0991,1051846,1052077,+,ymcE,231,ymcE-gnsA,No COG Annotation
@@ -1017,8 +1017,8 @@ b1022,1086520,1087846,-,pgaC,1326,pgaABCD,Cell wall/membrane/envelope biogenesis
 b1023,1087838,1089857,-,pgaB,2019,pgaABCD,Carbohydrate transport and metabolism
 b1024,1089865,1092289,-,pgaA,2424,pgaABCD,Cell wall/membrane/envelope biogenesis
 b1025,1092875,1094234,+,ycdT,1359,dgcT,Signal transduction mechanisms
-b1026,1094274,1095141,-,insF1,867,insEF-4E-4F-4,"Replication, recombination and repair"
-b1027,1095137,1095437,-,insE1,300,insEF-4E-4F-4,"Replication, recombination and repair"
+b1026,1094274,1095141,-,insF4,867,insEF-4E-4F-4,"Replication, recombination and repair"
+b1027,1095137,1095437,-,insE4,300,insEF-4E-4F-4,"Replication, recombination and repair"
 b1028,1095504,1095846,+,ymdE,342,ymdE-ycdU,No COG Annotation
 b1029,1095842,1096829,+,ycdU,987,ymdE-ycdU,Function unknown
 b1033,1097885,1098824,+,ghrA,939,ghrA,Amino acid transport and metabolism
@@ -1332,7 +1332,7 @@ b1327,1390932,1391853,-,ycjY,921,ycjY-ymjDC-mpaA,Function unknown
 b1328,1391990,1392890,+,pgrR,900,pgrR,Transcription
 b1329,1393226,1394840,+,mppA,1614,mppA,Amino acid transport and metabolism
 b1330,1394890,1395922,-,ynaI,1032,ynaI,Cell wall/membrane/envelope biogenesis
-b1331,1396075,1397092,+,insH1,1017,insH-4,"Replication, recombination and repair"
+b1331,1396075,1397092,+,insH4,1017,insH-4,"Replication, recombination and repair"
 b1332,1397364,1397622,+,ynaJ,258,ynaJ,Function unknown
 b1333,1397671,1398622,-,uspE,951,uspE,Signal transduction mechanisms
 b1334,1398773,1399526,-,fnr,753,fnr,Signal transduction mechanisms
@@ -1371,7 +1371,7 @@ b1365,1425376,1425640,+,ynaK,264,ynaK-ydaY,Transcription
 b1366,1425629,1426082,+,ydaY,453,ynaK-ydaY,No COG Annotation
 b1368,1426453,1427386,+,tmpR,933,ynaA-lomR_1,No COG Annotation
 b4570_1,1427388,1427598,+,lomR_1,210,ynaA-lomR_1,No COG Annotation
-b1370,1427745,1428726,-,insH1,981,insH-5,"Replication, recombination and repair"
+b1370,1427745,1428726,-,insH5,981,insH-5,"Replication, recombination and repair"
 b4570_2,1428795,1428984,+,lomR_2,189,lomR_2-stfR-tfaR,No COG Annotation
 b1372,1429048,1432411,+,stfR,3363,lomR_2-stfR-tfaR,Function unknown
 b1373,1432410,1432986,+,tfaR,576,lomR_2-stfR-tfaR,Function unknown
@@ -1406,10 +1406,10 @@ b1399,1463538,1464489,+,paaX,951,paaXY,Transcription
 b1400,1464470,1465061,+,paaY,591,paaXY,Function unknown
 b4674,1465164,1465230,-,ynbG,66,ynbG,No COG Annotation
 b4492_1,1465391,1467904,+,ydbA_1,2513,ydbA_1,No COG Annotation
-b1402,1467920,1468826,-,insD1,906,insCD-2C-2D-2,"Replication, recombination and repair"
-b1403,1468783,1469149,-,insC1,366,insCD-2C-2D-2,"Replication, recombination and repair"
+b1402,1467920,1468826,-,insD2,906,insCD-2C-2D-2,"Replication, recombination and repair"
+b1403,1468783,1469149,-,insC2,366,insCD-2C-2D-2,"Replication, recombination and repair"
 b4492_2,1469240,1469293,+,ydbA_2,53,ydbA_2,No COG Annotation
-b1404,1469357,1470509,+,insI1,1152,insI-2,"Replication, recombination and repair"
+b1404,1469357,1470509,+,insI2,1152,insI-2,"Replication, recombination and repair"
 b4492_3,1470516,1474013,+,ydbA_3,3497,ydbA_3,No COG Annotation
 b1406,1474220,1475081,+,ydbC,861,pdxI,Energy production and conversion
 b1407,1475143,1477450,+,ydbD,2307,ydbD,No COG Annotation
@@ -1588,7 +1588,7 @@ b1573,1648822,1649041,+,ydfC,219,ydfABC,No COG Annotation
 b1575,1649608,1649797,+,dicB,189,dicB-ydfDE-insD-7-intQ,No COG Annotation
 b1576,1649793,1649985,+,ydfD,192,dicB-ydfDE-insD-7-intQ,Function unknown
 b1577,1650077,1650842,+,ydfE,765,dicB-ydfDE-insD-7-intQ,No COG Annotation
-b1578,1650844,1651537,+,insD1,693,dicB-ydfDE-insD-7-intQ,No COG Annotation
+b1578,1650844,1651537,+,insD7,693,dicB-ydfDE-insD-7-intQ,No COG Annotation
 b1579,1651550,1652708,+,intQ,1158,dicB-ydfDE-insD-7-intQ,No COG Annotation
 b4600_1,1652754,1652838,-,ydfJ_1,84,ydfJ_1,No COG Annotation
 b1580,1652895,1653915,-,rspB,1020,rspAB,Amino acid transport and metabolism
@@ -1910,8 +1910,8 @@ b1889,1975328,1976255,-,motB,927,motAB-cheAW,Cell motility
 b1890,1976251,1977139,-,motA,888,motAB-cheAW,Cell motility
 b1891,1977265,1977844,-,flhC,579,flhDC,Transcription
 b1892,1977846,1978197,-,flhD,351,flhDC,Transcription
-b1893,1978517,1979021,-,insB1,504,insAB-5A-5B-5,"Replication, recombination and repair"
-b1894,1978939,1979215,-,insA,276,insAB-5A-5B-5,"Replication, recombination and repair"
+b1893,1978517,1979021,-,insB5,504,insAB-5A-5B-5,"Replication, recombination and repair"
+b1894,1978939,1979215,-,insA5,276,insAB-5A-5B-5,"Replication, recombination and repair"
 b1895,1979752,1980181,+,uspC,429,uspC,Signal transduction mechanisms
 b1896,1980187,1981612,-,otsA,1425,otsBA,Carbohydrate transport and metabolism
 b1897,1981586,1982387,-,otsB,801,otsBA,Carbohydrate transport and metabolism
@@ -2001,13 +2001,13 @@ b1991,2063387,2064467,-,cobT,1080,cobUST,Coenzyme transport and metabolism
 b1992,2064478,2065222,-,cobS,744,cobUST,Coenzyme transport and metabolism
 b1993,2065218,2065764,-,cobU,546,cobUST,Coenzyme transport and metabolism
 b4639,2066067,2066154,-,yeeH,87,yeeH,No COG Annotation
-b1994,2066304,2067321,-,insH1,1017,insH-6,"Replication, recombination and repair"
+b1994,2066304,2067321,-,insH6,1017,insH-6,"Replication, recombination and repair"
 b4640_2,2067359,2067458,-,yoeG_2,99,yoeG_2,No COG Annotation
 b4640_1,2067457,2067892,-,yoeG_1,435,yoeG_1,No COG Annotation
 b4641,2068260,2068419,-,yoeH,159,yoeH,No COG Annotation
 b4582_1,2068634,2068940,+,yoeA_1,306,yoeA_1,No COG Annotation
-b1996,2068951,2069857,-,insD1,906,insCD-3C-3D-3,"Replication, recombination and repair"
-b1997,2069814,2070180,-,insC1,366,insCD-3C-3D-3,"Replication, recombination and repair"
+b1996,2068951,2069857,-,insD3,906,insCD-3C-3D-3,"Replication, recombination and repair"
+b1997,2069814,2070180,-,insC3,366,insCD-3C-3D-3,"Replication, recombination and repair"
 b4582_2,2070276,2070474,+,yoeA_2,198,yoeA_2,No COG Annotation
 b1999,2070659,2071211,+,yeeP,552,yeeP,No COG Annotation
 b2000,2071538,2074658,+,flu,3120,isrC-flu,Cell wall/membrane/envelope biogenesis
@@ -2045,7 +2045,7 @@ b2027,2097320,2098301,-,wzzB,981,wzzB,Cell wall/membrane/envelope biogenesis
 b2028,2098446,2099613,-,ugd,1167,ugd,Cell wall/membrane/envelope biogenesis
 b2029,2099861,2101268,-,gnd,1407,gnd,Carbohydrate transport and metabolism
 b4571_2,2101395,2101744,-,wbbL_2,349,wbbL_2,No COG Annotation
-b2030,2101894,2102911,-,insH1,1017,insH-7,"Replication, recombination and repair"
+b2030,2101894,2102911,-,insH7,1017,insH-7,"Replication, recombination and repair"
 b4571_1,2102943,2103389,-,wbbL_1,446,wbbL_1,No COG Annotation
 b2032,2103390,2104509,-,wbbK,1119,wbbIJK,Cell wall/membrane/envelope biogenesis
 b2033,2104493,2105084,-,wbbJ,591,wbbIJK,Function unknown
@@ -2104,8 +2104,8 @@ b2083,2167601,2167814,-,yegZ,213,yegRZ,No COG Annotation
 b2085,2167988,2168306,-,yegR,318,yegRZ,Function unknown
 b2086,2168711,2169611,+,yegS,900,yegS,Lipid transport and metabolism
 b4498_2,2169692,2170167,-,gatR_2,475,gatR_2,No COG Annotation
-b2088,2170235,2170535,+,insE1,300,insE-5EF-5F-5,"Replication, recombination and repair"
-b2089,2170531,2171398,+,insF1,867,insE-5EF-5F-5,"Replication, recombination and repair"
+b2088,2170235,2170535,+,insE5,300,insE-5EF-5F-5,"Replication, recombination and repair"
+b2089,2170531,2171398,+,insF5,867,insE-5EF-5F-5,"Replication, recombination and repair"
 b4498_1,2171428,2171727,-,gatR_1,299,gatR_1,No COG Annotation
 b2091,2171832,2172873,-,gatD,1041,gatYZABCD,Amino acid transport and metabolism
 b2092_2,2172920,2173362,-,gatC_2,442,gatYZABCD,Carbohydrate transport and metabolism
@@ -2210,7 +2210,7 @@ b2186,2282939,2283947,-,yejK,1008,yejK,Function unknown
 b2187,2284128,2284356,+,yejL,228,yejLM,Function unknown
 b2188,2284375,2286136,+,yejM,1761,yejLM,Function unknown
 b2190_2,2286389,2288914,-,yejO_2,2525,yejO,No COG Annotation
-b2192,2289064,2290081,-,insH1,1017,insH-8,"Replication, recombination and repair"
+b2192,2289064,2290081,-,insH8,1017,insH-8,"Replication, recombination and repair"
 b2190_1,2290113,2290180,-,yejO_1,67,yejO,No COG Annotation
 b2193,2290499,2291147,+,narP,648,narP,Signal transduction mechanisms
 b2194,2291357,2292410,-,ccmH,1053,napFDAGHBC-ccmABCDEFGH,"Posttranslational modification, protein turnover, chaperones"
@@ -2414,7 +2414,7 @@ b2389,2509629,2510886,+,yfeO,1257,yfeO,Inorganic ion transport and metabolism
 b2390,2511000,2511327,+,ypeC,327,ypeC,Function unknown
 b2392,2511467,2512706,-,mntH,1239,mntH,Inorganic ion transport and metabolism
 b2393,2513041,2514244,+,nupC,1203,nupC,Nucleotide transport and metabolism
-b2394,2514330,2515443,+,insL1,1113,insL-3,"Replication, recombination and repair"
+b2394,2514330,2515443,+,insL3,1113,insL-3,"Replication, recombination and repair"
 b2395,2515642,2517832,-,yfeA,2190,pdeA,Signal transduction mechanisms
 b2398,2518466,2518811,+,yfeC,345,yfeCD,Transcription
 b2399,2518812,2519205,+,yfeD,393,yfeCD,Function unknown
@@ -2860,8 +2860,8 @@ b2856,2994459,2995092,-,ygeK,633,ygeLK,No COG Annotation
 b2858_2,2995313,2995760,-,ygeN_2,447,insCD-4C-4D-4-ygeONM,No COG Annotation
 b2858_1,2995759,2996020,-,ygeN_1,261,insCD-4C-4D-4-ygeONM,No COG Annotation
 b2859,2995961,2996360,-,ygeO,399,insCD-4C-4D-4-ygeONM,No COG Annotation
-b2860,2996371,2997277,-,insD1,906,insCD-4C-4D-4-ygeONM,"Replication, recombination and repair"
-b2861,2997234,2997600,-,insC1,366,insCD-4C-4D-4-ygeONM,"Replication, recombination and repair"
+b2860,2996371,2997277,-,insD4,906,insCD-4C-4D-4-ygeONM,"Replication, recombination and repair"
+b2861,2997234,2997600,-,insC4,366,insCD-4C-4D-4-ygeONM,"Replication, recombination and repair"
 b2863,2997691,2998828,-,ygeQ,1137,ygeQ,No COG Annotation
 b2865,2999135,2999891,-,ygeR,756,ygeR,Cell wall/membrane/envelope biogenesis
 b2866,3000344,3002603,+,xdhA,2259,xdhABC,Energy production and conversion
@@ -2978,7 +2978,7 @@ b4468,3125469,3126522,-,glcE,1053,glcDEFGBA,Energy production and conversion
 b2979,3126521,3128021,-,glcD,1500,glcDEFGBA,Energy production and conversion
 b2980,3128271,3129036,+,glcC,765,glcC,Transcription
 b2981,3129042,3130143,-,yghO,1101,yghO,No COG Annotation
-b2982,3130177,3131194,+,insH1,1017,insH-9,"Replication, recombination and repair"
+b2982,3130177,3131194,+,insH9,1017,insH-9,"Replication, recombination and repair"
 b2983,3131340,3132408,-,yghQ,1068,yghQ,Cell wall/membrane/envelope biogenesis
 b2984,3132453,3133212,-,yghR,759,yghSR,Function unknown
 b2985,3133243,3133957,-,yghS,714,yghSR,Function unknown
@@ -3037,8 +3037,8 @@ b3041,3183812,3184466,-,ribB,654,sroG-ribB,Coenzyme transport and metabolism
 b3042,3184839,3185130,+,yqiC,291,ubiK,Function unknown
 b3043,3185413,3185965,+,ygiL,552,ygiL,Function unknown
 b3046_1,3186060,3186090,+,yqiG_1,30,insC-5CD-5D-5-yqiGHI,No COG Annotation
-b3044,3186186,3186552,+,insC1,366,insC-5CD-5D-5-yqiGHI,"Replication, recombination and repair"
-b3045,3186509,3187415,+,insD1,906,insC-5CD-5D-5-yqiGHI,"Replication, recombination and repair"
+b3044,3186186,3186552,+,insC5,366,insC-5CD-5D-5-yqiGHI,"Replication, recombination and repair"
+b3045,3186509,3187415,+,insD5,906,insC-5CD-5D-5-yqiGHI,"Replication, recombination and repair"
 b3046_2,3187426,3189865,+,yqiG_2,2439,insC-5CD-5D-5-yqiGHI,No COG Annotation
 b3047,3189880,3190630,+,yqiH,750,insC-5CD-5D-5-yqiGHI,"Posttranslational modification, protein turnover, chaperones"
 b3048,3190631,3191696,+,yqiI,1065,insC-5CD-5D-5-yqiGHI,Function unknown
@@ -3207,7 +3207,7 @@ b3214,3361175,3361940,+,gltF,765,gltBDF,Cell wall/membrane/envelope biogenesis
 b3215,3362111,3362786,+,yhcA,675,yhcADE_1,Function unknown
 b3216,3362806,3365188,+,yhcD,2382,yhcADE_1,Cell wall/membrane/envelope biogenesis
 b4569_1,3365184,3365551,+,yhcE_1,367,yhcADE_1,No COG Annotation
-b3218,3365701,3366718,-,insH1,1017,insH-10,"Replication, recombination and repair"
+b3218,3365701,3366718,-,insH10,1017,insH-10,"Replication, recombination and repair"
 b4569_2,3366750,3366929,+,yhcE_2,179,yhcE_2F,No COG Annotation
 b3219,3366925,3367642,+,yhcF,717,yhcE_2F,Function unknown
 b3220,3367826,3368954,+,yhcG,1128,yhcG,Function unknown
@@ -3428,8 +3428,8 @@ b3440,3579767,3580805,-,yhhX,1038,yhhX,Function unknown
 b3441,3581137,3581626,+,yhhY,489,yhhY,Transcription
 b3442,3581862,3583041,+,yhhZ,1179,yhhZ-yrhA-insA-6AB-6B-6,Function unknown
 b3443_1,3583037,3583418,+,yrhA_1,381,yhhZ-yrhA-insA-6AB-6B-6,No COG Annotation
-b3444,3583482,3583758,+,insA,276,yhhZ-yrhA-insA-6AB-6B-6,"Replication, recombination and repair"
-b3445,3583676,3584180,+,insB1,504,yhhZ-yrhA-insA-6AB-6B-6,"Replication, recombination and repair"
+b3444,3583482,3583758,+,insA6,276,yhhZ-yrhA-insA-6AB-6B-6,"Replication, recombination and repair"
+b3445,3583676,3584180,+,insB6,504,yhhZ-yrhA-insA-6AB-6B-6,"Replication, recombination and repair"
 b3443_2,3584195,3584309,+,yrhA_2,114,yhhZ-yrhA-insA-6AB-6B-6,No COG Annotation
 b3446,3584758,3585043,+,yrhB,285,yrhB,Function unknown
 b3447,3585080,3586823,-,ggt,1743,ggt,Amino acid transport and metabolism
@@ -3492,7 +3492,7 @@ b3501,3648527,3648881,+,arsR,354,arsRBC,Transcription
 b3502,3648934,3650224,+,arsB,1290,arsRBC,Inorganic ion transport and metabolism
 b3503,3650236,3650662,+,arsC,426,arsRBC,Inorganic ion transport and metabolism
 b3504_1,3651290,3652031,+,yhiS_1,741,yhiS_1,No COG Annotation
-b3505,3652181,3653198,-,insH1,1017,insH-11,"Replication, recombination and repair"
+b3505,3652181,3653198,-,insH11,1017,insH-11,"Replication, recombination and repair"
 b3504_2,3653230,3653713,+,yhiS_2,483,yhiS_1,No COG Annotation
 b3506,3653960,3654527,+,slp,567,slp-dctR,Cell wall/membrane/envelope biogenesis
 b3507,3654682,3655213,+,dctR,531,slp-dctR,Transcription
@@ -4248,8 +4248,8 @@ b4267,4493374,4494406,-,idnD,1032,idnDOTR,Amino acid transport and metabolism
 b4268,4494622,4495186,+,idnK,564,idnK,Carbohydrate transport and metabolism
 b4269,4495189,4496209,-,ahr,1020,ahr,Energy production and conversion
 b4271,4496674,4497940,+,intB,1266,intB,No COG Annotation
-b4272,4498271,4498637,+,insC1,366,insC-6CD-6D-6,"Replication, recombination and repair"
-b4273,4498594,4499500,+,insD1,906,insC-6CD-6D-6,"Replication, recombination and repair"
+b4272,4498271,4498637,+,insC6,366,insC-6CD-6D-6,"Replication, recombination and repair"
+b4273,4498594,4499500,+,insD6,906,insC-6CD-6D-6,"Replication, recombination and repair"
 b4575_2,4499592,4500534,-,yjgX_2,942,yjgX_1X_2,No COG Annotation
 b4575_1,4500533,4500791,-,yjgX_1,258,yjgX_1X_2,No COG Annotation
 b4277,4501259,4501589,+,yjgZ,330,yjgZ,No COG Annotation
@@ -4260,7 +4260,7 @@ b4655,4506447,4506573,+,ythA,126,ythA,No COG Annotation
 b4281,4506625,4506856,-,yjhD,231,yjhD,No COG Annotation
 b4282,4506860,4507109,+,yjhE,249,yjhE,No COG Annotation
 b4623_1,4507196,4507451,+,insO_1,255,insO_1,No COG Annotation
-b4284,4507465,4508617,-,insI1,1152,insMI-3,"Replication, recombination and repair"
+b4284,4507465,4508617,-,insI3,1152,insMI-3,"Replication, recombination and repair"
 b4561,4508675,4508942,-,insM,267,insMI-3,No COG Annotation
 b4623_2,4509008,4509479,+,insO_2,471,insO_2,No COG Annotation
 b4623_3,4509478,4509793,+,insO_3,315,insO_3,No COG Annotation
@@ -4272,8 +4272,8 @@ b4290,4513405,4514308,-,fecB,903,fecABCDE,No COG Annotation
 b4291,4514352,4516677,-,fecA,2325,fecABCDE,Inorganic ion transport and metabolism
 b4292,4516763,4517717,-,fecR,954,fecIR,Signal transduction mechanisms
 b4293,4517713,4518235,-,fecI,522,fecIR,Transcription
-b4294,4518526,4518802,+,insA,276,insA-7,"Replication, recombination and repair"
-b4576,4518720,4519224,+,insB1,504,insB1,No COG Annotation
+b4294,4518526,4518802,+,insA7,276,insA-7,"Replication, recombination and repair"
+b4576,4518720,4519224,+,insB7,504,insB1,No COG Annotation
 b4295,4519337,4520324,-,yjhU,987,yjhU,Transcription
 b4296,4520670,4522020,-,yjhF,1350,yjhF,Amino acid transport and metabolism
 b4297,4522126,4524094,-,yjhG,1968,yjhIHG,Amino acid transport and metabolism

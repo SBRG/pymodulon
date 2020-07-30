@@ -1,7 +1,7 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
-from typing import Union, List
+from typing import *
 from warnings import warn
 import os
 
@@ -24,32 +24,15 @@ def _check_table(table: Data, index: List, name: str):
         raise TypeError('{}_table must be a pandas DataFrame or filename'.format(name))
 
 
-def _check_table_helper(table: pd.DataFrame, index: List, name: str):
+def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
     # Check if all indices are in table
     missing_index = list(set(index) - set(table.index))
     if len(missing_index) > 0:
-        warn('Some {} are missing from the {} table: {}'.format(name, name, ', '.join(missing_index)))
+        warn('Some {} are missing from the {} table: {}'.format(name, name, missing_index))
 
     # Remove extra indices from table
     table = table.loc[index]
     return table
-
-
-def rename_imodulon(ica_data, old_name: ImodName, new_name: ImodName) -> None:
-    """
-    Rename an iModulon
-    :param ica_data: The IcaData object
-    :param old_name: iModulon name to be replaced
-    :param new_name: New iModulon name
-    """
-    # Check that new names is not already in use
-    old_list = ica_data.imodulon_names
-    if new_name in old_list:
-        raise ValueError('iModulon name ({:s}) already in use. Please choose a different name.'.format(new_name))
-    if old_name not in old_list:
-        raise ValueError('No iModulon named {:s}'.format(old_name))
-    name_list = [name if name != old_name else new_name for name in old_list]
-    ica_data.imodulon_names = name_list
 
 
 def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
