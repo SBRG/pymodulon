@@ -1,9 +1,38 @@
 import numpy as np
 import pandas as pd
 from scipy import stats
-from typing import Union
+from typing import Union, List
+from warnings import warn
+import os
 
 ImodName = Union[str, int]
+Data = Union[pd.DataFrame, os.PathLike]
+
+
+def _check_table(table: Data, index: List, name: str):
+    # Set as empty dataframe if not input given
+    if table is None:
+        return pd.DataFrame(index=index)
+
+    # Load table if necessary
+    elif isinstance(table, str):
+        df = pd.read_csv(table, index_col=0)
+        return _check_table_helper(df, index, name)
+    elif isinstance(table, pd.DataFrame):
+        return _check_table_helper(table, index, name)
+    else:
+        raise TypeError('{}_table must be a pandas DataFrame or filename'.format(name))
+
+
+def _check_table_helper(table: pd.DataFrame, index: List, name: str):
+    # Check if all indices are in table
+    missing_index = list(set(index) - set(table.index))
+    if len(missing_index) > 0:
+        warn('Some {} are missing from the {} table: {}'.format(name, name, ', '.join(missing_index)))
+
+    # Remove extra indices from table
+    table = table.loc[index]
+    return table
 
 
 def rename_imodulon(ica_data, old_name: ImodName, new_name: ImodName) -> None:

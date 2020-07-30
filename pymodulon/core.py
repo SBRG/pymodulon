@@ -1,4 +1,6 @@
 from pymodulon.util import *
+from pymodulon.enrichment import *
+from pymodulon.util import _check_table
 
 
 class IcaData(object):
@@ -11,90 +13,80 @@ class IcaData(object):
 
     """
 
-    def __init__(self, s_matrix: pd.DataFrame, a_matrix: pd.DataFrame,
-                 x_matrix=None, imodulons=None,
-                 gene_table=None, sample_table=None,
-                 imodulon_table=None, trn=None,
-                 dagostino_cutoff=550):
-        # TODO: Add type hinting
-        """
-        Required Args:
-            s_matrix: S matrix from ICA
-            a_matrix: A matrix from ICA
-        Optional Args:
-            x_matrix: log-TPM expression values (not normalized to reference)
-            gene_table: Table containing relevant gene information
-            sample_table: Table containing relevant sample metadata
-            imodulons: List of iModulon names
-            dagostino_cutoff: Cut-off value for iModulon threshold calculation (default: 550)
-            TODO: Fill in
+    def __init__(self, s_matrix: Data, a_matrix: Data, x_matrix: Data = None,
+                 gene_table: Data = None, sample_table: Data = None, imodulon_table: Data = None,
+                 trn: Data = None, dagostino_cutoff: int = 550):
         """
 
-        # Check S and A matrices
-        if isinstance(s_matrix, pd.DataFrame) and isinstance(a_matrix, pd.DataFrame):
+        :param s_matrix: S matrix from ICA
+        :param a_matrix: A matrix from ICA
+        :param x_matrix: log-TPM expression values (not normalized to reference)
+        :param gene_table: Table containing relevant gene information
+        :param sample_table: Table containing relevant sample metadata
+        :param imodulon_table: Table containing iModulon names and enrichments
+        :param trn: Table containing transcriptional regulatory network links
+        :param dagostino_cutoff: Cut-off value for iModulon threshold calculation (default: 550)
+        """
 
-            # Convert column names of S to ints if necessary
-            try:
-                s_matrix.columns = s_matrix.columns.astype(int)
-            except TypeError:
-                pass
+        #########################
+        # Load S and A matrices #
+        #########################
 
-            if s_matrix.columns.tolist() != a_matrix.index.tolist():
-                raise ValueError('S and A matrices have different iModulon names')
+        # Type check S and A matrices
+        if isinstance(s_matrix, str):
+            s_matrix = pd.read_csv(s_matrix, index_col=0)
+        elif not isinstance(s_matrix, pd.DataFrame):
+            raise TypeError('s_matrix must be either a DataFrame or filename')
 
-            # Initialize sample and gene names
-            self._gene_names = s_matrix.index.tolist()
-            self._sample_names = a_matrix.columns.tolist()
-            self._imod_names = s_matrix.columns.tolist()
+        if isinstance(a_matrix, str):
+            a_matrix = pd.read_csv(a_matrix, index_col=0)
+        elif not isinstance(a_matrix, pd.DataFrame):
+            raise TypeError('a_matrix must be either a DataFrame or filename')
 
-            # Store S and A
-            self._s = s_matrix
-            self._a = a_matrix
-        else:
-            raise TypeError('S and A must be pandas dataframes or file names')
-            # TODO: Allow S and A to be filenames
+        # Convert column names of S to ints if possible
+        try:
+            s_matrix.columns = s_matrix.columns.astype(int)
+        except TypeError:
+            pass
+
+        # Check that S and A matrices have identical iModulon names
+        if s_matrix.columns.tolist() != a_matrix.index.tolist():
+            raise ValueError('S and A matrices have different iModulon names')
+
+        # Initialize sample and gene names
+        self._gene_names = s_matrix.index.tolist()
+        self._sample_names = a_matrix.columns.tolist()
+        self._imod_names = s_matrix.columns.tolist()
+
+        # Store S and A
+        self._s = s_matrix
+        self._a = a_matrix
 
         # Initialize thresholds
         self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imod_names}
 
-        # Check X matrix [optional]
+        #################
+        # Load X matrix #
+        #################
+
+        # Check X matrix
         if x_matrix is None:
             self._x = None
-        elif isinstance(x_matrix, pd.DataFrame):
-            if x_matrix.columns.tolist() != self._sample_names:
-                raise ValueError('X and A matrices have different sample names')
-            if x_matrix.index.tolist() != self._gene_names:
-                print(x_matrix.index.tolist())
-                print(self._gene_names)
-                raise ValueError('X and S matrices have different gene names')
-
-            # Store X
-            self._x = x_matrix
         else:
-            raise TypeError('X must be a pandas dataframe or filename')
-            # TODO: Allow X to be filename
-            # TODO: Move to X setter function?
+            self.X = x_matrix
 
-        # Set iModulon names [optional]
-        if isinstance(imodulons, list):
-            self.imodulon_names = imodulons
+        ####################
+        # Load data tables #
+        ####################
 
-        # Set gene, sample, and iModulon tables
-        if gene_table is None:
-            gene_table = pd.DataFrame(index=self._gene_names)
         self.gene_table = gene_table
-
-        if sample_table is None:
-            sample_table = pd.DataFrame(index=self._sample_names)
         self.sample_table = sample_table
-
-        if imodulon_table is None:
-            imodulon_table = pd.DataFrame(index=self._imod_names)
         self.imodulon_table = imodulon_table
 
         # Set TRN
         if trn is None:
             trn = pd.DataFrame()
+            # TODO: Add TF info to gene table
         self.trn = trn
 
     @property
@@ -114,13 +106,21 @@ class IcaData(object):
 
     @X.setter
     def X(self, x_matrix):
-        # Check X matrix columns and indices
-        if isinstance(x_matrix, pd.DataFrame):
-            if x_matrix.columns != self._a.columns:
-                raise ValueError('X and A matrices have different sample names')
-            if x_matrix.index != self._x.index:
-                raise ValueError('X and S matrices have different gene loci')
-        self._x = x_matrix
+        if isinstance(x_matrix, str):
+            df = pd.read_csv(x_matrix, index_col=0)
+        elif isinstance(x_matrix, pd.DataFrame):
+            df = x_matrix
+        else:
+            raise TypeError('X must be a pandas DataFrame or filename')
+
+        # Check that gene and sample names conform to S and A matrices
+        if df.columns.tolist() != self.sample_names:
+            raise ValueError('X and A matrices have different sample names')
+        if df.index.tolist() != self.gene_names:
+            raise ValueError('X and S matrices have different gene names')
+
+        # Set x_matrix
+        self._x = df
 
     @X.deleter
     def X(self):
@@ -201,7 +201,7 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        self._gene_table = new_table
+        self._gene_table = _check_table(new_table, self.gene_names, 'gene')
 
     @property
     def sample_table(self):
@@ -209,7 +209,7 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        self._sample_table = new_table
+        self._sample_table = _check_table(new_table, self.sample_names, 'sample')
 
     @property
     def imodulon_table(self):
@@ -217,7 +217,24 @@ class IcaData(object):
 
     @imodulon_table.setter
     def imodulon_table(self, new_table):
-        self._imod_table = new_table
+        self._imod_table = _check_table(new_table, self.imodulon_names, 'imodulon')
+
+    # Show enriched
+    def view_imodulon(self, imodulon: ImodName):
+        """
+        View genes in an iModulon and relevant information about each gene
+        :param imodulon: Name of iModulon
+        :return: Pandas Dataframe showing iModulon gene information
+        """
+        # Find genes in iModulon
+        in_imodulon = abs(self.S[imodulon]) > self.thresholds[imodulon]
+
+        # Get gene weights information
+        gene_weights = self.S.loc[in_imodulon, imodulon]
+        gene_rows = self.gene_table.loc[in_imodulon]
+        final_rows = pd.concat([gene_weights, gene_rows])
+
+        return final_rows
 
     # TRN
     @property
@@ -228,8 +245,17 @@ class IcaData(object):
     def trn(self, new_trn):
         self._trn = new_trn
 
+    # Enrichments
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str):
-        pass
+        """
+        Compare an iModulon against a regulon
+        :param imodulon:
+        :param regulator:
+        :return: Pandas Series containing enrichment statistics
+        """
+        imod_genes = self.view_imodulon(imodulon)
+        compute_regulon_enrichment(imod_genes, regulator, self.gene_names, self.trn)
+        return
 
     def compute_trn_enrichment(self, fdr: float = 1e-5, max_regs: int = 1, save: bool = False) -> pd.DataFrame:
         """

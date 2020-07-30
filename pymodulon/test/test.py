@@ -16,28 +16,53 @@ DATA_DIR = join(PYMOD_DIR, "test", "data", "")
 """str: THe directory location of the test data."""
 
 # Get test data
-s_file = abspath(join(DATA_DIR, 'test_S_matrix.csv'))
-a_file = abspath(join(DATA_DIR, 'test_A_matrix.csv'))
-x_file = abspath(join(DATA_DIR, 'test_X_matrix.csv'))
+s_file = abspath(join(DATA_DIR, 'ecoli_M.csv'))
+a_file = abspath(join(DATA_DIR, 'ecoli_A.csv'))
+x_file = abspath(join(DATA_DIR, 'ecoli_X.csv'))
+gene_file = abspath(join(DATA_DIR, 'ecoli_gene_table.csv'))
+sample_file = abspath(join(DATA_DIR, 'ecoli_sample_table.csv'))
+imodulon_file = abspath(join(DATA_DIR, 'ecoli_imodulon_table.csv'))
+trn_file = abspath(join(DATA_DIR, 'ecoli_trn.csv'))
 
 # Load test data
 s = pd.read_csv(s_file, index_col=0)
 a = pd.read_csv(a_file, index_col=0)
 x = pd.read_csv(x_file, index_col=0)
+gene_table = pd.read_csv(gene_file, index_col=0)
+sample_table = pd.read_csv(sample_file, index_col=0)
+imodulon_table = pd.read_csv(imodulon_file, index_col=0)
+trn = pd.read_csv(trn_file)
 
 
 def test_core():
     # Test loading in just S and A matrix
-    ica_data = IcaData(s, a)
-    # TODO: assert that specific functions fail
+    IcaData(s, a)
 
-    # Test loading S, A, and X
-    ica_data = IcaData(s, a, x_matrix=x)
+    # Test loading everything
+    ica_data = IcaData(s, a, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn)
 
-    # Test loading all tables
-    # TODO: create test data
+    # Ensure that gene names are consistent
+    gene_list = ica_data.gene_names
+    assert (gene_list == ica_data.X.index.tolist() and
+            gene_list == ica_data.S.index.tolist() and
+            gene_list == ica_data.gene_table.index.tolist())
 
-    return ica_data
+    # Ensure that sample names are consistent
+    sample_list = ica_data.sample_names
+    assert (sample_list == ica_data.X.columns.tolist() and
+            sample_list == ica_data.A.columns.tolist() and
+            sample_list == ica_data.sample_table.index.tolist())
+
+    # Ensure that iModulon names are consistent
+    imodulon_list = ica_data.imodulon_names
+    assert (imodulon_list == ica_data.S.columns.tolist() and
+            imodulon_list == ica_data.A.index.tolist() and
+            imodulon_list == ica_data.imodulon_table.index.tolist())
+
+    ica_data.view_imodulon(1)
+
+    # TODO: Test loading all tables
 
 
 # Test enrichment module
@@ -57,11 +82,11 @@ def test_compute_enrichment0():
     # Make sure function runs
     set2 = {'gene2', 'gene3', 'gene4'}
     result = compute_enrichment(set1, set2, all_genes, label='test')
-    assert (0 < result.pvalue < 1 and
-            0 < result.precision < 1 and
-            0 < result.recall < 1 and
-            0 < result.f1score < 1 and
-            result.TP == 1)
+    assert (0 <= result.pvalue <= 1 and
+            0 <= result.precision <= 1 and
+            0 <= result.recall <= 1 and
+            0 <= result.f1score <= 1 and
+            result.TP <= 0)
 
 
 def test_compute_enrichment1():
