@@ -7,7 +7,6 @@ requirements must be installed (e.g. :mod:`pytest`) for this function to work.
 from os.path import abspath, dirname, join
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
-import pytest
 
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
 """str: The directory location of where :mod:`pymodulon` is installed."""
@@ -35,13 +34,20 @@ trn = pd.read_csv(trn_file)
 
 
 def test_core():
+    test_simple_ica_data()
+    ica_data = IcaData(s, a, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    test_ica_data_consistency(ica_data)
+    test_compute_regulon_enrichment(ica_data)
+    test_compute_trn_enrichment(ica_data)
+
+
+def test_simple_ica_data():
     # Test loading in just S and A matrix
     IcaData(s, a)
 
-    # Test loading everything
-    ica_data = IcaData(s, a, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn)
 
+def test_ica_data_consistency(ica_data):
     # Ensure that gene names are consistent
     gene_list = ica_data.gene_names
     assert (gene_list == ica_data.X.index.tolist() and
@@ -61,68 +67,40 @@ def test_core():
             imodulon_list == ica_data.imodulon_table.index.tolist())
 
     # Check if gene names are used
-    assert(ica_data.gene_names[0] == 'thrA')
+    assert (ica_data.gene_names[0] == 'b0002')
 
     # Check if renaming works for iModulons
-    ica_data.rename_imodulons({2:'YgbI'})
-    assert(ica_data.imodulon_names[2] == 'YgbI' and
-           ica_data.A.index[2] == 'YgbI' and
-           ica_data.S.columns[2] == 'YgbI')
-
-    # TODO: Test loading all tables
+    ica_data.rename_imodulons({0: 'YieP'})
+    print(ica_data.view_imodulon('YieP'))
 
 
-# Test enrichment module
-set1 = {'gene0', 'gene1', 'gene2'}
+def test_compute_regulon_enrichment(ica_data):
+    print('Testing single enrichment')
+    enrich = ica_data.compute_regulon_enrichment(1, 'glpR')
+    print(enrich)
 
-all_genes = set(['gene' + str(i) for i in range(10)])
+    print('Testing multiple enrichment')
+    enrich = ica_data.compute_regulon_enrichment(1, 'glpR+crp')
+    print(enrich)
 
+    print('Original iModulon table')
+    print(ica_data.imodulon_table)
 
-def test_enrichment():
-    test_compute_enrichment0()
-    test_compute_enrichment1()
-    test_compute_enrichment2()
-    test_compute_enrichment3()
-
-
-def test_compute_enrichment0():
-    # Make sure function runs
-    set2 = {'gene2', 'gene3', 'gene4'}
-    result = compute_enrichment(set1, set2, all_genes, label='test')
-    assert (0 <= result.pvalue <= 1 and
-            0 <= result.precision <= 1 and
-            0 <= result.recall <= 1 and
-            0 <= result.f1score <= 1 and
-            result.TP <= 0)
+    print('GlpR iModulon table')
+    ica_data.compute_regulon_enrichment(1, 'glpR', save=True)
 
 
-def test_compute_enrichment1():
-    # Edge case 1: No overlap
-    set2 = {'gene3', 'gene4', 'gene5'}
-    result = compute_enrichment(set1, set2, all_genes, label='test')
-    assert (result.pvalue == 1 and
-            result.precision == 0 and
-            result.recall == 0 and
-            result.f1score == 0 and
-            result.TP == 0)
 
+def test_compute_trn_enrichment(ica_data):
+    print('Testing full TRN enrichment')
+    enrich = ica_data.compute_trn_enrichment()
+    print(enrich)
 
-def test_compute_enrichment2():
-    # Edge case 2: Complete overlap
-    set2 = set1
-    result = compute_enrichment(set1, set2, all_genes, label='test')
-    assert (result.pvalue == 0 and
-            result.precision == 1 and
-            result.recall == 1 and
-            result.f1score == 1 and
-            result.TP == 3)
-
-
-def test_compute_enrichment3():
-    # Edge case 3: Genes outside of all_genes
-    set2 = {'gene100'}
-    with pytest.raises(ValueError):
-        compute_enrichment(set1, set2, all_genes, label='test')
+    print('Original iModulon table')
+    print(ica_data.imodulon_table)
+    print('Full iModulon table')
+    ica_data.compute_trn_enrichment(save=True)
+    print(ica_data.imodulon_table)
 
 
 def test_io():

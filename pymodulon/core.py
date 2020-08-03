@@ -96,9 +96,15 @@ class IcaData(object):
         # Load TRN #
         ############
         if trn is None:
-            trn = pd.DataFrame()
-            # TODO: Add TF info to gene table
-        self.trn = trn
+            df_trn = pd.DataFrame(columns=['regulator', 'regulator_id', 'gene_name', 'gene_id', 'effect', 'ev_level'])
+        elif isinstance(trn, str):
+            df_trn = pd.read_csv(trn)
+        elif isinstance(trn, pd.DataFrame):
+            df_trn = trn
+        else:
+            raise TypeError('TRN must either be a pandas DataFrame or filename')
+        # Only include genes that are in S/X matrix
+        self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
 
     @property
     def S(self):
@@ -190,19 +196,11 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        good_table = _check_table(new_table, self._gene_names, 'gene')
-        # Use gene names as index if possible
-        if good_table.index.name != 'gene_name' and 'gene_name' in good_table.columns:
-            # Make sure gene names are unique
-            if good_table.gene_name.duplicated().any():
-                warn('Gene names are not unique. Default index will be locus tags.')
-            else:
-                good_table.set_index('gene_name', inplace=True)
-
-        self._gene_table = good_table
+        table = _check_table(new_table, self._gene_names, 'gene')
+        self._gene_table = table
 
         # Update gene names
-        names = good_table.index
+        names = table.index
         self._gene_names = names
         self._s.index = names
         if self._x is not None:
@@ -215,10 +213,10 @@ class IcaData(object):
     @sample_table.setter
     def sample_table(self, new_table):
         table = _check_table(new_table, self._sample_names, 'sample')
-        names = table.index
         self._sample_table = table
 
         # Update sample names
+        names = table.index
         self._sample_names = names
         self._a.columns = names
         if self._x is not None:
@@ -257,8 +255,9 @@ class IcaData(object):
 
         # Get gene weights information
         gene_weights = self.S.loc[in_imodulon, imodulon]
+        gene_weights.name = 'gene_weight'
         gene_rows = self.gene_table.loc[in_imodulon]
-        final_rows = pd.concat([gene_weights, gene_rows])
+        final_rows = pd.concat([gene_weights, gene_rows], axis=1)
 
         return final_rows
 
@@ -281,23 +280,83 @@ class IcaData(object):
         self._trn = new_trn
 
     # Enrichments
-    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str):
+    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str, save: bool = False):
         """
-        Compare an iModulon against a regulon
-        :param imodulon:
+        Compare an iModulon against a regulon. (Note: q-values cannot be computed for single enrichments)
+        :param imodulon: Name of iModulon
         :param regulator:
+        :param save:
         :return: Pandas Series containing enrichment statistics
         """
-        imod_genes = self.view_imodulon(imodulon)
-        compute_regulon_enrichment(imod_genes, regulator, self.gene_names, self.trn)
-        return
+        imod_genes = self.view_imodulon(imodulon).index
+        enrich = compute_regulon_enrichment(imod_genes, regulator, self.gene_names, self.trn)
+        enrich.rename({'gene_set_size': 'imodulon_size'}, inplace=True)
+        if save:
+            table = self.imodulon_table
+            for key, value in enrich.items():
+                table.loc[imodulon, key] = value
+            self.imodulon_table = table
+        return enrich
 
-    def compute_trn_enrichment(self, fdr: float = 1e-5, max_regs: int = 1, save: bool = False) -> pd.DataFrame:
+    def compute_trn_enrichment(self, imodulons: Union[ImodName, List[ImodName]] = None, fdr: float = 1e-5,
+                               max_regs: int = 1, save: bool = False, method: str = 'both',
+                               force: bool = False) -> pd.DataFrame:
         """
         Compare iModulons against all regulons
+        :param imodulons: Name of iModulon(s). If none given, compute enrichments for all iModulons
         :param fdr: False detection rate (default: 1e-5)
         :param max_regs: Maximum number of regulators to include in complex regulon (default: 1)
         :param save: Save regulons with highest enrichment scores to the imodulon_table
+        :param method: How to combine regulons. 'or' computes enrichment against union of regulons, \
+    'and' computes enrichment against intersection of regulons, and 'both' performs both tests (default: 'both')
+    intersection of regulons
+        :param force: Allows computation of >2 regulators
         :return: Pandas Dataframe of statistically significant enrichments
         """
-        pass
+        enrichments = []
+
+        if imodulons is None:
+            imodulon_list = self.imodulon_names
+        elif isinstance(imodulons, str):
+            imodulon_list = [imodulons]
+        else:
+            imodulon_list = imodulons
+
+        for imodulon in imodulon_list:
+            gene_list = self.view_imodulon(imodulon).index
+            df_enriched = compute_trn_enrichment(gene_list, self.gene_names, self.trn, max_regs=max_regs, fdr=fdr,
+                                                 method=method, force=force)
+            df_enriched['imodulon'] = imodulon
+            enrichments.append(df_enriched)
+
+        df_enriched = pd.concat(enrichments, axis=0)
+
+        # Set regulator as column instead of axis
+        df_enriched.index.name = 'regulator'
+        df_enriched.reset_index(inplace=True)
+
+        # Reorder columns
+        df_enriched.rename({'gene_set_size': 'imodulon_size'}, inplace=True, axis=1)
+        col_order = ['imodulon', 'regulator', 'pvalue', 'qvalue', 'precision', 'recall', 'f1score',
+                     'TP', 'regulon_size', 'imodulon_size', 'n_regs']
+        df_enriched = df_enriched[col_order]
+
+        if save:
+            df_top_enrich = df_enriched.sort_values(['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+            self._update_imodulon_table(df_top_enrich.set_index('imodulon'))
+
+        return df_enriched
+
+    def _update_imodulon_table(self, enrichment):
+        """
+        Update iModulon table given new iModulon enrichments
+        :param enrichment: Pandas series or dataframe containing an iModulon enrichment
+        """
+        if isinstance(enrichment, pd.Series):
+            enrichment = pd.DataFrame(enrichment)
+        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(enrichment.index)]
+        keep_cols = self.imodulon_table.loc[enrichment.index, set(self.imodulon_table.columns) -
+                                            set(enrichment.columns)]
+        df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
+        new_table = pd.concat([keep_rows, df_top_enrich])
+        self.imodulon_table = new_table.reindex(self.imodulon_names)

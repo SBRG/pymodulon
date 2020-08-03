@@ -1,14 +1,17 @@
+import sys
+
 from statsmodels.stats.multitest import fdrcorrection
 from scipy import stats, special
 import numpy as np
 import pandas as pd
-from typing import Union
+from typing import Union, List
 import itertools
+from tqdm.notebook import tqdm
 
 ImodName = Union[str, int]
 
 
-def contingency(set1: set, set2: set, all_genes: set):
+def contingency(set1: List, set2: List, all_genes: List):
     """
     Creates contingency table for gene enrichment
     :param set1: Set of genes (e.g. regulon)
@@ -17,7 +20,14 @@ def contingency(set1: set, set2: set, all_genes: set):
     :return: Contingency table
     """
 
+    set1 = set(set1)
+    set2 = set(set2)
+    all_genes = set(all_genes)
+
     if len(set1 - all_genes) > 0 or len(set2 - all_genes) > 0:
+        print(set1)
+        print(set2)
+        print(all_genes)
         raise ValueError('Gene sets contain genes not in all_genes')
 
     tp = len(set1 & set2)
@@ -42,17 +52,18 @@ def compute_enrichment(gene_set, target_genes, all_genes, label=None):
 
     # Handle edge cases
     if tp == 0:
-        res = [1, 0, 0, 0, 0, len(gene_set)]
+        res = [1, 0, 0, 0, 0, len(target_genes), len(gene_set)]
     elif fp == 0 and fn == 0:
-        res = [0, 1, 1, 1, len(gene_set), len(target_genes)]
+        res = [0, 1, 1, 1, len(gene_set), len(target_genes), len(gene_set)]
     else:
         odds, pval = stats.fisher_exact([[tp, fp], [fn, tn]], alternative='greater')
         recall = np.true_divide(tp, tp + fn)
         precision = np.true_divide(tp, tp + fp)
-        f1score = (2*precision*recall)/(precision+recall)
-        res = [pval, precision, recall, f1score, tp, len(target_genes)]
+        f1score = (2 * precision * recall) / (precision + recall)
+        res = [pval, precision, recall, f1score, tp, len(target_genes), len(gene_set)]
 
-    return pd.Series(res, index=['pvalue', 'precision', 'recall', 'f1score', 'TP', 'true_size'], name=label)
+    return pd.Series(res, index=['pvalue', 'precision', 'recall', 'f1score', 'TP', 'target_set_size', 'gene_set_size'],
+                     name=label)
 
 
 def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
@@ -77,19 +88,6 @@ def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
     return result.sort_values('qvalue')
 
 
-def compute_regulon_enrichment(gene_set, regulon_str, all_genes, trn: pd.DataFrame):
-    """
-    Computes enrichment statistics for a gene_set in a regulon
-    :param gene_set: Gene set for enrichment (e.g. genes in iModulon)
-    :param regulon_str: Complex regulon, where "/" uses genes in any regulon and "+" uses genes in all regulons
-    :param all_genes: List of all genes
-    :param trn: Pandas dataframe containing transcriptional regulatory network
-    :return: Pandas dataframe containing enrichment statistics
-    """
-    regulon = parse_regulon_str(regulon_str, trn)
-    return compute_enrichment(gene_set, regulon, all_genes, regulon_str)
-
-
 def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     """
     Converts a complex regulon (regulon_str) into a list of genes
@@ -98,6 +96,8 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     :return: Set of genes regulated by regulon_str
     """
 
+    if regulon_str == '':
+        return set()
     if '+' in regulon_str and '/' in regulon_str:
         raise NotImplementedError('Complex regulons cannot contain both "+" (AND) and "/" (OR) operators')
     elif '+' in regulon_str:
@@ -115,7 +115,25 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     return reg_genes
 
 
-def compute_trn_enrichment(gene_set, all_genes, trn, max_regs=1, fdr=0.01, method='both'):
+def compute_regulon_enrichment(gene_set: List, regulon_str: str, all_genes: List, trn: pd.DataFrame):
+    """
+    Computes enrichment statistics for a gene_set in a regulon
+    :param gene_set: Gene set for enrichment (e.g. genes in iModulon)
+    :param regulon_str: Complex regulon, where "/" uses genes in any regulon and "+" uses genes in all regulons
+    :param all_genes: List of all genes
+    :param trn: Pandas dataframe containing transcriptional regulatory network
+    :return: Pandas dataframe containing enrichment statistics
+    """
+    regulon = parse_regulon_str(regulon_str, trn)
+    result = compute_enrichment(gene_set, regulon, all_genes, regulon_str)
+    result.rename({'target_set_size': 'regulon_size'}, inplace=True)
+    n_regs = 1 + regulon_str.count('+') + regulon_str.count('/')
+    result['n_regs'] = n_regs
+    return result
+
+
+def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame, max_regs: int = 1, fdr: float = 0.01,
+                           method: str = 'both', force: bool = False):
     """
     Compare a gene set against an entire TRN
     :param gene_set: Gene set for enrichment (e.g. genes in iModulon)
@@ -126,41 +144,50 @@ def compute_trn_enrichment(gene_set, all_genes, trn, max_regs=1, fdr=0.01, metho
     'and' computes enrichment against intersection of regulons, and 'both' performs both tests (default: 'both')
     intersection of regulons
     :param fdr: False detection rate
+    :param force: Allows computation of >2 regulators
     :return: Pandas dataframe containing statistically significant enrichments
     """
 
-    # TODO: warning system if n_regs is too high
+    # Warning if max_regs is too high
+    if max_regs > 2:
+        ResourceWarning('Using >2 maximum regulators may take time to compute')
+        if not force:
+            sys.exit()
 
     # Only search for regulators known to regulate a gene in gene_set
     # This reduces the total runtime by skipping unnecessary tests
     # However, this needs to be taken into account for FDR
     imod_regs = trn[trn.gene_id.isin(gene_set)].regulator.unique()
 
+    # # Account for imodulons with no regulators
+    # if len(imod_regs) == 0:
+    #     return compute_regulon_enrichment(gene_set, '', all_genes, trn)
+
     # Prepare complex regulon names
-    reg_list = []
+    enrich_list = []
     total = 0
 
     for n_regs in range(1, max_regs + 1):
         group = itertools.combinations(imod_regs, n_regs)
-        num_tests = special.comb(len(trn.regulator.unique()), n_regs)
+        num_tests = int(special.comb(len(trn.regulator.unique()), n_regs))
 
         if method == 'and':
-            reg_list.append('+'.join(*group))
+            reg_list = ['+'.join(regs) for regs in group]
             total += num_tests
         elif method == 'or':
-            reg_list.append('/'.join(*group))
+            reg_list = ['/'.join(regs) for regs in group]
             total += num_tests
         elif method == 'both':
-            reg_list.append('+'.join(*group))
-            reg_list.append('/'.join(*group))
-            total += 2*num_tests
+            reg_list = ['+'.join(regs) for regs in group] + ['/'.join(regs) for regs in group]
+            total += 2 * num_tests
         else:
-            raise ValueError("method must be either 'and', 'or', or 'both'")
+            raise ValueError("'method' must be either 'and', 'or', or 'both'")
 
-    # Perform enrichments
-    enrich_list = []
-    for reg in reg_list:
-        regulon = parse_regulon_str(reg, trn)
-        enrich_list.append(compute_enrichment(gene_set, regulon, all_genes, reg))
-    df_enrich = pd.concat(enrich_list)
+        # Perform enrichments
+        for reg in reg_list:
+            enrich_list.append(compute_regulon_enrichment(gene_set, reg, all_genes, trn))
+
+    if len(enrich_list) == 0:
+        return pd.DataFrame()
+    df_enrich = pd.concat(enrich_list, axis=1).T
     return FDR(df_enrich, fdr=fdr, total=total)
