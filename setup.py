@@ -11,7 +11,7 @@ setuptools.setup(
     version="0.0.1",
     description="Python package for analyzing and visualizing iModulons",
     # Allow UTF-8 characters in README with encoding argument.
-    long_description=project_dir.joinpath("README.rst").read_text(encoding="utf-8"),
+    long_description=project_dir.joinpath("README.md").read_text(encoding="utf-8"),
     keywords=("python iModulon RNA-seq transcriptomics ICA regulation"),
     author="Anand V. Sastry",
     author_email="avsastry@eng.ucsd.edu",
@@ -38,7 +38,6 @@ setuptools.setup(
     install_requires=project_dir.joinpath("requirements.txt").read_text().split("\n"),
     zip_safe=False,
     license="MIT",
-    license_files=["LICENSE.txt"],
     classifiers=[
         "Development Status :: 1 - Planning",
         "Environment :: Console",
@@ -55,5 +54,4 @@ setuptools.setup(
         "Topic :: Scientific/Engineering :: Bio-Informatics"
     ],
     platforms="GNU/Linux, Mac OS X > 10.7, Microsoft Windows >= 7",
-    **setup_kwargs
 )
