@@ -118,7 +118,7 @@ class IcaData(object):
                     # also set a private attribute to tell us if we've done this optimization; only reasonable to try
                     # it again if the user uploads a new TRN
                     self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
         else:
             self.thresholds = thresholds
 
@@ -393,7 +393,7 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
         else:
             print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
 
