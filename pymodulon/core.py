@@ -1,3 +1,5 @@
+from typing import List, Union
+
 from pymodulon.util import *
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table
@@ -15,7 +17,8 @@ class IcaData(object):
 
     def __init__(self, s_matrix: Data, a_matrix: Data, x_matrix: Data = None,
                  gene_table: Data = None, sample_table: Data = None, imodulon_table: Data = None,
-                 trn: Data = None, optimize_cutoff: bool = False, dagostino_cutoff: int = 550):
+                 trn: Data = None, optimize_cutoff: bool = False, dagostino_cutoff: int = 550,
+                 thresholds: Union[List[float]] = None):
         """
 
         :param s_matrix: S matrix from ICA
@@ -29,6 +32,8 @@ class IcaData(object):
         provided TRN (if available). Optimizing thresholds may take a couple of minutes to complete.
         :param dagostino_cutoff: the cutoff value to use for the D'Agostino test for thresholding iModulon genes; this
         option will be overridden if optimize_cutoff is set to True
+        :param thresholds: a list of pre-computed thresholds index-matched to the imodulons (columns of S); overrides
+        all automatic optimization/computing of thresholds
         """
 
         #########################
@@ -100,19 +105,22 @@ class IcaData(object):
         self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
 
         # Initialize thresholds either with or without optimization
-        self.dagostino_cutoff = 550
+        self.dagostino_cutoff = dagostino_cutoff
         self._cutoff_optimized = False
-        if optimize_cutoff:
-            if trn is None:
-                raise ValueError('Thresholds cannot be optimized if no TRN is provided.')
-            else:
-                warn("Optimizing cutoff, may take 2-3 minutes...")
-                # this private function sets self.dagostino_cutoff internally
-                self._optimize_dagostino_cutoff()
-                # also set a private attribute to tell us if we've done this optimization; only reasonable to try
-                # it again if the user uploads a new TRN
-                self._cutoff_optimized = True
-        self._thresholds = {k:compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
+        if thresholds is None:
+            if optimize_cutoff:
+                if trn is None:
+                    raise ValueError('Thresholds cannot be optimized if no TRN is provided.')
+                else:
+                    warn("Optimizing cutoff, may take 2-3 minutes...")
+                    # this private function sets self.dagostino_cutoff internally
+                    self._optimize_dagostino_cutoff()
+                    # also set a private attribute to tell us if we've done this optimization; only reasonable to try
+                    # it again if the user uploads a new TRN
+                    self._cutoff_optimized = True
+            self._thresholds = {k: compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
+        else:
+            self.thresholds = thresholds
 
         ####################
         # Load data tables #
@@ -378,13 +386,14 @@ class IcaData(object):
         new_table = pd.concat([keep_rows, df_top_enrich])
         self.imodulon_table = new_table.reindex(self.imodulon_names)
 
-    def reoptimize_cutoff(self):
+    def reoptimize_thresholds(self):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
         """
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
+            self._thresholds = {k: compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
         else:
             print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
 
