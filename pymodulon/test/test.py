@@ -41,6 +41,7 @@ def test_core():
     test_compute_regulon_enrichment(ica_data)
     test_compute_trn_enrichment(ica_data)
     test_optimize_cutoff()
+    test_set_thresholds()
 
 
 def test_simple_ica_data():
@@ -125,6 +126,17 @@ def test_optimize_cutoff(capsys):
     ica_data.reoptimize_cutoff()
     assert (ica_data.dagostino_cutoff == 550)
     assert ica_data._cutoff_optimized
+
+
+def test_set_thresholds():
+    s_short = s.iloc[:, :10]
+    a_short = a.iloc[:10, :]
+    ica_data = IcaData(s_short, a_short, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
+                        imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776,
+                       thresholds=list(range(10, 20)))
+    assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
+    assert (not ica_data._cutoff_optimized)
+
 
 def test_io():
     pass
