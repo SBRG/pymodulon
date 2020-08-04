@@ -15,7 +15,7 @@ class IcaData(object):
 
     def __init__(self, s_matrix: Data, a_matrix: Data, x_matrix: Data = None,
                  gene_table: Data = None, sample_table: Data = None, imodulon_table: Data = None,
-                 trn: Data = None, dagostino_cutoff: int = 550):
+                 trn: Data = None, optimize_cutoff: bool = False, dagostino_cutoff: int = 550):
         """
 
         :param s_matrix: S matrix from ICA
@@ -25,7 +25,10 @@ class IcaData(object):
         :param sample_table: Table containing relevant sample metadata
         :param imodulon_table: Table containing iModulon names and enrichments
         :param trn: Table containing transcriptional regulatory network links
-        :param dagostino_cutoff: Cut-off value for iModulon threshold calculation (default: 550)
+        :param optimize_cutoff: Indicates if the cutoff for iModulon thresholds should be optimized based on the
+        provided TRN (if available). Optimizing thresholds may take a couple of minutes to complete.
+        :param dagostino_cutoff: the cutoff value to use for the D'Agostino test for thresholding iModulon genes; this
+        option will be overridden if optimize_cutoff is set to True
         """
 
         #########################
@@ -65,14 +68,6 @@ class IcaData(object):
         self._s = s_matrix
         self._a = a_matrix
 
-        # Initialize sample and gene names
-        self._gene_names = s_matrix.index.tolist()
-        self._sample_names = a_matrix.columns.tolist()
-        self._imodulon_names = s_matrix.columns.tolist()
-
-        # Initialize thresholds
-        self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imodulon_names}
-
         #################
         # Load X matrix #
         #################
@@ -83,14 +78,12 @@ class IcaData(object):
         else:
             self.X = x_matrix
 
-        ####################
-        # Load data tables #
-        ####################
-
-        # Use gene names if possible
+        # Initialize sample and gene names
+        self._gene_names = s_matrix.index.tolist()
         self.gene_table = gene_table
+        self._sample_names = a_matrix.columns.tolist()
         self.sample_table = sample_table
-        self.imodulon_table = imodulon_table
+        self._imodulon_names = s_matrix.columns.tolist()
 
         ############
         # Load TRN #
@@ -105,6 +98,28 @@ class IcaData(object):
             raise TypeError('TRN must either be a pandas DataFrame or filename')
         # Only include genes that are in S/X matrix
         self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
+
+        # Initialize thresholds either with or without optimization
+        self.dagostino_cutoff = 550
+        self._cutoff_optimized = False
+        if optimize_cutoff:
+            if trn is None:
+                raise ValueError('Thresholds cannot be optimized if no TRN is provided.')
+            else:
+                warn("Optimizing cutoff, may take 2-3 minutes...")
+                # this private function sets self.dagostino_cutoff internally
+                self._optimize_dagostino_cutoff()
+                # also set a private attribute to tell us if we've done this optimization; only reasonable to try
+                # it again if the user uploads a new TRN
+                self._cutoff_optimized = True
+        self._thresholds = {k:compute_threshold(self._s[k], self.dagostino_cutoff) for k in self._imodulon_names}
+
+        ####################
+        # Load data tables #
+        ####################
+
+        # this one is loaded here because it needs the thresholds
+        self.imodulon_table = imodulon_table
 
     @property
     def S(self):
@@ -145,7 +160,6 @@ class IcaData(object):
         del self._x
 
     # Thresholds property
-
     @property
     def thresholds(self):
         """ Get thresholds """
@@ -277,7 +291,10 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
-        self._trn = new_trn
+        # Only include genes that are in S/X matrix
+        self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+        # make a note that our cutoffs are no longer optimized since the TRN has changed
+        self._cutoff_optimized = False
 
     # Enrichments
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str, save: bool = False):
@@ -360,3 +377,64 @@ class IcaData(object):
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich])
         self.imodulon_table = new_table.reindex(self.imodulon_names)
+
+    def reoptimize_cutoff(self):
+        """
+        Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
+        """
+        if not self._cutoff_optimized:
+            self._optimize_dagostino_cutoff()
+            self._cutoff_optimized = True
+        else:
+            print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
+
+    def _optimize_dagostino_cutoff(self):
+        """
+        Computes an abridged version of the TRN enrichments for the 20 highest-weighted genes in order to determine
+        a global minimum for the D'Agostino cutoff ultimately used to threshold and define the genes "in" an iModulon
+        """
+
+        # prepare a DataFrame of the best single-TF enrichments for the top 20 genes in each component
+        top_enrichments = []
+        all_genes = list(self.S.index)
+        for imod in self.S.columns:
+
+            genes_top20 = list(abs(self.S[imod]).sort_values().iloc[-20:].index)
+            imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes, self.trn, max_regs=1)
+
+            # compute_trn_enrichment is being hijacked a bit; we want the index to be components, not the enriched TFs
+            imod_enrichment_df['TF'] = imod_enrichment_df.index
+            imod_enrichment_df['component'] = imod
+            if not imod_enrichment_df.empty:
+                # take the best single-TF enrichment row according to p-value
+                top_enrichment = imod_enrichment_df.sort_values(by='pvalue', ascending=False).iloc[0, :]
+                top_enrichments.append(top_enrichment)
+
+        # perform a sensitivity analysis to determine threshold effects on precision/recall overall
+        cutoffs_to_try = np.arange(300, 2000, 50)
+        f1_scores = []
+        for cutoff in cutoffs_to_try:
+            cutoff_f1_scores = []
+            for enrich_row in top_enrichments:
+
+                # for this enrichment row, get all the genes regulated by the regulator chosen above
+                regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
+
+                # compute the weighting threshold based on this cutoff to try
+                thresh = compute_threshold(self.S[enrich_row['component']], cutoff)
+                component_genes = list(self.S[abs(self.S[enrich_row['component']]) > thresh].index)
+
+                # Compute the contingency table (aka confusion matrix) for overlap between the regulon and iM genes
+                ((tp, fp), (fn, tn)) = contingency(regulon_genes, component_genes, all_genes)
+
+                # Calculate F1 score for one regulator-component pair and add it to the running list for this cutoff
+                precision = np.true_divide(tp, tp + fp)
+                recall = np.true_divide(tp, tp + fn)
+                f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+                cutoff_f1_scores.append(f1_score)
+
+            # Get mean of F1 score for this potential cutoff
+            f1_scores.append(np.mean(cutoff_f1_scores))
+
+        # extract the best cutoff and set it as the cutoff to use
+        self.dagostino_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
