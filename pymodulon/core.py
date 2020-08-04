@@ -107,7 +107,7 @@ class IcaData(object):
         self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
 
     @property
-    def S(self):
+    def M(self):
         """ Get M matrix """
         return self._m
 
@@ -133,7 +133,7 @@ class IcaData(object):
         # Check that gene and sample names conform to M and A matrices
         if df.columns.tolist() != self.A.columns.tolist():
             raise ValueError('X and A matrices have different sample names')
-        if df.index.tolist() != self.S.index.tolist():
+        if df.index.tolist() != self.M.index.tolist():
             raise ValueError('X and M matrices have different gene names')
 
         # Set x matrix
@@ -251,10 +251,10 @@ class IcaData(object):
         :return: Pandas Dataframe showing iModulon gene information
         """
         # Find genes in iModulon
-        in_imodulon = abs(self.S[imodulon]) > self.thresholds[imodulon]
+        in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
 
         # Get gene weights information
-        gene_weights = self.S.loc[in_imodulon, imodulon]
+        gene_weights = self.M.loc[in_imodulon, imodulon]
         gene_weights.name = 'gene_weight'
         gene_rows = self.gene_table.loc[in_imodulon]
         final_rows = pd.concat([gene_weights, gene_rows], axis=1)

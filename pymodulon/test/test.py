@@ -51,7 +51,7 @@ def test_ica_data_consistency(ica_data):
     # Ensure that gene names are consistent
     gene_list = ica_data.gene_names
     assert (gene_list == ica_data.X.index.tolist() and
-            gene_list == ica_data.S.index.tolist() and
+            gene_list == ica_data.M.index.tolist() and
             gene_list == ica_data.gene_table.index.tolist())
 
     # Ensure that sample names are consistent
@@ -62,7 +62,7 @@ def test_ica_data_consistency(ica_data):
 
     # Ensure that iModulon names are consistent
     imodulon_list = ica_data.imodulon_names
-    assert (imodulon_list == ica_data.S.columns.tolist() and
+    assert (imodulon_list == ica_data.M.columns.tolist() and
             imodulon_list == ica_data.A.index.tolist() and
             imodulon_list == ica_data.imodulon_table.index.tolist())
 
