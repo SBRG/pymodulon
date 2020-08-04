@@ -6,7 +6,6 @@ import numpy as np
 import pandas as pd
 from typing import Union, List
 import itertools
-from tqdm.notebook import tqdm
 
 ImodName = Union[str, int]
 
