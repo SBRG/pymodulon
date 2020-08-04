@@ -37,7 +37,7 @@ def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
 
 def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
     """
-    Computes D'agostino-test-based threshold for a component of an S matrix
+    Computes D'agostino-test-based threshold for a component of an M matrix
     :param ic: Pandas Series containing an independent component
     :param dagostino_cutoff: Minimum D'agostino test statistic value to determine threshold
     :return: iModulon threshold

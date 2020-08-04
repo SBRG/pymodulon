@@ -13,14 +13,14 @@ class IcaData(object):
 
     """
 
-    def __init__(self, s_matrix: Data, a_matrix: Data, x_matrix: Data = None,
+    def __init__(self, M: Data, A: Data, X: Data = None,
                  gene_table: Data = None, sample_table: Data = None, imodulon_table: Data = None,
                  trn: Data = None, dagostino_cutoff: int = 550):
         """
 
-        :param s_matrix: S matrix from ICA
-        :param a_matrix: A matrix from ICA
-        :param x_matrix: log-TPM expression values (not normalized to reference)
+        :param M: S matrix from ICA
+        :param A: A matrix from ICA
+        :param X: log-TPM expression values (not normalized to reference)
         :param gene_table: Table containing relevant gene information
         :param sample_table: Table containing relevant sample metadata
         :param imodulon_table: Table containing iModulon names and enrichments
@@ -29,59 +29,59 @@ class IcaData(object):
         """
 
         #########################
-        # Load S and A matrices #
+        # Load M and A matrices #
         #########################
 
-        # Type check S and A matrices
-        if isinstance(s_matrix, str):
-            s_matrix = pd.read_csv(s_matrix, index_col=0)
-        elif not isinstance(s_matrix, pd.DataFrame):
-            raise TypeError('s_matrix must be either a DataFrame or filename')
+        # Type check M and A matrices
+        if isinstance(M, str):
+            M = pd.read_csv(M, index_col=0)
+        elif not isinstance(M, pd.DataFrame):
+            raise TypeError('M must be either a DataFrame or filename')
 
-        if isinstance(a_matrix, str):
-            a_matrix = pd.read_csv(a_matrix, index_col=0)
-        elif not isinstance(a_matrix, pd.DataFrame):
-            raise TypeError('a_matrix must be either a DataFrame or filename')
+        if isinstance(A, str):
+            A = pd.read_csv(A, index_col=0)
+        elif not isinstance(A, pd.DataFrame):
+            raise TypeError('A must be either a DataFrame or filename')
 
-        # Convert column names of S to int if possible
+        # Convert column names of M to int if possible
         try:
-            s_matrix.columns = s_matrix.columns.astype(int)
+            M.columns = M.columns.astype(int)
         except TypeError:
             pass
 
-        # Check that S and A matrices have identical iModulon names
-        if s_matrix.columns.tolist() != a_matrix.index.tolist():
-            raise ValueError('S and A matrices have different iModulon names')
+        # Check that M and A matrices have identical iModulon names
+        if M.columns.tolist() != A.index.tolist():
+            raise ValueError('M and A matrices have different iModulon names')
 
-        # Ensure that S and A matrices have unique indices/columns
-        if s_matrix.index.duplicated().any():
-            raise ValueError('S matrix contains duplicate gene names')
-        if a_matrix.columns.duplicated().any():
+        # Ensure that M and A matrices have unique indices/columns
+        if M.index.duplicated().any():
+            raise ValueError('M matrix contains duplicate gene names')
+        if A.columns.duplicated().any():
             raise ValueError('A matrix contains duplicate sample names')
-        if s_matrix.columns.duplicated().any():
-            raise ValueError('S and A matrices contain duplicate iModulon names')
+        if M.columns.duplicated().any():
+            raise ValueError('M and A matrices contain duplicate iModulon names')
 
-        # Store S and A
-        self._s = s_matrix
-        self._a = a_matrix
+        # Store M and A
+        self._m = M
+        self._a = A
 
         # Initialize sample and gene names
-        self._gene_names = s_matrix.index.tolist()
-        self._sample_names = a_matrix.columns.tolist()
-        self._imodulon_names = s_matrix.columns.tolist()
+        self._gene_names = M.index.tolist()
+        self._sample_names = A.columns.tolist()
+        self._imodulon_names = M.columns.tolist()
 
         # Initialize thresholds
-        self._thresholds = {k: compute_threshold(self._s[k], dagostino_cutoff) for k in self._imodulon_names}
+        self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff) for k in self._imodulon_names}
 
         #################
         # Load X matrix #
         #################
 
         # Check X matrix
-        if x_matrix is None:
+        if X is None:
             self._x = None
         else:
-            self.X = x_matrix
+            self.X = X
 
         ####################
         # Load data tables #
@@ -103,13 +103,13 @@ class IcaData(object):
             df_trn = trn
         else:
             raise TypeError('TRN must either be a pandas DataFrame or filename')
-        # Only include genes that are in S/X matrix
+        # Only include genes that are in M/X matrix
         self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
 
     @property
     def S(self):
-        """ Get S matrix """
-        return self._s
+        """ Get M matrix """
+        return self._m
 
     @property
     def A(self):
@@ -130,13 +130,13 @@ class IcaData(object):
         else:
             raise TypeError('X must be a pandas DataFrame or filename')
 
-        # Check that gene and sample names conform to S and A matrices
+        # Check that gene and sample names conform to M and A matrices
         if df.columns.tolist() != self.A.columns.tolist():
             raise ValueError('X and A matrices have different sample names')
         if df.index.tolist() != self.S.index.tolist():
-            raise ValueError('X and S matrices have different gene names')
+            raise ValueError('X and M matrices have different gene names')
 
-        # Set x_matrix
+        # Set x matrix
         self._x = df
 
     @X.deleter
@@ -202,7 +202,7 @@ class IcaData(object):
         # Update gene names
         names = table.index
         self._gene_names = names
-        self._s.index = names
+        self._m.index = names
         if self._x is not None:
             self._x.index = names
 
@@ -240,7 +240,7 @@ class IcaData(object):
         # Update iModulon names
         self._imodulon_names = new_names
         self._a.index = new_names
-        self._s.columns = new_names
+        self._m.columns = new_names
         self._imodulon_table.index = new_names
 
     # Show enriched
