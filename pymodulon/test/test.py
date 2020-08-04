@@ -33,17 +33,19 @@ imodulon_table = pd.read_csv(imodulon_file, index_col=0)
 trn = pd.read_csv(trn_file)
 
 
-def test_core():
+def test_core(capsys):
     test_simple_ica_data()
-    ica_data = IcaData(s, a, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
                        imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    test_optimize_cutoff(capsys)
+    test_set_thresholds()
     test_ica_data_consistency(ica_data)
     test_compute_regulon_enrichment(ica_data)
     test_compute_trn_enrichment(ica_data)
 
 
 def test_simple_ica_data():
-    # Test loading in just S and A matrix
+    # Test loading in just M and A matrix
     IcaData(s, a)
 
 
@@ -51,7 +53,7 @@ def test_ica_data_consistency(ica_data):
     # Ensure that gene names are consistent
     gene_list = ica_data.gene_names
     assert (gene_list == ica_data.X.index.tolist() and
-            gene_list == ica_data.S.index.tolist() and
+            gene_list == ica_data.M.index.tolist() and
             gene_list == ica_data.gene_table.index.tolist())
 
     # Ensure that sample names are consistent
@@ -62,7 +64,7 @@ def test_ica_data_consistency(ica_data):
 
     # Ensure that iModulon names are consistent
     imodulon_list = ica_data.imodulon_names
-    assert (imodulon_list == ica_data.S.columns.tolist() and
+    assert (imodulon_list == ica_data.M.columns.tolist() and
             imodulon_list == ica_data.A.index.tolist() and
             imodulon_list == ica_data.imodulon_table.index.tolist())
 
@@ -90,7 +92,6 @@ def test_compute_regulon_enrichment(ica_data):
     ica_data.compute_regulon_enrichment(1, 'glpR', save=True)
 
 
-
 def test_compute_trn_enrichment(ica_data):
     print('Testing full TRN enrichment')
     enrich = ica_data.compute_trn_enrichment()
@@ -101,6 +102,42 @@ def test_compute_trn_enrichment(ica_data):
     print('Full iModulon table')
     ica_data.compute_trn_enrichment(save=True)
     print(ica_data.imodulon_table)
+
+
+def test_optimize_cutoff(capsys):
+    # truncate S to make this faster
+    s_short = s.iloc[:, :10]
+    a_short = a.iloc[:10, :]
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776)
+    assert (ica_data.dagostino_cutoff == 550)
+    assert ica_data._cutoff_optimized
+
+    # make sure that reoptimize doesn't run if trn isn't changed
+    ica_data.reoptimize_thresholds()
+    captured = capsys.readouterr()
+    assert ('Cutoff already optimized' in captured.out)
+
+    ica_data.trn = trn
+    assert (not ica_data._cutoff_optimized)
+    # Change D'agostino cutoff to bad value
+    ica_data.recompute_thresholds(1776)
+    assert (ica_data.dagostino_cutoff == 1776)
+    assert not ica_data._cutoff_optimized
+
+    ica_data.reoptimize_thresholds()
+    assert (ica_data.dagostino_cutoff == 550)
+    assert ica_data._cutoff_optimized
+
+
+def test_set_thresholds():
+    s_short = s.iloc[:, :10]
+    a_short = a.iloc[:10, :]
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776,
+                       thresholds=list(range(10, 20)))
+    assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
+    assert (not ica_data._cutoff_optimized)
 
 
 def test_io():
