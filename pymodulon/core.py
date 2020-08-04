@@ -1,5 +1,3 @@
-from typing import List, Union
-
 from pymodulon.util import *
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table
@@ -105,14 +103,14 @@ class IcaData(object):
         self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
 
         # Initialize thresholds either with or without optimization
-        self.dagostino_cutoff = dagostino_cutoff
+        self._dagostino_cutoff = dagostino_cutoff
         self._cutoff_optimized = False
         if thresholds is None:
             if optimize_cutoff:
                 if trn is None:
                     raise ValueError('Thresholds cannot be optimized if no TRN is provided.')
                 else:
-                    warn("Optimizing cutoff, may take 2-3 minutes...")
+                    warn("Optimizing iModulon thresholds, may take 2-3 minutes...")
                     # this private function sets self.dagostino_cutoff internally
                     self._optimize_dagostino_cutoff()
                     # also set a private attribute to tell us if we've done this optimization; only reasonable to try
@@ -166,33 +164,6 @@ class IcaData(object):
     def X(self):
         # Delete X matrix
         del self._x
-
-    # Thresholds property
-    @property
-    def thresholds(self):
-        """ Get thresholds """
-        return self._thresholds
-
-    @thresholds.setter
-    def thresholds(self, new_thresholds):
-        """ Set thresholds """
-        if len(new_thresholds) != len(self._imodulon_names):
-            raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
-                new_thresholds), len(self._imodulon_names)))
-        if isinstance(new_thresholds, dict):
-            self._thresholds = new_thresholds
-        elif isinstance(new_thresholds, list):
-            self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
-        else:
-            raise TypeError('new_thresholds must be list or dict')
-
-    def update_threshold(self, imodulon: ImodName, value):
-        """
-        Set threshold for an iModulon
-        :param imodulon: name of iModulon
-        :param value: New threshold
-        """
-        self._thresholds[imodulon] = value
 
     # Gene, sample and iModulon name properties
     @property
@@ -309,8 +280,8 @@ class IcaData(object):
         """
         Compare an iModulon against a regulon. (Note: q-values cannot be computed for single enrichments)
         :param imodulon: Name of iModulon
-        :param regulator:
-        :param save:
+        :param regulator: Complex regulon, where "/" uses genes in any regulon and "+" uses genes in all regulons
+        :param save: Save enrichment score to the imodulon_table
         :return: Pandas Series containing enrichment statistics
         """
         imod_genes = self.view_imodulon(imodulon).index
@@ -386,6 +357,53 @@ class IcaData(object):
         new_table = pd.concat([keep_rows, df_top_enrich])
         self.imodulon_table = new_table.reindex(self.imodulon_names)
 
+    ######################################
+    # Threshold properties and functions #
+    ######################################
+
+    @property
+    def dagostino_cutoff(self):
+        return self._dagostino_cutoff
+
+    @property
+    def thresholds(self):
+        """ Get thresholds """
+        return self._thresholds
+
+    @thresholds.setter
+    def thresholds(self, new_thresholds):
+        """ Set thresholds """
+        if len(new_thresholds) != len(self._imodulon_names):
+            raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
+                new_thresholds), len(self._imodulon_names)))
+        if isinstance(new_thresholds, dict):
+            self._thresholds = new_thresholds
+        elif isinstance(new_thresholds, list):
+            self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
+        else:
+            raise TypeError('new_thresholds must be list or dict')
+
+    def change_threshold(self, imodulon: ImodName, value):
+        """
+        Set threshold for an iModulon
+        :param imodulon: name of iModulon
+        :param value: New threshold
+        """
+        self._thresholds[imodulon] = value
+        self._cutoff_optimized = False
+
+    def recompute_thresholds(self, dagostino_cutoff: int):
+        """
+        Re-computes iModulon thresholds using a new D'Agostino cutoff
+        :param dagostino_cutoff: Value to use for the D'Agostino test to determine iModulon thresholds
+        :return:
+        """
+        self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff) for k in self._imodulon_names}
+        self._dagostino_cutoff = dagostino_cutoff
+        if not self._cutoff_optimized:
+            self._cutoff_optimized = False
+
+
     def reoptimize_thresholds(self):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
@@ -425,7 +443,6 @@ class IcaData(object):
         for cutoff in cutoffs_to_try:
             cutoff_f1_scores = []
             for enrich_row in top_enrichments:
-
                 # for this enrichment row, get all the genes regulated by the regulator chosen above
                 regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
 
@@ -446,4 +463,4 @@ class IcaData(object):
             f1_scores.append(np.mean(cutoff_f1_scores))
 
         # extract the best cutoff and set it as the cutoff to use
-        self.dagostino_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
+        self._dagostino_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
