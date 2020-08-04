@@ -35,7 +35,7 @@ trn = pd.read_csv(trn_file)
 
 def test_core():
     test_simple_ica_data()
-    ica_data = IcaData(s, a, x_matrix=x, gene_table=gene_table, sample_table=sample_table,
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
                        imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
     test_ica_data_consistency(ica_data)
     test_compute_regulon_enrichment(ica_data)
@@ -45,7 +45,7 @@ def test_core():
 
 
 def test_simple_ica_data():
-    # Test loading in just S and A matrix
+    # Test loading in just M and A matrix
     IcaData(s, a)
 
 
