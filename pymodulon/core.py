@@ -403,7 +403,6 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._cutoff_optimized = False
 
-
     def reoptimize_thresholds(self):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
@@ -423,10 +422,10 @@ class IcaData(object):
 
         # prepare a DataFrame of the best single-TF enrichments for the top 20 genes in each component
         top_enrichments = []
-        all_genes = list(self.S.index)
-        for imod in self.S.columns:
+        all_genes = list(self.M.index)
+        for imod in self.M.columns:
 
-            genes_top20 = list(abs(self.S[imod]).sort_values().iloc[-20:].index)
+            genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
             imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes, self.trn, max_regs=1)
 
             # compute_trn_enrichment is being hijacked a bit; we want the index to be components, not the enriched TFs
@@ -447,8 +446,8 @@ class IcaData(object):
                 regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
 
                 # compute the weighting threshold based on this cutoff to try
-                thresh = compute_threshold(self.S[enrich_row['component']], cutoff)
-                component_genes = list(self.S[abs(self.S[enrich_row['component']]) > thresh].index)
+                thresh = compute_threshold(self.M[enrich_row['component']], cutoff)
+                component_genes = list(self.M[abs(self.M[enrich_row['component']]) > thresh].index)
 
                 # Compute the contingency table (aka confusion matrix) for overlap between the regulon and iM genes
                 ((tp, fp), (fn, tn)) = contingency(regulon_genes, component_genes, all_genes)
