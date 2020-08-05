@@ -254,6 +254,13 @@ class IcaData(object):
 
         return final_rows
 
+    def single_gene_imodulons(self) -> List[ImodName]:
+        """
+        A simple function that returns the names of all single-gene iModulons based on the current threshold values
+        :return single_genes_imodulons: the current single-gene iModulon names
+        """
+        return [iM for iM in self.imodulon_names if sum(abs(self.M[iM]) > self.thresholds[iM]) == 1]
+
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
         Rename an iModulon
