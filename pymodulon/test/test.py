@@ -72,7 +72,7 @@ def test_ica_data_consistency(ica_data):
     assert (ica_data.gene_names[0] == 'b0002')
 
     # check that we can call out single-gene iModulons
-    assert (ica_data.single_gene_imodulons() == [4, 85])
+    assert (ica_data.find_single_gene_imodulons() == [4, 29, 42, 46, 90])
 
     # Check if renaming works for iModulons
     ica_data.rename_imodulons({0: 'YieP'})

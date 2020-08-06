@@ -254,12 +254,18 @@ class IcaData(object):
 
         return final_rows
 
-    def single_gene_imodulons(self) -> List[ImodName]:
+    def find_single_gene_imodulons(self) -> List[ImodName]:
         """
-        A simple function that returns the names of all single-gene iModulons based on the current threshold values
+        A simple function that returns the names of all likely single-gene iModulons. Checks if the largest iModulon
+        gene weight is more than twice the weight of the second highest iModulon gene weight.
         :return single_genes_imodulons: the current single-gene iModulon names
         """
-        return [iM for iM in self.imodulon_names if sum(abs(self.M[iM]) > self.thresholds[iM]) == 1]
+        single_genes_imodulons = []
+        for imodulon in self.imodulon_names:
+            sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
+            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+                single_genes_imodulons.append(imodulon)
+        return single_genes_imodulons
 
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
