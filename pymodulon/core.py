@@ -116,7 +116,7 @@ class IcaData(object):
                     # also set a private attribute to tell us if we've done this optimization; only reasonable to try
                     # it again if the user uploads a new TRN
                     self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
 
@@ -253,6 +253,19 @@ class IcaData(object):
         final_rows = pd.concat([gene_weights, gene_rows], axis=1)
 
         return final_rows
+
+    def find_single_gene_imodulons(self) -> List[ImodName]:
+        """
+        A simple function that returns the names of all likely single-gene iModulons. Checks if the largest iModulon
+        gene weight is more than twice the weight of the second highest iModulon gene weight.
+        :return single_genes_imodulons: the current single-gene iModulon names
+        """
+        single_genes_imodulons = []
+        for imodulon in self.imodulon_names:
+            sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
+            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+                single_genes_imodulons.append(imodulon)
+        return single_genes_imodulons
 
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
@@ -410,7 +423,7 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
 
