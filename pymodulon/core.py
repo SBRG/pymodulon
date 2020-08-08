@@ -56,7 +56,6 @@ class IcaData(object):
         try:
             M.columns = M.columns.astype(int)
         except TypeError:
-            print('Didnt set M to int')
             pass
 
         # Check that M and A matrices have identical iModulon names
@@ -126,8 +125,7 @@ class IcaData(object):
                     # also set a private attribute to tell us if we've done this optimization; only reasonable to try
                     # it again if the user uploads a new TRN
                     self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
-
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
 
@@ -264,6 +262,21 @@ class IcaData(object):
         final_rows = pd.concat([gene_weights, gene_rows], axis=1)
 
         return final_rows
+
+    def find_single_gene_imodulons(self, save: bool = False) -> List[ImodName]:
+        """
+        A simple function that returns the names of all likely single-gene iModulons. Checks if the largest iModulon
+        gene weight is more than twice the weight of the second highest iModulon gene weight.
+        :return single_genes_imodulons: the current single-gene iModulon names
+        """
+        single_genes_imodulons = []
+        for imodulon in self.imodulon_names:
+            sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
+            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+                single_genes_imodulons.append(imodulon)
+                if save:
+                    self.imodulon_table.loc[imodulon, 'single_gene'] = True
+        return single_genes_imodulons
 
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
@@ -421,7 +434,6 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._cutoff_optimized = False
 
-
     def reoptimize_thresholds(self):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
@@ -429,7 +441,7 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
 
@@ -441,10 +453,10 @@ class IcaData(object):
 
         # prepare a DataFrame of the best single-TF enrichments for the top 20 genes in each component
         top_enrichments = []
-        all_genes = list(self.S.index)
-        for imod in self.S.columns:
+        all_genes = list(self.M.index)
+        for imod in self.M.columns:
 
-            genes_top20 = list(abs(self.S[imod]).sort_values().iloc[-20:].index)
+            genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
             imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes, self.trn, max_regs=1)
 
             # compute_trn_enrichment is being hijacked a bit; we want the index to be components, not the enriched TFs
@@ -465,8 +477,8 @@ class IcaData(object):
                 regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
 
                 # compute the weighting threshold based on this cutoff to try
-                thresh = compute_threshold(self.S[enrich_row['component']], cutoff)
-                component_genes = list(self.S[abs(self.S[enrich_row['component']]) > thresh].index)
+                thresh = compute_threshold(self.M[enrich_row['component']], cutoff)
+                component_genes = list(self.M[abs(self.M[enrich_row['component']]) > thresh].index)
 
                 # Compute the contingency table (aka confusion matrix) for overlap between the regulon and iM genes
                 ((tp, fp), (fn, tn)) = contingency(regulon_genes, component_genes, all_genes)

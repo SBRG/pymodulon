@@ -71,9 +71,16 @@ def test_ica_data_consistency(ica_data):
     # Check if gene names are used
     assert (ica_data.gene_names[0] == 'b0002')
 
+    # check that we can call out single-gene iModulons
+    assert (ica_data.find_single_gene_imodulons(save=True) == [4, 29, 42, 46, 90])
+    assert (ica_data.imodulon_table.single_gene.sum() == 5)
+
     # Check if renaming works for iModulons
     ica_data.rename_imodulons({0: 'YieP'})
-    print(ica_data.view_imodulon('YieP'))
+    assert (ica_data.imodulon_names[0] == 'YieP')
+    assert (ica_data.M.columns[0] == 'YieP')
+    assert (ica_data.A.index[0] == 'YieP')
+    assert ('YieP' in ica_data.thresholds.keys())
 
 
 def test_compute_regulon_enrichment(ica_data):
