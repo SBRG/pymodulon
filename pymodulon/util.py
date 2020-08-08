@@ -8,23 +8,32 @@ import os
 ImodName = Union[str, int]
 Data = Union[pd.DataFrame, os.PathLike]
 
-
-def _check_table(table: Data, index: List, name: str):
+def _check_table(table: Data, name: str, index: List = None):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
 
     # Load table if necessary
     elif isinstance(table, str):
-        df = pd.read_csv(table, index_col=0)
-        return _check_table_helper(df, index, name)
-    elif isinstance(table, pd.DataFrame):
-        return _check_table_helper(table, index, name)
+        try:
+            table = pd.read_json(table)
+        except ValueError:
+            try:
+                table = pd.read_csv(table, index_col=0)
+            except FileNotFoundError:
+                raise TypeError('{}_table must be a pandas DataFrame filename or a valid JSON string'.format(name))
+
+    if isinstance(table, pd.DataFrame):
+        #dont run _check_table_helper if no index is passed
+        return table if index is None else _check_table_helper(table, index, name)
     else:
-        raise TypeError('{}_table must be a pandas DataFrame or filename'.format(name))
+        raise TypeError('{}_table must be a pandas DataFrame filename or a valid JSON string'.format(name))
+
 
 
 def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
+    if table.shape == (0, 0):
+        return pd.DataFrame(index=index)
     # Check if all indices are in table
     missing_index = list(set(index) - set(table.index))
     if len(missing_index) > 0:

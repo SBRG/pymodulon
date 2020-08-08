@@ -1,5 +1,5 @@
-from pymodulon.util import *
 from pymodulon.enrichment import *
+from pymodulon.util import *
 from pymodulon.util import _check_table
 
 
@@ -39,20 +39,24 @@ class IcaData(object):
         #########################
 
         # Type check M and A matrices
-        if isinstance(M, str):
-            M = pd.read_csv(M, index_col=0)
-        elif not isinstance(M, pd.DataFrame):
-            raise TypeError('M must be either a DataFrame or filename')
+        # if isinstance(M, str):
+        #     M = pd.read_csv(M, index_col=0)
+        # elif not isinstance(M, pd.DataFrame):
+        #     raise TypeError('M must be either a DataFrame or filename')
+        #
+        # if isinstance(A, str):
+        #     A = pd.read_csv(A, index_col=0)
+        # elif not isinstance(A, pd.DataFrame):
+        #     raise TypeError('A must be either a DataFrame or filename')
 
-        if isinstance(A, str):
-            A = pd.read_csv(A, index_col=0)
-        elif not isinstance(A, pd.DataFrame):
-            raise TypeError('A must be either a DataFrame or filename')
+        M = _check_table(M, 'M')
+        A = _check_table(A, 'A')
 
         # Convert column names of M to int if possible
         try:
             M.columns = M.columns.astype(int)
         except TypeError:
+            print('Didnt set M to int')
             pass
 
         # Check that M and A matrices have identical iModulon names
@@ -91,16 +95,22 @@ class IcaData(object):
         ############
         # Load TRN #
         ############
-        if trn is None:
-            df_trn = pd.DataFrame(columns=['regulator', 'regulator_id', 'gene_name', 'gene_id', 'effect', 'ev_level'])
-        elif isinstance(trn, str):
-            df_trn = pd.read_csv(trn)
-        elif isinstance(trn, pd.DataFrame):
-            df_trn = trn
-        else:
-            raise TypeError('TRN must either be a pandas DataFrame or filename')
+        # df_trn = _check_table(trn, 'TRN')
+        # if trn is None:
+        #     df_trn = pd.DataFrame(columns=['regulator', 'regulator_id', 'gene_name', 'gene_id', 'effect', 'ev_level'])
+        # elif isinstance(trn, str):
+        #     df_trn = pd.read_csv(trn)
+        # elif isinstance(trn, pd.DataFrame):
+        #     df_trn = trn
+        # else:
+        #     raise TypeError('TRN must either be a pandas DataFrame or filename')
+
         # Only include genes that are in M/X matrix
-        self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
+        # if df_trn.shape != (0,0):
+        #     df_trn.columns = ['regulator', 'regulator_id', 'gene_name',
+        #                       'gene_id', 'effect', 'ev_level']
+        #     df_trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
+        self.trn = trn
 
         # Initialize thresholds either with or without optimization
         self._dagostino_cutoff = dagostino_cutoff
@@ -117,6 +127,7 @@ class IcaData(object):
                     # it again if the user uploads a new TRN
                     self._cutoff_optimized = True
             self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+
         else:
             self.thresholds = thresholds
 
@@ -189,7 +200,7 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        table = _check_table(new_table, self._gene_names, 'gene')
+        table = _check_table(new_table, 'gene', self._gene_names)
         self._gene_table = table
 
         # Update gene names
@@ -205,7 +216,7 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        table = _check_table(new_table, self._sample_names, 'sample')
+        table = _check_table(new_table, 'sample', self._sample_names)
         self._sample_table = table
 
         # Update sample names
@@ -221,7 +232,7 @@ class IcaData(object):
 
     @imodulon_table.setter
     def imodulon_table(self, new_table):
-        table = _check_table(new_table, self._imodulon_names, 'imodulon')
+        table = _check_table(new_table, 'imodulon', self._imodulon_names)
         self._imodulon_table = table
         self._update_imodulon_names(table.index)
 
@@ -271,7 +282,8 @@ class IcaData(object):
     @trn.setter
     def trn(self, new_trn):
         # Only include genes that are in S/X matrix
-        self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+        self._trn = _check_table(new_trn, 'TRN')
+        # self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
         # make a note that our cutoffs are no longer optimized since the TRN has changed
         self._cutoff_optimized = False
 
@@ -377,6 +389,12 @@ class IcaData(object):
             raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
                 new_thresholds), len(self._imodulon_names)))
         if isinstance(new_thresholds, dict):
+            #fix json peculiarity of saving int dict keys as string
+            thresh_copy = new_thresholds.copy()
+            for key in thresh_copy.keys():
+                if isinstance(key, str) and all([char.isdigit() for char in key]):
+                    new_thresholds.update({int(key): new_thresholds.pop(key)})
+
             self._thresholds = new_thresholds
         elif isinstance(new_thresholds, list):
             self._thresholds = dict(zip(self._imodulon_names, new_thresholds))

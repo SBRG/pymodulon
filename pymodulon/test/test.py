@@ -141,7 +141,11 @@ def test_set_thresholds():
 
 
 def test_io():
-    pass
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    save_to_json(ica_data, 'test/data/model.json')
+    icd_from_json = load_json_model('test/data/model.json')
+    test_ica_data_consistency(icd_from_json)
 
 
 def test_util():
