@@ -38,17 +38,6 @@ class IcaData(object):
         # Load M and A matrices #
         #########################
 
-        # Type check M and A matrices
-        # if isinstance(M, str):
-        #     M = pd.read_csv(M, index_col=0)
-        # elif not isinstance(M, pd.DataFrame):
-        #     raise TypeError('M must be either a DataFrame or filename')
-        #
-        # if isinstance(A, str):
-        #     A = pd.read_csv(A, index_col=0)
-        # elif not isinstance(A, pd.DataFrame):
-        #     raise TypeError('A must be either a DataFrame or filename')
-
         M = _check_table(M, 'M')
         A = _check_table(A, 'A')
 
@@ -94,21 +83,7 @@ class IcaData(object):
         ############
         # Load TRN #
         ############
-        # df_trn = _check_table(trn, 'TRN')
-        # if trn is None:
-        #     df_trn = pd.DataFrame(columns=['regulator', 'regulator_id', 'gene_name', 'gene_id', 'effect', 'ev_level'])
-        # elif isinstance(trn, str):
-        #     df_trn = pd.read_csv(trn)
-        # elif isinstance(trn, pd.DataFrame):
-        #     df_trn = trn
-        # else:
-        #     raise TypeError('TRN must either be a pandas DataFrame or filename')
 
-        # Only include genes that are in M/X matrix
-        # if df_trn.shape != (0,0):
-        #     df_trn.columns = ['regulator', 'regulator_id', 'gene_name',
-        #                       'gene_id', 'effect', 'ev_level']
-        #     df_trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
         self.trn = trn
 
         # Initialize thresholds either with or without optimization
