@@ -108,13 +108,23 @@ class IcaData(object):
         # Load data tables #
         ####################
 
-        # this one is loaded here because it needs the thresholds
+        # these are loaded here because they need the thresholds
         self.imodulon_table = imodulon_table
 
     @property
     def M(self):
         """ Get M matrix """
         return self._m
+
+    @property
+    def M_binarized(self):
+        """ Get binarized version of M matrix based on current thresholds """
+        m_binarized = pd.DataFrame().reindex_like(self.M)
+        m_binarized[:] = 0
+        for imodulon in m_binarized.columns:
+            in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
+            m_binarized.loc[in_imodulon, imodulon] = 1
+        return m_binarized
 
     @property
     def A(self):
@@ -271,7 +281,8 @@ class IcaData(object):
     def trn(self, new_trn):
         # Only include genes that are in S/X matrix
         self._trn = _check_table(new_trn, 'TRN')
-        # self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+        if not self._trn.empty:
+            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
         # make a note that our cutoffs are no longer optimized since the TRN has changed
         self._cutoff_optimized = False
 
