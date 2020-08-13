@@ -173,17 +173,80 @@ def _make_dot_graph(DF_corr: pd.DataFrame, cutoff: float):
     return dot, name_links
 
 
-def compare_ica(S1, S2, metric='pearson', cutoff=0.2,ortho_dir=None):
+def _load_ortho_matrix(ortho_dir : str):
+    """
+    Load the .npz file and organism labels and compiles them into one
+    :param filename: location of organisms comparison file
+    :param label_file: location of organism comparison file labels
+    :return: Pandas Dataframe of the full organism compare matrix
+    """
+    filename = os.path.join(ortho_dir,"org_compare.npz")
+    label_file = os.path.join(ortho_dir,"org_compare_label.txt")
+    ortho_DF = pd.DataFrame(sparse.load_npz(filename).toarray())
+    labels = list(pd.read_csv(label_file, header=None, nrows=1).loc[0][:])
+
+    ortho_DF.index = labels
+    ortho_DF.columns = labels
+
+    return ortho_DF
+
+
+def _extract_genes(gene_set_1: List, gene_set_2: List, ortho_DF):
+    """
+    Returns a Panda Series that contains a cut down version of the complete Comparison DF, where the rows are only genes
+    found in the I-modulon component
+    :param gene_set_1: list of genes from organism 1
+    :param gene_set_2: list of genes from organism 2
+    :param ortho_DF: Full ortholog comparison Dataframe
+    :return: A reduced version of the ortho_DF Dataframe that only contains the genes from gene_set_1 and gene_set_2
+    """
+
+    rows = ortho_DF.loc[ortho_DF.index.isin(list(gene_set_1))][:].index
+    columns = ortho_DF.loc[:][ortho_DF.columns.isin(list(gene_set_2))].index
+
+    reduced_DF = ortho_DF.loc[rows][columns]
+
+    reduced_DF = reduced_DF.replace(0, np.nan)
+    reduced_DF = reduced_DF.dropna(axis=1, how="all")
+    reduced_DF = reduced_DF.replace(np.nan, 0)
+
+    return reduced_DF
+
+def _translate_genes(gene_list : List, reduced_DF : pd.DataFrame):
+    """
+
+    :param gene_list:
+    :param reduced_DF:
+    :return:
+    """
+    gene_list_copy = gene_list
+    for i in range(0,len(gene_list_copy)):
+        try:
+            convert_column = reduced_DF[gene_list_copy[i]]
+            gene_list_copy[i] = convert_column.loc[convert_column.loc==1].index
+        except KeyError as e:
+            continue
+    return gene_list_copy
+
+
+def compare_ica(S1 : pd.DataFrame, S2 : pd.DataFrame, metric='pearson', cutoff=0.2,ortho_dir=None):
     """
 
     :param S1:
     :param S2:
     :param metric:
     :param cutoff:
+    :param ortho_dir:
     :return:
     """
     if ortho_dir is None:
         DF_corr = _make_DF_corr(S1, S2, metric)
         dot, name_links = _make_dot_graph(DF_corr, cutoff)
         return dot, name_links
-
+    else:
+        ortho_reduced_DF = _extract_genes(list(S1.index),list(S2.index),_load_ortho_matrix(ortho_dir))
+        translated_genes = _translate_genes(list(S2.columns),ortho_reduced_DF)
+        S2.columns = translated_genes
+        DF_corr = _make_DF_corr(S1,S2,metric)
+        dot,name_links = _make_dot_graph(DF_corr,cutoff)
+        return dot, name_links
