@@ -22,7 +22,6 @@ def contingency(set1: List, set2: List, all_genes: List):
     set1 = set(set1)
     set2 = set(set2)
     all_genes = set(all_genes)
-
     if len(set1 - all_genes) > 0 or len(set2 - all_genes) > 0:
         print(set1)
         print(set2)

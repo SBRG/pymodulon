@@ -1,5 +1,5 @@
-from pymodulon.util import *
 from pymodulon.enrichment import *
+from pymodulon.util import *
 from pymodulon.util import _check_table
 
 
@@ -38,16 +38,8 @@ class IcaData(object):
         # Load M and A matrices #
         #########################
 
-        # Type check M and A matrices
-        if isinstance(M, str):
-            M = pd.read_csv(M, index_col=0)
-        elif not isinstance(M, pd.DataFrame):
-            raise TypeError('M must be either a DataFrame or filename')
-
-        if isinstance(A, str):
-            A = pd.read_csv(A, index_col=0)
-        elif not isinstance(A, pd.DataFrame):
-            raise TypeError('A must be either a DataFrame or filename')
+        M = _check_table(M, 'M')
+        A = _check_table(A, 'A')
 
         # Convert column names of M to int if possible
         try:
@@ -91,16 +83,8 @@ class IcaData(object):
         ############
         # Load TRN #
         ############
-        if trn is None:
-            df_trn = pd.DataFrame(columns=['regulator', 'regulator_id', 'gene_name', 'gene_id', 'effect', 'ev_level'])
-        elif isinstance(trn, str):
-            df_trn = pd.read_csv(trn)
-        elif isinstance(trn, pd.DataFrame):
-            df_trn = trn
-        else:
-            raise TypeError('TRN must either be a pandas DataFrame or filename')
-        # Only include genes that are in M/X matrix
-        self.trn = df_trn[df_trn.gene_id.isin(self.gene_names)]
+
+        self.trn = trn
 
         # Initialize thresholds either with or without optimization
         self._dagostino_cutoff = dagostino_cutoff
@@ -116,7 +100,7 @@ class IcaData(object):
                     # also set a private attribute to tell us if we've done this optimization; only reasonable to try
                     # it again if the user uploads a new TRN
                     self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
 
@@ -124,13 +108,23 @@ class IcaData(object):
         # Load data tables #
         ####################
 
-        # this one is loaded here because it needs the thresholds
+        # these are loaded here because they need the thresholds
         self.imodulon_table = imodulon_table
 
     @property
     def M(self):
         """ Get M matrix """
         return self._m
+
+    @property
+    def M_binarized(self):
+        """ Get binarized version of M matrix based on current thresholds """
+        m_binarized = pd.DataFrame().reindex_like(self.M)
+        m_binarized[:] = 0
+        for imodulon in m_binarized.columns:
+            in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
+            m_binarized.loc[in_imodulon, imodulon] = 1
+        return m_binarized
 
     @property
     def A(self):
@@ -189,7 +183,7 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        table = _check_table(new_table, self._gene_names, 'gene')
+        table = _check_table(new_table, 'gene', self._gene_names)
         self._gene_table = table
 
         # Update gene names
@@ -205,7 +199,7 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        table = _check_table(new_table, self._sample_names, 'sample')
+        table = _check_table(new_table, 'sample', self._sample_names)
         self._sample_table = table
 
         # Update sample names
@@ -221,7 +215,7 @@ class IcaData(object):
 
     @imodulon_table.setter
     def imodulon_table(self, new_table):
-        table = _check_table(new_table, self._imodulon_names, 'imodulon')
+        table = _check_table(new_table, 'imodulon', self._imodulon_names)
         self._imodulon_table = table
         self._update_imodulon_names(table.index)
 
@@ -254,6 +248,21 @@ class IcaData(object):
 
         return final_rows
 
+    def find_single_gene_imodulons(self, save: bool = False) -> List[ImodName]:
+        """
+        A simple function that returns the names of all likely single-gene iModulons. Checks if the largest iModulon
+        gene weight is more than twice the weight of the second highest iModulon gene weight.
+        :return single_genes_imodulons: the current single-gene iModulon names
+        """
+        single_genes_imodulons = []
+        for imodulon in self.imodulon_names:
+            sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
+            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+                single_genes_imodulons.append(imodulon)
+                if save:
+                    self.imodulon_table.loc[imodulon, 'single_gene'] = True
+        return single_genes_imodulons
+
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
         Rename an iModulon
@@ -271,7 +280,9 @@ class IcaData(object):
     @trn.setter
     def trn(self, new_trn):
         # Only include genes that are in S/X matrix
-        self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+        self._trn = _check_table(new_trn, 'TRN')
+        if not self._trn.empty:
+            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
         # make a note that our cutoffs are no longer optimized since the TRN has changed
         self._cutoff_optimized = False
 
@@ -377,6 +388,12 @@ class IcaData(object):
             raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
                 new_thresholds), len(self._imodulon_names)))
         if isinstance(new_thresholds, dict):
+            #fix json peculiarity of saving int dict keys as string
+            thresh_copy = new_thresholds.copy()
+            for key in thresh_copy.keys():
+                if isinstance(key, str) and all([char.isdigit() for char in key]):
+                    new_thresholds.update({int(key): new_thresholds.pop(key)})
+
             self._thresholds = new_thresholds
         elif isinstance(new_thresholds, list):
             self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
@@ -403,7 +420,6 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._cutoff_optimized = False
 
-
     def reoptimize_thresholds(self):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
@@ -411,7 +427,7 @@ class IcaData(object):
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
-            self._thresholds = {k: compute_threshold(self._m[k], self.dagostino_cutoff) for k in self._imodulon_names}
+            self.recompute_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
 
@@ -423,10 +439,10 @@ class IcaData(object):
 
         # prepare a DataFrame of the best single-TF enrichments for the top 20 genes in each component
         top_enrichments = []
-        all_genes = list(self.S.index)
-        for imod in self.S.columns:
+        all_genes = list(self.M.index)
+        for imod in self.M.columns:
 
-            genes_top20 = list(abs(self.S[imod]).sort_values().iloc[-20:].index)
+            genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
             imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes, self.trn, max_regs=1)
 
             # compute_trn_enrichment is being hijacked a bit; we want the index to be components, not the enriched TFs
@@ -447,8 +463,8 @@ class IcaData(object):
                 regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
 
                 # compute the weighting threshold based on this cutoff to try
-                thresh = compute_threshold(self.S[enrich_row['component']], cutoff)
-                component_genes = list(self.S[abs(self.S[enrich_row['component']]) > thresh].index)
+                thresh = compute_threshold(self.M[enrich_row['component']], cutoff)
+                component_genes = list(self.M[abs(self.M[enrich_row['component']]) > thresh].index)
 
                 # Compute the contingency table (aka confusion matrix) for overlap between the regulon and iM genes
                 ((tp, fp), (fn, tn)) = contingency(regulon_genes, component_genes, all_genes)
