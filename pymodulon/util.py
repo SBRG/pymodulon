@@ -8,7 +8,7 @@ import os
 ImodName = Union[str, int]
 Data = Union[pd.DataFrame, os.PathLike]
 
-def _check_table(table: Data, name: str, index: List = None):
+def _check_table(table: Data, name: str, index: Optional[Collection] = None):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
