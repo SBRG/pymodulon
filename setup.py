@@ -22,7 +22,7 @@ setuptools.setup(
     package_dir={"": "src"},
     # pip 9.0+ will inspect this field when installing to help users install a
     # compatible version of the library for their Python version.
-    python_requires="==3.8",
+    python_requires=">3.6",
     # There are some peculiarities on how to include package data for source
     # distributions using setuptools. You also need to add entries for package
     # data to MANIFEST.in.

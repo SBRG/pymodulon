@@ -176,7 +176,6 @@ class IcaData(object):
         return self._gene_table.index.tolist()
 
     # Gene, sample and iModulon tables
-    # TODO: Add checking
     @property
     def gene_table(self):
         return self._gene_table
@@ -388,7 +387,7 @@ class IcaData(object):
             raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
                 new_thresholds), len(self._imodulon_names)))
         if isinstance(new_thresholds, dict):
-            #fix json peculiarity of saving int dict keys as string
+            # fix json peculiarity of saving int dict keys as string
             thresh_copy = new_thresholds.copy()
             for key in thresh_copy.keys():
                 if isinstance(key, str) and all([char.isdigit() for char in key]):
