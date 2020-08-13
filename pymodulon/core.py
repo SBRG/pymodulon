@@ -30,12 +30,15 @@ class IcaData(object):
         :param sample_table: Table containing relevant sample metadata
         :param imodulon_table: Table containing iModulon names and enrichments
         :param trn: Table containing transcriptional regulatory network links
-        :param optimize_cutoff: Indicates if the cutoff for iModulon thresholds should be optimized based on the
-        provided TRN (if available). Optimizing thresholds may take a couple of minutes to complete.
-        :param dagostino_cutoff: the cutoff value to use for the D'Agostino test for thresholding iModulon genes; this
-        option will be overridden if optimize_cutoff is set to True
-        :param thresholds: a list of pre-computed thresholds index-matched to the imodulons (columns of S); overrides
-        all automatic optimization/computing of thresholds
+        :param optimize_cutoff: Indicates if the cutoff for iModulon thresholds
+            should be optimized based on the provided TRN (if available).
+            Optimizing thresholds may take a couple of minutes to complete.
+        :param dagostino_cutoff: the cutoff value to use for the D'Agostino
+            test for thresholding iModulon genes; this option will be
+            overridden if optimize_cutoff is set to True
+        :param thresholds: a list of pre-computed thresholds index-matched to
+            the imodulons (columns of S); overrides all automatic
+            optimization/computing of thresholds
         """
 
         #########################
