@@ -13,10 +13,14 @@ class IcaData(object):
 
     """
 
-    def __init__(self, M: Data, A: Data, X: Data = None,
-                 gene_table: Data = None, sample_table: Data = None, imodulon_table: Data = None,
-                 trn: Data = None, optimize_cutoff: bool = False, dagostino_cutoff: int = 550,
-                 thresholds: Union[List[float]] = None):
+    def __init__(self, M: Data, A: Data, X: Optional[Data] = None,
+                 gene_table: Optional[Data] = None,
+                 sample_table: Optional[Data] = None,
+                 imodulon_table: Optional[Data] = None,
+                 trn: Optional[Data] = None,
+                 optimize_cutoff: bool = False,
+                 dagostino_cutoff: int = 550,
+                 thresholds: Optional[Mapping[ImodName, float]] = None):
         """
 
         :param M: S matrix from ICA
