@@ -146,7 +146,8 @@ class IcaData(object):
     @X.setter
     def X(self, x_matrix):
         if isinstance(x_matrix, str):
-            df = pd.read_csv(x_matrix, index_col=0)
+            def sep(s): return '\t' if 'tsv' in s else ','
+            df = pd.read_csv(x_matrix, index_col=0, sep=sep(x_matrix))
         elif isinstance(x_matrix, pd.DataFrame):
             df = x_matrix
         else:
