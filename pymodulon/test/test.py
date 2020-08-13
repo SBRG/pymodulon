@@ -75,6 +75,10 @@ def test_ica_data_consistency(ica_data):
     assert (ica_data.find_single_gene_imodulons(save=True) == [4, 29, 42, 46, 90])
     assert (ica_data.imodulon_table.single_gene.sum() == 5)
 
+    # check if binarized M is correct
+    binary_m = ica_data.M_binarized
+    assert (binary_m.iloc[:, 0].sum() == 8)
+
     # Check if renaming works for iModulons
     ica_data.rename_imodulons({0: 'YieP'})
     assert (ica_data.imodulon_names[0] == 'YieP')
