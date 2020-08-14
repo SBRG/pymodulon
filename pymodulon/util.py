@@ -16,7 +16,6 @@ ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
 
 
-
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):
     # Set as empty dataframe if not input given
     if table is None:
