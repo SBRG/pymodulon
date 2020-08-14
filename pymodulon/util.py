@@ -6,6 +6,7 @@ from warnings import warn
 import os
 
 ImodName = Union[str, int]
+ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
 
 

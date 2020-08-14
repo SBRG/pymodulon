@@ -1,3 +1,5 @@
+import pandas as pd
+
 from pymodulon.enrichment import *
 from pymodulon.util import *
 from pymodulon.util import _check_table
@@ -327,8 +329,9 @@ class IcaData(object):
             self.imodulon_table = table
         return enrich
 
-    def compute_trn_enrichment(self, imodulons: Union[ImodName, List[ImodName]] = None, fdr: float = 1e-5,
-                               max_regs: int = 1, save: bool = False, method: str = 'both',
+    def compute_trn_enrichment(self, imodulons: Optional[ImodNameList] = None,
+                               fdr: float = 1e-5, max_regs: int = 1,
+                               save: bool = False, method: str = 'both',
                                force: bool = False) -> pd.DataFrame:
         """
         Compare iModulons against all regulons
