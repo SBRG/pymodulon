@@ -64,7 +64,8 @@ class IcaData(object):
         if A.columns.duplicated().any():
             raise ValueError('A matrix contains duplicate sample names')
         if M.columns.duplicated().any():
-            raise ValueError('M and A matrices contain duplicate iModulon names')
+            raise ValueError('M and A matrices contain '
+                             'duplicate iModulon names')
 
         # Store M and A
         self._m = M
@@ -99,13 +100,16 @@ class IcaData(object):
         if thresholds is None:
             if optimize_cutoff:
                 if trn is None:
-                    raise ValueError('Thresholds cannot be optimized if no TRN is provided.')
+                    raise ValueError('Thresholds cannot be optimized '
+                                     'if no TRN is provided.')
                 else:
-                    warn("Optimizing iModulon thresholds, may take 2-3 minutes...")
-                    # this private function sets self.dagostino_cutoff internally
+                    warn('Optimizing iModulon thresholds, '
+                         'may take 2-3 minutes...')
+                    # this function sets self.dagostino_cutoff internally
                     self._optimize_dagostino_cutoff()
-                    # also set a private attribute to tell us if we've done this optimization; only reasonable to try
-                    # it again if the user uploads a new TRN
+                    # also set an attribute to tell us if we've done
+                    # this optimization; only reasonable to try it
+                    # again if the user uploads a new TRN
                     self._cutoff_optimized = True
             self.recompute_thresholds(self.dagostino_cutoff)
         else:
@@ -241,6 +245,7 @@ class IcaData(object):
     def view_imodulon(self, imodulon: ImodName):
         """
         View genes in an iModulon and relevant information about each gene
+
         :param imodulon: Name of iModulon
         :return: Pandas Dataframe showing iModulon gene information
         """
@@ -257,9 +262,11 @@ class IcaData(object):
 
     def find_single_gene_imodulons(self, save: bool = False) -> List[ImodName]:
         """
-        A simple function that returns the names of all likely single-gene iModulons. Checks if the largest iModulon
-        gene weight is more than twice the weight of the second highest iModulon gene weight.
-        :return single_genes_imodulons: the current single-gene iModulon names
+        A simple function that returns the names of all likely single-gene
+        iModulons. Checks if the largest iModulon gene weight is more
+        than twice the weight of the second highest iModulon gene weight.
+
+        :return: List of the current single-gene iModulon names
         """
         single_genes_imodulons = []
         for imodulon in self.imodulon_names:
@@ -273,10 +280,12 @@ class IcaData(object):
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
         Rename an iModulon
-        :param name_dict: Dictionary mapping old iModulon names to new names (e.g. {old_name:new_name})
+        :param name_dict: Dictionary mapping old iModulon names to new
+            names (e.g. {old_name:new_name})
         """
 
-        new_names = [name_dict[name] if name in name_dict.keys() else name for name in self.imodulon_names]
+        new_names = [name_dict[name] if name in name_dict.keys() else name
+                     for name in self.imodulon_names]
         self._update_imodulon_names(new_names)
 
     # TRN
@@ -290,20 +299,26 @@ class IcaData(object):
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
             self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
-        # make a note that our cutoffs are no longer optimized since the TRN has changed
+        # make a note that our cutoffs are no longer optimized since
+        # the TRN has changed
         self._cutoff_optimized = False
 
     # Enrichments
-    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str, save: bool = False):
+    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
+                                   save: bool = False):
         """
-        Compare an iModulon against a regulon. (Note: q-values cannot be computed for single enrichments)
+        Compare an iModulon against a regulon. (Note: q-values cannot be
+        computed for single enrichments)
+
         :param imodulon: Name of iModulon
-        :param regulator: Complex regulon, where "/" uses genes in any regulon and "+" uses genes in all regulons
+        :param regulator: Complex regulon, where "/" uses genes in any
+            regulon and "+" uses genes in all regulons
         :param save: Save enrichment score to the imodulon_table
         :return: Pandas Series containing enrichment statistics
         """
         imod_genes = self.view_imodulon(imodulon).index
-        enrich = compute_regulon_enrichment(imod_genes, regulator, self.gene_names, self.trn)
+        enrich = compute_regulon_enrichment(imod_genes, regulator,
+                                            self.gene_names, self.trn)
         enrich.rename({'gene_set_size': 'imodulon_size'}, inplace=True)
         if save:
             table = self.imodulon_table
@@ -317,13 +332,18 @@ class IcaData(object):
                                force: bool = False) -> pd.DataFrame:
         """
         Compare iModulons against all regulons
-        :param imodulons: Name of iModulon(s). If none given, compute enrichments for all iModulons
+
+        :param imodulons: Name of iModulon(s). If none given, compute
+            enrichments for all iModulons
         :param fdr: False detection rate (default: 1e-5)
-        :param max_regs: Maximum number of regulators to include in complex regulon (default: 1)
-        :param save: Save regulons with highest enrichment scores to the imodulon_table
-        :param method: How to combine regulons. 'or' computes enrichment against union of regulons, \
-    'and' computes enrichment against intersection of regulons, and 'both' performs both tests (default: 'both')
-    intersection of regulons
+        :param max_regs: Maximum number of regulators to include in
+            complex regulon (default: 1)
+        :param save: Save regulons with highest enrichment scores to
+            the imodulon_table
+        :param method: How to combine regulons.
+            'or' computes enrichment against union of regulons,
+            'and' computes enrichment against intersection of regulons, and
+            'both' performs both tests (default: 'both')
         :param force: Allows computation of >2 regulators
         :return: Pandas Dataframe of statistically significant enrichments
         """
@@ -338,8 +358,10 @@ class IcaData(object):
 
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
-            df_enriched = compute_trn_enrichment(gene_list, self.gene_names, self.trn, max_regs=max_regs, fdr=fdr,
-                                                 method=method, force=force)
+            df_enriched = compute_trn_enrichment(gene_list, self.gene_names,
+                                                 self.trn, max_regs=max_regs,
+                                                 fdr=fdr, method=method,
+                                                 force=force)
             df_enriched['imodulon'] = imodulon
             enrichments.append(df_enriched)
 
@@ -350,13 +372,16 @@ class IcaData(object):
         df_enriched.reset_index(inplace=True)
 
         # Reorder columns
-        df_enriched.rename({'gene_set_size': 'imodulon_size'}, inplace=True, axis=1)
-        col_order = ['imodulon', 'regulator', 'pvalue', 'qvalue', 'precision', 'recall', 'f1score',
-                     'TP', 'regulon_size', 'imodulon_size', 'n_regs']
+        df_enriched.rename({'gene_set_size': 'imodulon_size'},
+                           inplace=True, axis=1)
+        col_order = ['imodulon', 'regulator', 'pvalue', 'qvalue', 'precision',
+                     'recall', 'f1score', 'TP', 'regulon_size',
+                     'imodulon_size', 'n_regs']
         df_enriched = df_enriched[col_order]
 
         if save:
-            df_top_enrich = df_enriched.sort_values(['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+            df_top_enrich = df_enriched.sort_values(
+                ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
             self._update_imodulon_table(df_top_enrich.set_index('imodulon'))
 
         return df_enriched
@@ -364,13 +389,17 @@ class IcaData(object):
     def _update_imodulon_table(self, enrichment):
         """
         Update iModulon table given new iModulon enrichments
-        :param enrichment: Pandas series or dataframe containing an iModulon enrichment
+
+        :param enrichment: Pandas series or dataframe containing an
+            iModulon enrichment
         """
         if isinstance(enrichment, pd.Series):
             enrichment = pd.DataFrame(enrichment)
-        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(enrichment.index)]
-        keep_cols = self.imodulon_table.loc[enrichment.index, set(self.imodulon_table.columns) -
-                                            set(enrichment.columns)]
+        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
+            enrichment.index)]
+        keep_cols = self.imodulon_table.loc[enrichment.index,
+                                            set(self.imodulon_table.columns)
+                                            - set(enrichment.columns)]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich])
         self.imodulon_table = new_table.reindex(self.imodulon_names)
@@ -391,14 +420,18 @@ class IcaData(object):
     @thresholds.setter
     def thresholds(self, new_thresholds):
         """ Set thresholds """
-        if len(new_thresholds) != len(self._imodulon_names):
-            raise ValueError('new_threshold has {:d} elements, but should have {:d} elements'.format(len(
-                new_thresholds), len(self._imodulon_names)))
+        new_thresh_len = len(new_thresholds)
+        imod_names_len = len(self._imodulon_names)
+        if new_thresh_len != imod_names_len:
+            raise ValueError('new_threshold has {:d} elements, but should '
+                             'have {:d} elements'.format(new_thresh_len,
+                                                         imod_names_len))
         if isinstance(new_thresholds, dict):
             # fix json peculiarity of saving int dict keys as string
             thresh_copy = new_thresholds.copy()
             for key in thresh_copy.keys():
-                if isinstance(key, str) and all([char.isdigit() for char in key]):
+                if isinstance(key, str) and all([char.isdigit()
+                                                 for char in key]):
                     new_thresholds.update({int(key): new_thresholds.pop(key)})
 
             self._thresholds = new_thresholds
@@ -410,6 +443,7 @@ class IcaData(object):
     def change_threshold(self, imodulon: ImodName, value):
         """
         Set threshold for an iModulon
+
         :param imodulon: name of iModulon
         :param value: New threshold
         """
@@ -419,67 +453,89 @@ class IcaData(object):
     def recompute_thresholds(self, dagostino_cutoff: int):
         """
         Re-computes iModulon thresholds using a new D'Agostino cutoff
-        :param dagostino_cutoff: Value to use for the D'Agostino test to determine iModulon thresholds
-        :return:
+
+        :param dagostino_cutoff: Value to use for the D'Agostino test
+            to determine iModulon thresholds
+        :return: None
         """
-        self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff) for k in self._imodulon_names}
+        self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff)
+                            for k in self._imodulon_names}
         self._dagostino_cutoff = dagostino_cutoff
         if not self._cutoff_optimized:
             self._cutoff_optimized = False
 
     def reoptimize_thresholds(self):
         """
-        Re-optimizes the D'Agostino statistic cutoff for defining iModulon thresholds if the trn has been updated
+        Re-optimizes the D'Agostino statistic cutoff for defining iModulon
+        thresholds if the trn has been updated
         """
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff()
             self._cutoff_optimized = True
             self.recompute_thresholds(self.dagostino_cutoff)
         else:
-            print('Cutoff already optimized, and no new TRN data provided. Reoptimization will return same cutoff.')
+            print('Cutoff already optimized, and no new TRN data provided. '
+                  'Reoptimization will return same cutoff.')
 
     def _optimize_dagostino_cutoff(self):
         """
-        Computes an abridged version of the TRN enrichments for the 20 highest-weighted genes in order to determine
-        a global minimum for the D'Agostino cutoff ultimately used to threshold and define the genes "in" an iModulon
+        Computes an abridged version of the TRN enrichments for the 20
+        highest-weighted genes in order to determine a global minimum
+        for the D'Agostino cutoff ultimately used to threshold and
+        define the genes "in" an iModulon
         """
 
-        # prepare a DataFrame of the best single-TF enrichments for the top 20 genes in each component
+        # prepare a DataFrame of the best single-TF enrichments for the
+        # top 20 genes in each component
         top_enrichments = []
         all_genes = list(self.M.index)
         for imod in self.M.columns:
 
-            genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
-            imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes, self.trn, max_regs=1)
+            genes_top20 = list(
+                abs(self.M[imod]).sort_values().iloc[-20:].index)
+            imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes,
+                                                        self.trn, max_regs=1)
 
-            # compute_trn_enrichment is being hijacked a bit; we want the index to be components, not the enriched TFs
+            # compute_trn_enrichment is being hijacked a bit; we want
+            # the index to be components, not the enriched TFs
             imod_enrichment_df['TF'] = imod_enrichment_df.index
             imod_enrichment_df['component'] = imod
             if not imod_enrichment_df.empty:
-                # take the best single-TF enrichment row according to p-value
-                top_enrichment = imod_enrichment_df.sort_values(by='pvalue', ascending=False).iloc[0, :]
+                # take the best single-TF enrichment row (by p-value)
+                top_enrichment = imod_enrichment_df.sort_values(
+                    by='pvalue', ascending=False).iloc[0, :]
                 top_enrichments.append(top_enrichment)
 
-        # perform a sensitivity analysis to determine threshold effects on precision/recall overall
+        # perform a sensitivity analysis to determine threshold effects
+        # on precision/recall overall
         cutoffs_to_try = np.arange(300, 2000, 50)
         f1_scores = []
         for cutoff in cutoffs_to_try:
             cutoff_f1_scores = []
             for enrich_row in top_enrichments:
-                # for this enrichment row, get all the genes regulated by the regulator chosen above
-                regulon_genes = list(self.trn[self.trn['regulator'] == enrich_row['TF']].gene_id)
+                # for this enrichment row, get all the genes regulated
+                # by the regulator chosen above
+                regulon_genes = list(self.trn[self.trn['regulator']
+                                              == enrich_row['TF']].gene_id)
 
                 # compute the weighting threshold based on this cutoff to try
-                thresh = compute_threshold(self.M[enrich_row['component']], cutoff)
-                component_genes = list(self.M[abs(self.M[enrich_row['component']]) > thresh].index)
+                thresh = compute_threshold(self.M[enrich_row['component']],
+                                           cutoff)
+                component_genes = self.M[abs(self.M[enrich_row['component']])
+                                         > thresh].index.tolist()
 
-                # Compute the contingency table (aka confusion matrix) for overlap between the regulon and iM genes
-                ((tp, fp), (fn, tn)) = contingency(regulon_genes, component_genes, all_genes)
+                # Compute the contingency table (aka confusion matrix)
+                # for overlap between the regulon and iM genes
+                ((tp, fp), (fn, tn)) = contingency(regulon_genes,
+                                                   component_genes,
+                                                   all_genes)
 
-                # Calculate F1 score for one regulator-component pair and add it to the running list for this cutoff
+                # Calculate F1 score for one regulator-component pair
+                # and add it to the running list for this cutoff
                 precision = np.true_divide(tp, tp + fp)
                 recall = np.true_divide(tp, tp + fn)
-                f1_score = (2 * precision * recall) / (precision + recall) if (precision + recall) > 0 else 0
+                f1_score = (2 * precision * recall) / (precision + recall) \
+                    if (precision + recall) > 0 else 0
                 cutoff_f1_scores.append(f1_score)
 
             # Get mean of F1 score for this potential cutoff
