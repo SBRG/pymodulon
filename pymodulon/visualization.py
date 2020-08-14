@@ -33,5 +33,13 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     ymin = ica_data.A.loc[imodulon].min()-3
     ymax = ica_data.A.loc[imodulon].max()+3
 
+    # Plot all projects not in the highlighted set
+    other = ica_data.sample_table[ica_data.sample_table.project_name
+                                  != project].copy()
+    other.index.name = 'sample_id'
+    other.reset_index(inplace=True)
+    ax.bar(range(len(other)), ica_data.A.loc[imodulon, other['sample_id']],
+           width=1, linewidth=0, align='edge', label='Previous Experiments')
+
     print(ica_data)  # placeholder, remove later
     print(imodulon)  # placeholder, remove later
