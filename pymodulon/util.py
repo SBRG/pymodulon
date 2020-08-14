@@ -1,13 +1,20 @@
+import os
+
 import numpy as np
 import pandas as pd
+
 from scipy import stats
 from typing import *
 from warnings import warn
-import os
 
+
+################
+# Type Aliases #
+################
 ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
+
 
 
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):
