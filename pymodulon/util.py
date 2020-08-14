@@ -21,8 +21,8 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None):
             table = pd.read_json(table)
         except ValueError:
             try:
-                def sep(s): return '\t' if 'tsv' in s else ','
-                table = pd.read_csv(table, index_col=0, sep=sep(table))
+                sep = '\t' if table.endswith('.tsv') else ','
+                table = pd.read_csv(table, index_col=0, sep=sep)
             except FileNotFoundError:
                 raise TypeError('{}_table must be a pandas DataFrame '
                                 'filename or a valid JSON string'.format(name))

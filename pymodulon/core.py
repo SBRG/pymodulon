@@ -1,5 +1,3 @@
-import pandas as pd
-
 from pymodulon.enrichment import *
 from pymodulon.util import *
 from pymodulon.util import _check_table
@@ -22,7 +20,7 @@ class IcaData(object):
                  trn: Optional[Data] = None,
                  optimize_cutoff: bool = False,
                  dagostino_cutoff: int = 550,
-                 thresholds: Optional[Mapping[ImodName, float]] = None):
+                 thresholds: Optional[Union[Mapping[ImodName, float], Iterable]] = None):
         """
 
         :param M: S matrix from ICA
@@ -152,8 +150,8 @@ class IcaData(object):
     @X.setter
     def X(self, x_matrix):
         if isinstance(x_matrix, str):
-            def sep(s): return '\t' if 'tsv' in s else ','
-            df = pd.read_csv(x_matrix, index_col=0, sep=sep(x_matrix))
+            sep = '\t' if x_matrix.endswith('.tsv') else ','
+            df = pd.read_csv(x_matrix, index_col=0, sep=sep)
         elif isinstance(x_matrix, pd.DataFrame):
             df = x_matrix
         else:
