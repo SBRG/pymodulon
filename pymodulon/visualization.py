@@ -57,5 +57,15 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
                 horizontalalignment='center')
         move = not move
 
+    # Plot project of interest
+    idx = len(other)
+    for name, group in ica_data.sample_table[
+        ica_data.sample_table.project_name==project].groupby('condition_name'):
+
+        values = ica_data.A.loc[imodulon, group.index].values
+        ax.bar(range(idx, idx+len(group)), values, width=1,
+               linewidth=0, align='edge', label=name)
+        idx += len(group)
+
     print(ica_data)  # placeholder, remove later
     print(imodulon)  # placeholder, remove later
