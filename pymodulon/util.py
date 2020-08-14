@@ -6,7 +6,7 @@ import pandas as pd
 from scipy import stats
 from typing import *
 from warnings import warn
-
+from matplotlib.axes._subplots import Subplot
 
 ################
 # Type Aliases #
@@ -14,6 +14,7 @@ from warnings import warn
 ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
+Ax = TypeVar('Ax', Subplot, object)
 
 
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):

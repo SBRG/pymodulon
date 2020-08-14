@@ -1,7 +1,6 @@
 import seaborn as sns
 import matplotlib.pyplot as plt
 
-from matplotlib.axes._subplots import Subplot
 from pymodulon.core import IcaData
 from pymodulon.util import *
 
@@ -14,9 +13,9 @@ sns.set_style('whitegrid')
 
 def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
                      project: Optional[str] = None,
-                     ax: Optional[Subplot] = None,
+                     ax: Optional[Ax] = None,
                      figsize: Tuple[float, float] = (15, 2),
-                     **legend_kwargs):
+                     **legend_kwargs) -> Ax:
     """
     :param ica_data: iModulon Data container object
     :param imodulon: Name of iModulon
