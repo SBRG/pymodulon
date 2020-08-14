@@ -281,7 +281,8 @@ class IcaData(object):
 
     def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
         """
-        Rename an iModulon
+        Rename an iModulon.
+
         :param name_dict: Dictionary mapping old iModulon names to new
             names (e.g. {old_name:new_name})
         """
