@@ -23,6 +23,7 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     :param project: Name of project (from metadata)
     :param ax: matplotlib Axes instance to output plot onto
     :param figsize: Size of output plot
+    :param legend_kwargs: kwargs that get passed onto `ax.legend()`
     """
 
     # Check that iModulon exists
