@@ -30,7 +30,7 @@ def save_to_json(model: IcaData, fname: str):
 
     # serialize pandas DataFrames and change sets to lists
     for key, val in param_dict.items():
-        if isinstance(val, pd.core.frame.DataFrame):
+        if isinstance(val, pd.DataFrame):
             param_dict.update({key: val.to_json()})
         elif isinstance(val, set):
             param_dict.update({key: list(val)})

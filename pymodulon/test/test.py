@@ -7,6 +7,7 @@ requirements must be installed (e.g. :mod:`pytest`) for this function to work.
 from os.path import abspath, dirname, join
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
+from pymodulon.io import save_to_json, load_json_model
 
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
 """str: The directory location of where :mod:`pymodulon` is installed."""
