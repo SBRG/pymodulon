@@ -47,5 +47,15 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     p_lines = other.project_name.drop_duplicates().index.tolist() \
         + [len(other), len(ica_data.sample_table)]
 
+    # Add project labels
+    move = True
+    locs = (np.array(p_lines)[:-1] + np.array(p_lines)[1:])/2
+
+    for loc, name in zip(locs, other.project_name.drop_duplicates().tolist()
+                         + [project]):
+        ax.text(loc, ymax+2+move*4, name, fontsize=12,
+                horizontalalignment='center')
+        move = not move
+
     print(ica_data)  # placeholder, remove later
     print(imodulon)  # placeholder, remove later
