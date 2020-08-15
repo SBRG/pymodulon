@@ -37,8 +37,12 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     ymin = ica_data.A.loc[imodulon].min()-3
     ymax = ica_data.A.loc[imodulon].max()+3
 
-    # Plot all projects not in the highlighted set
+    # Check that metadata (sample_table) exists/is not empty
     sample_table = ica_data.sample_table
+    if sample_table.empty():
+        raise ValueError('Metadata does not exist, sample_table is empty')
+
+    # Plot all projects not in the highlighted set
     other = sample_table[sample_table.project_name != project].copy()
     other.index.name = 'sample_id'
     other.reset_index(inplace=True)
