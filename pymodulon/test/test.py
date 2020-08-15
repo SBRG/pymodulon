@@ -189,3 +189,14 @@ def test_util():
 #######################
 # Visualization Tests #
 #######################
+
+
+def test_plot_samples_bar():
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table,
+                       trn=trn, dagostino_cutoff=750)
+    pass
+
+def test_plot_samples_bar_bad_imod():
+    pass
