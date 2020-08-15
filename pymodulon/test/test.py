@@ -41,8 +41,10 @@ trn = pd.read_csv(trn_file)
 
 def test_core(capsys):
     test_simple_ica_data()
-    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table,
+                       trn=trn, dagostino_cutoff=750)
     test_optimize_cutoff(capsys)
     test_set_thresholds()
     test_ica_data_consistency(ica_data)
@@ -78,7 +80,8 @@ def test_ica_data_consistency(ica_data):
     assert (ica_data.gene_names[0] == 'b0002')
 
     # check that we can call out single-gene iModulons
-    assert (ica_data.find_single_gene_imodulons(save=True) == [4, 29, 42, 46, 90])
+    assert (ica_data.find_single_gene_imodulons(save=True)
+            == [4, 29, 42, 46, 90])
     assert (ica_data.imodulon_table.single_gene.sum() == 5)
 
     # check if binarized M is correct
@@ -125,8 +128,10 @@ def test_optimize_cutoff(capsys):
     # truncate S to make this faster
     s_short = s.iloc[:, :10]
     a_short = a.iloc[:10, :]
-    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776)
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table,
+                       trn=trn, optimize_cutoff=True, dagostino_cutoff=1776)
     assert (ica_data.dagostino_cutoff == 550)
     assert ica_data._cutoff_optimized
 
@@ -150,8 +155,10 @@ def test_optimize_cutoff(capsys):
 def test_set_thresholds():
     s_short = s.iloc[:, :10]
     a_short = a.iloc[:10, :]
-    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776,
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn,
+                       optimize_cutoff=True, dagostino_cutoff=1776,
                        thresholds=list(range(10, 20)))
     assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
     assert (not ica_data._cutoff_optimized)
@@ -160,9 +167,12 @@ def test_set_thresholds():
 # I/O Tests #
 #############
 
+
 def test_io():
-    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table,
+                       trn=trn, dagostino_cutoff=750)
     save_to_json(ica_data, 'test/data/model.json')
     icd_from_json = load_json_model('test/data/model.json')
     test_ica_data_consistency(icd_from_json)
@@ -170,6 +180,7 @@ def test_io():
 ##############
 # Util Tests #
 ##############
+
 
 def test_util():
     pass
