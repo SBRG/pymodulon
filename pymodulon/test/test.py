@@ -1,7 +1,8 @@
 # -*- coding: utf-8 -*-
 """
-Module containing functions for testing various :mod:`pymodulon` methods. Note that the testing
-requirements must be installed (e.g. :mod:`pytest`) for this function to work.
+Module containing functions for testing various :mod:`pymodulon` methods.
+Note that the testing requirements must be installed (e.g. :mod:`pytest`)
+for this function to work.
 """
 
 from os.path import abspath, dirname, join
@@ -33,6 +34,10 @@ sample_table = pd.read_csv(sample_file, index_col=0)
 imodulon_table = pd.read_csv(imodulon_file, index_col=0)
 trn = pd.read_csv(trn_file)
 
+
+##############
+# Core Tests #
+##############
 
 def test_core(capsys):
     test_simple_ica_data()
@@ -151,6 +156,9 @@ def test_set_thresholds():
     assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
     assert (not ica_data._cutoff_optimized)
 
+#############
+# I/O Tests #
+#############
 
 def test_io():
     ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
@@ -159,6 +167,13 @@ def test_io():
     icd_from_json = load_json_model('test/data/model.json')
     test_ica_data_consistency(icd_from_json)
 
+##############
+# Util Tests #
+##############
 
 def test_util():
     pass
+
+#######################
+# Visualization Tests #
+#######################
