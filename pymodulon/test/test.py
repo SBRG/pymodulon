@@ -36,10 +36,10 @@ sample_table = pd.read_csv(sample_file, index_col=0)
 imodulon_table = pd.read_csv(imodulon_file, index_col=0)
 trn = pd.read_csv(trn_file)
 
-
 ##############
 # Core Tests #
 ##############
+
 
 def test_core(capsys):
     test_simple_ica_data()
