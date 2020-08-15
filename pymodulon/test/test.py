@@ -197,10 +197,29 @@ def test_plot_samples_bar():
                        sample_table=sample_table,
                        imodulon_table=imodulon_table,
                        trn=trn, dagostino_cutoff=750)
+
+    ica_data_sample_table_empty = IcaData(s, a, X=x, gene_table=gene_table,
+                                          sample_table=None,
+                                          imodulon_table=imodulon_table,
+                                          trn=trn, dagostino_cutoff=750)
+
     test_plot_samples_bar_bad_imod(ica_data)
+    test_plot_samples_bar_empty_metadata(ica_data_sample_table_empty)
 
 
 def test_plot_samples_bar_bad_imod(ica_data):
+    """
+    Ensure ValueError is raised when iModulon not in IcaData obj is given
+    """
     bad_imod = 'Nonexistent imodulon'
     with pytest.raises(ValueError):
-        plot_samples_bar(ica_data, bad_imod)
+        plot_samples_bar(ica_data, imodulon=bad_imod)
+
+
+def test_plot_samples_bar_empty_metadata(ica_data_sample_table_empty):
+    """
+    Ensure ValueError is raised when plotting with empty metadata file
+    """
+    with pytest.raises(ValueError):
+        imod = ica_data_sample_table_empty.imodulon_names[0]
+        plot_samples_bar(ica_data_sample_table_empty, imod)
