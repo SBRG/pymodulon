@@ -4,6 +4,7 @@ Module containing functions for testing various :mod:`pymodulon` methods.
 Note that the testing requirements must be installed (e.g. :mod:`pytest`)
 for this function to work.
 """
+import pytest
 
 from os.path import abspath, dirname, join
 from pymodulon.core import IcaData
