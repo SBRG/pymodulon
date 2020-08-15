@@ -17,12 +17,15 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
                      figsize: Tuple[float, float] = (15, 2),
                      **legend_kwargs) -> Ax:
     """
+    Generates plot of iModulon Activity levels, grouped by project name
+
     :param ica_data: iModulon Data container object
     :param imodulon: Name of iModulon
     :param project: Name of project (from metadata)
     :param ax: matplotlib Axes instance to output plot onto
     :param figsize: Size of output plot
     :param legend_kwargs: kwargs that get passed onto `ax.legend()`
+    :return: Matplotlib Axes instance
     """
 
     # Check that iModulon exists
