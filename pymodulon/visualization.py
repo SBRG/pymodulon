@@ -29,6 +29,7 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     if imodulon not in ica_data.imodulon_names:
         raise ValueError('Component does not exist: {}'.format(imodulon))
 
+    # Create ax obj if None is provided
     if ax is None:
         fig, ax = plt.subplots(figsize=figsize)
 
