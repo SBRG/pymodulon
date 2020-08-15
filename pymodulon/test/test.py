@@ -7,6 +7,7 @@ for this function to work.
 import pytest
 
 from os.path import abspath, dirname, join
+from pymodulon.visualization import *
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
 from pymodulon.io import save_to_json, load_json_model
@@ -196,7 +197,10 @@ def test_plot_samples_bar():
                        sample_table=sample_table,
                        imodulon_table=imodulon_table,
                        trn=trn, dagostino_cutoff=750)
-    pass
+    test_plot_samples_bar_bad_imod(ica_data)
 
-def test_plot_samples_bar_bad_imod():
-    pass
+
+def test_plot_samples_bar_bad_imod(ica_data):
+    bad_imod = 'Nonexistent imodulon'
+    with pytest.raises(ValueError):
+        plot_samples_bar(ica_data, bad_imod)
