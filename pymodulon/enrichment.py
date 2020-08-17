@@ -1,12 +1,11 @@
-import sys
+import itertools
+from typing import Union, List
+from warnings import warn
 
-from statsmodels.stats.multitest import fdrcorrection
-from scipy import stats, special
 import numpy as np
 import pandas as pd
-from typing import Union, List
-import itertools
-from warnings import warn
+from scipy import stats, special
+from statsmodels.stats.multitest import fdrcorrection
 
 ImodName = Union[str, int]
 
