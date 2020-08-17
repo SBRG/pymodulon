@@ -1,6 +1,6 @@
 from pymodulon.enrichment import *
-from pymodulon.util import *
-from pymodulon.util import _check_table
+from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
+from typing import Optional, Mapping, Iterable
 
 
 class IcaData(object):
@@ -242,7 +242,7 @@ class IcaData(object):
         self._imodulon_table.index = new_names
 
     def rename_imodulons(self, name_dict: Mapping[ImodName, ImodName] = None,
-                         column = None) -> None:
+                         column=None) -> None:
         """
         Rename an iModulon.
         :param name_dict: Dictionary mapping old iModulon names to new
@@ -296,7 +296,7 @@ class IcaData(object):
         single_genes_imodulons = []
         for imodulon in self.imodulon_names:
             sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
-            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+            if sorted_weights.iloc[0] > 2 * sorted_weights.iloc[1]:
                 single_genes_imodulons.append(imodulon)
                 if save:
                     self.imodulon_table.loc[imodulon, 'single_gene'] = True
@@ -312,12 +312,18 @@ class IcaData(object):
         if isinstance(new_trn, str):
             new_trn = pd.read_csv(new_trn).reset_index(drop=True)
 
-        # Only include genes that are in S/X matrix
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
+            # Only include genes that are in S/X matrix
             self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
-        # make a note that our cutoffs are no longer optimized since
-        # the TRN has changed
+
+            # Save regulator information to gene table
+            reg_dict = {}
+            for name, group in self.trn.groupby('gene_id'):
+                reg_dict[name] = ','.join(group.regulator)
+            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
+
+        # make a note that our cutoffs are no longer optimized since the TRN has changed
         self._cutoff_optimized = False
 
     ###############
@@ -491,8 +497,7 @@ class IcaData(object):
         self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff)
                             for k in self._imodulon_names}
         self._dagostino_cutoff = dagostino_cutoff
-        if not self._cutoff_optimized:
-            self._cutoff_optimized = False
+        self._cutoff_optimized = False
 
     def reoptimize_thresholds(self):
         """
@@ -505,7 +510,7 @@ class IcaData(object):
             self.recompute_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. '
-                  'Reoptimization will return same cutoff.')
+                  'Re-optimization will return same cutoff.')
 
     def _optimize_dagostino_cutoff(self):
         """
