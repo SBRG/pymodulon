@@ -320,7 +320,10 @@ class IcaData(object):
         # the TRN has changed
         self._cutoff_optimized = False
 
-    # Enrichments
+    ###############
+    # Enrichments #
+    ###############
+
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
                                    save: bool = False):
         """
@@ -341,6 +344,7 @@ class IcaData(object):
             table = self.imodulon_table
             for key, value in enrich.items():
                 table.loc[imodulon, key] = value
+                table.loc[imodulon, 'regulator'] = enrich.name
             self.imodulon_table = table
         return enrich
 
@@ -420,7 +424,15 @@ class IcaData(object):
                                             - set(enrichment.columns)]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich])
-        self.imodulon_table = new_table.reindex(self.imodulon_names)
+
+        # Reorder columns
+        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
+        new_table = new_table[col_order]
+
+        # Reorder rows
+        new_table = new_table.reindex(self.imodulon_names)
+
+        self.imodulon_table = new_table
 
     ######################################
     # Threshold properties and functions #
