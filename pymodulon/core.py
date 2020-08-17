@@ -241,6 +241,31 @@ class IcaData(object):
         self._m.columns = new_names
         self._imodulon_table.index = new_names
 
+    def rename_imodulons(self, name_dict: Mapping[ImodName, ImodName] = None,
+                         column = None) -> None:
+        """
+        Rename an iModulon.
+        :param name_dict: Dictionary mapping old iModulon names to new
+            names (e.g. {old_name:new_name})
+        :param column: Uses a column from the iModulon table to rename iModulons
+        """
+
+        # Rename using the column parameter if given
+        if column is not None:
+            if column in self.imodulon_table.columns:
+                new_names = self.imodulon_table[column]
+                self._imodulon_table = self._imodulon_table.drop(column, axis=1)
+            else:
+                raise ValueError('{} is not a column in the iModulon table'.format(column))
+        else:
+            new_names = self.imodulon_names
+
+        # Use dictionary to rename iModulons
+        if name_dict is not None:
+            new_names = [name_dict[name] if name in name_dict.keys() else name
+                         for name in new_names]
+        self._update_imodulon_names(new_names)
+
     # Show enriched
     def view_imodulon(self, imodulon: ImodName):
         """
@@ -277,18 +302,6 @@ class IcaData(object):
                     self.imodulon_table.loc[imodulon, 'single_gene'] = True
         return single_genes_imodulons
 
-    def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
-        """
-        Rename an iModulon.
-
-        :param name_dict: Dictionary mapping old iModulon names to new
-            names (e.g. {old_name:new_name})
-        """
-
-        new_names = [name_dict[name] if name in name_dict.keys() else name
-                     for name in self.imodulon_names]
-        self._update_imodulon_names(new_names)
-
     # TRN
     @property
     def trn(self):
@@ -296,6 +309,9 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
+        if isinstance(new_trn, str):
+            new_trn = pd.read_csv(new_trn).reset_index(drop=True)
+
         # Only include genes that are in S/X matrix
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
