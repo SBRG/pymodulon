@@ -6,6 +6,7 @@ import numpy as np
 import pandas as pd
 from typing import Union, List
 import itertools
+from warnings import warn
 
 ImodName = Union[str, int]
 
@@ -23,9 +24,6 @@ def contingency(set1: List, set2: List, all_genes: List):
     set2 = set(set2)
     all_genes = set(all_genes)
     if len(set1 - all_genes) > 0 or len(set2 - all_genes) > 0:
-        print(set1)
-        print(set2)
-        print(all_genes)
         raise ValueError('Gene sets contain genes not in all_genes')
 
     tp = len(set1 & set2)
@@ -123,6 +121,10 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str, all_genes: List
     :return: Pandas dataframe containing enrichment statistics
     """
     regulon = parse_regulon_str(regulon_str, trn)
+    # Remove genes in regulon that are not in all_genes
+    if len(regulon - set(all_genes)) > 0:
+        warn('Some genes are in the regulon but not in all_genes. These genes are removed before enrichment analysis.')
+        regulon = regulon & set(all_genes)
     result = compute_enrichment(gene_set, regulon, all_genes, regulon_str)
     result.rename({'target_set_size': 'regulon_size'}, inplace=True)
     n_regs = 1 + regulon_str.count('+') + regulon_str.count('/')
