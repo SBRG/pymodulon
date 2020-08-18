@@ -86,5 +86,7 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
     ax.grid(False, axis='x')
     ax.set_ylim([ymin, ymax])
     ax.set_xlim([0, ica_data.A.shape[1]])
+    for xc in p_lines:
+        ax.axvline(x=xc, color='0.8')
 
     return ax
