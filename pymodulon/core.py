@@ -1,6 +1,8 @@
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
 from typing import Optional, Mapping, Iterable
+from matplotlib import pyplot as plt
+from tqdm import tqdm_notebook as tqdm
 
 
 class IcaData(object):
@@ -106,12 +108,12 @@ class IcaData(object):
                     warn('Optimizing iModulon thresholds, '
                          'may take 2-3 minutes...')
                     # this function sets self.dagostino_cutoff internally
-                    self._optimize_dagostino_cutoff()
-                    # also set an attribute to tell us if we've done
+                    self.reoptimize_thresholds(progress=False, plot=False)
+                    # also sets an attribute to tell us if we've done
                     # this optimization; only reasonable to try it
                     # again if the user uploads a new TRN
-                    self._cutoff_optimized = True
-            self.recompute_thresholds(self.dagostino_cutoff)
+            else:
+                self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
 
@@ -494,30 +496,37 @@ class IcaData(object):
             to determine iModulon thresholds
         :return: None
         """
+        self._update_thresholds(dagostino_cutoff)
+        self._cutoff_optimized = False
+
+    def _update_thresholds(self, dagostino_cutoff: int):
         self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff)
                             for k in self._imodulon_names}
         self._dagostino_cutoff = dagostino_cutoff
-        self._cutoff_optimized = False
 
-    def reoptimize_thresholds(self):
+    def reoptimize_thresholds(self, progress=True, plot=True):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon
         thresholds if the trn has been updated
+        :param progress: Show a progress bar (default: True)
+        :param plot: Show the sensitivity analysis plot (default: True)
         """
         if not self._cutoff_optimized:
-            self._optimize_dagostino_cutoff()
+            self._optimize_dagostino_cutoff(progress, plot)
             self._cutoff_optimized = True
-            self.recompute_thresholds(self.dagostino_cutoff)
+            self._update_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. '
                   'Re-optimization will return same cutoff.')
 
-    def _optimize_dagostino_cutoff(self):
+    def _optimize_dagostino_cutoff(self, progress, plot):
         """
         Computes an abridged version of the TRN enrichments for the 20
         highest-weighted genes in order to determine a global minimum
         for the D'Agostino cutoff ultimately used to threshold and
         define the genes "in" an iModulon
+        :param progress: Show a progress bar (default: True)
+        :param plot: Show the sensitivity analysis plot (default: True)
         """
 
         # prepare a DataFrame of the best single-TF enrichments for the
@@ -535,17 +544,24 @@ class IcaData(object):
             # the index to be components, not the enriched TFs
             imod_enrichment_df['TF'] = imod_enrichment_df.index
             imod_enrichment_df['component'] = imod
+
             if not imod_enrichment_df.empty:
-                # take the best single-TF enrichment row (by p-value)
+                # take the best single-TF enrichment row (by q-value)
                 top_enrichment = imod_enrichment_df.sort_values(
-                    by='pvalue', ascending=False).iloc[0, :]
+                    by='qvalue').iloc[0, :]
                 top_enrichments.append(top_enrichment)
 
         # perform a sensitivity analysis to determine threshold effects
         # on precision/recall overall
         cutoffs_to_try = np.arange(300, 2000, 50)
         f1_scores = []
-        for cutoff in cutoffs_to_try:
+
+        if progress:
+            iterator = tqdm(cutoffs_to_try)
+        else:
+            iterator = cutoffs_to_try
+
+        for cutoff in iterator:
             cutoff_f1_scores = []
             for enrich_row in top_enrichments:
                 # for this enrichment row, get all the genes regulated
@@ -567,14 +583,24 @@ class IcaData(object):
 
                 # Calculate F1 score for one regulator-component pair
                 # and add it to the running list for this cutoff
-                precision = np.true_divide(tp, tp + fp)
-                recall = np.true_divide(tp, tp + fn)
+                precision = np.true_divide(tp, tp + fp) if tp > 0 else 0
+                recall = np.true_divide(tp, tp + fn) if tp > 0 else 0
                 f1_score = (2 * precision * recall) / (precision + recall) \
-                    if (precision + recall) > 0 else 0
+                    if tp > 0 else 0
                 cutoff_f1_scores.append(f1_score)
 
             # Get mean of F1 score for this potential cutoff
             f1_scores.append(np.mean(cutoff_f1_scores))
 
         # extract the best cutoff and set it as the cutoff to use
-        self._dagostino_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
+        best_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
+        self._dagostino_cutoff = best_cutoff
+
+        if plot:
+            fig, ax = plt.subplots(figsize=(4, 4))
+            ax.set_xlabel("D'agostino Test Statistic", fontsize=14)
+            ax.set_ylabel("Mean F1 score")
+            ax.plot(cutoffs_to_try, f1_scores)
+            ax.scatter([best_cutoff], [max(f1_scores)], color='r')
+
+        return best_cutoff
