@@ -42,7 +42,7 @@ def plot_samples_bar(ica_data: IcaData, imodulon: ImodName,
 
     # Check that metadata (sample_table) exists/is not empty
     sample_table = ica_data.sample_table
-    if sample_table.empty():
+    if sample_table.empty:
         raise ValueError('Metadata does not exist, sample_table is empty')
 
     # Plot all projects not in the highlighted set
