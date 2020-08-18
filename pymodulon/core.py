@@ -83,12 +83,17 @@ class IcaData(object):
         else:
             self.X = X
 
+        ####################
+        # Load data tables #
+        ####################
+
         # Initialize sample and gene names
         self._gene_names = M.index.tolist()
         self.gene_table = gene_table
         self._sample_names = A.columns.tolist()
         self.sample_table = sample_table
         self._imodulon_names = M.columns.tolist()
+        self.imodulon_table = imodulon_table
 
         ############
         # Load TRN #
@@ -117,12 +122,6 @@ class IcaData(object):
         else:
             self.thresholds = thresholds
 
-        ####################
-        # Load data tables #
-        ####################
-
-        # these are loaded here because they need the thresholds
-        self.imodulon_table = imodulon_table
 
     @property
     def M(self):
@@ -230,7 +229,6 @@ class IcaData(object):
     def imodulon_table(self, new_table):
         table = _check_table(new_table, 'imodulon', self._imodulon_names)
         self._imodulon_table = table
-        self._update_imodulon_names(table.index)
 
     def _update_imodulon_names(self, new_names):
         # Update thresholds
