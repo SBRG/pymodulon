@@ -1,11 +1,11 @@
-import sys
+import itertools
+from typing import Union, List
+from warnings import warn
 
-from statsmodels.stats.multitest import fdrcorrection
-from scipy import stats, special
 import numpy as np
 import pandas as pd
-from typing import Union, List
-import itertools
+from scipy import stats, special
+from statsmodels.stats.multitest import fdrcorrection
 
 ImodName = Union[str, int]
 
@@ -23,9 +23,6 @@ def contingency(set1: List, set2: List, all_genes: List):
     set2 = set(set2)
     all_genes = set(all_genes)
     if len(set1 - all_genes) > 0 or len(set2 - all_genes) > 0:
-        print(set1)
-        print(set2)
-        print(all_genes)
         raise ValueError('Gene sets contain genes not in all_genes')
 
     tp = len(set1 & set2)
@@ -123,6 +120,11 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str, all_genes: List
     :return: Pandas dataframe containing enrichment statistics
     """
     regulon = parse_regulon_str(regulon_str, trn)
+    # Remove genes in regulon that are not in all_genes
+    if len(regulon - set(all_genes)) > 0:
+        warn('Some genes are in the regulon but not in all_genes. These genes are removed before enrichment '
+             'analysis.', category=UserWarning)
+        regulon = regulon & set(all_genes)
     result = compute_enrichment(gene_set, regulon, all_genes, regulon_str)
     result.rename({'target_set_size': 'regulon_size'}, inplace=True)
     n_regs = 1 + regulon_str.count('+') + regulon_str.count('/')
@@ -138,9 +140,8 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame, m
     :param all_genes: List of all genes
     :param trn: Pandas dataframe containing transcriptional regulatory network
     :param max_regs: Maximum number of regulators to include in complex regulon (default: 1)
-    :param method: How to combine regulons. 'or' computes enrichment against union of regulons, \
+    :param method: How to combine complex regulons. 'or' computes enrichment against union of regulons, \
     'and' computes enrichment against intersection of regulons, and 'both' performs both tests (default: 'both')
-    intersection of regulons
     :param fdr: False detection rate
     :param force: Allows computation of >2 regulators
     :return: Pandas dataframe containing statistically significant enrichments
@@ -148,9 +149,10 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame, m
 
     # Warning if max_regs is too high
     if max_regs > 2:
-        ResourceWarning('Using >2 maximum regulators may take time to compute')
+        warn('Using >2 maximum regulators may take time to compute. To perform analysis, use force=True',
+             category=RuntimeWarning)
         if not force:
-            sys.exit()
+            return
 
     # Only search for regulators known to regulate a gene in gene_set
     # This reduces the total runtime by skipping unnecessary tests

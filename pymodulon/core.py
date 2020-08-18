@@ -1,6 +1,8 @@
 from pymodulon.enrichment import *
-from pymodulon.util import *
-from pymodulon.util import _check_table
+from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
+from typing import Optional, Mapping, Iterable
+from matplotlib import pyplot as plt
+from tqdm import tqdm_notebook as tqdm
 
 
 class IcaData(object):
@@ -81,12 +83,17 @@ class IcaData(object):
         else:
             self.X = X
 
+        ####################
+        # Load data tables #
+        ####################
+
         # Initialize sample and gene names
         self._gene_names = M.index.tolist()
         self.gene_table = gene_table
         self._sample_names = A.columns.tolist()
         self.sample_table = sample_table
         self._imodulon_names = M.columns.tolist()
+        self.imodulon_table = imodulon_table
 
         ############
         # Load TRN #
@@ -106,21 +113,15 @@ class IcaData(object):
                     warn('Optimizing iModulon thresholds, '
                          'may take 2-3 minutes...')
                     # this function sets self.dagostino_cutoff internally
-                    self._optimize_dagostino_cutoff()
-                    # also set an attribute to tell us if we've done
+                    self.reoptimize_thresholds(progress=False, plot=False)
+                    # also sets an attribute to tell us if we've done
                     # this optimization; only reasonable to try it
                     # again if the user uploads a new TRN
-                    self._cutoff_optimized = True
-            self.recompute_thresholds(self.dagostino_cutoff)
+            else:
+                self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
 
-        ####################
-        # Load data tables #
-        ####################
-
-        # these are loaded here because they need the thresholds
-        self.imodulon_table = imodulon_table
 
     @property
     def M(self):
@@ -228,7 +229,6 @@ class IcaData(object):
     def imodulon_table(self, new_table):
         table = _check_table(new_table, 'imodulon', self._imodulon_names)
         self._imodulon_table = table
-        self._update_imodulon_names(table.index)
 
     def _update_imodulon_names(self, new_names):
         # Update thresholds
@@ -240,6 +240,31 @@ class IcaData(object):
         self._a.index = new_names
         self._m.columns = new_names
         self._imodulon_table.index = new_names
+
+    def rename_imodulons(self, name_dict: Mapping[ImodName, ImodName] = None,
+                         column=None) -> None:
+        """
+        Rename an iModulon.
+        :param name_dict: Dictionary mapping old iModulon names to new
+            names (e.g. {old_name:new_name})
+        :param column: Uses a column from the iModulon table to rename iModulons
+        """
+
+        # Rename using the column parameter if given
+        if column is not None:
+            if column in self.imodulon_table.columns:
+                new_names = self.imodulon_table[column]
+                self._imodulon_table = self._imodulon_table.drop(column, axis=1)
+            else:
+                raise ValueError('{} is not a column in the iModulon table'.format(column))
+        else:
+            new_names = self.imodulon_names
+
+        # Use dictionary to rename iModulons
+        if name_dict is not None:
+            new_names = [name_dict[name] if name in name_dict.keys() else name
+                         for name in new_names]
+        self._update_imodulon_names(new_names)
 
     # Show enriched
     def view_imodulon(self, imodulon: ImodName):
@@ -271,23 +296,11 @@ class IcaData(object):
         single_genes_imodulons = []
         for imodulon in self.imodulon_names:
             sorted_weights = abs(self.M[imodulon]).sort_values(ascending=False)
-            if sorted_weights.iloc[0] > 2*sorted_weights.iloc[1]:
+            if sorted_weights.iloc[0] > 2 * sorted_weights.iloc[1]:
                 single_genes_imodulons.append(imodulon)
                 if save:
                     self.imodulon_table.loc[imodulon, 'single_gene'] = True
         return single_genes_imodulons
-
-    def rename_imodulons(self, name_dict: Dict[ImodName, ImodName]) -> None:
-        """
-        Rename an iModulon.
-
-        :param name_dict: Dictionary mapping old iModulon names to new
-            names (e.g. {old_name:new_name})
-        """
-
-        new_names = [name_dict[name] if name in name_dict.keys() else name
-                     for name in self.imodulon_names]
-        self._update_imodulon_names(new_names)
 
     # TRN
     @property
@@ -296,15 +309,27 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
-        # Only include genes that are in S/X matrix
+        if isinstance(new_trn, str):
+            new_trn = pd.read_csv(new_trn).reset_index(drop=True)
+
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
+            # Only include genes that are in S/X matrix
             self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
-        # make a note that our cutoffs are no longer optimized since
-        # the TRN has changed
+
+            # Save regulator information to gene table
+            reg_dict = {}
+            for name, group in self.trn.groupby('gene_id'):
+                reg_dict[name] = ','.join(group.regulator)
+            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
+
+        # make a note that our cutoffs are no longer optimized since the TRN has changed
         self._cutoff_optimized = False
 
-    # Enrichments
+    ###############
+    # Enrichments #
+    ###############
+
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
                                    save: bool = False):
         """
@@ -325,6 +350,7 @@ class IcaData(object):
             table = self.imodulon_table
             for key, value in enrich.items():
                 table.loc[imodulon, key] = value
+                table.loc[imodulon, 'regulator'] = enrich.name
             self.imodulon_table = table
         return enrich
 
@@ -404,7 +430,15 @@ class IcaData(object):
                                             - set(enrichment.columns)]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich])
-        self.imodulon_table = new_table.reindex(self.imodulon_names)
+
+        # Reorder columns
+        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
+        new_table = new_table[col_order]
+
+        # Reorder rows
+        new_table = new_table.reindex(self.imodulon_names)
+
+        self.imodulon_table = new_table
 
     ######################################
     # Threshold properties and functions #
@@ -460,31 +494,37 @@ class IcaData(object):
             to determine iModulon thresholds
         :return: None
         """
+        self._update_thresholds(dagostino_cutoff)
+        self._cutoff_optimized = False
+
+    def _update_thresholds(self, dagostino_cutoff: int):
         self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff)
                             for k in self._imodulon_names}
         self._dagostino_cutoff = dagostino_cutoff
-        if not self._cutoff_optimized:
-            self._cutoff_optimized = False
 
-    def reoptimize_thresholds(self):
+    def reoptimize_thresholds(self, progress=True, plot=True):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon
         thresholds if the trn has been updated
+        :param progress: Show a progress bar (default: True)
+        :param plot: Show the sensitivity analysis plot (default: True)
         """
         if not self._cutoff_optimized:
-            self._optimize_dagostino_cutoff()
+            self._optimize_dagostino_cutoff(progress, plot)
             self._cutoff_optimized = True
-            self.recompute_thresholds(self.dagostino_cutoff)
+            self._update_thresholds(self.dagostino_cutoff)
         else:
             print('Cutoff already optimized, and no new TRN data provided. '
-                  'Reoptimization will return same cutoff.')
+                  'Re-optimization will return same cutoff.')
 
-    def _optimize_dagostino_cutoff(self):
+    def _optimize_dagostino_cutoff(self, progress, plot):
         """
         Computes an abridged version of the TRN enrichments for the 20
         highest-weighted genes in order to determine a global minimum
         for the D'Agostino cutoff ultimately used to threshold and
         define the genes "in" an iModulon
+        :param progress: Show a progress bar (default: True)
+        :param plot: Show the sensitivity analysis plot (default: True)
         """
 
         # prepare a DataFrame of the best single-TF enrichments for the
@@ -502,17 +542,24 @@ class IcaData(object):
             # the index to be components, not the enriched TFs
             imod_enrichment_df['TF'] = imod_enrichment_df.index
             imod_enrichment_df['component'] = imod
+
             if not imod_enrichment_df.empty:
-                # take the best single-TF enrichment row (by p-value)
+                # take the best single-TF enrichment row (by q-value)
                 top_enrichment = imod_enrichment_df.sort_values(
-                    by='pvalue', ascending=False).iloc[0, :]
+                    by='qvalue').iloc[0, :]
                 top_enrichments.append(top_enrichment)
 
         # perform a sensitivity analysis to determine threshold effects
         # on precision/recall overall
         cutoffs_to_try = np.arange(300, 2000, 50)
         f1_scores = []
-        for cutoff in cutoffs_to_try:
+
+        if progress:
+            iterator = tqdm(cutoffs_to_try)
+        else:
+            iterator = cutoffs_to_try
+
+        for cutoff in iterator:
             cutoff_f1_scores = []
             for enrich_row in top_enrichments:
                 # for this enrichment row, get all the genes regulated
@@ -534,14 +581,24 @@ class IcaData(object):
 
                 # Calculate F1 score for one regulator-component pair
                 # and add it to the running list for this cutoff
-                precision = np.true_divide(tp, tp + fp)
-                recall = np.true_divide(tp, tp + fn)
+                precision = np.true_divide(tp, tp + fp) if tp > 0 else 0
+                recall = np.true_divide(tp, tp + fn) if tp > 0 else 0
                 f1_score = (2 * precision * recall) / (precision + recall) \
-                    if (precision + recall) > 0 else 0
+                    if tp > 0 else 0
                 cutoff_f1_scores.append(f1_score)
 
             # Get mean of F1 score for this potential cutoff
             f1_scores.append(np.mean(cutoff_f1_scores))
 
         # extract the best cutoff and set it as the cutoff to use
-        self._dagostino_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
+        best_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
+        self._dagostino_cutoff = best_cutoff
+
+        if plot:
+            fig, ax = plt.subplots(figsize=(4, 4))
+            ax.set_xlabel("D'agostino Test Statistic", fontsize=14)
+            ax.set_ylabel("Mean F1 score")
+            ax.plot(cutoffs_to_try, f1_scores)
+            ax.scatter([best_cutoff], [max(f1_scores)], color='r')
+
+        return best_cutoff
