@@ -310,7 +310,7 @@ class IcaData(object):
     @trn.setter
     def trn(self, new_trn):
         if isinstance(new_trn, str):
-            new_trn = pd.read_csv(new_trn).reset_index(drop=True)
+            new_trn = pd.read_csv(new_trn).reset_index()
 
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
