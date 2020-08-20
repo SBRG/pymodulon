@@ -312,7 +312,7 @@ class IcaData(object):
         if isinstance(new_trn, str):
             new_trn = pd.read_csv(new_trn).reset_index()
 
-        self._trn = _check_table(new_trn, 'TRN')
+        self._trn = _check_table(new_trn, 'TRN').reset_index()
         if not self._trn.empty:
             # Only include genes that are in S/X matrix
             self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
