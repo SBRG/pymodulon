@@ -310,16 +310,17 @@ class IcaData(object):
     @trn.setter
     def trn(self, new_trn):
         if isinstance(new_trn, str):
-            new_trn = pd.read_csv(new_trn).reset_index()
+            new_trn = pd.read_csv(new_trn, index_col=0)
 
-        self._trn = _check_table(new_trn, 'TRN').reset_index()
+        self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
             # Only include genes that are in S/X matrix
-            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)].reset_index()
 
             # Save regulator information to gene table
             reg_dict = {}
             for name, group in self._trn.groupby('gene_id'):
+                #print(group)
                 reg_dict[name] = ','.join(group.regulator)
             self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
 
