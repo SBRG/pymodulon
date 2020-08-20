@@ -315,16 +315,19 @@ class IcaData(object):
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
             # Only include genes that are in S/X matrix
-            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)].reset_index()
+            self._trn = new_trn[
+                new_trn.gene_id.isin(self.gene_names)].reset_index()
 
             # Save regulator information to gene table
             reg_dict = {}
             for name, group in self._trn.groupby('gene_id'):
                 #print(group)
                 reg_dict[name] = ','.join(group.regulator)
-            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
+            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(
+                self.gene_names)
 
-        # make a note that our cutoffs are no longer optimized since the TRN has changed
+        # make a note that our cutoffs are no longer optimized since the
+        # qTRN has changed
         self._cutoff_optimized = False
 
     ###############
