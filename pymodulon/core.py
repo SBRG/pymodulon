@@ -327,7 +327,7 @@ class IcaData(object):
                 self.gene_names)
 
         # make a note that our cutoffs are no longer optimized since the
-        # qTRN has changed
+        # TRN has changed
         self._cutoff_optimized = False
 
     ###############
