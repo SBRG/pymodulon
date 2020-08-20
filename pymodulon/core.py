@@ -319,7 +319,7 @@ class IcaData(object):
 
             # Save regulator information to gene table
             reg_dict = {}
-            for name, group in self.trn.groupby('gene_id'):
+            for name, group in self._trn.groupby('gene_id'):
                 reg_dict[name] = ','.join(group.regulator)
             self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
 
