@@ -22,7 +22,8 @@ class IcaData(object):
                  trn: Optional[Data] = None,
                  optimize_cutoff: bool = False,
                  dagostino_cutoff: int = 550,
-                 thresholds: Optional[Union[Mapping[ImodName, float], Iterable]] = None):
+                 thresholds: Optional[Union[Mapping[ImodName, float],
+                                            Iterable]] = None):
         """
 
         :param M: S matrix from ICA
@@ -121,7 +122,6 @@ class IcaData(object):
                 self.recompute_thresholds(self.dagostino_cutoff)
         else:
             self.thresholds = thresholds
-
 
     @property
     def M(self):
@@ -230,6 +230,28 @@ class IcaData(object):
         table = _check_table(new_table, 'imodulon', self._imodulon_names)
         self._imodulon_table = table
 
+    # TRN
+    @property
+    def trn(self):
+        return self._trn
+
+    @trn.setter
+    def trn(self, new_trn):
+        self._trn = _check_table(new_trn, 'TRN')
+        if not self._trn.empty:
+            # Only include genes that are in S/X matrix
+            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+
+            # Save regulator information to gene table
+            reg_dict = {}
+            for name, group in self.trn.groupby('gene_id'):
+                reg_dict[name] = ','.join(group.regulator)
+            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(
+                self.gene_names)
+
+        # mark that our cutoffs are no longer optimized since the TRN
+        self._cutoff_optimized = False
+
     def _update_imodulon_names(self, new_names):
         # Update thresholds
         for old_name, new_name in zip(self._imodulon_names, new_names):
@@ -256,7 +278,8 @@ class IcaData(object):
                 new_names = self.imodulon_table[column]
                 self._imodulon_table = self._imodulon_table.drop(column, axis=1)
             else:
-                raise ValueError('{} is not a column in the iModulon table'.format(column))
+                raise ValueError('{} is not a column in '
+                                 'the iModulon table'.format(column))
         else:
             new_names = self.imodulon_names
 
@@ -301,30 +324,6 @@ class IcaData(object):
                 if save:
                     self.imodulon_table.loc[imodulon, 'single_gene'] = True
         return single_genes_imodulons
-
-    # TRN
-    @property
-    def trn(self):
-        return self._trn
-
-    @trn.setter
-    def trn(self, new_trn):
-        if isinstance(new_trn, str):
-            new_trn = pd.read_csv(new_trn).reset_index(drop=True)
-
-        self._trn = _check_table(new_trn, 'TRN')
-        if not self._trn.empty:
-            # Only include genes that are in S/X matrix
-            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
-
-            # Save regulator information to gene table
-            reg_dict = {}
-            for name, group in self.trn.groupby('gene_id'):
-                reg_dict[name] = ','.join(group.regulator)
-            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(self.gene_names)
-
-        # make a note that our cutoffs are no longer optimized since the TRN has changed
-        self._cutoff_optimized = False
 
     ###############
     # Enrichments #
