@@ -515,6 +515,7 @@ class IcaData(object):
         else:
             print('Cutoff already optimized, and no new TRN data provided. '
                   'Re-optimization will return same cutoff.')
+        return self.dagostino_cutoff
 
     def _optimize_dagostino_cutoff(self, progress, plot):
         """
