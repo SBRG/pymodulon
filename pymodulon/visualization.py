@@ -5,76 +5,145 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 from pymodulon.core import IcaData
-# from typing import Optional, Tuple
-# from pymodulon.util import ImodName
+from typing import List, Union, Dict
+from pymodulon.util import ImodName
 from warnings import warn
 from adjustText import adjust_text
+import pandas as pd
 
 
 ########################
 # Component Gene Plots #
 ########################
 
-def barplot(ica_data, name, values, figsize, ax, legend_args):
+def bar_scatter_plot(values: pd.Series, sample_table: pd.DataFrame,
+                     label: str, projects: Union[List, str],
+                     highlight: Union[List, str], ax, legend_args):
+    """
+    Creates an overlaid scatter and barplot for a set of values (either gene
+    expression levels or iModulon activities)
+
+    Args:
+        values: List of values to plot
+        sample_table: Sample table from IcaData object
+        label: Name of gene or iModulon
+        projects: Project(s) to show
+        highlight: Project(s) to highlight
+        ax: Matplotlib axis object
+        legend_args:
+
+    Returns: A matplotlib axis object
+
+    """
+
+    # Remove extra projects
+    if isinstance(projects, str):
+        projects = [projects]
+
+    if projects is not None and 'project' in sample_table:
+        sample_table = sample_table[sample_table.project.isin(projects)]
+        values = values[sample_table.index]
+
     if ax is None:
+        figsize = (len(values) / 15 + 0.5, 2)
         fig, ax = plt.subplots(figsize=figsize)
 
-    # Add project-specific information
-    if 'project' in ica_data.sample_table.columns and \
-            'condition' in ica_data.sample_table.columns:
+    # Get ymin and max
+    ymin = values.min()
+    ymax = values.max()
+    yrange = ymax - ymin
+    ymax = max(1, max(ymax * 1.1, ymax + yrange * 0.1))
+    ymin = min(-1, min(ymin * 1.1, ymin - yrange * 0.1))
+    yrange = ymax - ymin
 
-        show_projects = True
+    # Add project-specific information
+    if 'project' in sample_table.columns and \
+            'condition' in sample_table.columns:
 
         # Sort data by project/condition to ensure replicates are together
-        metadata = ica_data.sample_table.sort_values(['project', 'condition'])
-        values = values.reindex(metadata.index)
+        metadata = sample_table.loc[:, ['project', 'condition']]
+        metadata = metadata.sort_values(['project', 'condition'])
+        metadata['name'] = metadata.project + ' - ' + metadata.condition
+
+        # Coerce highlight to iterable
+        if highlight is None:
+            highlight = []
+        elif isinstance(highlight, str):
+            highlight = [highlight]
+
+        # Get X and Y values for scatter points
+        metadata['y'] = values
+        metadata['x'] = np.cumsum(~metadata[['name']].duplicated())
+
+        # Get heights for barplot
+        bar_vals = metadata.groupby('x').mean()
+
+        # Add colors and names
+        bar_vals['name'] = metadata.drop_duplicates('name').name.values
+        bar_vals['project'] = metadata.drop_duplicates('name').project.values
+
+        # Plot bars for highlighted samples
+        color_vals = bar_vals[bar_vals.project.isin(highlight)]
+        color_cycle = ['tab:red', 'tab:orange', 'tab:green',
+                       'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray',
+                       'tab:olive', 'tab:cyan']
+        i = 0
+        for name, group in color_vals.groupby('name'):
+            ax.bar(group.index, group.y, color=color_cycle[i], width=1,
+                   linewidth=0, align='edge', zorder=1, label=name)
+            i = (i + 1) % len(color_cycle)
+
+        # Plot bars for non-highlighted samples
+        other_vals = bar_vals[~bar_vals.project.isin(highlight)]
+        ax.bar(other_vals.index, other_vals.y, color='tab:blue', width=1,
+               linewidth=0, align='edge', zorder=1, label=None)
+        ax.scatter(metadata.x + 0.5, metadata.y, color='k', zorder=2, s=10)
 
         # Get project names and sizes
         projects = metadata.project.drop_duplicates()
-        project_sizes = [len(metadata[metadata.project == proj]) for proj in
+        md_cond = metadata.drop_duplicates(['name'])
+        project_sizes = [len(md_cond[md_cond.project == proj]) for proj in
                          projects]
+        nbars = len(md_cond)
 
-    else:
-        warn('Missing "project" and "condition" columns in sample table.')
-        show_projects = False
-        projects = None
-        project_sizes = None
-
-    # Plot values
-    ax.bar(range(len(values)), values, width=1, linewidth=0, align='edge')
-
-    # Get ymin and max
-    ymax = max(1, values.max()) * 1.1
-    ymin = min(-1, values.min()) * 1.1
-
-    if show_projects:
         # Draw lines to discriminate between projects
-        ax.vlines(np.cumsum(project_sizes)[:-1], ymin, ymax, colors='lightgray',
+        proj_lines = np.cumsum([1] + project_sizes)
+        ax.vlines(proj_lines, ymin, ymax,
+                  colors='lightgray',
                   linewidth=1)
 
         # Add project names
         texts = []
-        start = 0  # Offset above axis by just a bit
+        start = 2
         for proj, size in zip(projects, project_sizes):
             x = start + size / 2
-            texts.append(ax.text(x, 0, proj, ha='center'))
+            texts.append(ax.text(x, ymin - yrange * 0.02, proj, ha='right',
+                                 va='top', rotation=45))
             start += size
 
-        adjust_text(texts, avoid_points=False, avoid_self=False,
-                    autoalign='y', expand_text=(1, 1),
-                    only_move={'text': 'y', 'points': 'y', 'objects': 'y'})
-        for text in texts:
-            x, y = text.get_position()
-            text.set_position((x, y + (ymax-ymin) * 1.1))
+        # Add legend
+        if not color_vals.empty:
+            kwargs = {'bbox_to_anchor': (1, 1), 'ncol': len(
+                color_vals.name.unique()) // 6 + 1}
+
+            if legend_args is not None:
+                kwargs.update(legend_args)
+
+            ax.legend(**kwargs)
+
+    else:
+        warn('Missing "project" and "condition" columns in sample table.')
+        ax.bar(range(len(values)), values, width=1, align='edge')
+        nbars = len(values)
 
     # Set axis limits
-    xmin = -0.01*len(values)
-    xmax = len(values)*1.01
+    xmin = -0.5
+    xmax = nbars + 2.5
     ax.set_xlim((xmin, xmax))
     ax.set_ylim((ymin, ymax))
 
     # Axis labels
-    ax.set_ylabel('{} Expression'.format(name), fontsize=12)
+    ax.set_ylabel(label, fontsize=12)
     ax.set_xticks([])
 
     # X-axis
@@ -84,10 +153,26 @@ def barplot(ica_data, name, values, figsize, ax, legend_args):
 
 
 def plot_expression(ica_data: IcaData, gene: str,
-                    figsize=(15, 2), ax=None, legend_args=None):
+                    projects: Union[List, str] = None,
+                    highlight: Union[List, str] = None,
+                    ax=None, legend_args: Dict = None):
+    """
+    Creates a barplot showing an gene's expression across the compendium
+    Args:
+        ica_data: IcaData Object
+        gene: Gene locus tag or name
+        projects: Name(s) of projects to show (default: show all)
+        highlight: Name(s) of projects to highlight (default: None)
+        ax: Matplotlib axis object
+        legend_args: Dictionary of arguments to be passed to legend
+
+    Returns: A matplotlib axis object
+
+    """
     # Check that gene exists
     if gene in ica_data.X.index:
         values = ica_data.X.loc[gene]
+        label = '{} Expression'.format(gene)
     else:
         gene_table = ica_data.gene_table
         if 'gene_name' in gene_table.columns:
@@ -101,14 +186,44 @@ def plot_expression(ica_data: IcaData, gene: str,
 
             # Get expression data
             values = ica_data.X.loc[loci[0]]
+
+            # Italicize label
+            label = '${}$ Expression'.format(gene)
         else:
             raise ValueError('Gene does not exist: {}'.format(gene))
 
-    return barplot(ica_data, gene, values, figsize, ax, legend_args)
+    return bar_scatter_plot(values, ica_data.sample_table, label, projects,
+                            highlight, ax, legend_args)
 
-#
-# def plot_activities():
-#     pass
+
+def plot_activities(ica_data: IcaData, imodulon: ImodName,
+                    projects: Union[List, str] = None,
+                    highlight: Union[List, str] = None,
+                    ax=None, legend_args: Dict = None):
+    """
+    Creates a barplot showing an iModulon's activity across the compendium
+    Args:
+        ica_data: IcaData Object
+        imodulon: iModulon name
+        projects: Name(s) of projects to show (default: show all)
+        highlight: Name(s) of projects to highlight (default: None)
+        ax: Matplotlib axis object
+        legend_args: Dictionary of arguments to be passed to legend
+
+    Returns: A matplotlib axis object
+
+    """
+    # Check that iModulon exists
+    if imodulon in ica_data.A.index:
+        values = ica_data.A.loc[imodulon]
+    else:
+        raise ValueError('iModulon does not exist: {}'.format(imodulon))
+
+    label = '{} iModulon\nActivity'.format(imodulon)
+
+    return bar_scatter_plot(values, ica_data.sample_table, label, projects,
+                            highlight, ax, legend_args)
+
 #
 #
 # def plot_gene_weights(kind='scatter'):
