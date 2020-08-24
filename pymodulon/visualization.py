@@ -1,24 +1,31 @@
 """
 
 """
-import numpy as np
+import warnings
+from typing import List, Union, Dict, Literal, Optional, Mapping
+
 import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+from adjustText import adjust_text
+from scipy import stats
+from scipy.optimize import curve_fit, OptimizeWarning
+from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from typing import List, Union, Dict
 from pymodulon.util import ImodName
-from warnings import warn
-from adjustText import adjust_text
-import pandas as pd
 
 
 ########################
 # Component Gene Plots #
 ########################
 
-def bar_scatter_plot(values: pd.Series, sample_table: pd.DataFrame,
-                     label: str, projects: Union[List, str],
-                     highlight: Union[List, str], ax, legend_args):
+def barplot(values: pd.Series, sample_table: pd.DataFrame,
+            ylabel: str = '',
+            projects: Optional[Union[List, str]] = None,
+            highlight: Optional[Union[List, str]] = None,
+            ax=None,
+            legend_args: Optional[Dict] = None):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
@@ -26,11 +33,11 @@ def bar_scatter_plot(values: pd.Series, sample_table: pd.DataFrame,
     Args:
         values: List of values to plot
         sample_table: Sample table from IcaData object
-        label: Name of gene or iModulon
+        ylabel: y-axis label
         projects: Project(s) to show
         highlight: Project(s) to highlight
         ax: Matplotlib axis object
-        legend_args:
+        legend_args: Dictionary of arguments for the legend
 
     Returns: A matplotlib axis object
 
@@ -132,7 +139,8 @@ def bar_scatter_plot(values: pd.Series, sample_table: pd.DataFrame,
             ax.legend(**kwargs)
 
     else:
-        warn('Missing "project" and "condition" columns in sample table.')
+        warnings.warn('Missing "project" and "condition" columns in sample '
+                      'table.')
         ax.bar(range(len(values)), values, width=1, align='edge')
         nbars = len(values)
 
@@ -143,7 +151,7 @@ def bar_scatter_plot(values: pd.Series, sample_table: pd.DataFrame,
     ax.set_ylim((ymin, ymax))
 
     # Axis labels
-    ax.set_ylabel(label, fontsize=12)
+    ax.set_ylabel(ylabel, fontsize=12)
     ax.set_xticks([])
 
     # X-axis
@@ -174,6 +182,7 @@ def plot_expression(ica_data: IcaData, gene: str,
         values = ica_data.X.loc[gene]
         label = '{} Expression'.format(gene)
     else:
+        # TODO: Expand into helper function
         gene_table = ica_data.gene_table
         if 'gene_name' in gene_table.columns:
             loci = gene_table[gene_table.gene_name == gene].index
@@ -182,7 +191,7 @@ def plot_expression(ica_data: IcaData, gene: str,
             if len(loci) == 0:
                 raise ValueError('Gene does not exist: {}'.format(gene))
             elif len(loci) > 1:
-                warn('Found multiple genes named {}'.format(gene))
+                warnings.warn('Found multiple genes named {}'.format(gene))
 
             # Get expression data
             values = ica_data.X.loc[loci[0]]
@@ -192,8 +201,8 @@ def plot_expression(ica_data: IcaData, gene: str,
         else:
             raise ValueError('Gene does not exist: {}'.format(gene))
 
-    return bar_scatter_plot(values, ica_data.sample_table, label, projects,
-                            highlight, ax, legend_args)
+    return barplot(values, ica_data.sample_table, label, projects,
+                   highlight, ax, legend_args)
 
 
 def plot_activities(ica_data: IcaData, imodulon: ImodName,
@@ -221,11 +230,44 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
 
     label = '{} iModulon\nActivity'.format(imodulon)
 
-    return bar_scatter_plot(values, ica_data.sample_table, label, projects,
-                            highlight, ax, legend_args)
+    return barplot(values, ica_data.sample_table, label, projects,
+                   highlight, ax, legend_args)
 
-#
-#
+
+def plot_metadata(ica_data: IcaData, column,
+                  projects: Union[List, str] = None,
+                  highlight: Union[List, str] = None,
+                  ax=None, legend_args: Dict = None):
+    """
+    Creates a barplot for values in the sample table
+
+    Args:
+        ica_data: IcaData Object
+        column: Column name to plot
+        projects: Name(s) of projects to show (default: show all)
+        highlight: Name(s) of projects to highlight (default: None)
+        ax: Matplotlib axis object
+        legend_args: Dictionary of arguments to be passed to legend
+
+    Returns: A matplotlib axis object
+    """
+    # Check that column exists
+    if column in ica_data.sample_table.columns:
+        # Make sure the column is filled with numbers
+        if not pd.api.types.is_numeric_dtype(ica_data.sample_table[column]):
+            raise ValueError('Metadata column {} is not numeric'.format(column))
+
+        # Remove null values
+        table = ica_data.sample_table[ica_data.sample_table[column].notnull()]
+        values = ica_data.sample_table[column]
+
+    else:
+        raise ValueError('Column not in sample table: {}'.format(column))
+
+    return barplot(values, table, column, projects,
+                   highlight, ax, legend_args)
+
+
 # def plot_gene_weights(kind='scatter'):
 #     """Plots iModulon gene weights
 #
@@ -243,110 +285,251 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
 #
 #     """
 #     pass
-#
-#
-# def plot_dima():
-#     pass
-#
-#
+
+
+def _broken_line(x, A, B, C):
+    y = np.zeros(len(x), dtype=np.float)
+    y += (A * x + B) * (x >= C)
+    y += (A * C + B) * (x < C)
+    return y
+
+
+def _solid_line(x, A, B):  # this is your 'straight line' y=f(x)
+    y = (A * x + B)
+    return y
+
+
+def _adj_r2(f, x, y, params):
+    n = len(x)
+    k = len(params) - 1
+    r2 = r2_score(y, f(x, *params))
+    return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
+
+
+def _get_fit(x, y):
+    all_params = [curve_fit(_solid_line, x, y)[0]]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=OptimizeWarning)
+        for c in [min(x), np.mean(x), max(x)]:
+            try:
+                all_params.append(
+                    curve_fit(_broken_line, x, y, p0=[1, 1, c])[0])
+            except OptimizeWarning:
+                pass
+
+    best_r2 = -np.inf
+    best_params = all_params[0]
+
+    for params in all_params:
+        if len(params) == 2:
+            r2 = _adj_r2(_solid_line, x, y, params)
+        else:
+            r2 = _adj_r2(_broken_line, x, y, params)
+
+        if r2 > best_r2:
+            best_r2 = r2
+            best_params = params
+
+    if best_r2 < 0:
+        return [0, np.mean(y)], 0
+
+    return best_params, best_r2
+
+
+def _fit_line(x, y, ax, metric):
+    # Get line parameters and metric of correlation/regression
+    if metric == 'r2':
+        params, r2 = _get_fit(x, y)
+        label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
+
+    elif metric == 'pearson':
+        params = curve_fit(_solid_line, x, y)[0]
+        label = 'Pearson R = {:.2f}\np-value = {:.2e}'.format(*stats.pearsonr(
+            x, y))
+
+    elif metric == 'spearman':
+        params = curve_fit(_solid_line, x, y)[0]
+        label = 'Spearman R = {:.2f}\np-value = {:.2e}'.format(*stats.spearmanr(
+            x, y))
+
+    else:
+        raise ValueError('Metric must be "pearson", "spearman", or "r2"')
+
+    # Plot line
+    if len(params) == 2:
+        xvals = np.array([min(x), max(x)])
+        ax.plot(xvals, _solid_line(xvals, *params), label=label,
+                color='k', linestyle='dashed', linewidth=1, zorder=5)
+    else:
+        mid = params[2]
+        xvals = np.array([x.min(), mid, x.max()])
+        ax.plot(xvals, _broken_line(xvals, *params), label=label,
+                color='k', linestyle='dashed', linewidth=1, zorder=5)
+
+
+def scatterplot(x: pd.Series, y: pd.Series,
+                groups: Optional[Mapping],
+                show_labels: Union[bool, Literal['auto']] = 'auto',
+                adjust_labels: bool = True,
+                line45: bool = False,
+                line45_margin: float = 0,
+                fit_line: bool = False,
+                fit_metric: Union[Literal['pearson'], Literal['spearman'],
+                                  Literal['r2']] = 'pearson',
+                xlabel: str = '', ylabel: str = '',
+                ax=None,
+                ax_font_args: Dict = None,
+                scatter_args: Dict = None,
+                label_font_args: Dict = None,
+                legend_args: Dict = None):
+
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    if show_labels == 'auto':
+        show_labels = (len(x) <= 20)
+
+    if not (isinstance(x, pd.Series) and isinstance(y, pd.Series) and
+            (x.sort_index().index == y.sort_index().index).all()):
+        raise TypeError('X and Y must be pandas series with the same index')
+
+    # Set up data object
+    data = pd.DataFrame({'x': x, 'y': y})
+
+    # Add group information
+    data['group'] = ''
+    if groups is not None:
+        for k, val in groups.items():
+            data.loc[k, 'group'] = val
+
+    # Handle custom args
+    if ax_font_args is None:
+        ax_font_args = {}
+
+    if label_font_args is None:
+        label_font_args = {}
+
+    if legend_args is None:
+        legend_args = {}
+
+    if scatter_args is None:
+        scatter_args = {}
+
+    # Get x and y limits
+    margin = 0.1
+    xrange = x.max() - x.min()
+    yrange = y.max() - y.min()
+    xmin = x.min() - xrange * margin
+    xmax = x.max() + xrange * margin
+    ymin = y.min() - yrange * margin
+    ymax = y.max() + yrange * margin
+    allmin = max(xmin, ymin)
+    allmax = min(xmax, ymax)
+
+    # Add 45 degree line
+    if line45:
+        # Plot diagonal lines
+        ax.plot([allmin, allmax], [allmin, allmax], color='k',
+                linestyle='dashed', linewidth=0.5, zorder=0)
+
+        if line45_margin > 0:
+            diff = abs(data.x - data.y)
+            data.loc[diff.index, 'group'] = 'hidden'
+            ax.plot([max(xmin, ymin + line45_margin),
+                     min(xmax, ymax + line45_margin)],
+                    [max(ymin, xmin - line45_margin),
+                     min(ymax, xmax - line45_margin)],
+                    color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
+            ax.plot([max(xmin, ymin - line45_margin),
+                     min(xmax, ymax - line45_margin)],
+                    [max(ymin, xmin + line45_margin),
+                     min(ymax, xmax + line45_margin)],
+                    color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
+
+    for name, group in data.groupby('group'):
+
+        # Override defaults for hidden points
+        kwargs = scatter_args.copy()
+        if name == 'hidden':
+            kwargs.update({'c': 'gray', 'alpha': 0.7, 'linewidth': 0,
+                           'label': None})
+        elif name == '':
+            kwargs.update({'label': None})
+        else:
+            kwargs.update({'label': name})
+
+        ax.scatter(group.x, group.y, **kwargs, zorder=1)
+
+    # Add regression
+    if fit_line:
+        _fit_line(x, y, ax, fit_metric)
+
+    # Add lines at 0
+    if xmin < 0 < xmax:
+        ax.hlines(0, xmin, xmax, linewidth=0.5, color='gray', zorder=2)
+    if ymin < 0 < ymax:
+        ax.vlines(0, ymin, ymax, linewidth=0.5, color='gray', zorder=2)
+
+    # Add labels
+    if show_labels:
+        texts = []
+        for idx in x.index:
+            texts.append(ax.text(x[idx], y[idx], idx, **label_font_args))
+        if adjust_labels:
+            adjust_text(texts, ax=ax,
+                        arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
+                        only_move={'objects': 'y'},
+                        expand_objects=(1.2, 1.4),
+                        expand_points=(1.3, 1.3))
+
+    ax.set_xlim((xmin, xmax))
+    ax.set_ylim((ymin, ymax))
+
+    ax.set_xlabel(xlabel, **ax_font_args)
+    ax.set_ylabel(ylabel, **ax_font_args)
+
+    ax.legend(**legend_args)
+
+    return ax
+
+
+def compare_expression():
+    pass
+
+
+def compare_activities(ica_data, imodulon1, imodulon2,
+                       groups: Optional[Mapping] = None,
+                       show_labels: Union[bool, Literal['auto']] = 'auto',
+                       adjust_labels: bool = True,
+                       fit_metric: Union[Literal['pearson'], Literal[
+                           'spearman']] = 'pearson',
+                       ax=None,
+                       ax_font_args: Dict = None,
+                       scatter_args: Dict = None,
+                       label_font_args: Dict = None,
+                       legend_args: Dict = None):
+    x = ica_data.A.loc[imodulon1]
+    y = ica_data.A.loc[imodulon2]
+
+    xlabel = '{} iModulon Activity'.format(imodulon1)
+    ylabel = '{} iModulon Activity'.format(imodulon2)
+
+    ax = scatterplot(x, y, ax=ax, groups=groups,
+                     show_labels=show_labels,
+                     adjust_labels=adjust_labels,
+                     fit_line=True, fit_metric=fit_metric,
+                     xlabel=xlabel, ylabel=ylabel,
+                     ax_font_args=ax_font_args,
+                     scatter_args=scatter_args,
+                     label_font_args=label_font_args,
+                     legend_args=legend_args)
+
+    return ax
+
+
+def compare_expression_to_activity():
+    pass
+
 # def plot_deg():
 #     pass
-#
-#
-# def plot_scatter():
-#     pass
-#
-#
-# def plot_samples_bar(ica_data: IcaData,
-#                      imodulon: ImodName = None,
-#                      project: Optional[str] = None,
-#                      ax=None,
-#                      figsize: Tuple[float, float] = (15, 2),
-#                      **legend_kwargs):
-#     """Generates plot of iModulon Activity levels, grouped by project name
-#
-#     Args:
-#         ica_data: iModulon Data container object
-#         imodulon: Name of iModulon. Either an iModulon or gene must be
-#         provided.
-#         project:
-#         ax:
-#         figsize:
-#         **legend_kwargs:
-#
-#     Returns:
-#
-#     """
-#
-#     """
-#
-#
-#     :param ica_data:
-#     :param imodulon:
-#     :param gene: Name of gene. Either an iModulon or gene must be provided.
-#     :param project: Name of project (from metadata)
-#     :param ax: matplotlib Axes instance to output plot onto
-#     :param figsize: Size of output plot
-#     :param legend_kwargs: kwargs that get passed onto `ax.legend()`
-#     :return: Matplotlib Axes instance
-#     """
-#
-#     # Check that iModulon exists
-#     if imodulon not in ica_data.imodulon_names:
-#         raise ValueError('Component does not exist: {}'.format(imodulon))
-#
-#     # Create ax obj if None is provided
-#     if ax is None:
-#         fig, ax = plt.subplots(figsize=figsize)
-#
-#     # Get ymin and ymax
-#     ymin = ica_data.A.loc[imodulon].min() - 3
-#     ymax = ica_data.A.loc[imodulon].max() + 3
-#
-#     # Check that metadata (sample_table) exists/is not empty
-#     sample_table = ica_data.sample_table
-#     if sample_table.empty:
-#         raise ValueError('Metadata does not exist, sample_table is empty')
-#
-#     # Plot all projects not in the highlighted set
-#     other = sample_table[sample_table.project_name != project].copy()
-#     other.index.name = 'sample_id'
-#     other.reset_index(inplace=True)
-#     ax.bar(range(len(other)), ica_data.A.loc[imodulon, other['sample_id']],
-#            width=1, linewidth=0, align='edge', label='Previous Experiments')
-#
-#     # Draw lines to discriminate between projects
-#     p_lines = other.project_name.drop_duplicates().index.tolist() \
-#               + [len(other), len(sample_table)]
-#
-#     # Add project labels
-#     move = True
-#     locs = (np.array(p_lines)[:-1] + np.array(p_lines)[1:]) / 2
-#
-#     for loc, name in zip(locs, other.project_name.drop_duplicates().tolist()
-#                                + [project]):
-#         ax.text(loc, ymax + 2 + move * 4, name, fontsize=12,
-#                 horizontalalignment='center')
-#         move = not move
-#
-#     # Plot project of interest
-#     idx = len(other)
-#     for name, group in sample_table[sample_table.project_name
-#                                     == project].groupby('condition_name'):
-#         values = ica_data.A.loc[imodulon, group.index].values
-#         ax.bar(range(idx, idx + len(group)), values, width=1,
-#                linewidth=0, align='edge', label=name)
-#         idx += len(group)
-#
-#     # Make legend
-#     kwargs = {'loc': 2, 'ncol': 7, 'bbox_to_anchor': (0, 0)}
-#     kwargs.update(legend_kwargs)
-#     ax.legend(**kwargs)
-#
-#     # Prettify
-#     ax.set_xticklabels([])
-#     ax.grid(False, axis='x')
-#     ax.set_ylim([ymin, ymax])
-#     ax.set_xlim([0, ica_data.A.shape[1]])
-#
-#     return ax
