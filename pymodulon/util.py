@@ -10,9 +10,7 @@ ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
 
 
-#def _check_table(table: Data, name: str, index: Optional[Collection] = None):
-
-def _check_table(table: Data, name: str, index: List = None):
+def _check_table(table: Data, name: str, index: Optional[Collection] = None):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -33,16 +31,12 @@ def _check_table(table: Data, name: str, index: List = None):
         # dont run _check_table_helper if no index is passed
         return table if index is None else _check_table_helper(table, index,
                                                                name)
-        return table if index is None else _check_table_helper(table, index, name)
     else:
         raise TypeError('{}_table must be a pandas DataFrame '
                         'filename or a valid JSON string'.format(name))
 
-#def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
- #                       name: ImodName):
-    
-    
-def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
+def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
+                       name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
     # Check if all indices are in table
