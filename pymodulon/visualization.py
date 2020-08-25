@@ -13,7 +13,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from pymodulon.util import ImodName
+from pymodulon.util import ImodName, name2num
 
 
 ########################
@@ -182,24 +182,9 @@ def plot_expression(ica_data: IcaData, gene: str,
         values = ica_data.X.loc[gene]
         label = '{} Expression'.format(gene)
     else:
-        # TODO: Expand into helper function
-        gene_table = ica_data.gene_table
-        if 'gene_name' in gene_table.columns:
-            loci = gene_table[gene_table.gene_name == gene].index
-
-            # Ensure only one locus maps to this gene
-            if len(loci) == 0:
-                raise ValueError('Gene does not exist: {}'.format(gene))
-            elif len(loci) > 1:
-                warnings.warn('Found multiple genes named {}'.format(gene))
-
-            # Get expression data
-            values = ica_data.X.loc[loci[0]]
-
-            # Italicize label
-            label = '${}$ Expression'.format(gene)
-        else:
-            raise ValueError('Gene does not exist: {}'.format(gene))
+        locus = name2num(ica_data, gene)
+        values = ica_data.X.loc[locus]
+        label = '${}$ Expression'.format(gene)
 
     return barplot(values, ica_data.sample_table, label, projects,
                    highlight, ax, legend_args)
@@ -339,7 +324,7 @@ def _get_fit(x, y):
 
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
-    if metric == 'r2':
+    if metric == 'r2adj':
         params, r2 = _get_fit(x, y)
         label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
 
@@ -376,13 +361,36 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 line45_margin: float = 0,
                 fit_line: bool = False,
                 fit_metric: Union[Literal['pearson'], Literal['spearman'],
-                                  Literal['r2']] = 'pearson',
+                                  Literal['r2adj']] = 'pearson',
                 xlabel: str = '', ylabel: str = '',
                 ax=None,
                 ax_font_args: Dict = None,
                 scatter_args: Dict = None,
                 label_font_args: Dict = None,
                 legend_args: Dict = None):
+    """
+
+    Args:
+        x:
+        y:
+        groups:
+        show_labels:
+        adjust_labels:
+        line45:
+        line45_margin:
+        fit_line:
+        fit_metric:
+        xlabel:
+        ylabel:
+        ax:
+        ax_font_args:
+        scatter_args:
+        label_font_args:
+        legend_args:
+
+    Returns:
+
+    """
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -495,6 +503,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
 
 def compare_expression():
+    # Same as compare activities, but with gene expression. Should have the
+    # same functionality as plot_expression() where it can either take a gene
+    # name or gene locus tag
     pass
 
 
@@ -502,13 +513,34 @@ def compare_activities(ica_data, imodulon1, imodulon2,
                        groups: Optional[Mapping] = None,
                        show_labels: Union[bool, Literal['auto']] = 'auto',
                        adjust_labels: bool = True,
+                       fit_line: bool = True,
                        fit_metric: Union[Literal['pearson'], Literal[
-                           'spearman']] = 'pearson',
+                           'spearman'], Literal['r2adj']] = 'pearson',
                        ax=None,
                        ax_font_args: Dict = None,
                        scatter_args: Dict = None,
                        label_font_args: Dict = None,
                        legend_args: Dict = None):
+    """
+    Creates a scatter plot to compare the compendium-wide activities of two
+    iModulons
+    Args:
+        ica_data:
+        imodulon1:
+        imodulon2:
+        groups:
+        show_labels:
+        adjust_labels:
+        fit_metric:
+        ax:
+        ax_font_args:
+        scatter_args:
+        label_font_args:
+        legend_args:
+
+    Returns:
+
+    """
     x = ica_data.A.loc[imodulon1]
     y = ica_data.A.loc[imodulon2]
 
@@ -518,7 +550,7 @@ def compare_activities(ica_data, imodulon1, imodulon2,
     ax = scatterplot(x, y, ax=ax, groups=groups,
                      show_labels=show_labels,
                      adjust_labels=adjust_labels,
-                     fit_line=True, fit_metric=fit_metric,
+                     fit_line=fit_line, fit_metric=fit_metric,
                      xlabel=xlabel, ylabel=ylabel,
                      ax_font_args=ax_font_args,
                      scatter_args=scatter_args,
@@ -528,8 +560,24 @@ def compare_activities(ica_data, imodulon1, imodulon2,
     return ax
 
 
-def compare_expression_to_activity():
+def compare_values(ica_data, item1, item2, etc):
+    # Generic comparison of anything vs. anything else
+    # First check if item is an iModulon name
+    # Then check if item is gene (use name2num like in plot_expression)
+    # Then check if item is in metadata (if this is the case, remove na like
+    # in plot_metadata)
+    # If both items are iModulon names or both are expression, just pass
+    # everything to relevant function
     pass
 
-# def plot_deg():
-#     pass
+
+def dima_plot(ica_data, samples1, samples2):
+    # DIMA plot, uses scatterplot underneath
+    # Can't write this until we have DIMA function
+    pass
+
+
+def deg_plot():
+    # DEG plot... let's not create this function yet because we don't have
+    # p-values
+    pass
