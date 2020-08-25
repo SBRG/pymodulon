@@ -9,12 +9,8 @@ ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
 
-<<<<<<< HEAD
-def _check_table(table: Data, name: str, index: List = None):
-=======
 
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):
->>>>>>> 5ccb22903edddc161705bf8da6029a0fa970cc4d
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -39,12 +35,9 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None):
         raise TypeError('{}_table must be a pandas DataFrame '
                         'filename or a valid JSON string'.format(name))
 
-<<<<<<< HEAD
-def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
-=======
+
 def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
-                       name: ImodName):
->>>>>>> 5ccb22903edddc161705bf8da6029a0fa970cc4d
+                        name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
     # Check if all indices are in table
@@ -272,6 +265,3 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, metric='pearson', cutoff=0.2
 #########################
 ## Activity Clustering ##
 #########################
-
-
-
