@@ -170,7 +170,7 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
         trn: Pandas dataframe containing transcriptional regulatory network
         max_regs: Maximum number of regulators to include in complex regulon
             (default: 1)
-        fdr: False detection rate
+        fdr: False detection rate (default: 0.01)
         method: How to combine complex regulons. 'or' computes enrichment
             against union of regulons, 'and' computes enrichment against
             intersection of regulons, and 'both' performs both tests
@@ -229,3 +229,30 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
         return pd.DataFrame()
     df_enrich = pd.concat(enrich_list, axis=1).T
     return FDR(df_enrich, fdr=fdr, total=total)
+
+
+def compute_annotation_enrichment(gene_set: List, all_genes: List,
+                                  annotation: pd.DataFrame,
+                                  column='annotation',
+                                  fdr: float = 0.01):
+    """
+    Compare a gene set against a dataframe of gene annotations
+    Args:
+        gene_set: Gene set for enrichment (e.g. genes in iModulon)
+        all_genes: List of all genes
+        annotation: Table containing gene annotations
+        column: Name of column in the annotation DataFrame (default =
+        'annotation')
+        fdr: False detection rate (default = 0.01)
+
+    Returns: Pandas dataframe containing statistically significant enrichments
+    """
+    # TODO: Create test functions
+    enrich_list = []
+    for name, group in annotation.groupby(column):
+        target_genes = group['gene_id']
+        enrich_list.append(compute_enrichment(gene_set, target_genes,
+                                              all_genes, label=name))
+
+    df_enrich = pd.concat(enrich_list, axis=1).T
+    return FDR(df_enrich, fdr=fdr)
