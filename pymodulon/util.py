@@ -9,9 +9,6 @@ ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
 
-
-#def _check_table(table: Data, name: str, index: Optional[Collection] = None):
-
 def _check_table(table: Data, name: str, index: List = None):
     # Set as empty dataframe if not input given
     if table is None:
@@ -38,10 +35,6 @@ def _check_table(table: Data, name: str, index: List = None):
         raise TypeError('{}_table must be a pandas DataFrame '
                         'filename or a valid JSON string'.format(name))
 
-#def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
- #                       name: ImodName):
-    
-    
 def _check_table_helper(table: pd.DataFrame, index: List, name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
@@ -132,11 +125,13 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
         for j, k2 in enumerate(s2.columns):
             if metric == 'pearson':
                 corr[i, j] = abs(stats.pearsonr(s1[k1], s2[k2])[0])
+            elif metric == 'spearman':
+                corr[i, j] = abs(stats.spearmanr(s1[k1], s2[k2][0]))
 
     DF_corr = pd.DataFrame(corr, index=s1.columns, columns=s2.columns)  # Only keep genes found in both S matrices
 
     # Initialize Graph
-    dot = Digraph(engine='dot', graph_attr={'ranksep': '0.3', 'nodesep': '0', 'packmode': 'array_u', 'size': '7,7'},
+    dot = Digraph(engine='dot', graph_attr={'ranksep': '0.3', 'nodesep': '0', 'packmode': 'array_u', 'size': '10,10'},
                   node_attr={'fontsize': '14', 'shape': 'none'},
                   edge_attr={'arrowsize': '0.5'}, format='png')
 
@@ -264,3 +259,10 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, metric='pearson', cutoff=0.2
         S2.index = translated_genes
         dot, name_links = _make_dot_graph(S1, S2, metric, cutoff)
         return dot, name_links
+
+#########################
+## Activity Clustering ##
+#########################
+
+
+
