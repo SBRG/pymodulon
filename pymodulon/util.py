@@ -88,11 +88,11 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
 
 from graphviz import Digraph
 from scipy.cluster.hierarchy import linkage, dendrogram
-from tqdm import notebook as tqdm
+import tqdm
 from scipy import sparse
 
 
-def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: float):
+def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: float, show_all: bool):
     """
     Given two S matrices, returns the dot graph and name links of the various connected ICA components
     :param S1: S matrix from the first organism
@@ -128,7 +128,7 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
             if metric == 'pearson':
                 corr[i, j] = abs(stats.pearsonr(s1[k1], s2[k2])[0])
             elif metric == 'spearman':
-                corr[i, j] = abs(stats.spearmanr(s1[k1], s2[k2][0]))
+                corr[i, j] = abs(stats.spearmanr(s1[k1], s2[k2])[0])
 
     DF_corr = pd.DataFrame(corr, index=s1.columns, columns=s2.columns)  # Only keep genes found in both S matrices
 
@@ -144,30 +144,49 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
     if len(links) == 0:
         warn('No components shared across runs')
         return None, None
+    if show_all is True:
+        # Initialize Nodes
+        for k in sorted(s2.columns):
+            if k in s2.columns[loc2]:
+                color = 'black'
+                font = 'helvetica'
+            else:
+                color = 'red'
+                font = 'helvetica-bold'
+            dot.node('data2_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
 
-    # Initialize Nodes
-    for k in sorted(s2.columns):
-        if k in s2.columns[loc2]:
-            color = 'black'
-            font = 'helvetica'
-        else:
-            color = 'red'
-            font = 'helvetica-bold'
-        dot.node('data2_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+        for k in s1.columns:
+            if k in s1.columns[loc1]:
+                color = 'black'
+                font = 'helvetica'
+            else:
+                color = 'red'
+                font = 'helvetica-bold'
+            dot.node('data1_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
 
-    for k in s1.columns:
-        if k in s1.columns[loc1]:
-            color = 'black'
-            font = 'helvetica'
-        else:
-            color = 'red'
-            font = 'helvetica-bold'
-        dot.node('data1_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+        # Add links between related components
+        for k1, k2 in links:
+            width = DF_corr.loc[k1, k2] * 5
+            dot.edge('data1_' + str(k1), 'data2_' + str(k2), _attributes={'penwidth': '{:.2f}'.format(width)})
+    else:
+        # Initialize Nodes
+        for k in sorted(s2.columns):
+            if k in s2.columns[loc2]:
+                color = 'black'
+                font = 'helvetica'
+                dot.node('data2_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
 
-    # Add links between related components
-    for k1, k2 in links:
-        width = DF_corr.loc[k1, k2] * 5
-        dot.edge('data1_' + str(k1), 'data2_' + str(k2), _attributes={'penwidth': '{:.2f}'.format(width)})
+        for k in s1.columns:
+            if k in s1.columns[loc1]:
+                color = 'black'
+                font = 'helvetica'
+                dot.node('data1_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+
+        # Add links between related components
+        for k1, k2 in links:
+            if k1 in s1.columns[loc1] and k2 in s2.columns[loc2]:
+                width = DF_corr.loc[k1, k2] * 5
+                dot.edge('data1_' + str(k1), 'data2_' + str(k2), _attributes={'penwidth': '{:.2f}'.format(width)})
 
     # Reformat names back to normal
     name1, name2 = list(zip(*links))
@@ -241,25 +260,26 @@ def _translate_genes(gene_list: List, reduced_DF: pd.DataFrame):
     return gene_list_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson', cutoff=0.2):
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson', cutoff=0.2, show_all=False):
     """
     Compares two S matrices between a single organism or across organisms and returns the connected ICA components
     :param S1: Pandas Dataframe of S matrix 1
     :param S2: Pandas Dataframe of S Matrix 2
+    :param ortho_dir: String of the location where organism data can be found (can be found under modulome/data)
     :param metric: A string of what statistical test to use (standard is 'pearson')
     :param cutoff: Float cut off value for pearson statistical test
-    :param ortho_dir: String of the location where organism data can be found (can be found under modulome/data)
+    :param show_all: True will show all nodes of the digraph matrix
     :return: Dot graph and name links of connected ICA components between the two runs or organisms.
     """
     if ortho_dir is None:
-        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff)
+        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff, show_all=show_all)
         return dot, name_links
     else:
         ortho_DF = _load_ortho_matrix(ortho_dir)
         ortho_reduced_DF = _extract_genes(list(S1.index), list(S2.index), ortho_DF)
         translated_genes = _translate_genes(list(S2.index), ortho_reduced_DF)
         S2.index = translated_genes
-        dot, name_links = _make_dot_graph(S1, S2, metric, cutoff)
+        dot, name_links = _make_dot_graph(S1, S2, metric, cutoff, show_all=show_all)
         return dot, name_links
 
 #########################
