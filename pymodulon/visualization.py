@@ -494,6 +494,55 @@ def scatterplot(x: pd.Series, y: pd.Series,
     return ax
 
 
+def compare_gene_weights(ica_data, imodulon1, imodulon2,
+                         groups: Optional[Mapping] = None,
+                         show_labels: Union[bool, Literal['auto']] = 'auto',
+                         adjust_labels: bool = True,
+                         ax=None,
+                         ax_font_args: Optional[Dict] = None,
+                         scatter_args: Optional[Dict] = None,
+                         label_font_args: Optional[Dict] = None,
+                         legend_args: Optional[Dict] = None):
+    '''
+    Compare gene weights between 2 iModulons
+
+    Parameters
+    ----------
+    ica_data
+    imodulon1
+    imodulon2
+    groups
+    show_labels
+    adjust_labels
+    ax
+    ax_font_args
+    scatter_args
+    label_font_args
+    legend_args
+
+    Returns
+    -------
+
+    '''
+    x = ica_data.M[imodulon1]
+    y = ica_data.M[imodulon2]
+
+    xlabel = f'{imodulon1} Gene Weight'
+    ylabel = f'{imodulon2} Gene Weight'
+
+
+    ax = scatterplot(x, y, ax=ax, groups=groups,
+                     show_labels=show_labels,
+                     adjust_labels=adjust_labels,
+                     xlabel=xlabel, ylabel=ylabel,
+                     ax_font_args=ax_font_args,
+                     scatter_args=scatter_args,
+                     label_font_args=label_font_args,
+                     legend_args=legend_args)
+
+    return ax
+
+
 def compare_expression():
     pass
 
