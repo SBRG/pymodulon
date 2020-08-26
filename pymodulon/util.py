@@ -241,7 +241,7 @@ def _translate_genes(gene_list: List, reduced_DF: pd.DataFrame):
     return gene_list_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, metric='pearson', cutoff=0.2, ortho_dir=None):
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson', cutoff=0.2):
     """
     Compares two S matrices between a single organism or across organisms and returns the connected ICA components
     :param S1: Pandas Dataframe of S matrix 1
@@ -252,7 +252,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, metric='pearson', cutoff=0.2
     :return: Dot graph and name links of connected ICA components between the two runs or organisms.
     """
     if ortho_dir is None:
-        dot, name_links = _make_dot_graph(S1, S2, DF_corr, cutoff)
+        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff)
         return dot, name_links
     else:
         ortho_DF = _load_ortho_matrix(ortho_dir)
