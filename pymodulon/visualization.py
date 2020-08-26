@@ -288,87 +288,6 @@ def plot_metadata(ica_data: IcaData, column,
 #     pass
 
 
-def _broken_line(x, A, B, C):
-    y = np.zeros(len(x), dtype=np.float)
-    y += (A * x + B) * (x >= C)
-    y += (A * C + B) * (x < C)
-    return y
-
-
-def _solid_line(x, A, B):  # this is your 'straight line' y=f(x)
-    y = (A * x + B)
-    return y
-
-
-def _adj_r2(f, x, y, params):
-    n = len(x)
-    k = len(params) - 1
-    r2 = r2_score(y, f(x, *params))
-    return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
-
-
-def _get_fit(x, y):
-    all_params = [curve_fit(_solid_line, x, y)[0]]
-
-    with warnings.catch_warnings():
-        warnings.simplefilter('ignore', category=OptimizeWarning)
-        for c in [min(x), np.mean(x), max(x)]:
-            try:
-                all_params.append(
-                    curve_fit(_broken_line, x, y, p0=[1, 1, c])[0])
-            except OptimizeWarning:
-                pass
-
-    best_r2 = -np.inf
-    best_params = all_params[0]
-
-    for params in all_params:
-        if len(params) == 2:
-            r2 = _adj_r2(_solid_line, x, y, params)
-        else:
-            r2 = _adj_r2(_broken_line, x, y, params)
-
-        if r2 > best_r2:
-            best_r2 = r2
-            best_params = params
-
-    if best_r2 < 0:
-        return [0, np.mean(y)], 0
-
-    return best_params, best_r2
-
-
-def _fit_line(x, y, ax, metric):
-    # Get line parameters and metric of correlation/regression
-    if metric == 'r2':
-        params, r2 = _get_fit(x, y)
-        label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
-
-    elif metric == 'pearson':
-        params = curve_fit(_solid_line, x, y)[0]
-        label = 'Pearson R = {:.2f}\np-value = {:.2e}'.format(*stats.pearsonr(
-            x, y))
-
-    elif metric == 'spearman':
-        params = curve_fit(_solid_line, x, y)[0]
-        label = 'Spearman R = {:.2f}\np-value = {:.2e}'.format(*stats.spearmanr(
-            x, y))
-
-    else:
-        raise ValueError('Metric must be "pearson", "spearman", or "r2"')
-
-    # Plot line
-    if len(params) == 2:
-        xvals = np.array([min(x), max(x)])
-        ax.plot(xvals, _solid_line(xvals, *params), label=label,
-                color='k', linestyle='dashed', linewidth=1, zorder=5)
-    else:
-        mid = params[2]
-        xvals = np.array([x.min(), mid, x.max()])
-        ax.plot(xvals, _broken_line(xvals, *params), label=label,
-                color='k', linestyle='dashed', linewidth=1, zorder=5)
-
-
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping],
                 show_labels: Union[bool, Literal['auto']] = 'auto',
@@ -644,3 +563,88 @@ def compare_expression_to_activity():
 
 # def plot_deg():
 #     pass
+
+
+####################
+# Helper Functions #
+####################
+
+def _fit_line(x, y, ax, metric):
+    # Get line parameters and metric of correlation/regression
+    if metric == 'r2':
+        params, r2 = _get_fit(x, y)
+        label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
+
+    elif metric == 'pearson':
+        params = curve_fit(_solid_line, x, y)[0]
+        label = 'Pearson R = {:.2f}\np-value = {:.2e}'.format(*stats.pearsonr(
+            x, y))
+
+    elif metric == 'spearman':
+        params = curve_fit(_solid_line, x, y)[0]
+        label = 'Spearman R = {:.2f}\np-value = {:.2e}'.format(*stats.spearmanr(
+            x, y))
+
+    else:
+        raise ValueError('Metric must be "pearson", "spearman", or "r2"')
+
+    # Plot line
+    if len(params) == 2:
+        xvals = np.array([min(x), max(x)])
+        ax.plot(xvals, _solid_line(xvals, *params), label=label,
+                color='k', linestyle='dashed', linewidth=1, zorder=5)
+    else:
+        mid = params[2]
+        xvals = np.array([x.min(), mid, x.max()])
+        ax.plot(xvals, _broken_line(xvals, *params), label=label,
+                color='k', linestyle='dashed', linewidth=1, zorder=5)
+
+
+def _get_fit(x, y):
+    all_params = [curve_fit(_solid_line, x, y)[0]]
+
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore', category=OptimizeWarning)
+        for c in [min(x), np.mean(x), max(x)]:
+            try:
+                all_params.append(
+                    curve_fit(_broken_line, x, y, p0=[1, 1, c])[0])
+            except OptimizeWarning:
+                pass
+
+    best_r2 = -np.inf
+    best_params = all_params[0]
+
+    for params in all_params:
+        if len(params) == 2:
+            r2 = _adj_r2(_solid_line, x, y, params)
+        else:
+            r2 = _adj_r2(_broken_line, x, y, params)
+
+        if r2 > best_r2:
+            best_r2 = r2
+            best_params = params
+
+    if best_r2 < 0:
+        return [0, np.mean(y)], 0
+
+    return best_params, best_r2
+
+
+def _broken_line(x, A, B, C):
+    y = np.zeros(len(x), dtype=np.float)
+    y += (A * x + B) * (x >= C)
+    y += (A * C + B) * (x < C)
+    return y
+
+
+def _solid_line(x, A, B):  # this is your 'straight line' y=f(x)
+    y = (A * x + B)
+    return y
+
+
+def _adj_r2(f, x, y, params):
+    n = len(x)
+    k = len(params) - 1
+    r2 = r2_score(y, f(x, *params))
+    return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
