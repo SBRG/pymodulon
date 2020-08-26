@@ -540,6 +540,25 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                      label_font_args=label_font_args,
                      legend_args=legend_args)
 
+    # Add thresholds to scatterplot (dashed lines)
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+
+    if ica_data.thresholds[imodulon1] != 0:
+        ax.vlines([ica_data.thresholds[imodulon1],
+                   -ica_data.thresholds[imodulon1]],
+                  ymin=ymin, ymax=ymax, colors='k',
+                  linestyles='dashed', linewidth=1)
+
+    if ica_data.thresholds[imodulon2] != 0:
+        ax.hlines([ica_data.thresholds[imodulon2],
+                   -ica_data.thresholds[imodulon2]],
+                  xmin=xmin, xmax=xmax, colors='k',
+                  linestyles='dashed', linewidth=1)
+
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+
     return ax
 
 
