@@ -5,6 +5,7 @@ import warnings
 from typing import List, Union, Dict, Literal, Optional, Mapping
 
 import matplotlib.pyplot as plt
+from matplotlib.patches import Rectangle
 import numpy as np
 import pandas as pd
 from adjustText import adjust_text
@@ -532,8 +533,8 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
 
 
     ax = scatterplot(x, y, ax=ax, groups=groups,
-                     show_labels=show_labels,
-                     adjust_labels=adjust_labels,
+                     show_labels=False,
+                     adjust_labels=False,
                      xlabel=xlabel, ylabel=ylabel,
                      ax_font_args=ax_font_args,
                      scatter_args=scatter_args,
@@ -544,20 +545,62 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
 
-    if ica_data.thresholds[imodulon1] != 0:
-        ax.vlines([ica_data.thresholds[imodulon1],
-                   -ica_data.thresholds[imodulon1]],
-                  ymin=ymin, ymax=ymax, colors='k',
-                  linestyles='dashed', linewidth=1)
+    thresh1 = ica_data.thresholds[imodulon1]
+    thresh2 = ica_data.thresholds[imodulon2]
 
-    if ica_data.thresholds[imodulon2] != 0:
-        ax.hlines([ica_data.thresholds[imodulon2],
-                   -ica_data.thresholds[imodulon2]],
-                  xmin=xmin, xmax=xmax, colors='k',
-                  linestyles='dashed', linewidth=1)
+    if thresh1 != 0:
+        ax.vlines([thresh1, -thresh1], ymin=ymin, ymax=ymax,
+                  colors='k', linestyles='dashed', linewidth=1)
+
+    if thresh2 != 0:
+        ax.hlines([thresh2, -thresh2], xmin=xmin, xmax=xmax,
+                  colors='k', linestyles='dashed', linewidth=1)
 
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
+
+    # Add labels on data-points
+    bin_M = ica_data.M_binarized
+    component_genes_x = set(bin_M[imodulon1].loc[bin_M[imodulon1] == 1].index)
+    component_genes_y = set(bin_M[imodulon2].loc[bin_M[imodulon2] == 1].index)
+    component_genes = component_genes_x.intersection(component_genes_y)
+    texts = []
+    expand_kwargs = {'expand_objects': (1.2, 1.4),
+                     'expand_points': (1.3, 1.3)}
+
+    # Add labels: Put gene name if components contain under 20 genes
+    auto = None
+    if show_labels == 'auto':
+        auto = (bin_M[imodulon1].astype(bool)
+                & bin_M[imodulon2].astype(bool)).sum() <= 20
+
+    if show_labels is True or auto == True:
+        for gene in component_genes:
+            ax.scatter(ica_data.M.loc[gene, imodulon1],
+                       ica_data.M.loc[gene, imodulon2],
+                       color='r')
+            texts.append(ax.text(ica_data.M.loc[gene, imodulon1],
+                                 ica_data.M.loc[gene, imodulon2],
+                                 ica_data.gene_table.loc[gene, 'gene_name'],
+                                 fontsize=12))
+
+        expand_kwargs['expand_text'] = (1.4, 1.4)
+
+    # Add labels: Repel texts from other text and points
+    rectx = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh2)),
+                                   width=xmax-xmin,
+                                   height=2*abs(thresh2),
+                                   fill=False, linewidth=0))
+
+    recty = ax.add_patch(Rectangle(xy=(-abs(thresh1), ymin),
+                                   width=2*abs(thresh1),
+                                   height=ymax-ymin,
+                                   fill=False, linewidth=0))
+
+    if adjust_labels:
+        adjust_text(texts=texts, add_objects=[rectx, recty], ax=ax,
+                    arrowprops=dict(arrowstyle='-', color='k', lw=0.5),
+                    only_move={'objects': 'y'}, **expand_kwargs)
 
     return ax
 
