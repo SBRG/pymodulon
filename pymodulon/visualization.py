@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import Dict, List, Literal, Optional, Mapping, Union
+from typing import List, Literal, Optional, Mapping, Union
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -26,7 +26,7 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
             projects: Optional[Union[List, str]] = None,
             highlight: Optional[Union[List, str]] = None,
             ax: Optional[Ax] = None,
-            legend_kwargs: Optional[Mapping] = None):
+            legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
@@ -165,7 +165,7 @@ def plot_expression(ica_data: IcaData, gene: str,
                     projects: Union[List, str] = None,
                     highlight: Union[List, str] = None,
                     ax: Optional[Ax] = None,
-                    legend_kwargs: Optional[Mapping] = None):
+                    legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
     Creates a barplot showing an gene's expression across the compendium
     Args:
@@ -211,7 +211,7 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
                     projects: Union[List, str] = None,
                     highlight: Union[List, str] = None,
                     ax: Optional[Ax] = None,
-                    legend_kwargs: Optional[Mapping] = None):
+                    legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
     Creates a barplot showing an iModulon's activity across the compendium
     Args:
@@ -241,7 +241,7 @@ def plot_metadata(ica_data: IcaData, column,
                   projects: Union[List, str] = None,
                   highlight: Union[List, str] = None,
                   ax: Optional[Ax] = None,
-                  legend_kwargs: Optional[Mapping] = None):
+                  legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
     Creates a barplot for values in the sample table
 
@@ -305,7 +305,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 ax_font_kwargs: Optional[Mapping] = None,
                 scatter_kwargs: Optional[Mapping] = None,
                 label_font_kwargs: Optional[Mapping] = None,
-                legend_kwargs: Optional[Mapping] = None):
+                legend_kwargs: Optional[Mapping] = None) -> Ax:
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -425,8 +425,8 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                          ax_font_kwargs: Optional[Mapping] = None,
                          scatter_kwargs: Optional[Mapping] = None,
                          label_font_kwargs: Optional[Mapping] = None,
-                         legend_kwargs: Optional[Mapping] = None):
-    '''
+                         legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
     Compare gene weights between 2 iModulons
 
     Parameters
@@ -446,13 +446,12 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
     Returns
     -------
 
-    '''
+    """
     x = ica_data.M[imodulon1]
     y = ica_data.M[imodulon2]
 
     xlabel = f'{imodulon1} Gene Weight'
     ylabel = f'{imodulon2} Gene Weight'
-
 
     ax = scatterplot(x, y, ax=ax, groups=groups,
                      show_labels=False,
@@ -496,7 +495,7 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
         auto = (bin_M[imodulon1].astype(bool)
                 & bin_M[imodulon2].astype(bool)).sum() <= 20
 
-    if show_labels is True or auto == True:
+    if show_labels is True or auto is True:
         for gene in component_genes:
             ax.scatter(ica_data.M.loc[gene, imodulon1],
                        ica_data.M.loc[gene, imodulon2],
@@ -535,13 +534,13 @@ def compare_activities(ica_data, imodulon1, imodulon2,
                        groups: Optional[Mapping] = None,
                        show_labels: Union[bool, Literal['auto']] = 'auto',
                        adjust_labels: bool = True,
-                       fit_metric: Union[Literal['pearson'],Literal[
+                       fit_metric: Union[Literal['pearson'], Literal[
                            'spearman']] = 'pearson',
                        ax: Optional[Ax] = None,
                        ax_font_kwargs: Optional[Mapping] = None,
                        scatter_kwargs: Optional[Mapping] = None,
                        label_font_kwargs: Optional[Mapping] = None,
-                       legend_kwargs: Optional[Mapping] = None):
+                       legend_kwargs: Optional[Mapping] = None) -> Ax:
 
     x = ica_data.A.loc[imodulon1]
     y = ica_data.A.loc[imodulon2]
