@@ -488,9 +488,9 @@ def compare_gene_weights(ica_data: IcaData,
     ----------
     ica_data: pymodulon.core.IcaData
         IcaData container object
-    imodulon1: bool, str
+    imodulon1: int, str
         The name of the iModulon to plot on the x-axis
-    imodulon2: bool, str
+    imodulon2: int, str
         The name of the iModulon to plot on the y-axis
     groups: dict
         A mapping of data-points that form groups in the data
