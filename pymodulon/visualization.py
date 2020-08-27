@@ -343,7 +343,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
         The axes instance on which to generate the scatter-plot. If None is
         provided, generates a new figure and axes instance to use
     ax_font_kwargs: dict
-    kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
     scatter_kwargs: dict
         kwargs that are passed onto `ax.scatter()`
     label_font_kwargs: dict
@@ -470,7 +470,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
     return ax
 
 
-def compare_gene_weights(ica_data, imodulon1, imodulon2,
+def compare_gene_weights(ica_data: IcaData,
+                         imodulon1: ImodName, imodulon2: ImodName,
                          groups: Optional[Mapping] = None,
                          show_labels: Union[bool, Literal['auto']] = 'auto',
                          adjust_labels: bool = True,
@@ -480,25 +481,40 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                          label_font_kwargs: Optional[Mapping] = None,
                          legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
-    Compare gene weights between 2 iModulons
+    Compare gene weights between 2 iModulons. The result is shown as a
+    scatter-plot
 
     Parameters
     ----------
-    ica_data
-    imodulon1
-    imodulon2
-    groups
-    show_labels
-    adjust_labels
-    ax
-    ax_font_kwargs
-    scatter_kwargs
-    label_font_kwargs
-    legend_kwargs
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    imodulon1: bool, str
+        The name of the iModulon to plot on the x-axis
+    imodulon2: bool, str
+        The name of the iModulon to plot on the y-axis
+    groups: dict
+        A mapping of data-points that form groups in the data
+    show_labels: bool, str
+        An option that toggles whether data-points are given labels
+    adjust_labels: bool
+        An option that ensures labels on data are sufficiently spread out
+        and readable
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    scatter_kwargs: dict
+        kwargs that are passed onto `ax.scatter()`
+    label_font_kwargs: dict
+        kwargs that are passed onto `ax.text()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
 
     Returns
     -------
-
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
     """
     x = ica_data.M[imodulon1]
     y = ica_data.M[imodulon2]
