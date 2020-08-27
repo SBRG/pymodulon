@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Union
+from typing import List, Literal, Optional, Mapping, Tuple, Union
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -295,6 +295,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
                 adjust_labels: bool = True,
+                figsize: Tuple[int, int] = (6, 6),
                 line45: bool = False,
                 line45_margin: float = 0,
                 fit_line: bool = False,
@@ -324,6 +325,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
     adjust_labels: bool
         An option that ensures labels on data are sufficiently spread out
         and readable
+    figsize: tuple
+        Sets the figure size if no ax obj is given
     line45: bool
         An option to add a 45 degree line to the scatter-plot, useful
         for comparison with R^2 values
@@ -358,7 +361,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
     """
 
     if ax is None:
-        fig, ax = plt.subplots()
+        fig, ax = plt.subplots(figsize=figsize)
 
     if show_labels == 'auto':
         show_labels = (len(x) <= 20)
@@ -475,6 +478,7 @@ def compare_gene_weights(ica_data: IcaData,
                          groups: Optional[Mapping] = None,
                          show_labels: Union[bool, Literal['auto']] = 'auto',
                          adjust_labels: bool = True,
+                         figsize: Tuple[int, int] = (8, 8),
                          ax: Optional[Ax] = None,
                          ax_font_kwargs: Optional[Mapping] = None,
                          scatter_kwargs: Optional[Mapping] = None,
@@ -499,6 +503,8 @@ def compare_gene_weights(ica_data: IcaData,
     adjust_labels: bool
         An option that ensures labels on data are sufficiently spread out
         and readable
+    figsize: tuple
+        Sets the figure size if no ax obj is provided
     ax: matplotlib.axes instance
         The axes instance on which to generate the scatter-plot. If None is
         provided, generates a new figure and axes instance to use
@@ -522,11 +528,10 @@ def compare_gene_weights(ica_data: IcaData,
     xlabel = f'{imodulon1} Gene Weight'
     ylabel = f'{imodulon2} Gene Weight'
 
-    ax = scatterplot(x, y, ax=ax, groups=groups,
-                     show_labels=False,
-                     adjust_labels=False,
+    ax = scatterplot(x, y, groups=groups, show_labels=False,
+                     adjust_labels=False, figsize=figsize,
                      xlabel=xlabel, ylabel=ylabel,
-                     ax_font_kwargs=ax_font_kwargs,
+                     ax=ax, ax_font_kwargs=ax_font_kwargs,
                      scatter_kwargs=scatter_kwargs,
                      label_font_kwargs=label_font_kwargs,
                      legend_kwargs=legend_kwargs)
@@ -617,11 +622,9 @@ def compare_activities(ica_data, imodulon1, imodulon2,
     xlabel = '{} iModulon Activity'.format(imodulon1)
     ylabel = '{} iModulon Activity'.format(imodulon2)
 
-    ax = scatterplot(x, y, ax=ax, groups=groups,
-                     show_labels=show_labels,
-                     adjust_labels=adjust_labels,
-                     fit_line=True, fit_metric=fit_metric,
-                     xlabel=xlabel, ylabel=ylabel,
+    ax = scatterplot(x, y, groups=groups, show_labels=show_labels,
+                     adjust_labels=adjust_labels, size=7, fit_line=True,
+                     fit_metric=fit_metric, xlabel=xlabel, ylabel=ylabel, ax=ax,
                      ax_font_kwargs=ax_font_kwargs,
                      scatter_kwargs=scatter_kwargs,
                      label_font_kwargs=label_font_kwargs,
