@@ -3,6 +3,7 @@ import os
 import numpy as np
 import pandas as pd
 
+from matplotlib.axes._subplots import Subplot
 from scipy import stats
 from typing import *
 from warnings import warn
@@ -13,6 +14,7 @@ from warnings import warn
 ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 Data = Union[pd.DataFrame, os.PathLike]
+Ax = TypeVar("Ax", Subplot, object)
 
 
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):
