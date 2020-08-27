@@ -326,7 +326,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
         for k, val in groups.items():
             data.loc[k, 'group'] = val
 
-    # Handle custom args
+    # Handle custom kwargs
     if ax_font_kwargs is None:
         ax_font_kwargs = {}
 
@@ -495,7 +495,7 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
         auto = (bin_M[imodulon1].astype(bool)
                 & bin_M[imodulon2].astype(bool)).sum() <= 20
 
-    if show_labels is True or auto is True:
+    if show_labels is True or auto == True:
         for gene in component_genes:
             ax.scatter(ica_data.M.loc[gene, imodulon1],
                        ica_data.M.loc[gene, imodulon2],
