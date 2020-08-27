@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import List, Union, Dict, Literal, Optional, Mapping
+from typing import Dict, List, Literal, Optional, Mapping, Union
 
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from pymodulon.util import ImodName
+from pymodulon.util import Ax, ImodName
 
 
 ########################
@@ -25,8 +25,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ylabel: str = '',
             projects: Optional[Union[List, str]] = None,
             highlight: Optional[Union[List, str]] = None,
-            ax=None,
-            legend_args: Optional[Dict] = None):
+            ax: Optional[Ax] = None,
+            legend_kwargs: Optional[Mapping] = None):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
@@ -38,7 +38,7 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
         projects: Project(s) to show
         highlight: Project(s) to highlight
         ax: Matplotlib axis object
-        legend_args: Dictionary of arguments for the legend
+        legend_kwargs: Dictionary of arguments for the legend
 
     Returns: A matplotlib axis object
 
@@ -134,8 +134,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
             kwargs = {'bbox_to_anchor': (1, 1), 'ncol': len(
                 color_vals.name.unique()) // 6 + 1}
 
-            if legend_args is not None:
-                kwargs.update(legend_args)
+            if legend_kwargs is not None:
+                kwargs.update(legend_kwargs)
 
             ax.legend(**kwargs)
 
@@ -164,7 +164,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
 def plot_expression(ica_data: IcaData, gene: str,
                     projects: Union[List, str] = None,
                     highlight: Union[List, str] = None,
-                    ax=None, legend_args: Dict = None):
+                    ax: Optional[Ax] = None,
+                    legend_kwargs: Optional[Mapping] = None):
     """
     Creates a barplot showing an gene's expression across the compendium
     Args:
@@ -173,7 +174,7 @@ def plot_expression(ica_data: IcaData, gene: str,
         projects: Name(s) of projects to show (default: show all)
         highlight: Name(s) of projects to highlight (default: None)
         ax: Matplotlib axis object
-        legend_args: Dictionary of arguments to be passed to legend
+        legend_kwargs: Dictionary of arguments to be passed to legend
 
     Returns: A matplotlib axis object
 
@@ -203,13 +204,14 @@ def plot_expression(ica_data: IcaData, gene: str,
             raise ValueError('Gene does not exist: {}'.format(gene))
 
     return barplot(values, ica_data.sample_table, label, projects,
-                   highlight, ax, legend_args)
+                   highlight, ax, legend_kwargs)
 
 
 def plot_activities(ica_data: IcaData, imodulon: ImodName,
                     projects: Union[List, str] = None,
                     highlight: Union[List, str] = None,
-                    ax=None, legend_args: Dict = None):
+                    ax: Optional[Ax] = None,
+                    legend_kwargs: Optional[Mapping] = None):
     """
     Creates a barplot showing an iModulon's activity across the compendium
     Args:
@@ -218,7 +220,7 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
         projects: Name(s) of projects to show (default: show all)
         highlight: Name(s) of projects to highlight (default: None)
         ax: Matplotlib axis object
-        legend_args: Dictionary of arguments to be passed to legend
+        legend_kwargs: Dictionary of arguments to be passed to legend
 
     Returns: A matplotlib axis object
 
@@ -232,13 +234,14 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
     label = '{} iModulon\nActivity'.format(imodulon)
 
     return barplot(values, ica_data.sample_table, label, projects,
-                   highlight, ax, legend_args)
+                   highlight, ax, legend_kwargs)
 
 
 def plot_metadata(ica_data: IcaData, column,
                   projects: Union[List, str] = None,
                   highlight: Union[List, str] = None,
-                  ax=None, legend_args: Dict = None):
+                  ax: Optional[Ax] = None,
+                  legend_kwargs: Optional[Mapping] = None):
     """
     Creates a barplot for values in the sample table
 
@@ -248,7 +251,7 @@ def plot_metadata(ica_data: IcaData, column,
         projects: Name(s) of projects to show (default: show all)
         highlight: Name(s) of projects to highlight (default: None)
         ax: Matplotlib axis object
-        legend_args: Dictionary of arguments to be passed to legend
+        legend_kwargs: Dictionary of arguments to be passed to legend
 
     Returns: A matplotlib axis object
     """
@@ -266,7 +269,7 @@ def plot_metadata(ica_data: IcaData, column,
         raise ValueError('Column not in sample table: {}'.format(column))
 
     return barplot(values, table, column, projects,
-                   highlight, ax, legend_args)
+                   highlight, ax, legend_kwargs)
 
 
 # def plot_gene_weights(kind='scatter'):
@@ -298,11 +301,11 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 fit_metric: Union[Literal['pearson'], Literal['spearman'],
                                   Literal['r2']] = 'pearson',
                 xlabel: str = '', ylabel: str = '',
-                ax=None,
-                ax_font_args: Optional[Mapping] = None,
-                scatter_args: Optional[Mapping] = None,
-                label_font_args: Optional[Mapping] = None,
-                legend_args: Optional[Mapping] = None):
+                ax: Optional[Ax] = None,
+                ax_font_kwargs: Optional[Mapping] = None,
+                scatter_kwargs: Optional[Mapping] = None,
+                label_font_kwargs: Optional[Mapping] = None,
+                legend_kwargs: Optional[Mapping] = None):
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -324,17 +327,17 @@ def scatterplot(x: pd.Series, y: pd.Series,
             data.loc[k, 'group'] = val
 
     # Handle custom args
-    if ax_font_args is None:
-        ax_font_args = {}
+    if ax_font_kwargs is None:
+        ax_font_kwargs = {}
 
-    if label_font_args is None:
-        label_font_args = {}
+    if label_font_kwargs is None:
+        label_font_kwargs = {}
 
-    if legend_args is None:
-        legend_args = {}
+    if legend_kwargs is None:
+        legend_kwargs = {}
 
-    if scatter_args is None:
-        scatter_args = {}
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
 
     # Get x and y limits
     margin = 0.1
@@ -370,7 +373,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
     for name, group in data.groupby('group'):
 
         # Override defaults for hidden points
-        kwargs = scatter_args.copy()
+        kwargs = scatter_kwargs.copy()
         if name == 'hidden':
             kwargs.update({'c': 'gray', 'alpha': 0.7, 'linewidth': 0,
                            'label': None})
@@ -395,7 +398,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
     if show_labels:
         texts = []
         for idx in x.index:
-            texts.append(ax.text(x[idx], y[idx], idx, **label_font_args))
+            texts.append(ax.text(x[idx], y[idx], idx, **label_font_kwargs))
         if adjust_labels:
             adjust_text(texts, ax=ax,
                         arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
@@ -406,10 +409,10 @@ def scatterplot(x: pd.Series, y: pd.Series,
     ax.set_xlim((xmin, xmax))
     ax.set_ylim((ymin, ymax))
 
-    ax.set_xlabel(xlabel, **ax_font_args)
-    ax.set_ylabel(ylabel, **ax_font_args)
+    ax.set_xlabel(xlabel, **ax_font_kwargs)
+    ax.set_ylabel(ylabel, **ax_font_kwargs)
 
-    ax.legend(**legend_args)
+    ax.legend(**legend_kwargs)
 
     return ax
 
@@ -418,11 +421,11 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                          groups: Optional[Mapping] = None,
                          show_labels: Union[bool, Literal['auto']] = 'auto',
                          adjust_labels: bool = True,
-                         ax=None,
-                         ax_font_args: Optional[Mapping] = None,
-                         scatter_args: Optional[Mapping] = None,
-                         label_font_args: Optional[Mapping] = None,
-                         legend_args: Optional[Mapping] = None):
+                         ax: Optional[Ax] = None,
+                         ax_font_kwargs: Optional[Mapping] = None,
+                         scatter_kwargs: Optional[Mapping] = None,
+                         label_font_kwargs: Optional[Mapping] = None,
+                         legend_kwargs: Optional[Mapping] = None):
     '''
     Compare gene weights between 2 iModulons
 
@@ -435,10 +438,10 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
     show_labels
     adjust_labels
     ax
-    ax_font_args
-    scatter_args
-    label_font_args
-    legend_args
+    ax_font_kwargs
+    scatter_kwargs
+    label_font_kwargs
+    legend_kwargs
 
     Returns
     -------
@@ -455,10 +458,10 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                      show_labels=False,
                      adjust_labels=False,
                      xlabel=xlabel, ylabel=ylabel,
-                     ax_font_args=ax_font_args,
-                     scatter_args=scatter_args,
-                     label_font_args=label_font_args,
-                     legend_args=legend_args)
+                     ax_font_kwargs=ax_font_kwargs,
+                     scatter_kwargs=scatter_kwargs,
+                     label_font_kwargs=label_font_kwargs,
+                     legend_kwargs=legend_kwargs)
 
     # Add thresholds to scatterplot (dashed lines)
     xmin, xmax = ax.get_xlim()
@@ -532,13 +535,14 @@ def compare_activities(ica_data, imodulon1, imodulon2,
                        groups: Optional[Mapping] = None,
                        show_labels: Union[bool, Literal['auto']] = 'auto',
                        adjust_labels: bool = True,
-                       fit_metric: Union[Literal['pearson'], Literal[
+                       fit_metric: Union[Literal['pearson'],Literal[
                            'spearman']] = 'pearson',
-                       ax=None,
-                       ax_font_args: Dict = None,
-                       scatter_args: Dict = None,
-                       label_font_args: Dict = None,
-                       legend_args: Dict = None):
+                       ax: Optional[Ax] = None,
+                       ax_font_kwargs: Optional[Mapping] = None,
+                       scatter_kwargs: Optional[Mapping] = None,
+                       label_font_kwargs: Optional[Mapping] = None,
+                       legend_kwargs: Optional[Mapping] = None):
+
     x = ica_data.A.loc[imodulon1]
     y = ica_data.A.loc[imodulon2]
 
@@ -550,10 +554,10 @@ def compare_activities(ica_data, imodulon1, imodulon2,
                      adjust_labels=adjust_labels,
                      fit_line=True, fit_metric=fit_metric,
                      xlabel=xlabel, ylabel=ylabel,
-                     ax_font_args=ax_font_args,
-                     scatter_args=scatter_args,
-                     label_font_args=label_font_args,
-                     legend_args=legend_args)
+                     ax_font_kwargs=ax_font_kwargs,
+                     scatter_kwargs=scatter_kwargs,
+                     label_font_kwargs=label_font_kwargs,
+                     legend_kwargs=legend_kwargs)
 
     return ax
 
