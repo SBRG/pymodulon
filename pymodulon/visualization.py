@@ -473,6 +473,19 @@ def scatterplot(x: pd.Series, y: pd.Series,
     return ax
 
 
+def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
+                      groups: Optional[Mapping] = None,
+                      show_labels: Union[bool, Literal['auto']] = 'auto',
+                      adjust_labels: bool = True,
+                      figsize: Tuple[int, int] = (8,6),
+                      ax: Optional[Ax] = None,
+                      ax_font_kwargs: Optional[Mapping] = None,
+                      scatter_kwargs: Optional[Mapping] = None,
+                      label_font_kwargs: Optional[Mapping] = None,
+                      legend_kwargs: Optional[Mapping] = None) -> Ax:
+    pass
+
+
 def compare_gene_weights(ica_data: IcaData,
                          imodulon1: ImodName, imodulon2: ImodName,
                          groups: Optional[Mapping] = None,
