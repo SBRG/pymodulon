@@ -299,10 +299,10 @@ def scatterplot(x: pd.Series, y: pd.Series,
                                   Literal['r2']] = 'pearson',
                 xlabel: str = '', ylabel: str = '',
                 ax=None,
-                ax_font_args: Dict = None,
-                scatter_args: Dict = None,
-                label_font_args: Dict = None,
-                legend_args: Dict = None):
+                ax_font_args: Optional[Mapping] = None,
+                scatter_args: Optional[Mapping] = None,
+                label_font_args: Optional[Mapping] = None,
+                legend_args: Optional[Mapping] = None):
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -419,10 +419,10 @@ def compare_gene_weights(ica_data, imodulon1, imodulon2,
                          show_labels: Union[bool, Literal['auto']] = 'auto',
                          adjust_labels: bool = True,
                          ax=None,
-                         ax_font_args: Optional[Dict] = None,
-                         scatter_args: Optional[Dict] = None,
-                         label_font_args: Optional[Dict] = None,
-                         legend_args: Optional[Dict] = None):
+                         ax_font_args: Optional[Mapping] = None,
+                         scatter_args: Optional[Mapping] = None,
+                         label_font_args: Optional[Mapping] = None,
+                         legend_args: Optional[Mapping] = None):
     '''
     Compare gene weights between 2 iModulons
 
