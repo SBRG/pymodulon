@@ -292,7 +292,7 @@ def plot_metadata(ica_data: IcaData, column,
 
 
 def scatterplot(x: pd.Series, y: pd.Series,
-                groups: Optional[Mapping],
+                groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
                 adjust_labels: bool = True,
                 line45: bool = False,
@@ -306,6 +306,56 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 scatter_kwargs: Optional[Mapping] = None,
                 label_font_kwargs: Optional[Mapping] = None,
                 legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Generates a scatter-plot of the data given, with options for coloring by
+    group, adding labels, adding lines, and generating correlation or
+    determination coefficients.
+
+    Parameters
+    ----------
+    x: pd.Series
+        The data to be plotted on the x-axis
+    y: pd.Series
+        The data to be plotted on the x-axis
+    groups: dict
+        A mapping of data-points that form groups in the data
+    show_labels: bool, str
+        An option that toggles whether data-points are given labels
+    adjust_labels: bool
+        An option that ensures labels on data are sufficiently spread out
+        and readable
+    line45: bool
+        An option to add a 45 degree line to the scatter-plot, useful
+        for comparison with R^2 values
+    line45_margin: float
+        An option that adds margins around the 45 degree line. The larger
+        this number, the larger the margin (distance from line45)
+    fit_line: bool
+        An option to add a line of best fit on the scatter-plot
+    fit_metric: str
+        The metric to use for finding the line of best fit. Options include
+        pearson-r, spearman-r, or r^2
+    xlabel: str
+        The label to use for the x-axis of the plot
+    ylabel: str
+        The label to use for the y-axis of the plot
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    ax_font_kwargs: dict
+    kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    scatter_kwargs: dict
+        kwargs that are passed onto `ax.scatter()`
+    label_font_kwargs: dict
+        kwargs that are passed onto `ax.text()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
+    """
 
     if ax is None:
         fig, ax = plt.subplots()
@@ -363,12 +413,14 @@ def scatterplot(x: pd.Series, y: pd.Series,
                      min(xmax, ymax + line45_margin)],
                     [max(ymin, xmin - line45_margin),
                      min(ymax, xmax - line45_margin)],
-                    color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
+                    color='gray', linestyle='dashed',
+                    linewidth=0.5, zorder=0)
             ax.plot([max(xmin, ymin - line45_margin),
                      min(xmax, ymax - line45_margin)],
                     [max(ymin, xmin + line45_margin),
                      min(ymax, xmax + line45_margin)],
-                    color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
+                    color='gray', linestyle='dashed',
+                    linewidth=0.5, zorder=0)
 
     for name, group in data.groupby('group'):
 
