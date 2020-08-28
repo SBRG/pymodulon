@@ -272,25 +272,6 @@ def plot_metadata(ica_data: IcaData, column,
                    highlight, ax, legend_kwargs)
 
 
-# def plot_gene_weights(kind='scatter'):
-#     """Plots iModulon gene weights
-#
-#     If the ica_data object contains an expression matrix (X), this will
-#     produce a scatter plot between gene weights and a reference gene
-#     expression set. If not, this will produce a histogram. This can be
-#     manually selected using the `kind` argument.
-#
-#     Args:
-#         kind: Kind of plot ('scatter' or 'histogram')
-#
-#
-#
-#     Returns:
-#
-#     """
-#     pass
-
-
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
