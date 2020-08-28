@@ -351,7 +351,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
         show_labels = (len(x) <= 20)
 
     if not (isinstance(x, pd.Series) and isinstance(y, pd.Series) and
-            (x.sort_index().index == y.sort_index().index).all()):
+            x.sort_index().index.equals(y.sort_index().index)):
         raise TypeError('X and Y must be pandas series with the same index')
 
     # Set up data object
