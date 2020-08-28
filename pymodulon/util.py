@@ -11,10 +11,12 @@ from warnings import warn
 ################
 # Type Aliases #
 ################
+Ax = TypeVar("Ax", Subplot, object)
+Data = Union[pd.DataFrame, os.PathLike]
+SeqSetStr = Union[Sequence[str], Set[str]]
 ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
-Data = Union[pd.DataFrame, os.PathLike]
-Ax = TypeVar("Ax", Subplot, object)
+
 
 
 def _check_table(table: Data, name: str, index: Optional[Collection] = None):

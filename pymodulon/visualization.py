@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from pymodulon.util import Ax, ImodName
+from pymodulon.util import Ax, ImodName, SeqSetStr
 
 
 ########################
@@ -460,6 +460,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
 def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
                       by: Union[Literal['log-tpm-norm'], Literal['length'],
                                 Literal['start']],
+                      ref_cols: Optional[SeqSetStr] = None,
                       groups: Optional[Mapping] = None,
                       show_labels: Union[bool, Literal['auto']] = 'auto',
                       adjust_labels: bool = True,
@@ -471,15 +472,12 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
                       label_font_kwargs: Optional[Mapping] = None,
                       legend_kwargs: Optional[Mapping] = None) -> Ax:
 
-    x = xlabel = None
     y = ica_data.M[imodulon]
     ylabel = f'{imodulon} Gene Weight'
 
     #  Ensure 'by' has a valid input
-    if by not in ['log-tpm-norm', 'length', 'start']:
-        raise ValueError('by must be "log-tpm-norm", "length", or "start"')
-    elif by == 'log-tpm-norm':
-        x = ica_data.X.mean(axis=1)
+    if by == ('log-tpm' or 'log-tpm-norm'):
+        x = _normalize_expr(ica_data, ref_cols)
         xlabel = 'Mean Expression'
     elif by == 'length':
         x = np.log10(ica_data.gene_table.length)
@@ -487,6 +485,8 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     elif by == 'start':
         x = ica_data.gene_table.start
         xlabel = 'Gene Start'
+    else:
+        raise ValueError('by must be "log-tpm-norm", "length", or "start"')
 
     # Create ax if None is provided
     if ax is None:
@@ -805,3 +805,15 @@ def _adj_r2(f, x, y, params):
     k = len(params) - 1
     r2 = r2_score(y, f(x, *params))
     return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
+
+
+def _normalize_expr(ica_data, ref_cols):
+    x = ica_data.X
+
+    if ref_cols:
+        drop_cols = x[ref_cols].mean(axis=1)
+        norm = x.sub(drop_cols, axis=0).drop(ref_cols, axis=1).mean(axis=1)
+    else:
+        norm = x.mean(axis=1)
+
+    return norm
