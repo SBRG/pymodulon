@@ -501,8 +501,8 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
         x = ica_data.X.mean(axis=1)
         xlabel = 'Mean Expression'
     elif by == 'length':
-        x = ica_data.gene_table.length
-        xlabel = 'Gene Length'
+        x = np.log10(ica_data.gene_table.length)
+        xlabel = 'Gene Length (log10-scale)'
     elif by == 'start':
         x = ica_data.gene_table.start
         xlabel = 'Gene Start'
