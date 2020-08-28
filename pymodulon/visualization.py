@@ -303,6 +303,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
                                   Literal['r2']] = 'pearson',
                 xlabel: str = '', ylabel: str = '',
                 ax: Optional[Ax] = None,
+                legend: bool = True,
                 ax_font_kwargs: Optional[Mapping] = None,
                 scatter_kwargs: Optional[Mapping] = None,
                 label_font_kwargs: Optional[Mapping] = None,
@@ -345,6 +346,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
     ax: matplotlib.axes instance
         The axes instance on which to generate the scatter-plot. If None is
         provided, generates a new figure and axes instance to use
+    legend: bool
+        An option on whether to show the legend
     ax_font_kwargs: dict
         kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
     scatter_kwargs: dict
@@ -467,7 +470,97 @@ def scatterplot(x: pd.Series, y: pd.Series,
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
 
-    if legend_kwargs != {}:
+    if legend and legend_kwargs:
+        ax.legend(**legend_kwargs)
+
+    return ax
+
+
+def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
+                      by: Union[Literal['log-tpm-norm'], Literal['length'],
+                                Literal['start']],
+                      groups: Optional[Mapping] = None,
+                      show_labels: Union[bool, Literal['auto']] = 'auto',
+                      adjust_labels: bool = True,
+                      figsize: Tuple[int, int] = (8, 6),
+                      ax: Optional[Ax] = None,
+                      legend: bool = True,
+                      ax_font_kwargs: Optional[Mapping] = None,
+                      scatter_kwargs: Optional[Mapping] = None,
+                      label_font_kwargs: Optional[Mapping] = None,
+                      legend_kwargs: Optional[Mapping] = None) -> Ax:
+
+    x = xlabel = None
+    y = ica_data.M[imodulon]
+    ylabel = f'{imodulon} Gene Weight'
+
+    #  Ensure 'by' has a valid input
+    if by not in ['log-tpm-norm', 'length', 'start']:
+        raise ValueError('by must be "log-tpm-norm", "length", or "start"')
+    elif by == 'log-tpm-norm':
+        x = ica_data.X.mean(axis=1)
+        xlabel = 'Mean Expression'
+    elif by == 'length':
+        x = ica_data.gene_table.length
+        xlabel = 'Gene Length'
+    elif by == 'start':
+        x = ica_data.gene_table.start
+        xlabel = 'Gene Start'
+
+    # Create ax if None is provided
+    if ax is None:
+        fig, ax = plt.subplots(figsize=figsize)
+
+    ax = scatterplot(x, y, groups=groups, show_labels=False,
+                     adjust_labels=False, figsize=figsize,
+                     xlabel=xlabel, ylabel=ylabel,
+                     ax=ax, legend=legend,
+                     ax_font_kwargs=ax_font_kwargs,
+                     scatter_kwargs=scatter_kwargs,
+                     label_font_kwargs=label_font_kwargs,
+                     legend_kwargs=None)
+
+    # Add thresholds to scatterplot (dashed lines)
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+
+    thresh = ica_data.thresholds['Fur-1']
+    if thresh != 0:
+        ax.hlines([thresh, -thresh], xmin=xmin, xmax=xmax,
+                  colors='k', linestyles='dashed', linewidth=1)
+
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+
+    bin_M = ica_data.M_binarized
+    component_genes = set(bin_M[imodulon].loc[bin_M[imodulon] == 1].index)
+    texts = []
+    expand_kwargs = {'expand_objects': (1.2, 1.4),
+                     'expand_points': (1.3, 1.3)}
+
+    # Add labels: Put gene name if components contain under 20 genes
+    if show_labels is True or (show_labels is not False
+                               and len(component_genes) <= 20):
+        for gene in component_genes:
+            texts.append(ax.text(x[gene], ica_data.M.loc[gene, imodulon],
+                                 ica_data.gene_table.loc[gene, 'gene_name'],
+                                 fontsize=12))
+
+        expand_kwargs['expand_text'] = (1.4, 1.4)
+
+    # Add labels: Repel texts from other text and points
+    rect = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh)),
+                                  width=xmax-xmin,
+                                  height=2*abs(thresh),
+                                  fill=False, linewidth=0))
+
+    if adjust_labels:
+        adjust_text(texts=texts, add_objects=[rect], ax=ax,
+                    arrowprops=dict(arrowstyle='-', color='k', lw=0.5),
+                    only_move={'objects': 'y'}, **expand_kwargs)
+
+    # Add legend
+    if legend and legend_kwargs:
         ax.legend(**legend_kwargs)
 
     return ax
@@ -478,8 +571,9 @@ def compare_gene_weights(ica_data: IcaData,
                          groups: Optional[Mapping] = None,
                          show_labels: Union[bool, Literal['auto']] = 'auto',
                          adjust_labels: bool = True,
-                         figsize: Tuple[int, int] = (8, 8),
+                         figsize: Tuple[int, int] = (8, 6),
                          ax: Optional[Ax] = None,
+                         legend: bool = False,
                          ax_font_kwargs: Optional[Mapping] = None,
                          scatter_kwargs: Optional[Mapping] = None,
                          label_font_kwargs: Optional[Mapping] = None,
@@ -508,6 +602,8 @@ def compare_gene_weights(ica_data: IcaData,
     ax: matplotlib.axes instance
         The axes instance on which to generate the scatter-plot. If None is
         provided, generates a new figure and axes instance to use
+    legend: bool
+        An option on whether to show the legend
     ax_font_kwargs: dict
         kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
     scatter_kwargs: dict
@@ -531,10 +627,11 @@ def compare_gene_weights(ica_data: IcaData,
     ax = scatterplot(x, y, groups=groups, show_labels=False,
                      adjust_labels=False, figsize=figsize,
                      xlabel=xlabel, ylabel=ylabel,
-                     ax=ax, ax_font_kwargs=ax_font_kwargs,
+                     ax=ax, legend=legend,
+                     ax_font_kwargs=ax_font_kwargs,
                      scatter_kwargs=scatter_kwargs,
                      label_font_kwargs=label_font_kwargs,
-                     legend_kwargs=legend_kwargs)
+                     legend_kwargs=None)
 
     # Add thresholds to scatterplot (dashed lines)
     xmin, xmax = ax.get_xlim()
@@ -597,6 +694,10 @@ def compare_gene_weights(ica_data: IcaData,
                     arrowprops=dict(arrowstyle='-', color='k', lw=0.5),
                     only_move={'objects': 'y'}, **expand_kwargs)
 
+    # Add legend
+    if legend and legend_kwargs:
+        ax.legend(**legend_kwargs)
+
     return ax
 
 
@@ -623,9 +724,9 @@ def compare_activities(ica_data, imodulon1, imodulon2,
     ylabel = '{} iModulon Activity'.format(imodulon2)
 
     ax = scatterplot(x, y, groups=groups, show_labels=show_labels,
-                     adjust_labels=adjust_labels, size=7, fit_line=True,
-                     fit_metric=fit_metric, xlabel=xlabel, ylabel=ylabel, ax=ax,
-                     ax_font_kwargs=ax_font_kwargs,
+                     adjust_labels=adjust_labels, fit_line=True,
+                     fit_metric=fit_metric, xlabel=xlabel, ylabel=ylabel,
+                     ax=ax, ax_font_kwargs=ax_font_kwargs,
                      scatter_kwargs=scatter_kwargs,
                      label_font_kwargs=label_font_kwargs,
                      legend_kwargs=legend_kwargs)
