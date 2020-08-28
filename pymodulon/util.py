@@ -13,7 +13,7 @@ from warnings import warn
 ################
 Ax = TypeVar("Ax", Subplot, object)
 Data = Union[pd.DataFrame, os.PathLike]
-SeqSetStr = Union[Sequence[str], Set[str]]
+SeqSetStr = Union[Sequence[str], Set[str], str]
 ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 
