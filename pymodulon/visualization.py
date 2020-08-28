@@ -524,7 +524,7 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     xmin, xmax = ax.get_xlim()
     ymin, ymax = ax.get_ylim()
 
-    thresh = ica_data.thresholds['Fur-1']
+    thresh = ica_data.thresholds[imodulon]
     if thresh != 0:
         ax.hlines([thresh, -thresh], xmin=xmin, xmax=xmax,
                   colors='k', linestyles='dashed', linewidth=1)
