@@ -276,7 +276,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
                 adjust_labels: bool = True,
-                figsize: Tuple[int, int] = (6, 6),
+                figsize: Tuple[int, int] = (8, 6),
                 line45: bool = False,
                 line45_margin: float = 0,
                 fit_line: bool = False,
@@ -682,17 +682,47 @@ def compare_gene_weights(ica_data: IcaData,
     return ax
 
 
-def compare_expression():
-    pass
+def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
+                       groups: Optional[Mapping] = None,
+                       show_labels: Union[bool, Literal['auto']] = 'auto',
+                       adjust_labels: bool = True,
+                       figsize: Tuple[int, int] = (8, 6),
+                       fit_metric: Union[Literal['pearson'], Literal[
+                           'spearman']] = 'pearson',
+                       ax: Optional[Ax] = None,
+                       legend: bool = True,
+                       ax_font_kwargs: Optional[Mapping] = None,
+                       scatter_kwargs: Optional[Mapping] = None,
+                       label_font_kwargs: Optional[Mapping] = None,
+                       legend_kwargs: Optional[Mapping] = None) -> Ax:
+
+    x = ica_data.X.loc[gene1]
+    y = ica_data.X.loc[gene2]
+
+    xlabel = f'{gene1} Expression'
+    ylabel = f'{gene2} Expression'
+
+    ax = scatterplot(x, y, groups=groups, show_labels=show_labels,
+                     adjust_labels=adjust_labels, figsize=figsize,
+                     fit_line=True, fit_metric=fit_metric,
+                     xlabel=xlabel, ylabel=ylabel, ax=ax, legend=legend,
+                     ax_font_kwargs=ax_font_kwargs,
+                     scatter_kwargs=scatter_kwargs,
+                     label_font_kwargs=label_font_kwargs,
+                     legend_kwargs=legend_kwargs)
+
+    return ax
 
 
 def compare_activities(ica_data, imodulon1, imodulon2,
                        groups: Optional[Mapping] = None,
                        show_labels: Union[bool, Literal['auto']] = 'auto',
                        adjust_labels: bool = True,
+                       figsize: Tuple[int, int] = (8, 6),
                        fit_metric: Union[Literal['pearson'], Literal[
                            'spearman']] = 'pearson',
                        ax: Optional[Ax] = None,
+                       legend: bool = True,
                        ax_font_kwargs: Optional[Mapping] = None,
                        scatter_kwargs: Optional[Mapping] = None,
                        label_font_kwargs: Optional[Mapping] = None,
@@ -705,9 +735,10 @@ def compare_activities(ica_data, imodulon1, imodulon2,
     ylabel = '{} iModulon Activity'.format(imodulon2)
 
     ax = scatterplot(x, y, groups=groups, show_labels=show_labels,
-                     adjust_labels=adjust_labels, fit_line=True,
-                     fit_metric=fit_metric, xlabel=xlabel, ylabel=ylabel,
-                     ax=ax, ax_font_kwargs=ax_font_kwargs,
+                     adjust_labels=adjust_labels, figsize=figsize,
+                     fit_line=True, fit_metric=fit_metric,
+                     xlabel=xlabel, ylabel=ylabel, ax=ax, legend=legend,
+                     ax_font_kwargs=ax_font_kwargs,
                      scatter_kwargs=scatter_kwargs,
                      label_font_kwargs=label_font_kwargs,
                      legend_kwargs=legend_kwargs)
