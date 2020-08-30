@@ -17,9 +17,9 @@ from pymodulon.core import IcaData
 from pymodulon.util import Ax, ImodName, SeqSetStr
 
 
-########################
-# Component Gene Plots #
-########################
+############################
+# Component Gene Bar Plots #
+############################
 
 def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ylabel: str = '',
@@ -272,6 +272,10 @@ def plot_metadata(ica_data: IcaData, column,
                    highlight, ax, legend_kwargs)
 
 
+################################
+# Component Gene Scatter Plots #
+################################
+
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
@@ -471,6 +475,53 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
                       scatter_kwargs: Optional[Mapping] = None,
                       label_font_kwargs: Optional[Mapping] = None,
                       legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Generates a scatter-plot, with gene weights on the y-axis, and either
+    the mean expression, gene length, or gene start site on the x-axis.
+    Also shows the D'Agostino cutoff and labels the statistically
+    enriched genes, if the appropriate parameters are given.
+
+    Parameters
+    ----------
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    imodulon: int, str
+        The name of the iModulon to plot
+    by: 'log-tpm-norm', 'length', 'start'
+        Gene property to plot on the x-axis. log-tpm-norm plots mean
+        expression, length plots gene length, and start plots gene start
+        position
+    ref_cols: Sequence, set, or str
+        A str or list of str values to use for normalizing the log-tpm data.
+        Only used if 'log-tpm-norm' is given for the `by` parameter.
+    groups: dict
+        A mapping of data-points that form groups in the data
+    show_labels: bool, str
+        An option that toggles whether data-points are given labels
+    adjust_labels: bool
+        An option that ensures labels on data are sufficiently spread out
+        and readable
+    figsize: tuple
+        Sets the figure size if no ax obj is provided
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    legend: bool
+        An option on whether to show the legend
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    scatter_kwargs: dict
+        kwargs that are passed onto `ax.scatter()`
+    label_font_kwargs: dict
+        kwargs that are passed onto `ax.text()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
+    """
 
     y = ica_data.M[imodulon]
     ylabel = f'{imodulon} Gene Weight'
@@ -561,7 +612,9 @@ def compare_gene_weights(ica_data: IcaData,
                          legend_kwargs: Optional[Mapping] = None) -> Ax:
     """
     Compare gene weights between 2 iModulons. The result is shown as a
-    scatter-plot
+    scatter-plot. Also shows the D'Agostino cutoff for both iModulons,
+    and labels significantly enriched genes for both iModulons, if
+    appropriate parameters are selected.
 
     Parameters
     ----------
@@ -695,6 +748,49 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
                        scatter_kwargs: Optional[Mapping] = None,
                        label_font_kwargs: Optional[Mapping] = None,
                        legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Compares Gene Expression values between two genes. The result is shown
+    as a scatter-plot.
+
+    Parameters
+    ----------
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    gene1: str
+        Gene to plot on the x-axis
+    gene2: str
+        Gene to plot on the y-axis
+    groups: dict
+        A mapping of data-points that form groups in the data
+    show_labels: bool, str
+        An option that toggles whether data-points are given labels
+    adjust_labels: bool
+        An option that ensures labels on data are sufficiently spread out
+        and readable
+    figsize: tuple
+        Sets the figure size if no ax obj is provided
+    fit_metric: str
+        The metric to use for finding the line of best fit. Options include
+        pearson-r, spearman-r, or r^2
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    legend: bool
+        An option on whether to show the legend
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    scatter_kwargs: dict
+        kwargs that are passed onto `ax.scatter()`
+    label_font_kwargs: dict
+        kwargs that are passed onto `ax.text()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
+    """
 
     x = ica_data.X.loc[gene1]
     y = ica_data.X.loc[gene2]
@@ -727,12 +823,55 @@ def compare_activities(ica_data, imodulon1, imodulon2,
                        scatter_kwargs: Optional[Mapping] = None,
                        label_font_kwargs: Optional[Mapping] = None,
                        legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Compare activities between 2 iModulons.  The result is shown as a
+    scatter-plot.
+
+    Parameters
+    ----------
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    imodulon1: int, str
+        The name of the iModulon to plot on the x-axis
+    imodulon2: int, str
+        The name of the iModulon to plot on the y-axis
+    groups: dict
+        A mapping of data-points that form groups in the data
+    show_labels: bool, str
+        An option that toggles whether data-points are given labels
+    adjust_labels: bool
+        An option that ensures labels on data are sufficiently spread out
+        and readable
+    figsize: tuple
+        Sets the figure size if no ax obj is provided
+    fit_metric: str
+        The metric to use for finding the line of best fit. Options include
+        pearson-r, spearman-r, or r^2
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    legend: bool
+        An option on whether to show the legend
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    scatter_kwargs: dict
+        kwargs that are passed onto `ax.scatter()`
+    label_font_kwargs: dict
+        kwargs that are passed onto `ax.text()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
+    """
 
     x = ica_data.A.loc[imodulon1]
     y = ica_data.A.loc[imodulon2]
 
-    xlabel = '{} iModulon Activity'.format(imodulon1)
-    ylabel = '{} iModulon Activity'.format(imodulon2)
+    xlabel = f'{imodulon1} iModulon Activity'
+    ylabel = f'{imodulon2} iModulon Activity'
 
     ax = scatterplot(x, y, groups=groups, show_labels=show_labels,
                      adjust_labels=adjust_labels, figsize=figsize,
