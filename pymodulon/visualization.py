@@ -451,7 +451,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
 
-    if legend and legend_kwargs:
+    if (legend and legend_kwargs) or fit_line:
         ax.legend(**legend_kwargs)
 
     return ax
