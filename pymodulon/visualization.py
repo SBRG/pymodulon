@@ -476,7 +476,7 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     ylabel = f'{imodulon} Gene Weight'
 
     #  Ensure 'by' has a valid input
-    if by == ('log-tpm' or 'log-tpm-norm'):
+    if by in ('log-tpm', 'log-tpm-norm'):
         x = _normalize_expr(ica_data, ref_cols)
         xlabel = 'Mean Expression'
     elif by == 'length':
