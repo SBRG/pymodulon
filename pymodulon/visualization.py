@@ -682,8 +682,32 @@ def compare_gene_weights(ica_data: IcaData,
     return ax
 
 
-def compare_expression():
-    pass
+def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
+                       groups: Optional[Mapping] = None,
+                       show_labels: Union[bool, Literal['auto']] = 'auto',
+                       adjust_labels: bool = True,
+                       fit_metric: Union[Literal['pearson'], Literal[
+                           'spearman']] = 'pearson',
+                       ax: Optional[Ax] = None,
+                       ax_font_kwargs: Optional[Mapping] = None,
+                       scatter_kwargs: Optional[Mapping] = None,
+                       label_font_kwargs: Optional[Mapping] = None,
+                       legend_kwargs: Optional[Mapping] = None) -> Ax:
+
+    x = ica_data.X.loc[gene1]
+    y = ica_data.X.loc[gene2]
+
+    xlabel = f'{gene1} Expression'
+    ylabel = f'{gene2} Expression'
+
+    ax = scatterplot(x, y, groups=groups, show_labels=False,
+                     adjust_labels=False, figsize=figsize,
+                     xlabel=xlabel, ylabel=ylabel,
+                     ax=ax, legend=legend,
+                     ax_font_kwargs=ax_font_kwargs,
+                     scatter_kwargs=scatter_kwargs,
+                     label_font_kwargs=label_font_kwargs,
+                     legend_kwargs=None)
 
 
 def compare_activities(ica_data, imodulon1, imodulon2,
