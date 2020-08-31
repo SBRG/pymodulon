@@ -788,13 +788,19 @@ def _fit_line(x, y, ax, metric):
 
     elif metric == 'pearson':
         params = curve_fit(_solid_line, x, y)[0]
-        label = 'Pearson R = {:.2f}\np-value = {:.2e}'.format(*stats.pearsonr(
-            x, y))
+        r, pval = stats.pearsonr(x, y)
+        if pval < 1e10:
+            label = f'Pearson R = {r:.2f}\np-value < 1e10'
+        else:
+            label = f'Pearson R = {r:.2f}\np-value = {pval:1e}'
 
     elif metric == 'spearman':
         params = curve_fit(_solid_line, x, y)[0]
-        label = 'Spearman R = {:.2f}\np-value = {:.2e}'.format(*stats.spearmanr(
-            x, y))
+        r, pval = stats.spearmanr(x, y)
+        if pval < 1e10:
+            label = f'Spearman R = {r:.2f}\np-value < 1e10'
+        else:
+            label = f'Spearman R = {r:.2f}\np-value = {pval:1e}'
 
     else:
         raise ValueError('Metric must be "pearson", "spearman", or "r2"')
