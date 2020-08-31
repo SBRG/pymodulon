@@ -104,6 +104,10 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
 
     # Only keep genes found in both S matrices
     common = set(S1.index) & set(S2.index)
+
+    if len(common) == 0:
+        raise KeyError("No common genes")
+
     s1 = S1.reindex(common)
     s2 = S2.reindex(common)
 
