@@ -2,12 +2,13 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Tuple, Union
+from typing import List, Literal, Optional, Mapping, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from adjustText import adjust_text
+from matplotlib.patches import Rectangle
 from scipy import stats
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
@@ -16,9 +17,9 @@ from pymodulon.core import IcaData
 from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
 
 
-############################
-# Component Gene Bar Plots #
-############################
+#############
+# Bar Plots #
+#############
 
 def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ylabel: str = '',
@@ -256,12 +257,14 @@ def plot_metadata(ica_data: IcaData, column,
                    highlight, ax, legend_kwargs)
 
 
+################
+# Scatterplots #
+################
 
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, Literal['auto']] = 'auto',
                 adjust_labels: bool = True,
-                figsize: Tuple[int, int] = (8, 6),
                 line45: bool = False,
                 line45_margin: float = 0,
                 fit_line: bool = False,
@@ -292,8 +295,6 @@ def scatterplot(x: pd.Series, y: pd.Series,
     adjust_labels: bool
         An option that ensures labels on data are sufficiently spread out
         and readable
-    figsize: tuple
-        Sets the figure size if no ax obj is given
     line45: bool
         An option to add a 45 degree line to the scatter-plot, useful
         for comparison with R^2 values
@@ -538,8 +539,8 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
 
     # Add labels: Repel texts from other text and points
     rect = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh)),
-                                  width=xmax-xmin,
-                                  height=2*abs(thresh),
+                                  width=xmax - xmin,
+                                  height=2 * abs(thresh),
                                   fill=False, linewidth=0))
 
     if adjust_labels_pgw:
@@ -634,7 +635,7 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
         auto = (bin_M[imodulon1].astype(bool)
                 & bin_M[imodulon2].astype(bool)).sum() <= 20
 
-    if show_labels_cgw is True or auto == True:
+    if show_labels_cgw or auto:
         for gene in component_genes:
             ax.scatter(ica_data.M.loc[gene, imodulon1],
                        ica_data.M.loc[gene, imodulon2],
@@ -648,13 +649,13 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
 
     # Add labels: Repel texts from other text and points
     rectx = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh2)),
-                                   width=xmax-xmin,
-                                   height=2*abs(thresh2),
+                                   width=xmax - xmin,
+                                   height=2 * abs(thresh2),
                                    fill=False, linewidth=0))
 
     recty = ax.add_patch(Rectangle(xy=(-abs(thresh1), ymin),
-                                   width=2*abs(thresh1),
-                                   height=ymax-ymin,
+                                   width=2 * abs(thresh1),
+                                   height=ymax - ymin,
                                    fill=False, linewidth=0))
 
     if adjust_labels_cgw:
@@ -692,11 +693,23 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
         Returns the axes instance on which the scatter-plot is generated
     """
 
-    x = ica_data.X.loc[gene1]
-    y = ica_data.X.loc[gene2]
+    # Check that gene1 exists
+    if gene1 in ica_data.X.index:
+        x = ica_data.X.loc[gene1]
+        xlabel = f'{gene1} Expression'
+    else:
+        locus = name2num(ica_data, gene1)
+        x = ica_data.X.loc[locus]
+        xlabel = f'${gene1}$ Expression'
 
-    xlabel = f'{gene1} Expression'
-    ylabel = f'{gene2} Expression'
+    # Check that gene2 exists
+    if gene2 in ica_data.X.index:
+        y = ica_data.X.loc[gene2]
+        ylabel = f'{gene2} Expression'
+    else:
+        locus = name2num(ica_data, gene2)
+        y = ica_data.X.loc[locus]
+        ylabel = f'${gene2}$ Expression'
 
     # Remove xlabel, ylabel, and fit_line kwargs if provided
     kwargs.pop('xlabel', None)
@@ -712,7 +725,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
 
 def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     """
-    Compare activities between 2 iModulons.  The result is shown as a
+    Compare activities between two iModulons.  The result is shown as a
     scatter-plot.
 
     Parameters
@@ -749,6 +762,7 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 
     return ax
 
+
 ####################
 # Helper Functions #
 ####################
@@ -762,18 +776,18 @@ def _fit_line(x, y, ax, metric):
     elif metric == 'pearson':
         params = curve_fit(_solid_line, x, y)[0]
         r, pval = stats.pearsonr(x, y)
-        if pval < 1e10:
-            label = f'Pearson R = {r:.2f}\np-value < 1e10'
+        if pval < 1e-10:
+            label = f'Pearson R = {r:.2f}\np-value < 1e-10'
         else:
-            label = f'Pearson R = {r:.2f}\np-value = {pval:1e}'
+            label = f'Pearson R = {r:.2f}\np-value = {pval:.2e}'
 
     elif metric == 'spearman':
         params = curve_fit(_solid_line, x, y)[0]
         r, pval = stats.spearmanr(x, y)
-        if pval < 1e10:
-            label = f'Spearman R = {r:.2f}\np-value < 1e10'
+        if pval < 1e-10:
+            label = f'Spearman R = {r:.2f}\np-value < 1e-10'
         else:
-            label = f'Spearman R = {r:.2f}\np-value = {pval:1e}'
+            label = f'Spearman R = {r:.2f}\np-value = {pval:.2e}'
 
     else:
         raise ValueError('Metric must be "pearson", "spearman", or "r2"')

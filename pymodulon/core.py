@@ -150,9 +150,13 @@ class IcaData(object):
 
     @X.setter
     def X(self, x_matrix):
+        ## TODO: Use check_table function instead
         if isinstance(x_matrix, str):
-            sep = '\t' if x_matrix.endswith('.tsv') else ','
-            df = pd.read_csv(x_matrix, index_col=0, sep=sep)
+            try:
+                df = pd.read_json(x_matrix)
+            except ValueError:
+                sep = '\t' if x_matrix.endswith('.tsv') else ','
+                df = pd.read_csv(x_matrix, index_col=0, sep=sep)
         elif isinstance(x_matrix, pd.DataFrame):
             df = x_matrix
         else:
@@ -240,11 +244,11 @@ class IcaData(object):
         self._trn = _check_table(new_trn, 'TRN')
         if not self._trn.empty:
             # Only include genes that are in S/X matrix
-            self._trn = new_trn[new_trn.gene_id.isin(self.gene_names)]
+            self._trn = self._trn[self._trn.gene_id.isin(self.gene_names)]
 
             # Save regulator information to gene table
             reg_dict = {}
-            for name, group in self.trn.groupby('gene_id'):
+            for name, group in self._trn.groupby('gene_id'):
                 reg_dict[name] = ','.join(group.regulator)
             self._gene_table['regulator'] = pd.Series(reg_dict).reindex(
                 self.gene_names)

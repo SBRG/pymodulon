@@ -135,21 +135,25 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str, all_genes: List
 def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame, max_regs: int = 1, fdr: float = 0.01,
                            method: str = 'both', force: bool = False):
     """
-    Compare a gene set against an entire TRN
-    :param gene_set: Gene set for enrichment (e.g. genes in iModulon)
-    :param all_genes: List of all genes
-    :param trn: Pandas dataframe containing transcriptional regulatory network
-    :param max_regs: Maximum number of regulators to include in complex regulon (default: 1)
-    :param method: How to combine complex regulons. 'or' computes enrichment against union of regulons, \
-    'and' computes enrichment against intersection of regulons, and 'both' performs both tests (default: 'both')
-    :param fdr: False detection rate
-    :param force: Allows computation of >2 regulators
-    :return: Pandas dataframe containing statistically significant enrichments
+    Compare a gene set against an entire TRN :param gene_set: Gene set for
+    enrichment (e.g. genes in iModulon) :param all_genes: List of all genes
+    :param trn: Pandas dataframe containing transcriptional regulatory
+    network :param max_regs: Maximum number of regulators to include in
+    complex regulon (default: 1) :param method: How to combine complex
+    regulons. 'or' computes enrichment against union of regulons, \ 'and'
+    computes enrichment against intersection of regulons, and 'both' performs
+    both tests (default: 'both') :param fdr: False detection rate :param
+    force: Allows computation of >2 regulators :return: Pandas dataframe
+    containing statistically significant enrichments
+
+    Args:
+        all_genes:
     """
 
     # Warning if max_regs is too high
     if max_regs > 2:
-        warn('Using >2 maximum regulators may take time to compute. To perform analysis, use force=True',
+        warn('Using >2 maximum regulators may take time to compute. To '
+             'perform analysis, use force=True',
              category=RuntimeWarning)
         if not force:
             return
