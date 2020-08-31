@@ -7,6 +7,10 @@ from matplotlib.axes import Axes
 from scipy import stats
 from typing import *
 import warnings
+from graphviz import Digraph
+from tqdm import tqdm_notebook as tqdm
+from scipy import sparse
+
 
 ################
 # Type Aliases #
@@ -89,6 +93,7 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
     else:
         return np.mean([ordered_genes.iloc[i], ordered_genes.iloc[i - 1]])
 
+
 def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
     """
     Convert a gene name to the locus tag
@@ -127,24 +132,25 @@ def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
     else:
         return final_list
 
-######################
-## Compare ICA runs ##
-######################
 
-from graphviz import Digraph
-from scipy.cluster.hierarchy import linkage, dendrogram
-import tqdm
-from scipy import sparse
+####################
+# Compare ICA runs #
+####################
 
-
-def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: float, show_all: bool):
+def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
+                    cutoff: float, show_all: bool):
     """
-    Given two S matrices, returns the dot graph and name links of the various connected ICA components
-    :param S1: S matrix from the first organism
-    :param S2: S matrix from the second organism
-    :param metric: A string of what statistical test to use (standard is 'pearson')
-    :param cutoff: Float cut off value for pearson statistical test
-    :return: Dot graph and name links of connected ICA components
+    Given two S matrices, returns the dot graph and name links of the various
+    connected ICA components
+    Args:
+        S1: S matrix from the first organism
+        S2: S matrix from the second organism
+        metric: Statistical test to use (default:'pearson')
+        cutoff: Float cut off value for pearson statistical test
+        show_all:
+
+    Returns: Dot graph and name links of connected ICA components
+
     """
 
     # Only keep genes found in both S matrices
@@ -172,17 +178,20 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
     # Calculate correlation matrix
     corr = np.zeros((len(s1.columns), len(s2.columns)))
 
-    for i, k1 in tqdm.tqdm(enumerate(s1.columns), total=len(s1.columns)):
+    for i, k1 in tqdm(enumerate(s1.columns), total=len(s1.columns)):
         for j, k2 in enumerate(s2.columns):
             if metric == 'pearson':
                 corr[i, j] = abs(stats.pearsonr(s1[k1], s2[k2])[0])
             elif metric == 'spearman':
                 corr[i, j] = abs(stats.spearmanr(s1[k1], s2[k2])[0])
 
-    DF_corr = pd.DataFrame(corr, index=s1.columns, columns=s2.columns)  # Only keep genes found in both S matrices
+    # Only keep genes found in both S matrices
+    DF_corr = pd.DataFrame(corr, index=s1.columns, columns=s2.columns)
 
     # Initialize Graph
-    dot = Digraph(engine='dot', graph_attr={'ranksep': '0.3', 'nodesep': '0', 'packmode': 'array_u', 'size': '10,10'},
+    dot = Digraph(engine='dot', graph_attr={'ranksep': '0.3', 'nodesep': '0',
+                                            'packmode': 'array_u',
+                                            'size': '10,10'},
                   node_attr={'fontsize': '14', 'shape': 'none'},
                   edge_attr={'arrowsize': '0.5'}, format='png')
 
@@ -191,7 +200,7 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
     links = list(zip(s1.columns[loc1], s2.columns[loc2]))
 
     if len(links) == 0:
-        warn('No components shared across runs')
+        warnings.warn('No components shared across runs')
         return None, None
     if show_all is True:
         # Initialize Nodes
@@ -202,7 +211,8 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
             else:
                 color = 'red'
                 font = 'helvetica-bold'
-            dot.node('data2_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+            dot.node('data2_' + str(k), label=k,
+                     _attributes={'fontcolor': color, 'fontname': font})
 
         for k in s1.columns:
             if k in s1.columns[loc1]:
@@ -211,31 +221,36 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
             else:
                 color = 'red'
                 font = 'helvetica-bold'
-            dot.node('data1_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+            dot.node('data1_' + str(k), label=k,
+                     _attributes={'fontcolor': color, 'fontname': font})
 
         # Add links between related components
         for k1, k2 in links:
             width = DF_corr.loc[k1, k2] * 5
-            dot.edge('data1_' + str(k1), 'data2_' + str(k2), _attributes={'penwidth': '{:.2f}'.format(width)})
+            dot.edge('data1_' + str(k1), 'data2_' + str(k2),
+                     _attributes={'penwidth': '{:.2f}'.format(width)})
     else:
         # Initialize Nodes
         for k in sorted(s2.columns):
             if k in s2.columns[loc2]:
                 color = 'black'
                 font = 'helvetica'
-                dot.node('data2_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+                dot.node('data2_' + str(k), label=k,
+                         _attributes={'fontcolor': color, 'fontname': font})
 
         for k in s1.columns:
             if k in s1.columns[loc1]:
                 color = 'black'
                 font = 'helvetica'
-                dot.node('data1_' + str(k), label=k, _attributes={'fontcolor': color, 'fontname': font})
+                dot.node('data1_' + str(k), label=k,
+                         _attributes={'fontcolor': color, 'fontname': font})
 
         # Add links between related components
         for k1, k2 in links:
             if k1 in s1.columns[loc1] and k2 in s2.columns[loc2]:
                 width = DF_corr.loc[k1, k2] * 5
-                dot.edge('data1_' + str(k1), 'data2_' + str(k2), _attributes={'penwidth': '{:.2f}'.format(width)})
+                dot.edge('data1_' + str(k1), 'data2_' + str(k2),
+                         _attributes={'penwidth': '{:.2f}'.format(width)})
 
     # Reformat names back to normal
     name1, name2 = list(zip(*links))
@@ -247,9 +262,14 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str, cutoff: flo
 def _load_ortho_matrix(ortho_dir: str):
     """
     Load the .npz file and organism labels and compiles them into one
-    :param ortho_dir: String of the location where organism data can be found (can be found under modulome/data)
-    :return: Pandas Dataframe of the full organism compare matrix
+    Args:
+        ortho_dir: String of the location where organism data can be found
+        (can be found under modulome/data)
+
+    Returns: Pandas Dataframe of the full organism compare matrix
+
     """
+
     filename = os.path.join(ortho_dir, "org_compare.npz")
     label_file = os.path.join(ortho_dir, "org_compare_label.txt")
     ortho_DF = pd.DataFrame(sparse.load_npz(filename).toarray())
@@ -259,25 +279,29 @@ def _load_ortho_matrix(ortho_dir: str):
     ortho_DF.columns = labels
 
     # Filter out different strains of Salmonella, only leaves LT2 strain
-    filter = []
+    filter_strain = []
     for i in ortho_DF.index:
         if "STM" in i and "_" in i:
-            filter.append(i)
+            filter_strain.append(i)
 
-    ortho_DF.drop(filter, inplace=True)
-    ortho_DF.drop(columns=filter, inplace=True)
+    ortho_DF.drop(filter_strain, inplace=True)
+    ortho_DF.drop(columns=filter_strain, inplace=True)
 
     return ortho_DF
 
 
 def _extract_genes(gene_set_1: List, gene_set_2: List, ortho_DF):
     """
-    Returns a Panda Series that contains a cut down version of the complete Comparison DF, where the rows are only genes
-    found in the I-modulon component
-    :param gene_set_1: list of genes from organism 1
-    :param gene_set_2: list of genes from organism 2
-    :param ortho_DF: Full ortholog comparison Dataframe
-    :return: A reduced version of the ortho_DF Dataframe that only contains the genes from gene_set_1 and gene_set_2
+    Returns a Panda Series that contains a cut down version of the complete
+    Comparison DF, where the rows are only genes
+    Args:
+        gene_set_1: List of genes from organism 1
+        gene_set_2: list of genes from organism 2
+        ortho_DF: Full ortholog comparison Dataframe
+
+    Returns: A reduced version of the ortho_DF Dataframe that only contains
+    the genes from gene_set_1 and gene_set_2
+
     """
 
     rows = ortho_DF.loc[ortho_DF.index.isin(list(gene_set_1))][:].index
@@ -294,39 +318,56 @@ def _extract_genes(gene_set_1: List, gene_set_2: List, ortho_DF):
 
 def _translate_genes(gene_list: List, reduced_DF: pd.DataFrame):
     """
-    Converts genes from one list to their corresponding ortholog of another organism
-    :param gene_list: List of genes to be translated
-    :param reduced_DF: Pandas Dataframe of the orthologs between your two target organisms
-    :return: List of genes that have been translated
+    Converts genes from one list to their corresponding ortholog of another
+    organism
+
+    Args:
+        gene_list: List of genes to be translated
+        reduced_DF: Pandas Dataframe of the orthologs between your two target
+            organisms
+
+    Returns: List of genes that have been translated
+
     """
     gene_list_copy = gene_list
     for i in range(0, len(gene_list_copy)):
         try:
             convert_column = reduced_DF[gene_list_copy[i]]
-            gene_list_copy[i] = str(convert_column.loc[convert_column == 1][:].index[0])
-        except KeyError as e:
+            gene_list_copy[i] = str(
+                convert_column.loc[convert_column == 1][:].index[0])
+        except KeyError:
             continue
     return gene_list_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson', cutoff=0.2, show_all=False):
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson',
+                cutoff=0.2, show_all=False):
     """
-    Compares two S matrices between a single organism or across organisms and returns the connected ICA components
-    :param S1: Pandas Dataframe of S matrix 1
-    :param S2: Pandas Dataframe of S Matrix 2
-    :param ortho_dir: String of the location where organism data can be found (can be found under modulome/data)
-    :param metric: A string of what statistical test to use (standard is 'pearson')
-    :param cutoff: Float cut off value for pearson statistical test
-    :param show_all: True will show all nodes of the digraph matrix
-    :return: Dot graph and name links of connected ICA components between the two runs or organisms.
+    Compares two S matrices between a single organism or across organisms and
+    returns the connected ICA components
+    Args:
+        S1: Pandas Dataframe of S matrix 1
+        S2: Pandas Dataframe of S Matrix 2
+        ortho_dir: String of the location where organism data can be found
+            (can be found under modulome/data)
+        metric: A string of what statistical test to use (standard is 'pearson')
+        cutoff: Float cut off value for pearson statistical test
+        show_all: True will show all nodes of the digraph matrix
+
+    Returns: Dot graph and name links of connected ICA components between the
+    two runs or organisms.
+
     """
     if ortho_dir is None:
-        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff, show_all=show_all)
+        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff,
+                                          show_all=show_all)
         return dot, name_links
     else:
         ortho_DF = _load_ortho_matrix(ortho_dir)
-        ortho_reduced_DF = _extract_genes(list(S1.index), list(S2.index), ortho_DF)
+        ortho_reduced_DF = _extract_genes(list(S1.index), list(S2.index),
+                                          ortho_DF)
         translated_genes = _translate_genes(list(S2.index), ortho_reduced_DF)
         S2.index = translated_genes
-        dot, name_links = _make_dot_graph(S1, S2, metric, cutoff, show_all=show_all)
+        dot, name_links = _make_dot_graph(S1, S2, metric, cutoff,
+                                          show_all=show_all)
         return dot, name_links
