@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
-"""
-Module containing functions for testing various :mod:`pymodulon` methods. Note that the testing
-requirements must be installed (e.g. :mod:`pytest`) for this function to work.
-"""
+"""Module containing functions for testing various :mod:`pymodulon` methods.
+Note that the testing requirements must be installed (e.g. :mod:`pytest`) for
+this function to work. """
 
 from os.path import abspath, dirname, join
 from pymodulon.core import IcaData
@@ -12,17 +11,17 @@ from pymodulon.io import save_to_json, load_json_model
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
 """str: The directory location of where :mod:`pymodulon` is installed."""
 
-DATA_DIR = join(PYMOD_DIR, "test", "data", "")
+DATA_DIR = join(PYMOD_DIR, "test", "precise_data", "")
 """str: THe directory location of the test data."""
 
 # Get test data
-s_file = abspath(join(DATA_DIR, 'ecoli_M.csv'))
-a_file = abspath(join(DATA_DIR, 'ecoli_A.csv'))
-x_file = abspath(join(DATA_DIR, 'ecoli_X.csv'))
-gene_file = abspath(join(DATA_DIR, 'ecoli_gene_table.csv'))
-sample_file = abspath(join(DATA_DIR, 'ecoli_sample_table.csv'))
-imodulon_file = abspath(join(DATA_DIR, 'ecoli_imodulon_table.csv'))
-trn_file = abspath(join(DATA_DIR, 'ecoli_trn.csv'))
+s_file = abspath(join(DATA_DIR, 'M.csv'))
+a_file = abspath(join(DATA_DIR, 'A.csv'))
+x_file = abspath(join(DATA_DIR, 'X.csv'))
+gene_file = abspath(join(DATA_DIR, 'gene_table.csv'))
+sample_file = abspath(join(DATA_DIR, 'sample_table.csv'))
+imodulon_file = abspath(join(DATA_DIR, 'imodulon_table.csv'))
+trn_file = abspath(join(DATA_DIR, 'trn.csv'))
 
 # Load test data
 s = pd.read_csv(s_file, index_col=0)
@@ -36,8 +35,10 @@ trn = pd.read_csv(trn_file)
 
 def test_core(capsys):
     test_simple_ica_data()
-    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn,
+                       dagostino_cutoff=750)
     test_optimize_cutoff(capsys)
     test_set_thresholds()
     test_ica_data_consistency(ica_data)
@@ -73,7 +74,8 @@ def test_ica_data_consistency(ica_data):
     assert (ica_data.gene_names[0] == 'b0002')
 
     # check that we can call out single-gene iModulons
-    assert (ica_data.find_single_gene_imodulons(save=True) == [4, 29, 42, 46, 90])
+    assert (ica_data.find_single_gene_imodulons(save=True) ==
+            [4, 29, 42, 46, 90])
     assert (ica_data.imodulon_table.single_gene.sum() == 5)
 
     # check if binarized M is correct
@@ -120,8 +122,10 @@ def test_optimize_cutoff(capsys):
     # truncate S to make this faster
     s_short = s.iloc[:, :10]
     a_short = a.iloc[:10, :]
-    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776)
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn,
+                       optimize_cutoff=True, dagostino_cutoff=1776)
     assert (ica_data.dagostino_cutoff == 550)
     assert ica_data._cutoff_optimized
 
@@ -145,16 +149,20 @@ def test_optimize_cutoff(capsys):
 def test_set_thresholds():
     s_short = s.iloc[:, :10]
     a_short = a.iloc[:10, :]
-    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, optimize_cutoff=True, dagostino_cutoff=1776,
+    ica_data = IcaData(s_short, a_short, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table, trn=trn,
+                       optimize_cutoff=True, dagostino_cutoff=1776,
                        thresholds=list(range(10, 20)))
     assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
     assert (not ica_data._cutoff_optimized)
 
 
 def test_io():
-    ica_data = IcaData(s, a, X=x, gene_table=gene_table, sample_table=sample_table,
-                       imodulon_table=imodulon_table, trn=trn, dagostino_cutoff=750)
+    ica_data = IcaData(s, a, X=x, gene_table=gene_table,
+                       sample_table=sample_table,
+                       imodulon_table=imodulon_table,
+                       trn=trn, dagostino_cutoff=750)
     save_to_json(ica_data, 'test/data/model.json')
     icd_from_json = load_json_model('test/data/model.json')
     test_ica_data_consistency(icd_from_json)
