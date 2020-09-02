@@ -444,8 +444,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
 
 def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
+                      xaxis=None, xname='',
                       by: Union[Literal['log-tpm-norm'], Literal['length'],
-                                Literal['start']],
+                                Literal['start'], None] = None,
                       ref_cols: Optional[SeqSetStr] = None,
                       **kwargs) -> Ax:
     """
@@ -460,6 +461,10 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
         IcaData container object
     imodulon: int, str
         The name of the iModulon to plot
+    xaxis:
+        Experimental parameter. See `_set_axis()` for further details.
+    xname:
+        Experimental parameter. See `_set_axis()` for further details.
     by: 'log-tpm-norm', 'length', 'start'
         Gene property to plot on the x-axis. log-tpm-norm plots mean
         expression, length plots gene length, and start plots gene start
@@ -479,18 +484,25 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     y = ica_data.M[imodulon]
     ylabel = f'{imodulon} Gene Weight'
 
-    #  Ensure 'by' has a valid input and assign x, xlabel accordingly
-    if by in ('log-tpm', 'log-tpm-norm'):
-        x = _normalize_expr(ica_data, ref_cols)
-        xlabel = 'Mean Expression'
-    elif by == 'length':
-        x = np.log10(ica_data.gene_table.length)
-        xlabel = 'Gene Length (log10-scale)'
-    elif by == 'start':
-        x = ica_data.gene_table.start
-        xlabel = 'Gene Start'
+    # If experimental `xaxis` parameter is used, use custom values for x-axis
+    if xaxis is not None:
+        x = _set_xaxis(xaxis=xaxis)
+        xlabel = xname
+
     else:
-        raise ValueError('"by" must be "log-tpm-norm", "length", or "start"')
+        #  Ensure 'by' has a valid input and assign x, xlabel accordingly
+        if by in ('log-tpm', 'log-tpm-norm'):
+            x = _normalize_expr(ica_data, ref_cols)
+            xlabel = 'Mean Expression'
+        elif by == 'length':
+            x = np.log10(ica_data.gene_table.length)
+            xlabel = 'Gene Length (log10-scale)'
+        elif by == 'start':
+            x = ica_data.gene_table.start
+            xlabel = 'Gene Start'
+        else:
+            raise ValueError('"by" must be "log-tpm-norm", "length", '
+                             'or "start"')
 
     # Override specific kwargs (their implementation is different
     # in this function)
@@ -864,3 +876,36 @@ def _normalize_expr(ica_data, ref_cols):
         norm = x.mean(axis=1)
 
     return norm
+
+
+##########################
+# Experimental Functions #
+##########################
+
+def _set_xaxis(xaxis: Union[Mapping, pd.Series]):
+    """
+    Implements experimental `xaxis` param from `plot_gene_weights`. This
+    allows for users to generate a scatterplot comparing gene weight on
+    the y-axis with any collection of numbers on the x-axis (as long as
+    the lengths match).
+
+    Parameters
+    ----------
+    xaxis: list, set, tuple, dict, np.array, pd.Series
+        Any collection or mapping of numbers (plots on x-axis)
+
+    Returns
+    -------
+    x: pd.Series
+        Returns a pd.Series to be used as the x-axis data-points for
+        generating the plot_gene_weights scatter-plot.
+    """
+    # Determine type of `xaxis`
+    if isinstance(xaxis, dict):
+        x = pd.Series(xaxis)
+    elif isinstance(xaxis, pd.Series):
+        x = xaxis
+    else:
+        raise TypeError('`xaxis` must be of type dict or pandas.Series')
+
+    return x
