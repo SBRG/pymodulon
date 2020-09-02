@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Sequence, Union
+from typing import List, Literal, Optional, Mapping, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -444,7 +444,7 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
 
 def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
-                      xaxis=None, xname=None,
+                      xaxis=None, xname='',
                       by: Union[Literal['log-tpm-norm'], Literal['length'],
                                 Literal['start'], None] = None,
                       ref_cols: Optional[SeqSetStr] = None,
@@ -461,6 +461,10 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
         IcaData container object
     imodulon: int, str
         The name of the iModulon to plot
+    xaxis:
+        Experimental parameter. See `_set_axis()` for further details.
+    xname:
+        Experimental parameter. See `_set_axis()` for further details.
     by: 'log-tpm-norm', 'length', 'start'
         Gene property to plot on the x-axis. log-tpm-norm plots mean
         expression, length plots gene length, and start plots gene start
@@ -476,29 +480,29 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
     """
-    # If experimental `xaxis` parameter is used, return function call
-    if xaxis is not None:
-        return _plot_gene_weights_experimental(ica_data=ica_data,
-                                               imodulon=imodulon,
-                                               xaxis=xaxis, xname=xname,
-                                               **kwargs)
-
     # Assign y and ylabel
     y = ica_data.M[imodulon]
     ylabel = f'{imodulon} Gene Weight'
 
-    #  Ensure 'by' has a valid input and assign x, xlabel accordingly
-    if by in ('log-tpm', 'log-tpm-norm'):
-        x = _normalize_expr(ica_data, ref_cols)
-        xlabel = 'Mean Expression'
-    elif by == 'length':
-        x = np.log10(ica_data.gene_table.length)
-        xlabel = 'Gene Length (log10-scale)'
-    elif by == 'start':
-        x = ica_data.gene_table.start
-        xlabel = 'Gene Start'
+    # If experimental `xaxis` parameter is used, use custom values for x-axis
+    if xaxis is not None:
+        x = _set_xaxis(xaxis=xaxis)
+        xlabel = xname
+
     else:
-        raise ValueError('"by" must be "log-tpm-norm", "length", or "start"')
+        #  Ensure 'by' has a valid input and assign x, xlabel accordingly
+        if by in ('log-tpm', 'log-tpm-norm'):
+            x = _normalize_expr(ica_data, ref_cols)
+            xlabel = 'Mean Expression'
+        elif by == 'length':
+            x = np.log10(ica_data.gene_table.length)
+            xlabel = 'Gene Length (log10-scale)'
+        elif by == 'start':
+            x = ica_data.gene_table.start
+            xlabel = 'Gene Start'
+        else:
+            raise ValueError('"by" must be "log-tpm-norm", "length", '
+                             'or "start"')
 
     # Override specific kwargs (their implementation is different
     # in this function)
@@ -878,39 +882,30 @@ def _normalize_expr(ica_data, ref_cols):
 # Experimental Functions #
 ##########################
 
-def _plot_gene_weights_experimental(ica_data: IcaData, imodulon: ImodName,
-                                    xaxis: Union[Sequence, Mapping],
-                                    xname: str = '', **kwargs):
+def _set_xaxis(xaxis: Union[Mapping, pd.Series]):
     """
-    Implements experimental `xaxis` & `xname` params from
-    `plot_gene_weights`. This allows for users to generate a scatterplot
-    comparing gene weight on the y-axis with any collection of numbers
-    on the x-axis (as long as the lengths match).
+    Implements experimental `xaxis` param from `plot_gene_weights`. This
+    allows for users to generate a scatterplot comparing gene weight on
+    the y-axis with any collection of numbers on the x-axis (as long as
+    the lengths match).
 
     Parameters
     ----------
-    ica_data: IcaData
-        IcaData container object
-    imodulon: str, int
-        name of iModulon (plots on y-axis)
     xaxis: list, set, tuple, dict, np.array, pd.Series
         Any collection or mapping of numbers (plots on x-axis)
-    xname: x-axis label name
-    kwargs: dict
-        Additional keyword arguments to be passed onto `scatterplot`
 
     Returns
     -------
-    ax: matplotlib.axes instance
-        Returns the axes instance on which the scatter-plot is generated
+    x: pd.Series
+        Returns a pd.Series to be used as the x-axis data-points for
+        generating the plot_gene_weights scatter-plot.
     """
-    # Step 1: Find if x-points have mapping (the same way y-points do)
-    #   If yes:
-    #       Proceed to Step 3
-    #   If no:
-    #       Proceed to Step 2
-    #
-    # Step 2: Generate Scatter Plot with given x and y
-    #
-    # Step 3: Generate Scatter Plot with mapped (a,b) for a,b in zip(x,y)
-    pass
+    # Determine type of `xaxis`
+    if isinstance(xaxis, dict):
+        x = pd.Series(xaxis)
+    elif isinstance(xaxis, pd.Series):
+        x = xaxis
+    else:
+        raise TypeError('`xaxis` must be of type dict or pandas.Series')
+
+    return x
