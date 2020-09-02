@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Union
+from typing import List, Literal, Optional, Mapping, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -444,8 +444,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
 
 def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
+                      xaxis=None, xname=None,
                       by: Union[Literal['log-tpm-norm'], Literal['length'],
-                                Literal['start']],
+                                Literal['start'], None] = None,
                       ref_cols: Optional[SeqSetStr] = None,
                       **kwargs) -> Ax:
     """
@@ -475,6 +476,13 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
     """
+    # If experimental `xaxis` parameter is used, return function call
+    if xaxis is not None:
+        return _plot_gene_weights_experimental(ica_data=ica_data,
+                                               imodulon=imodulon,
+                                               xaxis=xaxis, xname=xname,
+                                               **kwargs)
+
     # Assign y and ylabel
     y = ica_data.M[imodulon]
     ylabel = f'{imodulon} Gene Weight'
@@ -864,3 +872,45 @@ def _normalize_expr(ica_data, ref_cols):
         norm = x.mean(axis=1)
 
     return norm
+
+
+##########################
+# Experimental Functions #
+##########################
+
+def _plot_gene_weights_experimental(ica_data: IcaData, imodulon: ImodName,
+                                    xaxis: Union[Sequence, Mapping],
+                                    xname: str = '', **kwargs):
+    """
+    Implements experimental `xaxis` & `xname` params from
+    `plot_gene_weights`. This allows for users to generate a scatterplot
+    comparing gene weight on the y-axis with any collection of numbers
+    on the x-axis (as long as the lengths match).
+
+    Parameters
+    ----------
+    ica_data: IcaData
+        IcaData container object
+    imodulon: str, int
+        name of iModulon (plots on y-axis)
+    xaxis: list, set, tuple, dict, np.array, pd.Series
+        Any collection or mapping of numbers (plots on x-axis)
+    xname: x-axis label name
+    kwargs: dict
+        Additional keyword arguments to be passed onto `scatterplot`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the scatter-plot is generated
+    """
+    # Step 1: Find if x-points have mapping (the same way y-points do)
+    #   If yes:
+    #       Proceed to Step 3
+    #   If no:
+    #       Proceed to Step 2
+    #
+    # Step 2: Generate Scatter Plot with given x and y
+    #
+    # Step 3: Generate Scatter Plot with mapped (a,b) for a,b in zip(x,y)
+    pass
