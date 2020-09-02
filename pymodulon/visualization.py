@@ -486,7 +486,7 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
 
     # If experimental `xaxis` parameter is used, use custom values for x-axis
     if xaxis is not None:
-        x = _set_xaxis(xaxis=xaxis)
+        x = _set_xaxis(xaxis=xaxis, y=y)
         xlabel = xname
 
     else:
@@ -882,7 +882,7 @@ def _normalize_expr(ica_data, ref_cols):
 # Experimental Functions #
 ##########################
 
-def _set_xaxis(xaxis: Union[Mapping, pd.Series]):
+def _set_xaxis(xaxis: Union[Mapping, pd.Series], y: pd.Series):
     """
     Implements experimental `xaxis` param from `plot_gene_weights`. This
     allows for users to generate a scatterplot comparing gene weight on
@@ -893,6 +893,9 @@ def _set_xaxis(xaxis: Union[Mapping, pd.Series]):
     ----------
     xaxis: list, set, tuple, dict, np.array, pd.Series
         Any collection or mapping of numbers (plots on x-axis)
+    y: pd.Series
+        pandas Series of Gene Weights to be plotted on the y-axis of
+        `plot_gene_weights`
 
     Returns
     -------
@@ -900,12 +903,11 @@ def _set_xaxis(xaxis: Union[Mapping, pd.Series]):
         Returns a pd.Series to be used as the x-axis data-points for
         generating the plot_gene_weights scatter-plot.
     """
-    # Determine type of `xaxis`
-    if isinstance(xaxis, dict):
-        x = pd.Series(xaxis)
-    elif isinstance(xaxis, pd.Series):
-        x = xaxis
-    else:
-        raise TypeError('`xaxis` must be of type dict or pandas.Series')
+    # Determine type of `xaxis` and set `x` accordingly
+    x = xaxis if isinstance(xaxis, pd.Series) else pd.Series(xaxis)
+
+    if not x.sort_index().index.equals(y.sort_index().index):
+        raise ValueError('Given x-values do not align with gene and their '
+                         'respective gene-weights on the y-axis')
 
     return x
