@@ -270,7 +270,7 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     return dot, name_links
 
 
-def gene_dictionary(gene_list: List):
+def _gene_dictionary(gene_list: List):
     gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis", "MPN": "mPneumoniae", "PP": "pPutida",
                         "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580", "SEN": "sEnterica_enteritidis",
                         "SL1344": "sEnterica_SL1344", "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
@@ -294,7 +294,6 @@ def gene_dictionary(gene_list: List):
                     org_counts.update({curr_org: org_counts[curr_org] + 1})
             except KeyError:
                 continue
-    print(org_counts)
     if (org_counts[max(org_counts)] / len(gene_list)) >= .9:
         return max(org_counts)
     else:
@@ -302,7 +301,7 @@ def gene_dictionary(gene_list: List):
         raise KeyError
 
 
-def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame, S2: pd.DataFrame):
+def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
     for dirpath, dirname, file_arr in os.walk(ortho_dir):
         for file in file_arr:
             file_split = file.split("_vs_")
@@ -338,8 +337,6 @@ def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame, S2: 
                 S1_copy.index = S1_index
                 return S1_copy
 
-    return None
-
 
 def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, auto_find: bool = True, org_1_name: str = None,
                 org_2_name: str = None,
@@ -365,14 +362,14 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, auto_find: bool =
                                           show_all=show_all)
         return dot, name_links
     else:
-        if auto_find == False and org_1_name != None and org_2_name != None:
-            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1, S2)
+        if auto_find is False and org_1_name is not None and org_2_name is not None:
+            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1)
             dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
                                               show_all=show_all)
         else:
-            org_1_name = gene_dictionary(S1.index)
-            org_2_name = gene_dictionary(S2.index)
-            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1, S2)
+            org_1_name = _gene_dictionary(S1.index)
+            org_2_name = _gene_dictionary(S2.index)
+            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1)
             dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
                                               show_all=show_all)
 
