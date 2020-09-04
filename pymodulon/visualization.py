@@ -276,9 +276,22 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If bins is None, generate optimal bin width
     opt_width = _mod_freedman_diaconis(ica_data.M[imodulon], bins)
 
+    # If regulator is given, use it to find genes in regulon
+    if regulator is not None:
+        reg = regulator
+
     # If regulator is None, use imodulon_table to find regulator
-    if regulator is None:
-        pass
+    elif not ica_data.imodulon_table.empty:
+        reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
+
+    # If imodulon_table is empty, compute trn enrichment for imodulon
+    elif not ica_data.trn.empty:
+        # TODO: Ask Anand about max_regs and how important that is
+        df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
+        reg = df_enriched.loc[imodulon, 'regulator']
+
+    else:
+        reg = None
 
     # Histogram
 
