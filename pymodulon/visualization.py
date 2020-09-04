@@ -2,7 +2,7 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Union
+from typing import List, Literal, Optional, Mapping, Sequence, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -255,6 +255,22 @@ def plot_metadata(ica_data: IcaData, column,
 
     return barplot(values, table, column, projects,
                    highlight, ax, legend_kwargs)
+
+
+def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
+                           regulator: str = None,
+                           bins: Optional[Union[int, Sequence, str]] = None,
+                           ax: Optional[Ax] = None):
+    ##
+    ## Generate histogram given iModulon, and regulator
+    ##      If bins is None, use Freedman-Diaconis and thresholds to generate best # of bins
+    ##      If regulator is None, use imodulon_table to find regulator
+    ##          If imodulon_table is None, use compute_trn_enrichments to generate imodulon_table
+    ##
+    ## Optional: Add option for side-by-side histograms or overlapping histograms
+
+    #
+    pass
 
 
 ################
