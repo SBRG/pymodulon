@@ -268,10 +268,19 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     ##          If imodulon_table is None, use compute_trn_enrichments to generate imodulon_table
     ##
     ## Optional: Add option for side-by-side histograms or overlapping histograms
-
+    ##
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
+
+    # If bins is None, generate optimal bin width
+    opt_width = _mod_freedman_diaconis(ica_data.M[imodulon], bins)
+
+    # If regulator is None, use imodulon_table to find regulator
+    if regulator is None:
+        pass
+
+    # Histogram
 
 
 ################
@@ -884,6 +893,48 @@ def _adj_r2(f, x, y, params):
     k = len(params) - 1
     r2 = r2_score(y, f(x, *params))
     return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
+
+
+def _mod_freedman_diaconis(x, bins):
+    """
+    Generates optimal bin width estimate if bins is None.
+
+    This is done using a modified Freedman-Diaconis rule. The modification
+    is necessary as iModulon gene-weights inherently contains many
+    statistical `outliers`, which are the enriched genes of interest in
+    the iModulon. For this reason, the interquartile range is not a
+    sufficient bin width estimator by itself (it is too limited in its
+    range). Thus, the full range of the dataset `x` is used instead of
+    2*IQR. This strategy is generally fine as it leads to a better
+    number of bins (< 20) and ensures that bin width continues to be
+    proportional to n^-1/3 (where n is the number of samples in
+    dataset `x`).
+
+    Parameters
+    ----------
+    x: array-like, pd.Series
+        The dataset in question
+    bins: None, Any
+        The bins to use. If None, calculates the modified Freedman-Diaconis
+
+    Returns
+    -------
+    opt_width:
+        The optimal bin width (or None if bins are pre-selected)
+
+    See Also
+    --------
+    Wikipedia:
+        {https://en.wikipedia.org/wiki/Freedman-Diaconis_rule}
+    StackExchange:
+        {https://tinyurl.com/pymodulonFreedmanDiaconis}
+    """
+    if bins is None:
+        opt_width = (x.max() - x.min()) / (len(x)**(1/3))
+    else:
+        opt_width = None
+
+    return opt_width
 
 
 def _normalize_expr(ica_data, ref_cols):
