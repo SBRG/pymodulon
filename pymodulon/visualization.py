@@ -260,6 +260,8 @@ def plot_metadata(ica_data: IcaData, column,
 def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            regulator: str = None,
                            bins: Optional[Union[int, Sequence, str]] = None,
+                           kind: Union[Literal['overlap'],
+                                       Literal['side']] = 'overlap',
                            ax: Optional[Ax] = None):
     ##
     ## Generate histogram given iModulon, and regulator
@@ -273,8 +275,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
 
-    # If bins is None, generate optimal bin width
-    opt_width = _mod_freedman_diaconis(ica_data.M[imodulon], bins)
+    # If bins is None, generate optimal number of bins
+    num_bins = _mod_freedman_diaconis(ica_data, imodulon, bins)
 
     # If regulator is given, use it to find genes in regulon
     if regulator is not None:
@@ -908,7 +910,7 @@ def _adj_r2(f, x, y, params):
     return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
 
 
-def _mod_freedman_diaconis(x, bins):
+def _mod_freedman_diaconis(ica_data, imodulon, bins):
     """
     Generates optimal bin width estimate if bins is None.
 
@@ -923,18 +925,6 @@ def _mod_freedman_diaconis(x, bins):
     proportional to n^-1/3 (where n is the number of samples in
     dataset `x`).
 
-    Parameters
-    ----------
-    x: array-like, pd.Series
-        The dataset in question
-    bins: None, Any
-        The bins to use. If None, calculates the modified Freedman-Diaconis
-
-    Returns
-    -------
-    opt_width:
-        The optimal bin width (or None if bins are pre-selected)
-
     See Also
     --------
     Wikipedia:
@@ -942,13 +932,24 @@ def _mod_freedman_diaconis(x, bins):
     StackExchange:
         {https://tinyurl.com/pymodulonFreedmanDiaconis}
     """
+    x = ica_data.M[imodulon]
+    thresh = ica_data.thresholds[imodulon]
+
+    # Freedman-Diaconis
     if bins is None:
         opt_width = (x.max() - x.min()) / (len(x)**(1/3))
     else:
         opt_width = None
 
-    return opt_width
+    # Number of bins calculated from Freedman-Diaconis
+    if opt_width is None:
+        num_bins = bins
+    elif opt_width > thresh:
+        num_bins = np.round((x.max() - x.min()) / (0.5*thresh))
+    else:
+        num_bins = np.round((x.max() - x.min()) / opt_width)
 
+    return num_bins
 
 def _normalize_expr(ica_data, ref_cols):
     x = ica_data.X
