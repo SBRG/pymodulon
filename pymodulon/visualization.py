@@ -214,7 +214,7 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
     if imodulon in ica_data.A.index:
         values = ica_data.A.loc[imodulon]
     else:
-        raise ValueError('iModulon does not exist: {}'.format(imodulon))
+        raise ValueError(f'iModulon does not exist: {imodulon}')
 
     label = '{} iModulon\nActivity'.format(imodulon)
 
@@ -269,8 +269,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     ##
     ## Optional: Add option for side-by-side histograms or overlapping histograms
 
-    #
-    pass
+    # Check that iModulon exists
+    if imodulon not in ica_data.M.columns:
+        raise ValueError(f'iModulon does not exist: {imodulon}')
 
 
 ################
@@ -496,9 +497,12 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
     """
-    # Assign y and ylabel
-    y = ica_data.M[imodulon]
-    ylabel = f'{imodulon} Gene Weight'
+    # Check that iModulon exists
+    if imodulon in ica_data.M.columns:
+        y = ica_data.M[imodulon]
+        ylabel = f'{imodulon} Gene Weight'
+    else:
+        raise ValueError(f'iModulon does not exist: {imodulon}')
 
     # If experimental `xaxis` parameter is used, use custom values for x-axis
     if xaxis is not None:
