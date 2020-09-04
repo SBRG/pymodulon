@@ -271,6 +271,12 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
 
 
 def _gene_dictionary(gene_list: List):
+    """
+    Given a list of genes, will return a string for what organism best matches the gene prefixes
+    Args
+        :param gene_list: List of genes, usually from an S matrix
+        :return: String of the organism name specific to the _pull_bbh_csv function
+    """
     gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis", "MPN": "mPneumoniae", "PP": "pPutida",
                         "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580", "SEN": "sEnterica_enteritidis",
                         "SL1344": "sEnterica_SL1344", "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
@@ -294,14 +300,27 @@ def _gene_dictionary(gene_list: List):
                     org_counts.update({curr_org: org_counts[curr_org] + 1})
             except KeyError:
                 continue
-    if (org_counts[max(org_counts)] / len(gene_list)) >= .9:
+    if (org_counts[max(org_counts)] / len(gene_list)) >= .7:
         return max(org_counts)
     else:
-        print("One of your org files contains too many different genes")
+        print("One of your org files contains too many different genes "
+              +str((org_counts[max(org_counts)] / len(gene_list))))
         raise KeyError
 
 
 def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
+    """
+    Receives an the S matrix for an organism and returns the same S matrix with index genes translated into the
+    orthologs in organism 2
+    :param org_1: Name of organism 1 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
+    _gene_dictionary function
+    :param org_2: Name of organism 2 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
+    _gene_dictionary function
+    :param ortho_dir: String path to the "bbh_csv" directory in the "modulome_compare_data" repository.
+    Ex. "../../modulome_compare_data/bbh_csv"
+    :param S1: Pandas DataFrame of the S matrix for organism 1
+    :return: Pandas DataFrame of the S matrix for organism 1 with indexes translated into orthologs
+    """
     for dirpath, dirname, file_arr in os.walk(ortho_dir):
         for file in file_arr:
             file_split = file.split("_vs_")
