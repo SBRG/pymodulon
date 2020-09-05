@@ -277,7 +277,10 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
         fig, ax = plt.subplots()
 
     # If bins is None, generate optimal number of bins
-    num_bins = _mod_freedman_diaconis(ica_data, imodulon, bins)
+    if bins is None:
+        bin_arr = _mod_freedman_diaconis(ica_data, imodulon)
+    else:
+        bin_arr = bins
 
     # If regulator is given, use it to find genes in regulon
     if regulator is not None and not ica_data.trn.empty:
@@ -302,23 +305,32 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
 
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
-
     reg_arr = ica_data.M[imodulon].loc[reg_genes]
     non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
+
     if kind == 'overlap':
-        _, nbins, _ = ax.hist(reg_arr, bins=num_bins,
-                              label='Regulon Genes', alpha=0.5)
-        ax.hist(non_reg_arr, bins=nbins, label='Not regulated', alpha=0.5)
+        ax.hist(non_reg_arr, bins=bin_arr, label='Not regulated', alpha=0.5)
+        ax.hist(reg_arr, bins=bin_arr, label='Regulon Genes', alpha=0.5)
 
     elif kind == 'side':
-        ax.hist([reg_arr, non_reg_arr], bins=num_bins,
-                label=['Regulon Genes', 'Not regulated'])
+        ax.hist([non_reg_arr, reg_arr], bins=bin_arr,
+                label=['Not regulated', 'Regulon Genes'])
 
     else:
         raise ValueError(f'{kind} is not a valid option. `kind` must be '
                          'either "overlap" or "side"')
 
+    # Set y-axis to log-scale
     ax.set_yscale('log')
+
+    # Add thresholds to scatterplot (dashed lines)
+    ymin, ymax = ax.get_ylim()
+    thresh = abs(ica_data.thresholds[imodulon])
+    if thresh != 0:
+        ax.vlines([-thresh, thresh], ymin=ymin, ymax=ymax,
+                  colors='k', linestyles='dashed', linewidth=1)
+
+    ax.set_ylim(ymin, ymax)
 
     # Add legend
     if legend_kwargs is None:
@@ -941,7 +953,7 @@ def _adj_r2(f, x, y, params):
     return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
 
 
-def _mod_freedman_diaconis(ica_data, imodulon, bins):
+def _mod_freedman_diaconis(ica_data, imodulon):
     """
     Generates optimal bin width estimate if bins is None.
 
@@ -964,23 +976,32 @@ def _mod_freedman_diaconis(ica_data, imodulon, bins):
         {https://tinyurl.com/pymodulonFreedmanDiaconis}
     """
     x = ica_data.M[imodulon]
-    thresh = ica_data.thresholds[imodulon]
+    thresh = abs(ica_data.thresholds[imodulon])
 
     # Freedman-Diaconis
-    if bins is None:
-        opt_width = (x.max() - x.min()) / (len(x)**(1/3))
-    else:
-        opt_width = None
+    opt_width = (x.max() - x.min()) / (len(x) ** (1 / 3))
 
-    # Number of bins calculated from Freedman-Diaconis
-    if opt_width is None:
-        num_bins = bins
-    elif opt_width > thresh:
-        num_bins = np.round((x.max() - x.min()) / (0.5*thresh))
+    # Width calculated using optimal width and iModulon threshold
+    if thresh > opt_width:
+        width = thresh/int(thresh/opt_width)
     else:
-        num_bins = np.round((x.max() - x.min()) / opt_width)
+        width = thresh/2
 
-    return int(num_bins)
+    # Use width and thresh to calculate xmin, xmax
+    if x.min() < -thresh:
+        multiple = int(np.ceil(abs(x.min()/width)))
+        xmin = -(multiple+1)*width
+    else:
+        xmin = -(thresh+width)
+
+    if x.max() > thresh:
+        multiple = int(np.ceil(x.max()/width))
+        xmax = (multiple+1)*width
+    else:
+        xmax = (thresh+width)
+
+    return np.arange(xmin, xmax+width, width)
+
 
 def _normalize_expr(ica_data, ref_cols):
     x = ica_data.X
