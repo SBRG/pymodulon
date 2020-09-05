@@ -14,6 +14,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
+from pymodulon.enrichment import  parse_regulon_str
 from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
 
 
@@ -262,7 +263,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            bins: Optional[Union[int, Sequence, str]] = None,
                            kind: Union[Literal['overlap'],
                                        Literal['side']] = 'overlap',
-                           ax: Optional[Ax] = None):
+                           ax: Optional[Ax] = None,
+                           legend_kwargs: Optional[Mapping] = None) -> Ax:
     ##
     ## Generate histogram given iModulon, and regulator
     ##      If bins is None, use Freedman-Diaconis and thresholds to generate best # of bins
@@ -275,27 +277,61 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
 
+    # If ax is None, create ax on which to generate histogram
+    if ax is None:
+        fig, ax = plt.subplots()
+
     # If bins is None, generate optimal number of bins
     num_bins = _mod_freedman_diaconis(ica_data, imodulon, bins)
 
     # If regulator is given, use it to find genes in regulon
-    if regulator is not None:
+    if regulator is not None and not ica_data.trn.empty:
         reg = regulator
+        reg_genes = parse_regulon_str(reg, ica_data.trn)
 
     # If regulator is None, use imodulon_table to find regulator
-    elif not ica_data.imodulon_table.empty:
+    elif not ica_data.imodulon_table.empty and not ica_data.trn.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
+        reg_genes = parse_regulon_str(reg, ica_data.trn)
 
     # If imodulon_table is empty, compute trn enrichment for imodulon
     elif not ica_data.trn.empty:
         # TODO: Ask Anand about max_regs and how important that is
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
         reg = df_enriched.loc[imodulon, 'regulator']
+        reg_genes = parse_regulon_str(reg, ica_data.trn)
 
     else:
         reg = None
+        reg_genes = set()
 
     # Histogram
+    non_reg_genes = set(ica_data.gene_names) - reg_genes
+
+    reg_arr = ica_data.M[imodulon].loc[reg_genes]
+    non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
+    if kind == 'overlap':
+        _, nbins, _ = ax.hist(reg_arr, bins=num_bins,
+                              label='Regulon Genes', alpha=0.5)
+        ax.hist(non_reg_arr, bins=nbins, label='Not regulated', alpha=0.5)
+
+    elif kind == 'side':
+        ax.hist([reg_arr, non_reg_arr], bins=num_bins,
+                label=['Regulon Genes', 'Not regulated'])
+
+    else:
+        raise ValueError(f'{kind} is not a valid option. `kind` must be '
+                         'either "overlap" or "side"')
+
+    ax.set_yscale('log')
+
+    # Add legend
+    if legend_kwargs is None:
+        legend_kwargs = dict({'loc': 'upper right'})
+
+    ax.legend(**legend_kwargs)
+
+    return ax
 
 
 ################
@@ -949,7 +985,7 @@ def _mod_freedman_diaconis(ica_data, imodulon, bins):
     else:
         num_bins = np.round((x.max() - x.min()) / opt_width)
 
-    return num_bins
+    return int(num_bins)
 
 def _normalize_expr(ica_data, ref_cols):
     x = ica_data.X
