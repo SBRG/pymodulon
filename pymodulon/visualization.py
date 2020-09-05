@@ -265,6 +265,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                                        Literal['side']] = 'overlap',
                            ax: Optional[Ax] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
+    # TODO: Add threshold
+    # TODO: Change _mod_freedman_diaconis to return bin_arr
+    # TODO: Ensure bin_arr has bin width that is a multiple of threhold
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
