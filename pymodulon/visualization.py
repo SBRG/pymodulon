@@ -265,14 +265,6 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                                        Literal['side']] = 'overlap',
                            ax: Optional[Ax] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
-    ##
-    ## Generate histogram given iModulon, and regulator
-    ##      If bins is None, use Freedman-Diaconis and thresholds to generate best # of bins
-    ##      If regulator is None, use imodulon_table to find regulator
-    ##          If imodulon_table is None, use compute_trn_enrichments to generate imodulon_table
-    ##
-    ## Optional: Add option for side-by-side histograms or overlapping histograms
-    ##
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
