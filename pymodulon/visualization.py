@@ -14,7 +14,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from pymodulon.enrichment import  parse_regulon_str
+from pymodulon.enrichment import parse_regulon_str
 from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
 
 
@@ -263,11 +263,12 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            bins: Optional[Union[int, Sequence, str]] = None,
                            kind: Union[Literal['overlap'],
                                        Literal['side']] = 'overlap',
+                           xlabel: str = '', ylabel: str = '',
                            ax: Optional[Ax] = None,
+                           ax_font_kwargs: Optional[Mapping] = None,
+                           hist_kwargs: Optional[Mapping] = None,
+                           label_font_kwargs: Optional[Mapping] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
-    # TODO: Add threshold
-    # TODO: Change _mod_freedman_diaconis to return bin_arr
-    # TODO: Ensure bin_arr has bin width that is a multiple of threhold
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
@@ -300,7 +301,6 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
         reg_genes = parse_regulon_str(reg, ica_data.trn)
 
     else:
-        reg = None
         reg_genes = set()
 
     # Histogram
@@ -309,8 +309,10 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
 
     if kind == 'overlap':
-        ax.hist(non_reg_arr, bins=bin_arr, label='Not regulated', alpha=0.5)
-        ax.hist(reg_arr, bins=bin_arr, label='Regulon Genes', alpha=0.5)
+        ax.hist(non_reg_arr, bins=bin_arr, label='Not regulated',
+                color='#aaaaaa', alpha=0.7)
+        ax.hist(reg_arr, bins=bin_arr, label='Regulon Genes',
+                color='salmon', alpha=0.7)
 
     elif kind == 'side':
         ax.hist([non_reg_arr, reg_arr], bins=bin_arr,
@@ -335,7 +337,6 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # Add legend
     if legend_kwargs is None:
         legend_kwargs = dict({'loc': 'upper right'})
-
     ax.legend(**legend_kwargs)
 
     return ax
