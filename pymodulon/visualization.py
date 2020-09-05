@@ -285,33 +285,32 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     else:
         bin_arr = bins
 
-    # If regulator is given, use it to find genes in regulon
-    if regulator is not None and not ica_data.trn.empty:
+    # If no TRN in IcaData, regulon genes cannot be determined and plotted
+    if ica_data.trn.empty:
+        reg = None
+
+    # If regulator is given, use it to find regulon genes
+    elif regulator is not None:
         reg = regulator
-        reg_genes = parse_regulon_str(reg, ica_data.trn)
 
-    # If regulator is None, use imodulon_table to find regulator
-    elif not ica_data.imodulon_table.empty and not ica_data.trn.empty:
+    # If regulator is not given, use imodulon_table to find regulator
+    elif not ica_data.imodulon_table.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        if not isnan(reg):
-            reg_genes = parse_regulon_str(reg, ica_data.trn)
-        else:
+        if isnan(reg):
             reg = None
-            reg_genes = set()
 
-    # If imodulon_table is empty, compute trn enrichment for imodulon
-    elif not ica_data.trn.empty:
+    # If no imodulon_table in IcaData, compute trn enrichment to find regulator
+    else:
         # TODO: Ask Anand about max_regs and how important that is
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
         reg = df_enriched.loc[imodulon, 'regulator']
-        if not isnan(reg):
-            reg_genes = parse_regulon_str(reg, ica_data.trn)
-        else:
+        if isnan(reg):
             reg = None
-            reg_genes = set()
 
+    # Use regulator value to find regulon genes
+    if reg is not None:
+        reg_genes = parse_regulon_str(reg, ica_data.trn)
     else:
-        reg = None
         reg_genes = set()
 
     # Handle custom kwargs
