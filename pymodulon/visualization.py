@@ -2,6 +2,7 @@
 
 """
 import warnings
+from math import isnan
 from typing import List, Literal, Optional, Mapping, Sequence, Union
 
 import matplotlib.pyplot as plt
@@ -266,7 +267,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            xlabel: str = '', ylabel: str = '',
                            ax: Optional[Ax] = None,
                            ax_font_kwargs: Optional[Mapping] = None,
-                           hist_kwargs: Optional[Mapping] = None,
+                           regulon_hist_kwargs: Optional[Mapping] = None,
+                           non_regulon_hist_kwargs: Optional[Mapping] = None,
                            label_font_kwargs: Optional[Mapping] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
     # Check that iModulon exists
@@ -291,17 +293,42 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If regulator is None, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty and not ica_data.trn.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        reg_genes = parse_regulon_str(reg, ica_data.trn)
+        if not isnan(reg):
+            reg_genes = parse_regulon_str(reg, ica_data.trn)
+        else:
+            reg = None
+            reg_genes = set()
 
     # If imodulon_table is empty, compute trn enrichment for imodulon
     elif not ica_data.trn.empty:
         # TODO: Ask Anand about max_regs and how important that is
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
         reg = df_enriched.loc[imodulon, 'regulator']
-        reg_genes = parse_regulon_str(reg, ica_data.trn)
+        if not isnan(reg):
+            reg_genes = parse_regulon_str(reg, ica_data.trn)
+        else:
+            reg = None
+            reg_genes = set()
 
     else:
+        reg = None
         reg_genes = set()
+
+    # Handle custom kwargs
+    if ax_font_kwargs is None:
+        ax_font_kwargs = {}
+
+    if label_font_kwargs is None:
+        label_font_kwargs = {}
+
+    if legend_kwargs is None:
+        legend_kwargs = dict({'loc': 'upper right'})
+
+    if regulon_hist_kwargs is None:
+        regulon_hist_kwargs = {'color': 'salmon', 'alpha': 0.7}
+
+    if non_regulon_hist_kwargs is None:
+        non_regulon_hist_kwargs = {'color': '#aaaaaa', 'alpha': 0.7}
 
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
@@ -315,8 +342,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                 color='salmon', alpha=0.7)
 
     elif kind == 'side':
-        ax.hist([non_reg_arr, reg_arr], bins=bin_arr,
-                label=['Not regulated', 'Regulon Genes'])
+        arr = np.array([non_reg_arr, reg_arr], dtype='object')
+        ax.hist(arr, bins=bin_arr, label=['Not regulated', 'Regulon Genes'],
+                color = ['#aaaaaa', 'salmon'], alpha=0.7)
 
     else:
         raise ValueError(f'{kind} is not a valid option. `kind` must be '
@@ -335,8 +363,6 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     ax.set_ylim(ymin, ymax)
 
     # Add legend
-    if legend_kwargs is None:
-        legend_kwargs = dict({'loc': 'upper right'})
     ax.legend(**legend_kwargs)
 
     return ax
