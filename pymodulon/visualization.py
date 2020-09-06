@@ -264,7 +264,6 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            bins: Optional[Union[int, Sequence, str]] = None,
                            kind: Union[Literal['overlap'],
                                        Literal['side']] = 'overlap',
-                           xlabel: str = '', ylabel: str = '',
                            ax: Optional[Ax] = None,
                            ax_font_kwargs: Optional[Mapping] = None,
                            regulon_kwargs: Optional[Mapping] = None,
@@ -374,8 +373,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                   colors='k', linestyles='dashed', linewidth=1)
 
     ax.set_ylim(ymin, ymax)
-    ax.set_xlabel(xlabel, **ax_font_kwargs)
-    ax.set_ylabel(ylabel, **ax_font_kwargs)
+    ax.set_xlabel(f'{imodulon} Gene Weight', **ax_font_kwargs)
+    ax.set_ylabel('Number of Genes', **ax_font_kwargs)
 
 
     # Add legend
