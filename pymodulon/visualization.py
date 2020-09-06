@@ -267,8 +267,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            xlabel: str = '', ylabel: str = '',
                            ax: Optional[Ax] = None,
                            ax_font_kwargs: Optional[Mapping] = None,
-                           regulon_hist_kwargs: Optional[Mapping] = None,
-                           non_regulon_hist_kwargs: Optional[Mapping] = None,
+                           regulon_kwargs: Optional[Mapping] = None,
+                           non_regulon_kwargs: Optional[Mapping] = None,
                            label_font_kwargs: Optional[Mapping] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
     # Check that iModulon exists
@@ -323,11 +323,28 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     if legend_kwargs is None:
         legend_kwargs = dict({'loc': 'upper right'})
 
-    if regulon_hist_kwargs is None:
-        regulon_hist_kwargs = {'color': 'salmon', 'alpha': 0.7}
+    if regulon_kwargs is None:
+        regulon_kwargs = {}
 
-    if non_regulon_hist_kwargs is None:
-        non_regulon_hist_kwargs = {'color': '#aaaaaa', 'alpha': 0.7}
+    if non_regulon_kwargs is None:
+        non_regulon_kwargs = {}
+
+    # Initialize default values
+    reg_kwargs = dict(regulon_kwargs.copy())
+    reg_kwargs['label'] = regulon_kwargs.get('label', 'Regulon Genes')
+    reg_kwargs['color'] = regulon_kwargs.get('color', 'salmon')
+    reg_kwargs['alpha'] = regulon_kwargs.get('alpha', 0.7)
+
+    non_reg_kwargs = dict(non_regulon_kwargs.copy())
+    non_reg_kwargs['label'] = non_regulon_kwargs.get(
+        'label', 'Not regulated')
+    non_reg_kwargs['color'] = non_regulon_kwargs.get('color', '#aaaaaa')
+    non_reg_kwargs['alpha'] = non_regulon_kwargs.get('alpha', 0.7)
+
+    # If `kind` is 'side', only default params are used
+    side_kwargs = {'label': ['Not regulated', 'Regulon Genes'],
+                   'color': ['#aaaaaa', 'salmon'],
+                   'alpha': 0.7}
 
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
@@ -335,15 +352,12 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
 
     if kind == 'overlap':
-        ax.hist(non_reg_arr, bins=bin_arr, label='Not regulated',
-                color='#aaaaaa', alpha=0.7)
-        ax.hist(reg_arr, bins=bin_arr, label='Regulon Genes',
-                color='salmon', alpha=0.7)
+        ax.hist(non_reg_arr, bins=bin_arr, **non_reg_kwargs)
+        ax.hist(reg_arr, bins=bin_arr, **reg_kwargs)
 
     elif kind == 'side':
         arr = np.array([non_reg_arr, reg_arr], dtype='object')
-        ax.hist(arr, bins=bin_arr, label=['Not regulated', 'Regulon Genes'],
-                color = ['#aaaaaa', 'salmon'], alpha=0.7)
+        ax.hist(arr, bins=bin_arr, **side_kwargs)
 
     else:
         raise ValueError(f'{kind} is not a valid option. `kind` must be '
