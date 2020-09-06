@@ -1029,13 +1029,13 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
     # Use width and thresh to calculate xmin, xmax
     if x.min() < -thresh:
-        multiple = int(np.ceil(abs(x.min()/width)))
+        multiple = np.ceil(abs(x.min()/width))
         xmin = -(multiple+1)*width
     else:
         xmin = -(thresh+width)
 
     if x.max() > thresh:
-        multiple = int(np.ceil(x.max()/width))
+        multiple = np.ceil(x.max()/width)
         xmax = (multiple+1)*width
     else:
         xmax = (thresh+width)
