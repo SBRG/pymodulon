@@ -374,6 +374,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                   colors='k', linestyles='dashed', linewidth=1)
 
     ax.set_ylim(ymin, ymax)
+    ax.set_xlabel(xlabel, **ax_font_kwargs)
+    ax.set_ylabel(ylabel, **ax_font_kwargs)
+
 
     # Add legend
     ax.legend(**legend_kwargs)
@@ -1018,7 +1021,7 @@ def _mod_freedman_diaconis(ica_data, imodulon):
     x = ica_data.M[imodulon]
     thresh = abs(ica_data.thresholds[imodulon])
 
-    # Freedman-Diaconis
+    # Modified Freedman-Diaconis
     opt_width = (x.max() - x.min()) / (len(x) ** (1 / 3))
 
     # Width calculated using optimal width and iModulon threshold
