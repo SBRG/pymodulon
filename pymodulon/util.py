@@ -1,3 +1,7 @@
+"""
+General utility functions for the pymodulon package
+"""
+
 import os
 
 import numpy as np

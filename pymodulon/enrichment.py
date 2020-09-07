@@ -1,7 +1,6 @@
 import itertools
+import warnings
 from typing import Union, Iterable
-from warnings import warn
-
 import numpy as np
 import pandas as pd
 from scipy import stats, special
@@ -148,9 +147,9 @@ def compute_regulon_enrichment(gene_set: Iterable, regulon_str: str,
     regulon = parse_regulon_str(regulon_str, trn)
     # Remove genes in regulon that are not in all_genes
     if len(regulon - set(all_genes)) > 0:
-        warn('Some genes are in the regulon but not in all_genes. These genes '
-             'are removed before enrichment '
-             'analysis.', category=UserWarning)
+        warnings.warn('Some genes are in the regulon but not in all_genes. '
+                      'These genes are removed before enrichment analysis.',
+                      category=UserWarning)
         regulon = regulon & set(all_genes)
     result = compute_enrichment(gene_set, regulon, all_genes, regulon_str)
     result.rename({'target_set_size': 'regulon_size'}, inplace=True)
@@ -183,13 +182,11 @@ def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
     """
 
     # Warning if max_regs is too high
-    if max_regs > 2:
-        warn(
+    if max_regs > 2 and not force:
+        RuntimeError(
             'Using >2 maximum regulators may take time to compute. '
-            'To perform analysis, use force=True',
-            category=RuntimeWarning)
-        if not force:
-            return
+            'To perform analysis, use force=True')
+        return
 
     # Only search for regulators known to regulate a gene in gene_set
     # This reduces the total runtime by skipping unnecessary tests

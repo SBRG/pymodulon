@@ -1,3 +1,5 @@
+import re
+
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
 from typing import Optional, Mapping, List
@@ -111,8 +113,8 @@ class IcaData(object):
                     raise ValueError('Thresholds cannot be optimized '
                                      'if no TRN is provided.')
                 else:
-                    warn('Optimizing iModulon thresholds, '
-                         'may take 2-3 minutes...')
+                    warnings.warn('Optimizing iModulon thresholds, '
+                                  'may take 2-3 minutes...')
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
