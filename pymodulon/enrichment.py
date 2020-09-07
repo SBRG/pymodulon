@@ -1,5 +1,5 @@
 import itertools
-from typing import Union, List
+from typing import Union, Iterable
 from warnings import warn
 
 import numpy as np
@@ -10,7 +10,7 @@ from statsmodels.stats.multitest import fdrcorrection
 ImodName = Union[str, int]
 
 
-def contingency(set1: List, set2: List, all_genes: List):
+def contingency(set1: Iterable, set2: Iterable, all_genes: Iterable):
     """
     Creates contingency table for gene enrichment
     Args:
@@ -130,8 +130,8 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     return reg_genes
 
 
-def compute_regulon_enrichment(gene_set: List, regulon_str: str,
-                               all_genes: List, trn: pd.DataFrame):
+def compute_regulon_enrichment(gene_set: Iterable, regulon_str: str,
+                               all_genes: Iterable, trn: pd.DataFrame):
     """
     Computes enrichment statistics for a gene_set in a regulon
     Args:
@@ -159,7 +159,8 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str,
     return result
 
 
-def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
+def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
+                           trn: pd.DataFrame,
                            max_regs: int = 1, fdr: float = 0.01,
                            method: str = 'both', force: bool = False):
     """
@@ -231,7 +232,7 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
     return FDR(df_enrich, fdr=fdr, total=total)
 
 
-def compute_annotation_enrichment(gene_set: List, all_genes: List,
+def compute_annotation_enrichment(gene_set: Iterable, all_genes: Iterable,
                                   annotation: pd.DataFrame,
                                   column='annotation',
                                   fdr: float = 0.01):
