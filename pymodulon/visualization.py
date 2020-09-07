@@ -272,6 +272,48 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            alpha: float = 0.7,
                            ax_font_kwargs: Optional[Mapping] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
+
+    Parameters
+    ----------
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    imodulon: int, str
+        The name of the iModulon to plot in regards to. Used to determine
+        gene weights
+    regulator: str
+        Name of regulator to compare enrichment against. Determines which
+        genes are in the regulon and which are not.
+    bins: int, Sequence, str
+        The bins to use when generating the histogram. Passed on to
+        `ax.hist()`
+    kind: 'overlap', 'side'
+        Whether to plot an overlapping or side-by-side comparison histogram
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    hist_label: Tuple[str, str]
+        The label to use when plotting the regulon and non-regulon genes.
+        Takes into a tuple of 2 values (first for non-regulon genes,
+        second for regulon genes). Passed on to `ax.hist()`
+    color: Sequence of tuples and/or str
+        The colors to use for regulon and non-regulon genes. Takes a
+        Sequence of 2 values (first for non-regulon genes, second for
+        regulon genes). Passed on to `ax.hist()`
+    alpha: float
+        Sets the opacity of the histogram (0 = transparent, 1 = opaque).
+        Passed on to `ax.hist()`
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the histogram is generated
+    """
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
         raise ValueError(f'iModulon does not exist: {imodulon}')
