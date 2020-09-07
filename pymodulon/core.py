@@ -419,9 +419,11 @@ class IcaData(object):
                      'imodulon_size', 'n_regs']
         df_enriched = df_enriched[col_order]
 
+        # Sort by q-value
+        df_enriched.sort_values( ['imodulon', 'qvalue', 'n_regs'])
+
         if save:
-            df_top_enrich = df_enriched.sort_values(
-                ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+            df_top_enrich = df_enriched.drop_duplicates('imodulon')
             self._update_imodulon_table(df_top_enrich.set_index('imodulon'))
 
         return df_enriched
