@@ -235,7 +235,24 @@ class IcaData(object):
     def trn(self, new_trn):
         self._trn = _check_table(new_trn, 'TRN', index_col=None)
         if not self._trn.empty:
+            # Check that regulator and gene_id columns are filled in
+            if self._trn.regulator.isnull().any():
+                raise ValueError('Null value detected in "regulator" column '
+                                 'of TRN')
+            if self._trn.gene_id.isnull().any():
+                raise ValueError('Null value detected in "gene_id" column '
+                                 'of TRN')
+
+            # Make sure regulators do not contain / or + characters
+            self._trn.regulator = [re.sub('\\+', ';', re.sub('/', ';', reg)) for
+                                   reg in self._trn.regulator]
+
             # Only include genes that are in S/X matrix
+            extra_genes = set(self._trn.gene_id) - set(self.gene_names)
+            if len(extra_genes) > 0:
+                warnings.warn('The following genes are in the TRN but not in '
+                              'your M '
+                              'matrix: {}'.format(extra_genes))
             self._trn = self._trn[self._trn.gene_id.isin(self.gene_names)]
 
             # Save regulator information to gene table
