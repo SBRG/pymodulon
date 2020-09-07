@@ -183,10 +183,9 @@ def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
 
     # Warning if max_regs is too high
     if max_regs > 2 and not force:
-        RuntimeError(
+        ValueError(
             'Using >2 maximum regulators may take time to compute. '
             'To perform analysis, use force=True')
-        return
 
     # Only search for regulators known to regulate a gene in gene_set
     # This reduces the total runtime by skipping unnecessary tests
