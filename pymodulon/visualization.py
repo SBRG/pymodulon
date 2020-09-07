@@ -265,10 +265,10 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            kind: Union[Literal['overlap'],
                                        Literal['side']] = 'overlap',
                            ax: Optional[Ax] = None,
-                           hist_label: Sequence[str, str] = ('Not regulated',
+                           hist_label: Tuple[str, str] = ('Not regulated',
                                                              'Regulon Genes'),
-                           color: Optional[Sequence[Tuple],
-                                           Sequence[str]] = None,
+                           color: Union[Sequence[Tuple],
+                                        Sequence[str]] = ('#aaaaaa', 'salmon'),
                            alpha: float = 0.7,
                            ax_font_kwargs: Optional[Mapping] = None,
                            legend_kwargs: Optional[Mapping] = None) -> Ax:
@@ -329,8 +329,8 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     if kind == 'overlap':
         ax.hist(non_reg_arr, bins=bin_arr, alpha=alpha, color=color[0],
                 label=hist_label[0])
-        ax.hist(reg_arr, bins=bin_arr, alpha=alpha, color=color[0],
-                label=hist_label[0])
+        ax.hist(reg_arr, bins=bin_arr, alpha=alpha, color=color[1],
+                label=hist_label[1])
 
     elif kind == 'side':
         arr = np.array([non_reg_arr, reg_arr], dtype='object')
