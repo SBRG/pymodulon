@@ -22,7 +22,8 @@ ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 
 
-def _check_table(table: Data, name: str, index: Optional[Collection] = None):
+def _check_table(table: Data, name: str, index: Optional[Collection] = None,
+                 index_col=0):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -33,7 +34,7 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None):
             table = pd.read_json(table)
         except ValueError:
             sep = '\t' if table.endswith('.tsv') else ','
-            table = pd.read_csv(table, index_col=0, sep=sep)
+            table = pd.read_csv(table, index_col=index_col, sep=sep)
 
     if isinstance(table, pd.DataFrame):
         # dont run _check_table_helper if no index is passed
@@ -127,6 +128,23 @@ def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
         return final_list[0]
     else:
         return final_list
+
+
+def num2name(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+    """
+    Convert a locus tag to the gene name
+    Args:
+        ica_data: IcaData object
+        gene: Locus tag or list of locus tags
+
+    Returns: Gene name or list of gene names
+
+    """
+    result = ica_data.gene_table.loc[gene].gene_name
+    if isinstance(gene, list):
+        return result.tolist()
+    else:
+        return result
 
 
 ####################
