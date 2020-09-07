@@ -1,6 +1,6 @@
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
-from typing import Optional, Mapping, Iterable
+from typing import Optional, Mapping, List
 from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
 
@@ -231,7 +231,7 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
-        self._trn = _check_table(new_trn, 'TRN')
+        self._trn = _check_table(new_trn, 'TRN', index_col=None)
         if not self._trn.empty:
             # Only include genes that are in S/X matrix
             self._trn = self._trn[self._trn.gene_id.isin(self.gene_names)]
@@ -386,7 +386,7 @@ class IcaData(object):
             df_enriched['imodulon'] = imodulon
             enrichments.append(df_enriched)
 
-        df_enriched = pd.concat(enrichments, axis=0)
+        df_enriched = pd.concat(enrichments, axis=0, sort=True)
 
         # Set regulator as column instead of axis
         df_enriched.index.name = 'regulator'
