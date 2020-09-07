@@ -32,12 +32,8 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None):
         try:
             table = pd.read_json(table)
         except ValueError:
-            try:
-                sep = '\t' if table.endswith('.tsv') else ','
-                table = pd.read_csv(table, index_col=0, sep=sep)
-            except FileNotFoundError:
-                raise TypeError('{}_table must be a pandas DataFrame '
-                                'filename or a valid JSON string'.format(name))
+            sep = '\t' if table.endswith('.tsv') else ','
+            table = pd.read_csv(table, index_col=0, sep=sep)
 
     if isinstance(table, pd.DataFrame):
         # dont run _check_table_helper if no index is passed
@@ -137,6 +133,18 @@ def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
 # Compare ICA runs #
 ####################
 
+from scipy import sparse
+import numpy as np
+import pandas as pd
+from re import split
+from typing import List, Dict
+import os
+from scipy import stats, special
+import tqdm
+from graphviz import Digraph
+import warnings
+
+
 def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
                     cutoff: float, show_all: bool):
     """
@@ -178,7 +186,7 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     # Calculate correlation matrix
     corr = np.zeros((len(s1.columns), len(s2.columns)))
 
-    for i, k1 in tqdm(enumerate(s1.columns), total=len(s1.columns)):
+    for i, k1 in tqdm.tqdm(enumerate(s1.columns), total=len(s1.columns)):
         for j, k2 in enumerate(s2.columns):
             if metric == 'pearson':
                 corr[i, j] = abs(stats.pearsonr(s1[k1], s2[k2])[0])
@@ -259,89 +267,96 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     return dot, name_links
 
 
-def _load_ortho_matrix(ortho_dir: str):
+def _gene_dictionary(gene_list: List):
     """
-    Load the .npz file and organism labels and compiles them into one
-    Args:
-        ortho_dir: String of the location where organism data can be found
-        (can be found under modulome/data)
-
-    Returns: Pandas Dataframe of the full organism compare matrix
-
+    Given a list of genes, will return a string for what organism best matches the gene prefixes
+    Args
+        :param gene_list: List of genes, usually from an S matrix
+        :return: String of the organism name specific to the _pull_bbh_csv function
     """
+    gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis", "MPN": "mPneumoniae", "PP": "pPutida",
+                        "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580", "SEN": "sEnterica_enteritidis",
+                        "SL1344": "sEnterica_SL1344", "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
+                        "SACI": "sAcidocaldarius", "SYNPCC7942": "sElongatus", "b": "eColi", "Rv": "mTuberculosis",
+                        "PA": "pAeruginosa", "STM": "sEnterica_full", "SCO": "sCoelicolor"}
 
-    filename = os.path.join(ortho_dir, "org_compare.npz")
-    label_file = os.path.join(ortho_dir, "org_compare_label.txt")
-    ortho_DF = pd.DataFrame(sparse.load_npz(filename).toarray())
-    labels = list(pd.read_csv(label_file, header=None, nrows=1).loc[0][:])
-
-    ortho_DF.index = labels
-    ortho_DF.columns = labels
-
-    # Filter out different strains of Salmonella, only leaves LT2 strain
-    filter_strain = []
-    for i in ortho_DF.index:
-        if "STM" in i and "_" in i:
-            filter_strain.append(i)
-
-    ortho_DF.drop(filter_strain, inplace=True)
-    ortho_DF.drop(columns=filter_strain, inplace=True)
-
-    return ortho_DF
-
-
-def _extract_genes(gene_set_1: List, gene_set_2: List, ortho_DF):
-    """
-    Returns a Panda Series that contains a cut down version of the complete
-    Comparison DF, where the rows are only genes
-    Args:
-        gene_set_1: List of genes from organism 1
-        gene_set_2: list of genes from organism 2
-        ortho_DF: Full ortholog comparison Dataframe
-
-    Returns: A reduced version of the ortho_DF Dataframe that only contains
-    the genes from gene_set_1 and gene_set_2
-
-    """
-
-    rows = ortho_DF.loc[ortho_DF.index.isin(list(gene_set_1))][:].index
-    columns = ortho_DF.loc[:][ortho_DF.columns.isin(list(gene_set_2))].index
-
-    reduced_DF = ortho_DF.loc[rows][columns]
-
-    reduced_DF = reduced_DF.replace(0, np.nan)
-    reduced_DF = reduced_DF.dropna(axis=1, how="all")
-    reduced_DF = reduced_DF.replace(np.nan, 0)
-
-    return reduced_DF
-
-
-def _translate_genes(gene_list: List, reduced_DF: pd.DataFrame):
-    """
-    Converts genes from one list to their corresponding ortholog of another
-    organism
-
-    Args:
-        gene_list: List of genes to be translated
-        reduced_DF: Pandas Dataframe of the orthologs between your two target
-            organisms
-
-    Returns: List of genes that have been translated
-
-    """
-    gene_list_copy = gene_list
-    for i in range(0, len(gene_list_copy)):
+    org_counts = {}
+    for gene in gene_list:
         try:
-            convert_column = reduced_DF[gene_list_copy[i]]
-            gene_list_copy[i] = str(
-                convert_column.loc[convert_column == 1][:].index[0])
+            curr_org = gene_to_org_dict[gene.split("_")[0]]
+            if curr_org not in org_counts.keys():
+                org_counts.update({curr_org: 1})
+            else:
+                org_counts.update({curr_org: org_counts[curr_org] + 1})
         except KeyError:
-            continue
-    return gene_list_copy
+            try:
+                curr_org = gene_to_org_dict[split("[0-9]", gene, maxsplit=1)[0]]
+                if curr_org not in org_counts.keys():
+                    org_counts.update({curr_org: 1})
+                else:
+                    org_counts.update({curr_org: org_counts[curr_org] + 1})
+            except KeyError:
+                continue
+    if (org_counts[max(org_counts)] / len(gene_list)) >= .7:
+        return max(org_counts)
+    else:
+        print("One of your org files contains too many different genes "
+              +str((org_counts[max(org_counts)] / len(gene_list))))
+        raise KeyError
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson',
-                cutoff=0.2, show_all=False):
+def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
+    """
+    Receives an the S matrix for an organism and returns the same S matrix with index genes translated into the
+    orthologs in organism 2
+    :param org_1: Name of organism 1 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
+    _gene_dictionary function
+    :param org_2: Name of organism 2 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
+    _gene_dictionary function
+    :param ortho_dir: String path to the "bbh_csv" directory in the "modulome_compare_data" repository.
+    Ex. "../../modulome_compare_data/bbh_csv"
+    :param S1: Pandas DataFrame of the S matrix for organism 1
+    :return: Pandas DataFrame of the S matrix for organism 1 with indexes translated into orthologs
+    """
+    for dirpath, dirname, file_arr in os.walk(ortho_dir):
+        for file in file_arr:
+            file_split = file.split("_vs_")
+            if org_1 in file_split[0] and org_2 in file_split[1]:
+                bbh_csv = os.path.join(dirpath, file)
+                bbh_DF = pd.read_csv(bbh_csv, index_col="gene")
+                bbh_DF.drop(columns="Unnamed: 0", inplace=True)
+                bbh_DF = bbh_DF.loc[:]["subject"]
+
+                S1_copy = S1.copy()
+                S1_index = list(S1_copy.index)
+                for i in range(0, len(S1_index)):
+                    try:
+                        S1_index[i] = bbh_DF.loc[S1_index[i]]
+                    except KeyError:
+                        continue
+                S1_copy.index = S1_index
+                return S1_copy
+
+            elif org_1 in file_split[1] and org_2 in file_split[0]:
+                bbh_csv = os.path.join(dirpath, file)
+                bbh_DF = pd.read_csv(bbh_csv, index_col="subject")
+                bbh_DF.drop(columns="Unnamed: 0", inplace=True)
+                bbh_DF = bbh_DF.loc[:]["gene"]
+
+                S1_copy = S1.copy()
+                S1_index = list(S1_copy.index)
+                for i in range(0, len(S1_index)):
+                    try:
+                        S1_index[i] = bbh_DF.loc[S1_index[i]]
+                    except KeyError:
+                        continue
+                S1_copy.index = S1_index
+                return S1_copy
+
+
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, auto_find: bool = True, org_1_name: str = None,
+                org_2_name: str = None,
+                metric='pearson', cutoff=0.2, show_all=False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
@@ -363,11 +378,15 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, metric='pearson',
                                           show_all=show_all)
         return dot, name_links
     else:
-        ortho_DF = _load_ortho_matrix(ortho_dir)
-        ortho_reduced_DF = _extract_genes(list(S1.index), list(S2.index),
-                                          ortho_DF)
-        translated_genes = _translate_genes(list(S2.index), ortho_reduced_DF)
-        S2.index = translated_genes
-        dot, name_links = _make_dot_graph(S1, S2, metric, cutoff,
-                                          show_all=show_all)
+        if auto_find is False and org_1_name is not None and org_2_name is not None:
+            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1)
+            dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
+                                              show_all=show_all)
+        else:
+            org_1_name = _gene_dictionary(S1.index)
+            org_2_name = _gene_dictionary(S2.index)
+            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1)
+            dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
+                                              show_all=show_all)
+
         return dot, name_links

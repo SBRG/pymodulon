@@ -150,26 +150,16 @@ class IcaData(object):
 
     @X.setter
     def X(self, x_matrix):
-        ## TODO: Use check_table function instead
-        if isinstance(x_matrix, str):
-            try:
-                df = pd.read_json(x_matrix)
-            except ValueError:
-                sep = '\t' if x_matrix.endswith('.tsv') else ','
-                df = pd.read_csv(x_matrix, index_col=0, sep=sep)
-        elif isinstance(x_matrix, pd.DataFrame):
-            df = x_matrix
-        else:
-            raise TypeError('X must be a pandas DataFrame or filename')
+        x = _check_table(x_matrix, 'X')
 
         # Check that gene and sample names conform to M and A matrices
-        if df.columns.tolist() != self.A.columns.tolist():
+        if x.columns.tolist() != self.A.columns.tolist():
             raise ValueError('X and A matrices have different sample names')
-        if df.index.tolist() != self.M.index.tolist():
+        if x.index.tolist() != self.M.index.tolist():
             raise ValueError('X and M matrices have different gene names')
 
         # Set x matrix
-        self._x = df
+        self._x = x
 
     @X.deleter
     def X(self):
