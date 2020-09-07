@@ -1018,7 +1018,7 @@ def _adj_r2(f, x, y, params):
 
 def _mod_freedman_diaconis(ica_data, imodulon):
     """
-    Generates optimal bin width estimate if bins is None.
+    Generates bins using optimal bin width estimate.
 
     This is done using a modified Freedman-Diaconis rule. The modification
     is necessary as iModulon gene-weights inherently contains many
