@@ -2,7 +2,8 @@
 
 """
 import warnings
-from typing import List, Literal, Optional, Mapping, Union
+from math import isnan
+from typing import List, Literal, Optional, Mapping, Sequence, Tuple, Union
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -14,6 +15,7 @@ from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
+from pymodulon.enrichment import parse_regulon_str
 from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
 
 
@@ -214,7 +216,7 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
     if imodulon in ica_data.A.index:
         values = ica_data.A.loc[imodulon]
     else:
-        raise ValueError('iModulon does not exist: {}'.format(imodulon))
+        raise ValueError(f'iModulon does not exist: {imodulon}')
 
     label = '{} iModulon\nActivity'.format(imodulon)
 
@@ -255,6 +257,151 @@ def plot_metadata(ica_data: IcaData, column,
 
     return barplot(values, table, column, projects,
                    highlight, ax, legend_kwargs)
+
+
+def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
+                           regulator: str = None,
+                           bins: Optional[Union[int, Sequence, str]] = None,
+                           kind: Union[Literal['overlap'],
+                                       Literal['side']] = 'overlap',
+                           ax: Optional[Ax] = None,
+                           hist_label: Tuple[str, str] = ('Not regulated',
+                                                          'Regulon Genes'),
+                           color: Union[Sequence[Tuple],
+                                        Sequence[str]] = ('#aaaaaa', 'salmon'),
+                           alpha: float = 0.7,
+                           ax_font_kwargs: Optional[Mapping] = None,
+                           legend_kwargs: Optional[Mapping] = None) -> Ax:
+    """
+    Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
+
+    Parameters
+    ----------
+    ica_data: pymodulon.core.IcaData
+        IcaData container object
+    imodulon: int, str
+        The name of the iModulon to plot in regards to. Used to determine
+        gene weights
+    regulator: str
+        Name of regulator to compare enrichment against. Determines which
+        genes are in the regulon and which are not.
+    bins: int, Sequence, str
+        The bins to use when generating the histogram. Passed on to
+        `ax.hist()`
+    kind: 'overlap', 'side'
+        Whether to plot an overlapping or side-by-side comparison histogram
+    ax: matplotlib.axes instance
+        The axes instance on which to generate the scatter-plot. If None is
+        provided, generates a new figure and axes instance to use
+    hist_label: Tuple[str, str]
+        The label to use when plotting the regulon and non-regulon genes.
+        Takes into a tuple of 2 values (first for non-regulon genes,
+        second for regulon genes). Passed on to `ax.hist()`
+    color: Sequence of tuples and/or str
+        The colors to use for regulon and non-regulon genes. Takes a
+        Sequence of 2 values (first for non-regulon genes, second for
+        regulon genes). Passed on to `ax.hist()`
+    alpha: float
+        Sets the opacity of the histogram (0 = transparent, 1 = opaque).
+        Passed on to `ax.hist()`
+    ax_font_kwargs: dict
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
+    legend_kwargs: dict
+        kwargs that are passed onto `ax.legend()`
+
+    Returns
+    -------
+    ax: matplotlib.axes instance
+        Returns the axes instance on which the histogram is generated
+    """
+    # Check that iModulon exists
+    if imodulon not in ica_data.M.columns:
+        raise ValueError(f'iModulon does not exist: {imodulon}')
+
+    # If ax is None, create ax on which to generate histogram
+    if ax is None:
+        fig, ax = plt.subplots()
+
+    # If bins is None, generate optimal number of bins
+    if bins is None:
+        bin_arr = _mod_freedman_diaconis(ica_data, imodulon)
+    else:
+        bin_arr = bins
+
+    # If no TRN in IcaData, regulon genes cannot be determined and plotted
+    if ica_data.trn.empty:
+        reg = None
+
+    # If regulator is given, use it to find regulon genes
+    elif regulator is not None:
+        reg = regulator
+
+    # If regulator is not given, use imodulon_table to find regulator
+    elif not ica_data.imodulon_table.empty:
+        reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
+        if isnan(reg):
+            reg = None
+
+    # If no imodulon_table in IcaData, compute trn enrichment to find regulator
+    else:
+        # TODO: Ask Anand about max_regs and how important that is
+        df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
+        reg = df_enriched.loc[imodulon, 'regulator']
+        if isnan(reg):
+            reg = None
+
+    # Use regulator value to find regulon genes
+    if reg is not None:
+        reg_genes = parse_regulon_str(reg, ica_data.trn)
+    else:
+        reg_genes = set()
+
+    # Handle custom kwargs
+    if ax_font_kwargs is None:
+        ax_font_kwargs = {}
+
+    if legend_kwargs is None:
+        legend_kwargs = dict({'loc': 'upper right'})
+
+    # Histogram
+    non_reg_genes = set(ica_data.gene_names) - reg_genes
+    reg_arr = ica_data.M[imodulon].loc[reg_genes]
+    non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
+
+    if kind == 'overlap':
+        ax.hist(non_reg_arr, bins=bin_arr, alpha=alpha, color=color[0],
+                label=hist_label[0])
+        ax.hist(reg_arr, bins=bin_arr, alpha=alpha, color=color[1],
+                label=hist_label[1])
+
+    elif kind == 'side':
+        arr = np.array([non_reg_arr, reg_arr], dtype='object')
+        ax.hist(arr, bins=bin_arr, alpha=alpha, color=color, label=hist_label)
+
+    else:
+        raise ValueError(f'{kind} is not a valid option. `kind` must be '
+                         'either "overlap" or "side"')
+
+    # Set y-axis to log-scale
+    ax.set_yscale('log')
+
+    # Add thresholds to scatterplot (dashed lines)
+    ymin, ymax = ax.get_ylim()
+    thresh = abs(ica_data.thresholds[imodulon])
+    if thresh != 0:
+        ax.vlines([-thresh, thresh], ymin=ymin, ymax=ymax,
+                  colors='k', linestyles='dashed', linewidth=1)
+
+    ax.set_ylim(ymin, ymax)
+
+    # Set x and y labels
+    ax.set_xlabel(f'{imodulon} Gene Weight', **ax_font_kwargs)
+    ax.set_ylabel('Number of Genes', **ax_font_kwargs)
+
+    # Add legend
+    ax.legend(**legend_kwargs)
+
+    return ax
 
 
 ################
@@ -444,8 +591,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
 
 def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
+                      xaxis=None, xname='',
                       by: Union[Literal['log-tpm-norm'], Literal['length'],
-                                Literal['start']],
+                                Literal['start'], None] = None,
                       ref_cols: Optional[SeqSetStr] = None,
                       **kwargs) -> Ax:
     """
@@ -460,6 +608,10 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
         IcaData container object
     imodulon: int, str
         The name of the iModulon to plot
+    xaxis:
+        Experimental parameter. See `_set_axis()` for further details.
+    xname:
+        Experimental parameter. See `_set_axis()` for further details.
     by: 'log-tpm-norm', 'length', 'start'
         Gene property to plot on the x-axis. log-tpm-norm plots mean
         expression, length plots gene length, and start plots gene start
@@ -475,22 +627,32 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
     """
-    # Assign y and ylabel
-    y = ica_data.M[imodulon]
-    ylabel = f'{imodulon} Gene Weight'
-
-    #  Ensure 'by' has a valid input and assign x, xlabel accordingly
-    if by in ('log-tpm', 'log-tpm-norm'):
-        x = _normalize_expr(ica_data, ref_cols)
-        xlabel = 'Mean Expression'
-    elif by == 'length':
-        x = np.log10(ica_data.gene_table.length)
-        xlabel = 'Gene Length (log10-scale)'
-    elif by == 'start':
-        x = ica_data.gene_table.start
-        xlabel = 'Gene Start'
+    # Check that iModulon exists
+    if imodulon in ica_data.M.columns:
+        y = ica_data.M[imodulon]
+        ylabel = f'{imodulon} Gene Weight'
     else:
-        raise ValueError('"by" must be "log-tpm-norm", "length", or "start"')
+        raise ValueError(f'iModulon does not exist: {imodulon}')
+
+    # If experimental `xaxis` parameter is used, use custom values for x-axis
+    if xaxis is not None:
+        x = _set_xaxis(xaxis=xaxis, y=y)
+        xlabel = xname
+
+    else:
+        #  Ensure 'by' has a valid input and assign x, xlabel accordingly
+        if by in ('log-tpm', 'log-tpm-norm'):
+            x = _normalize_expr(ica_data, ref_cols)
+            xlabel = 'Mean Expression'
+        elif by == 'length':
+            x = np.log10(ica_data.gene_table.length)
+            xlabel = 'Gene Length (log10-scale)'
+        elif by == 'start':
+            x = ica_data.gene_table.start
+            xlabel = 'Gene Start'
+        else:
+            raise ValueError('"by" must be "log-tpm-norm", "length", '
+                             'or "start"')
 
     # Override specific kwargs (their implementation is different
     # in this function)
@@ -854,6 +1016,56 @@ def _adj_r2(f, x, y, params):
     return 1 - np.true_divide((1 - r2) * (n - 1), (n - k - 1))
 
 
+def _mod_freedman_diaconis(ica_data, imodulon):
+    """
+    Generates optimal bin width estimate if bins is None.
+
+    This is done using a modified Freedman-Diaconis rule. The modification
+    is necessary as iModulon gene-weights inherently contains many
+    statistical `outliers`, which are the enriched genes of interest in
+    the iModulon. For this reason, the interquartile range is not a
+    sufficient bin width estimator by itself (it is too limited in its
+    range). Thus, the full range of the dataset `x` is used instead of
+    2*IQR. This strategy is generally fine as it leads to a better
+    number of bins (< 20) and ensures that bin width continues to be
+    proportional to n^-1/3 (where n is the number of samples in
+    dataset `x`).
+
+    See Also
+    --------
+    Wikipedia:
+        {https://en.wikipedia.org/wiki/Freedman-Diaconis_rule}
+    StackExchange:
+        {https://tinyurl.com/pymodulonFreedmanDiaconis}
+    """
+    x = ica_data.M[imodulon]
+    thresh = abs(ica_data.thresholds[imodulon])
+
+    # Modified Freedman-Diaconis
+    opt_width = (x.max() - x.min()) / (len(x) ** (1 / 3))
+
+    # Width calculated using optimal width and iModulon threshold
+    if thresh > opt_width:
+        width = thresh/int(thresh/opt_width)
+    else:
+        width = thresh/2
+
+    # Use width and thresh to calculate xmin, xmax
+    if x.min() < -thresh:
+        multiple = np.ceil(abs(x.min()/width))
+        xmin = -(multiple+1)*width
+    else:
+        xmin = -(thresh+width)
+
+    if x.max() > thresh:
+        multiple = np.ceil(x.max()/width)
+        xmax = (multiple+1)*width
+    else:
+        xmax = (thresh+width)
+
+    return np.arange(xmin, xmax+width, width)
+
+
 def _normalize_expr(ica_data, ref_cols):
     x = ica_data.X
 
@@ -864,3 +1076,38 @@ def _normalize_expr(ica_data, ref_cols):
         norm = x.mean(axis=1)
 
     return norm
+
+
+##########################
+# Experimental Functions #
+##########################
+
+def _set_xaxis(xaxis: Union[Mapping, pd.Series], y: pd.Series):
+    """
+    Implements experimental `xaxis` param from `plot_gene_weights`. This
+    allows for users to generate a scatterplot comparing gene weight on
+    the y-axis with any collection of numbers on the x-axis (as long as
+    the lengths match).
+
+    Parameters
+    ----------
+    xaxis: list, set, tuple, dict, np.array, pd.Series
+        Any collection or mapping of numbers (plots on x-axis)
+    y: pd.Series
+        pandas Series of Gene Weights to be plotted on the y-axis of
+        `plot_gene_weights`
+
+    Returns
+    -------
+    x: pd.Series
+        Returns a pd.Series to be used as the x-axis data-points for
+        generating the plot_gene_weights scatter-plot.
+    """
+    # Determine type of `xaxis` and set `x` accordingly
+    x = xaxis if isinstance(xaxis, pd.Series) else pd.Series(xaxis)
+
+    if not x.sort_index().index.equals(y.sort_index().index):
+        raise ValueError('Given x-values do not align with gene and their '
+                         'respective gene-weights on the y-axis')
+
+    return x
