@@ -14,6 +14,8 @@ from matplotlib.patches import Rectangle
 from scipy import stats
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
+from itertools import combinations
+from statsmodels.stats.multitest import fdrcorrection
 
 from pymodulon.core import IcaData
 from pymodulon.enrichment import parse_regulon_str
@@ -929,7 +931,7 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 
 def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
               lfc: float = 5, fdr_rate: float = .1, label: bool = True,
-              adjust: bool = True) -> Ax:
+              adjust: bool = True, **kwargs) -> Ax:
     """
     Creates a DIMA plot that compares samples
     Args:
@@ -947,9 +949,29 @@ def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
     a1 = ica_data_1.A[sample1].mean(axis=1)
     a2 = ica_data_1.A[sample2].mean(axis=1)
 
-    return scatterplot(a1, a2, line45=True, line45_margin=lfc,
-                       xlabel=re.search('(.*)__', sample1[0]).group(1),
-                       ylabel=re.search('(.*)__', sample2[0]).group(1))
+    df_diff = _diff_act(ica_data_1, sample1, sample2, lfc=lfc,
+                        fdr_rate=fdr_rate)
+
+    ax = scatterplot(a1, a2, line45=True, line45_margin=lfc,
+                     xlabel=re.search('(.*)__', sample1[0]).group(1),
+                     ylabel=re.search('(.*)__', sample2[0]).group(1),
+                     **kwargs)
+
+    if label:
+        df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
+        texts = []
+        for k in df_diff.index:
+            texts.append(ax.text(df_diff.loc[k, 0], df_diff.loc[k, 1], k,
+                                        fontsize=10))
+        if adjust:
+            expand_args = {'expand_objects': (1.2, 1.4),
+                           'expand_points': (1.3, 1.3),
+                           'expand_text': (1.4, 1.4)}
+            adjust_text(texts, ax=ax,
+                        arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
+                        only_move={'objects': 'y'}, **expand_args)
+
+    return ax
 
 
 ####################
@@ -1128,12 +1150,12 @@ def _diff_act(ica_data: IcaData, sample1: List, sample2: List, lfc: float,
     for k in ica_data.A.index:
         dist[k] = stats.lognorm(*stats.lognorm.fit(_diff.loc[k].values)).cdf
 
-    res = pd.DataFrame(index=ica_data.A.columns)
+    res = pd.DataFrame(index=ica_data.A.index)
     for k in res.index:
-        a1 = ica_data.A.loc[k, s1_list].mean()
-        a2 = ica_data.A.loc[k, s2_list].mean()
+        a1 = ica_data.A.loc[k, sample1].mean()
+        a2 = ica_data.A.loc[k, sample2].mean()
         res.loc[k, 'LFC'] = a2 - a1
-        res.loc[k, 'pvalue'] = 1 - ica_data.dist[k](abs(a1 - a2))
+        res.loc[k, 'pvalue'] = 1 - dist[k](abs(a1 - a2))
     final = FDR(res, fdr_rate)
     return final[(abs(final.LFC) > lfc)].sort_values('LFC', ascending=False)
 
