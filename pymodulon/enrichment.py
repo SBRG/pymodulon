@@ -230,7 +230,7 @@ def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
 
 def compute_annotation_enrichment(gene_set: Iterable, all_genes: Iterable,
                                   annotation: pd.DataFrame,
-                                  column='annotation',
+                                  column: str,
                                   fdr: float = 0.01):
     """
     Compare a gene set against a dataframe of gene annotations

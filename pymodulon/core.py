@@ -342,6 +342,32 @@ class IcaData(object):
     # Enrichments #
     ###############
 
+    def _update_imodulon_table(self, enrichment):
+        """
+        Update iModulon table given new iModulon enrichments
+
+        :param enrichment: Pandas series or dataframe containing an
+            iModulon enrichment
+        """
+        if isinstance(enrichment, pd.Series):
+            enrichment = pd.DataFrame(enrichment)
+        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
+            enrichment.index)]
+        keep_cols = self.imodulon_table.loc[enrichment.index,
+                                            set(self.imodulon_table.columns)
+                                            - set(enrichment.columns)]
+        df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
+        new_table = pd.concat([keep_rows, df_top_enrich])
+
+        # Reorder columns
+        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
+        new_table = new_table[col_order]
+
+        # Reorder rows
+        new_table = new_table.reindex(self.imodulon_names)
+
+        self.imodulon_table = new_table
+
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
                                    save: bool = False):
         """
@@ -428,31 +454,46 @@ class IcaData(object):
 
         return df_enriched
 
-    def _update_imodulon_table(self, enrichment):
-        """
-        Update iModulon table given new iModulon enrichments
+    def compute_annotation_enrichment(self, annotation: pd.DataFrame,
+                                      column: str,
+                                      imodulons: Optional[ImodNameList] = None,
+                                      fdr: float = 0.1) \
+            -> pd.DataFrame:
 
-        :param enrichment: Pandas series or dataframe containing an
-            iModulon enrichment
-        """
-        if isinstance(enrichment, pd.Series):
-            enrichment = pd.DataFrame(enrichment)
-        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
-            enrichment.index)]
-        keep_cols = self.imodulon_table.loc[enrichment.index,
-                                            set(self.imodulon_table.columns)
-                                            - set(enrichment.columns)]
-        df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
-        new_table = pd.concat([keep_rows, df_top_enrich])
+        # TODO: write test function
+        # TODO: Figure out save function
+        # TODO: Add documentation
 
-        # Reorder columns
-        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
-        new_table = new_table[col_order]
+        enrichments = []
 
-        # Reorder rows
-        new_table = new_table.reindex(self.imodulon_names)
+        if imodulons is None:
+            imodulon_list = self.imodulon_names
+        elif isinstance(imodulons, str):
+            imodulon_list = [imodulons]
+        else:
+            imodulon_list = imodulons
 
-        self.imodulon_table = new_table
+        for imodulon in imodulon_list:
+            gene_list = self.view_imodulon(imodulon).index
+            df_enriched = compute_annotation_enrichment(gene_list,
+                                                        self.gene_names,
+                                                        column=column,
+                                                        annotation=annotation,
+                                                        fdr=fdr)
+            df_enriched['imodulon'] = imodulon
+            enrichments.append(df_enriched)
+
+        DF_enriched = pd.concat(enrichments, axis=0, sort=True)
+
+        # Set annotation name as column instead of axis
+        DF_enriched.index.name = column
+        DF_enriched.reset_index(inplace=True)
+
+        # Rename column
+        DF_enriched.rename({'gene_set_size': 'imodulon_size'},
+                           inplace=True, axis=1)
+
+        return DF_enriched
 
     ######################################
     # Threshold properties and functions #
