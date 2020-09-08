@@ -1,74 +1,72 @@
-regulator	regulator_id	gene_name	gene_id	old_locus_tag	gene_issue	other_id	Direction	Evidence	PMID	Additional Notes
-BarR	SACI_RS10330	barR	SACI_RS10330	Saci_2136		3472865		qRT-PCR	24646198	BarR TF (Lrp/AsnC family transcriptional regulator), called the “feast or famine” regulator
-BarR 			SACI_RS10335	Saci_2137		3472866	+	qRT-PCR	24646198	
-BarR			SACI_RS00130	Saci_0028		3472576		ChIP-Seq, qRT-PCR	27502941	
-BarR 		meaB	SACI_RS00275	Saci_0061		3472976		ChIP-Seq, qRT-PCR	27502941	
-BarR		infB	SACI_RS03305	Saci_0695		3472541		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS03430	Saci_0720		3472566		ChIP-Seq, qRT-PCR	27502941	
-BarR		rgy	SACI_RS04020	Saci_0839	pseudogene	3472710		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS05015	Saci_1050		3473008		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS05315	Saci_1115		3474149		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS05635	Saci_1182		3473527		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS07940	Saci_1664		3474094		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS07990	Saci_1674		3474104		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS08595	Saci_1796		3473791		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS08790	Saci_1833		3474321		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS09490	Saci_1964		3474827		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS09790	Saci_2025		3474442		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS10020	Saci_2073		3473626		ChIP-Seq, qRT-PCR	27502941	
-BarR 			SACI_RS10475	Saci_2166		3472676		ChIP-Seq, qRT-PCR	27502941	
-BarR			SACI_RS11225	Saci_2319	discontinued	3473566		ChIP-Seq, qRT-PCR	27502941	Saci_2320 is shown to have a high affinity binding site, but Saci_2319 is used in the table instead. Saci_2320 may be the more appropriate gene to use instead
-BarR			SACI_RS11230	Saci_2320		3473567		ChIP-Seq	27502941	
-BarR			SACI_RS11235	Saci_2321		3473568		ChIP-Seq	27502941	
-FadR			SACI_RS01110	Saci_0229		3474712		ChIP-Seq, EMSA	30948713	
-FadR			SACI_RS01295	Saci_0266		3474823		ChIP-Seq	30948713	
-FadR		cedA	SACI_RS02695	Saci_0568		3473206		ChIP-Seq, EMSA	30948713	
-FadR			SACI_RS04840	Saci_1014		3473681		ChIP-Seq	30948713	
-FadR			SACI_RS05270	Saci_1106		3474140		ChIP-Seq, EMSA	30948713	
-FadR	SACI_RS05275	fadR	SACI_RS05275	Saci_1107		3474141		ChIP-Seq, EMSA	30948713	FadR_Sa TF (TetR/AcrR family transcriptional regulator)
-FadR			SACI_RS05285	Saci_1109		3474143		ChIP-Seq	30948713	
-FadR			SACI_RS05315	Saci_1115		3474149		ChIP-Seq, EMSA	30948713	
-FadR			SACI_RS05360	Saci_1124		3474158		ChIP-Seq, EMSA	30948713	Possible CopG family transcription regulator (paper states its a TF, NCBi claims its a hypothetical protein)
-FadR		hmgA	SACI_RS06500	Saci_1359		3472924		ChIP-Seq	30948713	
-FadR			SACI_RS06525	Saci_1364		3472929		ChIP-Seq	30948713	
-FadR			SACI_RS08840	Saci_1843	discontinued	3474331		ChIP-Seq	30948713	Originally thought to code for a cyclase, this gene and Saci_1844 were both discontinued (Saci_1842 or Saci_1845 might be the more appropriate target)
-FadR			SACI_RS10185	Saci_2107		3472620		ChIP-Seq	30948713	
-FadR			SACI_RS10300	Saci_2130		3472859		ChIP-Seq, EMSA	30948713	
-FadR			SACI_RS05260	Saci_1104		3474138		qRT-PCR	30948713	
-FadR			SACI_RS05265	Saci_1105		3474139		qRT-PCR	30948713	
-FadR			SACI_RS05280	Saci_1108		3474142		qRT-PCR	30948713	
-FadR			SACI_RS05310	Saci_1114		3474148		qRT-PCR	30948713	
-FadR			SACI_RS05345	Saci_1121		3474155		qRT-PCR	30948713	
-FadR			SACI_RS05355	Saci_1123		3474157		qRT-PCR	30948713	
-MalR	SACI_RS05530	malR	SACI_RS05530	Saci_1161		3473350		qRT-PCR	24271181	MalR TF (TrmB familiy transcription regulator). Maltose regulatory protein, only present in S. acidocaldarius, all other Sulfolobus species have no homologue 
-MalR		malA	SACI_RS05525	Saci_1160		3473349	+	qRT-PCR	24271181	
-MalR		amyA	SACI_RS05535	Saci_1162		3473351	+	qRT-PCR	24271181	
-MalR		malF	SACI_RS05540	Saci_1163		3473352	+	qRT-PCR	24271181	
-MalR		malG	SACI_RS05545	Saci_1164		3473353	+	qRT-PCR	24271181	
-MalR		malE	SACI_RS05550	Saci_1165		3473354	+	qRT-PCR, EMSA	24271181	Promotor
-MalR		malK	SACI_RS05555	Saci_1166		3473355	+	qRT-PCR	24271181	
-ArnR/ArnR1	SACI_RS05625	arnR	SACI_RS05625	Saci_1180		3473525			23461567	ArnR TF (MarR family transcriptional regulatory, membrane-bound transcriptional activator of the crenarchaeal archaellum, nutrient-limitation dependent)
-ArnR/ArnR1		arnR1	SACI_RS05580	Saci_1171		3473360			23461567	ArnR1 TF ( MarR family transcription regulator, membrane-bound transcriptional activator of the crenarchaeal archaellum, NOT nutrient-limitation dependent)
-ArnR/ArnR1		flaJ	SACI_RS05585	Saci_1172		3473361	+		23461567	
-ArnR/ArnR1		flaI	SACI_RS05590	Saci_1173		3473362	+		23461567	
-ArnR/ArnR1		flaH	SACI_RS05595	Saci_1174		3473363	+		23461567	
-ArnR/ArnR1		flaF	SACI_RS05600	Saci_1175		3473364	+		23461567	
-ArnR/ArnR1		flaG	SACI_RS05605	Saci_1176		3473521	+		23461567	
-ArnR/ArnR1		flaX	SACI_RS05610	Saci_1177		3473522	+		23461567	Promotor, activity remains constitutive (NOT nutrient starvation dependent)
-ArnR/ArnR1		flaB	SACI_RS05615	Saci_1178		3473523	+		23461567	Promotor, activity increases during nutrient starvation
-ArnR/ArnR1			SACI_RS05620	Saci_1179		3473524			23461567	
-ArnR/ArnR1		arnS	SACI_RS05630	Saci_1181		3473526		qRT-PCR, Motility Assay	27731916	ArnS (Ser/Thr protein kinase, controls ArnA transcription and translation, nutrient-limitation dependent)
-ArnA/ArnB	SACI_RS05765	arnA	SACI_RS05765	Saci_1210		3473555		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	ArnA TF (Forkhead-associated [FHA] domain-containing protein, repressors of crenarchaeal archaellum expression), ArnA and ArnB phosphorylate together to form a complex that inhibits the archaellum operon
-ArnA/ArnB		arnB	SACI_RS05770	Saci_1211		3473556		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	ArnB TF (von Willebrand [vWA] domain-containing protein, repressors of crenarchaeal archaellum), ArnA and ArnB phosphorylate together to form a complex that inhibits the archaellum operon
-ArnA/ArnB			SACI_RS05755	Saci_1208		3473553		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	vWA domain-containing protein (vWA2, so-called because it is the second vWA protein that flanks arnA, the other being arnB)
-ArnA/ArnB			SACI_RS05760	Saci_1209		3473554		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Disulfide bond formation protein A [DsbA] family protein, flanks vWA2, unique to Saci
-ArnA/ArnB		arnC	SACI_RS05690	Saci_1193		3473538		SDS-PAGE	22845497	ArnC (protein kinase responsible for phosphorylating ArnA, ArnB, and vWA2)
-ArnA/ArnB		arnD	SACI_RS08090	Saci_1694		3474460		SDS-PAGE	22845497	ArnD (Ser/Thr protein kinase responsible for specifically phosphorylating ArnB)
-ArnA/ArnB		flaJ	SACI_RS05585	Saci_1172		3473361	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
-ArnA/ArnB		flaI	SACI_RS05590	Saci_1173		3473362	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
-ArnA/ArnB		flaH	SACI_RS05595	Saci_1174		3473363	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
-ArnA/ArnB		flaF	SACI_RS05600	Saci_1175		3473364	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
-ArnA/ArnB		flaG	SACI_RS05605	Saci_1176		3473521	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
-ArnA/ArnB		flaX	SACI_RS05610	Saci_1177		3473522	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Promotor, activity remains constitutive (NOT nutrient starvation dependent)
-ArnA/ArnB		flaB	SACI_RS05615	Saci_1178		3473523	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Promotor, activity increases during nutrient starvation
-ArnA/ArnB		saci_pp2a	SACI_RS04220	Saci_0884		3473103		Immunoblotting Assay, qRT-PCR	27731916	phospho Ser/Thr phosphatise, homologous to PP2A catalytic subunit in eukaryote phoshotases, phosphorylates ArnB, implicated in repressing archaellum expression, See Also: PMID 24078887
+regulator	gene_id	regulator_id	gene_name	old_locus_tag	gene_issue	other_id	direction	evidence	PMID	Additional Notes
+BarR	SACI_RS10330	SACI_RS10330	barR	Saci_2136		3472865		qRT-PCR	24646198	BarR TF (Lrp/AsnC family transcriptional regulator), called the “feast or famine” regulator
+BarR 	SACI_RS10335	SACI_RS10330		Saci_2137		3472866	+	qRT-PCR	24646198	
+BarR	SACI_RS00130	SACI_RS10330		Saci_0028		3472576		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS00275	SACI_RS10330	meaB	Saci_0061		3472976		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS03305	SACI_RS10330	infB	Saci_0695		3472541		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS03430	SACI_RS10330		Saci_0720		3472566		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS04020	SACI_RS10330	rgy	Saci_0839	pseudogene	3472710		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS05015	SACI_RS10330		Saci_1050		3473008		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS05315	SACI_RS10330		Saci_1115		3474149		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS05635	SACI_RS10330		Saci_1182		3473527		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS07940	SACI_RS10330		Saci_1664		3474094		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS07990	SACI_RS10330		Saci_1674		3474104		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS08595	SACI_RS10330		Saci_1796		3473791		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS08790	SACI_RS10330		Saci_1833		3474321		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS09490	SACI_RS10330		Saci_1964		3474827		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS09790	SACI_RS10330		Saci_2025		3474442		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS10020	SACI_RS10330		Saci_2073		3473626		ChIP-Seq, qRT-PCR	27502941	
+BarR 	SACI_RS10475	SACI_RS10330		Saci_2166		3472676		ChIP-Seq, qRT-PCR	27502941	
+BarR	SACI_RS11230	SACI_RS10330		Saci_2320		3473567		ChIP-Seq	27502941	
+BarR	SACI_RS11235	SACI_RS10330		Saci_2321		3473568		ChIP-Seq	27502941	
+FadR	SACI_RS01110	SACI_RS05275		Saci_0229		3474712		ChIP-Seq, EMSA	30948713	
+FadR	SACI_RS01295	SACI_RS05275		Saci_0266		3474823		ChIP-Seq	30948713	
+FadR	SACI_RS02695	SACI_RS05275	cedA	Saci_0568		3473206		ChIP-Seq, EMSA	30948713	
+FadR	SACI_RS04840	SACI_RS05275		Saci_1014		3473681		ChIP-Seq	30948713	
+FadR	SACI_RS05270	SACI_RS05275		Saci_1106		3474140		ChIP-Seq, EMSA	30948713	
+FadR	SACI_RS05275	SACI_RS05275	fadR	Saci_1107		3474141		ChIP-Seq, EMSA	30948713	FadR_Sa TF (TetR/AcrR family transcriptional regulator)
+FadR	SACI_RS05285	SACI_RS05275		Saci_1109		3474143		ChIP-Seq	30948713	
+FadR	SACI_RS05315	SACI_RS05275		Saci_1115		3474149		ChIP-Seq, EMSA	30948713	
+FadR	SACI_RS05360	SACI_RS05275		Saci_1124		3474158		ChIP-Seq, EMSA	30948713	Possible CopG family transcription regulator (paper states its a TF, NCBi claims its a hypothetical protein)
+FadR	SACI_RS06500	SACI_RS05275	hmgA	Saci_1359		3472924		ChIP-Seq	30948713	
+FadR	SACI_RS06525	SACI_RS05275		Saci_1364		3472929		ChIP-Seq	30948713	
+FadR	SACI_RS10185	SACI_RS05275		Saci_2107		3472620		ChIP-Seq	30948713	
+FadR	SACI_RS10300	SACI_RS05275		Saci_2130		3472859		ChIP-Seq, EMSA	30948713	
+FadR	SACI_RS05260	SACI_RS05275		Saci_1104		3474138		qRT-PCR	30948713	
+FadR	SACI_RS05265	SACI_RS05275		Saci_1105		3474139		qRT-PCR	30948713	
+FadR	SACI_RS05280	SACI_RS05275		Saci_1108		3474142		qRT-PCR	30948713	
+FadR	SACI_RS05310	SACI_RS05275		Saci_1114		3474148		qRT-PCR	30948713	
+FadR	SACI_RS05345	SACI_RS05275		Saci_1121		3474155		qRT-PCR	30948713	
+FadR	SACI_RS05355	SACI_RS05275		Saci_1123		3474157		qRT-PCR	30948713	
+MalR	SACI_RS05530	SACI_RS05530	malR	Saci_1161		3473350		qRT-PCR	24271181	MalR TF (TrmB familiy transcription regulator). Maltose regulatory protein, only present in S. acidocaldarius, all other Sulfolobus species have no homologue 
+MalR	SACI_RS05525	SACI_RS05530	malA	Saci_1160		3473349	+	qRT-PCR	24271181	
+MalR	SACI_RS05535	SACI_RS05530	amyA	Saci_1162		3473351	+	qRT-PCR	24271181	
+MalR	SACI_RS05540	SACI_RS05530	malF	Saci_1163		3473352	+	qRT-PCR	24271181	
+MalR	SACI_RS05545	SACI_RS05530	malG	Saci_1164		3473353	+	qRT-PCR	24271181	
+MalR	SACI_RS05550	SACI_RS05530	malE	Saci_1165		3473354	+	qRT-PCR, EMSA	24271181	Promotor
+MalR	SACI_RS05555	SACI_RS05530	malK	Saci_1166		3473355	+	qRT-PCR	24271181	
+ArnR;ArnR1	SACI_RS05625	SACI_RS05625	arnR	Saci_1180		3473525			23461567	ArnR TF (MarR family transcriptional regulatory, membrane-bound transcriptional activator of the crenarchaeal archaellum, nutrient-limitation dependent)
+ArnR;ArnR1	SACI_RS05580	SACI_RS05625	arnR1	Saci_1171		3473360			23461567	ArnR1 TF ( MarR family transcription regulator, membrane-bound transcriptional activator of the crenarchaeal archaellum, NOT nutrient-limitation dependent)
+ArnR;ArnR1	SACI_RS05585	SACI_RS05625	flaJ	Saci_1172		3473361	+		23461567	
+ArnR;ArnR1	SACI_RS05590	SACI_RS05625	flaI	Saci_1173		3473362	+		23461567	
+ArnR;ArnR1	SACI_RS05595	SACI_RS05625	flaH	Saci_1174		3473363	+		23461567	
+ArnR;ArnR1	SACI_RS05600	SACI_RS05625	flaF	Saci_1175		3473364	+		23461567	
+ArnR;ArnR1	SACI_RS05605	SACI_RS05625	flaG	Saci_1176		3473521	+		23461567	
+ArnR;ArnR1	SACI_RS05610	SACI_RS05625	flaX	Saci_1177		3473522	+		23461567	Promotor, activity remains constitutive (NOT nutrient starvation dependent)
+ArnR;ArnR1	SACI_RS05615	SACI_RS05625	flaB	Saci_1178		3473523	+		23461567	Promotor, activity increases during nutrient starvation
+ArnR;ArnR1	SACI_RS05620	SACI_RS05625		Saci_1179		3473524			23461567	
+ArnR;ArnR1	SACI_RS05630	SACI_RS05625	arnS	Saci_1181		3473526		qRT-PCR, Motility Assay	27731916	ArnS (Ser/Thr protein kinase, controls ArnA transcription and translation, nutrient-limitation dependent)
+ArnA;ArnB	SACI_RS05765	SACI_RS05765	arnA	Saci_1210		3473555		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	ArnA TF (Forkhead-associated [FHA] domain-containing protein, repressors of crenarchaeal archaellum expression), ArnA and ArnB phosphorylate together to form a complex that inhibits the archaellum operon
+ArnA;ArnB	SACI_RS05770	SACI_RS05765	arnB	Saci_1211		3473556		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	ArnB TF (von Willebrand [vWA] domain-containing protein, repressors of crenarchaeal archaellum), ArnA and ArnB phosphorylate together to form a complex that inhibits the archaellum operon
+ArnA;ArnB	SACI_RS05755	SACI_RS05765		Saci_1208		3473553		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	vWA domain-containing protein (vWA2, so-called because it is the second vWA protein that flanks arnA, the other being arnB)
+ArnA;ArnB	SACI_RS05760	SACI_RS05765		Saci_1209		3473554		Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Disulfide bond formation protein A [DsbA] family protein, flanks vWA2, unique to Saci
+ArnA;ArnB	SACI_RS05690	SACI_RS05765	arnC	Saci_1193		3473538		SDS-PAGE	22845497	ArnC (protein kinase responsible for phosphorylating ArnA, ArnB, and vWA2)
+ArnA;ArnB	SACI_RS08090	SACI_RS05765	arnD	Saci_1694		3474460		SDS-PAGE	22845497	ArnD (Ser/Thr protein kinase responsible for specifically phosphorylating ArnB)
+ArnA;ArnB	SACI_RS05585	SACI_RS05765	flaJ	Saci_1172		3473361	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
+ArnA;ArnB	SACI_RS05590	SACI_RS05765	flaI	Saci_1173		3473362	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
+ArnA;ArnB	SACI_RS05595	SACI_RS05765	flaH	Saci_1174		3473363	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
+ArnA;ArnB	SACI_RS05600	SACI_RS05765	flaF	Saci_1175		3473364	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
+ArnA;ArnB	SACI_RS05605	SACI_RS05765	flaG	Saci_1176		3473521	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	
+ArnA;ArnB	SACI_RS05610	SACI_RS05765	flaX	Saci_1177		3473522	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Promotor, activity remains constitutive (NOT nutrient starvation dependent)
+ArnA;ArnB	SACI_RS05615	SACI_RS05765	flaB	Saci_1178		3473523	-	Immunoblotting Assay, Motility Assay, Promotor Activity Assay	22845497	Promotor, activity increases during nutrient starvation
+ArnA;ArnB	SACI_RS04220	SACI_RS05765	saci_pp2a	Saci_0884		3473103		Immunoblotting Assay, qRT-PCR	27731916	phospho Ser/Thr phosphatise, homologous to PP2A catalytic subunit in eukaryote phoshotases, phosphorylates ArnB, implicated in repressing archaellum expression, See Also: PMID 24078887

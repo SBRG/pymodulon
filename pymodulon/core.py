@@ -1,6 +1,8 @@
+import re
+
 from pymodulon.enrichment import *
 from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
-from typing import Optional, Mapping, Iterable
+from typing import Optional, Mapping, List
 from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
 
@@ -111,8 +113,8 @@ class IcaData(object):
                     raise ValueError('Thresholds cannot be optimized '
                                      'if no TRN is provided.')
                 else:
-                    warn('Optimizing iModulon thresholds, '
-                         'may take 2-3 minutes...')
+                    warnings.warn('Optimizing iModulon thresholds, '
+                                  'may take 2-3 minutes...')
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
@@ -150,26 +152,16 @@ class IcaData(object):
 
     @X.setter
     def X(self, x_matrix):
-        ## TODO: Use check_table function instead
-        if isinstance(x_matrix, str):
-            try:
-                df = pd.read_json(x_matrix)
-            except ValueError:
-                sep = '\t' if x_matrix.endswith('.tsv') else ','
-                df = pd.read_csv(x_matrix, index_col=0, sep=sep)
-        elif isinstance(x_matrix, pd.DataFrame):
-            df = x_matrix
-        else:
-            raise TypeError('X must be a pandas DataFrame or filename')
+        x = _check_table(x_matrix, 'X')
 
         # Check that gene and sample names conform to M and A matrices
-        if df.columns.tolist() != self.A.columns.tolist():
+        if x.columns.tolist() != self.A.columns.tolist():
             raise ValueError('X and A matrices have different sample names')
-        if df.index.tolist() != self.M.index.tolist():
+        if x.index.tolist() != self.M.index.tolist():
             raise ValueError('X and M matrices have different gene names')
 
         # Set x matrix
-        self._x = df
+        self._x = x
 
     @X.deleter
     def X(self):
@@ -241,9 +233,26 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
-        self._trn = _check_table(new_trn, 'TRN')
+        self._trn = _check_table(new_trn, 'TRN', index_col=None)
         if not self._trn.empty:
+            # Check that regulator and gene_id columns are filled in
+            if self._trn.regulator.isnull().any():
+                raise ValueError('Null value detected in "regulator" column '
+                                 'of TRN')
+            if self._trn.gene_id.isnull().any():
+                raise ValueError('Null value detected in "gene_id" column '
+                                 'of TRN')
+
+            # Make sure regulators do not contain / or + characters
+            self._trn.regulator = [re.sub('\\+', ';', re.sub('/', ';', reg)) for
+                                   reg in self._trn.regulator]
+
             # Only include genes that are in S/X matrix
+            extra_genes = set(self._trn.gene_id) - set(self.gene_names)
+            if len(extra_genes) > 0:
+                warnings.warn('The following genes are in the TRN but not in '
+                              'your M '
+                              'matrix: {}'.format(extra_genes))
             self._trn = self._trn[self._trn.gene_id.isin(self.gene_names)]
 
             # Save regulator information to gene table
@@ -333,6 +342,32 @@ class IcaData(object):
     # Enrichments #
     ###############
 
+    def _update_imodulon_table(self, enrichment):
+        """
+        Update iModulon table given new iModulon enrichments
+
+        :param enrichment: Pandas series or dataframe containing an
+            iModulon enrichment
+        """
+        if isinstance(enrichment, pd.Series):
+            enrichment = pd.DataFrame(enrichment)
+        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
+            enrichment.index)]
+        keep_cols = self.imodulon_table.loc[enrichment.index,
+                                            set(self.imodulon_table.columns)
+                                            - set(enrichment.columns)]
+        df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
+        new_table = pd.concat([keep_rows, df_top_enrich])
+
+        # Reorder columns
+        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
+        new_table = new_table[col_order]
+
+        # Reorder rows
+        new_table = new_table.reindex(self.imodulon_names)
+
+        self.imodulon_table = new_table
+
     def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
                                    save: bool = False):
         """
@@ -396,7 +431,7 @@ class IcaData(object):
             df_enriched['imodulon'] = imodulon
             enrichments.append(df_enriched)
 
-        df_enriched = pd.concat(enrichments, axis=0)
+        df_enriched = pd.concat(enrichments, axis=0, sort=True)
 
         # Set regulator as column instead of axis
         df_enriched.index.name = 'regulator'
@@ -410,38 +445,55 @@ class IcaData(object):
                      'imodulon_size', 'n_regs']
         df_enriched = df_enriched[col_order]
 
+        # Sort by q-value
+        df_enriched.sort_values(['imodulon', 'qvalue', 'n_regs'])
+
         if save:
-            df_top_enrich = df_enriched.sort_values(
-                ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+            df_top_enrich = df_enriched.drop_duplicates('imodulon')
             self._update_imodulon_table(df_top_enrich.set_index('imodulon'))
 
         return df_enriched
 
-    def _update_imodulon_table(self, enrichment):
-        """
-        Update iModulon table given new iModulon enrichments
+    def compute_annotation_enrichment(self, annotation: pd.DataFrame,
+                                      column: str,
+                                      imodulons: Optional[ImodNameList] = None,
+                                      fdr: float = 0.1) \
+            -> pd.DataFrame:
 
-        :param enrichment: Pandas series or dataframe containing an
-            iModulon enrichment
-        """
-        if isinstance(enrichment, pd.Series):
-            enrichment = pd.DataFrame(enrichment)
-        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
-            enrichment.index)]
-        keep_cols = self.imodulon_table.loc[enrichment.index,
-                                            set(self.imodulon_table.columns)
-                                            - set(enrichment.columns)]
-        df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
-        new_table = pd.concat([keep_rows, df_top_enrich])
+        # TODO: write test function
+        # TODO: Figure out save function
+        # TODO: Add documentation
 
-        # Reorder columns
-        col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
-        new_table = new_table[col_order]
+        enrichments = []
 
-        # Reorder rows
-        new_table = new_table.reindex(self.imodulon_names)
+        if imodulons is None:
+            imodulon_list = self.imodulon_names
+        elif isinstance(imodulons, str):
+            imodulon_list = [imodulons]
+        else:
+            imodulon_list = imodulons
 
-        self.imodulon_table = new_table
+        for imodulon in imodulon_list:
+            gene_list = self.view_imodulon(imodulon).index
+            df_enriched = compute_annotation_enrichment(gene_list,
+                                                        self.gene_names,
+                                                        column=column,
+                                                        annotation=annotation,
+                                                        fdr=fdr)
+            df_enriched['imodulon'] = imodulon
+            enrichments.append(df_enriched)
+
+        DF_enriched = pd.concat(enrichments, axis=0, sort=True)
+
+        # Set annotation name as column instead of axis
+        DF_enriched.index.name = column
+        DF_enriched.reset_index(inplace=True)
+
+        # Rename column
+        DF_enriched.rename({'gene_set_size': 'imodulon_size'},
+                           inplace=True, axis=1)
+
+        return DF_enriched
 
     ######################################
     # Threshold properties and functions #
