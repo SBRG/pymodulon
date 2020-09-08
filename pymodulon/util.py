@@ -2,19 +2,18 @@
 General utility functions for the pymodulon package
 """
 
-import os
-
+from matplotlib.axes import Axes
+from typing import *
+from tqdm import tqdm_notebook as tqdm
 import numpy as np
 import pandas as pd
-
-from matplotlib.axes import Axes
+from re import split
+from typing import List
+import os
 from scipy import stats
-from typing import *
-import warnings
+import tqdm
 from graphviz import Digraph
-from tqdm import tqdm_notebook as tqdm
-from scipy import sparse
-
+import warnings
 
 ################
 # Type Aliases #
@@ -155,17 +154,6 @@ def num2name(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
 # Compare ICA runs #
 ####################
 
-from scipy import sparse
-import numpy as np
-import pandas as pd
-from re import split
-from typing import List, Dict
-import os
-from scipy import stats, special
-import tqdm
-from graphviz import Digraph
-import warnings
-
 
 def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
                     cutoff: float, show_all: bool):
@@ -289,18 +277,26 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     return dot, name_links
 
 
-def _gene_dictionary(gene_list: List):
+def _gene_dictionary(gene_list: Collection):
     """
-    Given a list of genes, will return a string for what organism best matches the gene prefixes
-    Args
-        :param gene_list: List of genes, usually from an S matrix
-        :return: String of the organism name specific to the _pull_bbh_csv function
+    Given a list of genes, will return a string for what organism best matches
+        the gene prefixes
+    Args:
+        gene_list: List of genes, usually from an S matrix
+
+    Returns:
+        String of the organism name specific to the _pull_bbh_csv function
     """
-    gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis", "MPN": "mPneumoniae", "PP": "pPutida",
-                        "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580", "SEN": "sEnterica_enteritidis",
-                        "SL1344": "sEnterica_SL1344", "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
-                        "SACI": "sAcidocaldarius", "SYNPCC7942": "sElongatus", "b": "eColi", "Rv": "mTuberculosis",
-                        "PA": "pAeruginosa", "STM": "sEnterica_full", "SCO": "sCoelicolor"}
+    gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis",
+                        "MPN": "mPneumoniae", "PP": "pPutida",
+                        "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580",
+                        "SEN": "sEnterica_enteritidis",
+                        "SL1344": "sEnterica_SL1344",
+                        "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
+                        "SACI": "sAcidocaldarius", "SYNPCC7942": "sElongatus",
+                        "b": "eColi", "Rv": "mTuberculosis",
+                        "PA": "pAeruginosa", "STM": "sEnterica_full",
+                        "SCO": "sCoelicolor"}
 
     org_counts = {}
     for gene in gene_list:
@@ -323,23 +319,31 @@ def _gene_dictionary(gene_list: List):
         return max(org_counts)
     else:
         print("One of your org files contains too many different genes "
-              +str((org_counts[max(org_counts)] / len(gene_list))))
+              + str((org_counts[max(org_counts)] / len(gene_list))))
         raise KeyError
 
 
 def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
     """
-    Receives an the S matrix for an organism and returns the same S matrix with index genes translated into the
-    orthologs in organism 2
-    :param org_1: Name of organism 1 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
+    Receives an the S matrix for an organism and returns the same S matrix
+    with index genes translated into the orthologs in organism 2
+    Args:
+        org_1: Name of organism 1 based on the following format: Ex. "eColi"
+        "mTuberculosis". Can use output of _gene_dictionary function
+        org_2: Name of organism 2 based on the following format: Ex. "eColi"
+        "mTuberculosis". Can use output of
     _gene_dictionary function
-    :param org_2: Name of organism 2 based on the following format: Ex. "eColi" "mTuberculosis". Can use output of
-    _gene_dictionary function
-    :param ortho_dir: String path to the "bbh_csv" directory in the "modulome_compare_data" repository.
-    Ex. "../../modulome_compare_data/bbh_csv"
-    :param S1: Pandas DataFrame of the S matrix for organism 1
-    :return: Pandas DataFrame of the S matrix for organism 1 with indexes translated into orthologs
+        ortho_dir: String path to the "bbh_csv" directory in the
+        "modulome_compare_data" repository. Ex.
+        "../../modulome_compare_data/bbh_csv"
+        S1: Pandas DataFrame of the S matrix for organism 1
+
+    Returns:
+        Pandas DataFrame of the S matrix for organism 1 with indexes
+        translated into orthologs
+
     """
+
     for dirpath, dirname, file_arr in os.walk(ortho_dir):
         for file in file_arr:
             file_split = file.split("_vs_")
@@ -376,13 +380,17 @@ def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
                 return S1_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, auto_find: bool = True, org_1_name: str = None,
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir,
+                auto_find: bool = True, org_1_name: str = None,
                 org_2_name: str = None,
                 metric='pearson', cutoff=0.2, show_all=False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
     Args:
+        org_1_name:
+        auto_find:
+        org_2_name:
         S1: Pandas Dataframe of S matrix 1
         S2: Pandas Dataframe of S Matrix 2
         ortho_dir: String of the location where organism data can be found
@@ -400,7 +408,9 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir, auto_find: bool =
                                           show_all=show_all)
         return dot, name_links
     else:
-        if auto_find is False and org_1_name is not None and org_2_name is not None:
+        if auto_find is False and \
+                org_1_name is not None and \
+                org_2_name is not None:
             translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_dir, S1)
             dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
                                               show_all=show_all)
