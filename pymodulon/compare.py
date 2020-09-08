@@ -131,60 +131,14 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     return dot, name_links
 
 
-def _gene_dictionary(gene_list: Collection):
-    """
-    Given a list of genes, will return a string for what organism best matches
-        the gene prefixes
-    Args:
-        gene_list: List of genes, usually from an S matrix
-
-    Returns:
-        String of the organism name specific to the _pull_bbh_csv function
-    """
-    gene_to_org_dict = {"A1S": "aBaumannii", "BSU": "bSubtilis",
-                        "MPN": "mPneumoniae", "PP": "pPutida",
-                        "PSPTO": "pSyringae", "STMMW": "sEnterica_D23580",
-                        "SEN": "sEnterica_enteritidis",
-                        "SL1344": "sEnterica_SL1344",
-                        "STM474": "sEnterica_ST4_74", "USA300HOU": "sAureus",
-                        "SACI": "sAcidocaldarius", "SYNPCC7942": "sElongatus",
-                        "b": "eColi", "Rv": "mTuberculosis",
-                        "PA": "pAeruginosa", "STM": "sEnterica_full",
-                        "SCO": "sCoelicolor"}
-
-    org_counts = {}
-    for gene in gene_list:
-        try:
-            curr_org = gene_to_org_dict[gene.split("_")[0]]
-            if curr_org not in org_counts.keys():
-                org_counts.update({curr_org: 1})
-            else:
-                org_counts.update({curr_org: org_counts[curr_org] + 1})
-        except KeyError:
-            try:
-                curr_org = gene_to_org_dict[split("[0-9]", gene, maxsplit=1)[0]]
-                if curr_org not in org_counts.keys():
-                    org_counts.update({curr_org: 1})
-                else:
-                    org_counts.update({curr_org: org_counts[curr_org] + 1})
-            except KeyError:
-                continue
-    if (org_counts[max(org_counts)] / len(gene_list)) >= .7:
-        return max(org_counts)
-    else:
-        print("One of your org files contains too many different genes "
-              + str((org_counts[max(org_counts)] / len(gene_list))))
-        raise KeyError
-
-
 def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
     """
     Receives an the S matrix for an organism and returns the same S matrix
     with index genes translated into the orthologs in organism 2
     Args:
-        ortho_dir: String path to the bbh CSV file in the
-        "modulome_compare_data" repository. Ex.
-        "../../modulome_compare_data/bbh_csv/
+        ortho_file: String path to the bbh CSV file in the
+        "modulome_compare_data" repository.
+        Ex. "../../modulome_compare_data/bbh_csv/
         bSubtilis_full_protein_vs_sAureus_full_protein_parsed.csv"
         S1: Pandas DataFrame of the S matrix for organism 1
 
