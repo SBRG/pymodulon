@@ -380,23 +380,24 @@ def _pull_bbh_csv(org_1: str, org_2: str, ortho_dir: str, S1: pd.DataFrame):
                 return S1_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir,
-                auto_find: bool = True, org_1_name: str = None,
-                org_2_name: str = None,
-                metric='pearson', cutoff=0.2, show_all=False):
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_dir: Optional[str],
+                cutoff: float = 0.2, auto_find: bool = True,
+                org_1_name: Optional[str] = None,
+                org_2_name: Optional[str] = None,
+                metric='pearson', show_all=False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
     Args:
-        org_1_name:
-        auto_find:
-        org_2_name:
         S1: Pandas Dataframe of S matrix 1
         S2: Pandas Dataframe of S Matrix 2
         ortho_dir: String of the location where organism data can be found
             (can be found under modulome/data)
-        metric: A string of what statistical test to use (standard is 'pearson')
         cutoff: Float cut off value for pearson statistical test
+        auto_find: Automatically detect gene prefix
+        org_1_name: Name of first organism
+        org_2_name: Name of second organism
+        metric: A string of what statistical test to use (standard is 'pearson')
         show_all: True will show all nodes of the digraph matrix
 
     Returns: Dot graph and name links of connected ICA components between the
