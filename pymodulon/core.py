@@ -420,7 +420,7 @@ class IcaData(object):
         df_enriched = df_enriched[col_order]
 
         # Sort by q-value
-        df_enriched.sort_values( ['imodulon', 'qvalue', 'n_regs'])
+        df_enriched.sort_values(['imodulon', 'qvalue', 'n_regs'])
 
         if save:
             df_top_enrich = df_enriched.drop_duplicates('imodulon')
