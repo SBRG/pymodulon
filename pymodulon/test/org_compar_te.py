@@ -5,8 +5,7 @@ import sys
 import pandas as pd
 
 sys.path.append("/home/sbrg/Desktop/pymodulon/")
-from pymodulon.util import *
-
+from pymodulon.compare import *
 
 class MyTestCase(unittest.TestCase):
 
