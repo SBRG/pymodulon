@@ -8,6 +8,7 @@ from typing import List, Literal, Optional, Mapping, Sequence, Tuple, Union
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
+import re
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
 from scipy import stats
@@ -527,7 +528,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 linestyle='dashed', linewidth=0.5, zorder=0)
 
         if line45_margin > 0:
-            diff = abs(data.x - data.y)
+            diff = pd.DataFrame(abs(data.x - data.y), index=data.index)
+            diff = diff.loc[diff[0] > line45_margin]
             data.loc[diff.index, 'group'] = 'hidden'
             ax.plot([max(xmin, ymin + line45_margin),
                      min(xmax, ymax + line45_margin)],
@@ -925,6 +927,31 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     return ax
 
 
+def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
+              lfc: float = 5, fdr_rate: float = .1, label: bool = True,
+              adjust: bool = True) -> Ax:
+    """
+    Creates a DIMA plot that compares samples
+    Args:
+        ica_data_1:
+        sample1:
+        sample2:
+        lfc:
+        fdr_rate:
+        label:
+        adjust:
+
+    Returns:
+
+    """
+    a1 = ica_data_1.A[sample1].mean(axis=1)
+    a2 = ica_data_1.A[sample2].mean(axis=1)
+
+    return scatterplot(a1, a2, line45=True, line45_margin=lfc,
+                       xlabel=re.search('(.*)__', sample1[0]).group(1),
+                       ylabel=re.search('(.*)__', sample2[0]).group(1))
+
+
 ####################
 # Helper Functions #
 ####################
@@ -1046,24 +1073,24 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
     # Width calculated using optimal width and iModulon threshold
     if thresh > opt_width:
-        width = thresh/int(thresh/opt_width)
+        width = thresh / int(thresh / opt_width)
     else:
-        width = thresh/2
+        width = thresh / 2
 
     # Use width and thresh to calculate xmin, xmax
     if x.min() < -thresh:
-        multiple = np.ceil(abs(x.min()/width))
-        xmin = -(multiple+1)*width
+        multiple = np.ceil(abs(x.min() / width))
+        xmin = -(multiple + 1) * width
     else:
-        xmin = -(thresh+width)
+        xmin = -(thresh + width)
 
     if x.max() > thresh:
-        multiple = np.ceil(x.max()/width)
-        xmax = (multiple+1)*width
+        multiple = np.ceil(x.max() / width)
+        xmax = (multiple + 1) * width
     else:
-        xmax = (thresh+width)
+        xmax = (thresh + width)
 
-    return np.arange(xmin, xmax+width, width)
+    return np.arange(xmin, xmax + width, width)
 
 
 def _normalize_expr(ica_data, ref_cols):
@@ -1076,6 +1103,67 @@ def _normalize_expr(ica_data, ref_cols):
         norm = x.mean(axis=1)
 
     return norm
+
+
+def _diff_act(ica_data: IcaData, sample1: List, sample2: List, lfc: float,
+              fdr_rate: float):
+    """
+
+    Args:
+        ica_data:
+        sample1:
+        sample2:
+        lfc:
+        fdr_rate:
+
+    Returns:
+
+    """
+    _diff = pd.DataFrame()
+    for name, group in ica_data.sample_table.groupby(
+            ['project_id', 'condition_id']):
+        for i1, i2 in combinations(group.index, 2):
+            _diff['__'.join(name)] = abs(ica_data.A[i1] - ica_data.A[i2])
+    dist = {}
+    for k in ica_data.A.index:
+        dist[k] = stats.lognorm(*stats.lognorm.fit(_diff.loc[k].values)).cdf
+
+    res = pd.DataFrame(index=ica_data.A.columns)
+    for k in res.index:
+        a1 = ica_data.A.loc[k, s1_list].mean()
+        a2 = ica_data.A.loc[k, s2_list].mean()
+        res.loc[k, 'LFC'] = a2 - a1
+        res.loc[k, 'pvalue'] = 1 - ica_data.dist[k](abs(a1 - a2))
+    final = FDR(res, fdr_rate)
+    return final[(abs(final.LFC) > lfc)].sort_values('LFC', ascending=False)
+
+
+def FDR(p_values, fdr_rate, total=None):
+    """
+
+    Args:
+        p_values:
+        fdr_rate:
+        total:
+
+    Returns:
+
+    """
+
+    if total is not None:
+        pvals = p_values.pvalue.values.tolist() + [1] * (total - len(p_values))
+        idx = p_values.pvalue.index.tolist() + [None] * (total - len(p_values))
+    else:
+        pvals = p_values.pvalue.values
+        idx = p_values.pvalue.index
+
+    keep, qvals = fdrcorrection(pvals, alpha=fdr_rate)
+
+    result = p_values.copy()
+    result['qvalue'] = qvals[:len(p_values)]
+    result = result[keep[:len(p_values)]]
+
+    return result.sort_values('qvalue')
 
 
 ##########################
