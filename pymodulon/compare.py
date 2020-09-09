@@ -3,7 +3,7 @@ import tqdm
 import warnings
 import numpy as np
 import pandas as pd
-from re import split
+from Bio import SeqIO
 from typing import *
 from graphviz import Digraph
 from scipy import stats
@@ -194,3 +194,30 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
         dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
                                           show_all=show_all)
         return dot, name_links
+
+
+####################
+# BBH CSV Creation #
+####################
+
+#
+
+def make_prots(gbk: os.PathLike, out_path: os.PathLike):
+    """
+    Makes protein files for all the genes in the genbank file. Adapted from
+    code by Saguat Poudel
+    :param gbk: path to input genbank file
+    :param out_path: path to the output FASTA file
+    :return: None
+    """
+    with open(out_path, 'w') as fa:
+        for refseq in SeqIO.parse(gbk, 'genbank'):
+            for feats in [f for f in refseq.features if f.type == 'CDS']:
+                lt = feats.qualifiers['locus_tag'][0]
+                try:
+                    seq = feats.qualifiers['translation'][0]
+                except KeyError:
+                    seq = feats.extract(refseq.seq).translate()
+                if seq:
+                    fa.write('>{}\n{}\n'.format(lt, seq))
+
