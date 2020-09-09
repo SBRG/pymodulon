@@ -187,7 +187,8 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_file: Optional[str],
         return dot, name_links
 
     else:
-        warnings.warn()
+        warnings.warn("Please ensure that the order of S1 and S2 match the "
+                      "order of the BBH CSV file")
         translated_S = _pull_bbh_csv(ortho_file, S1)
         dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
                                           show_all=show_all)
