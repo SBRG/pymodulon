@@ -1,15 +1,10 @@
 import os
 
-import numpy as np
 import pandas as pd
 
 from matplotlib.axes import Axes
-from scipy import stats
 from typing import *
-import warnings
-from graphviz import Digraph
 from tqdm import tqdm_notebook as tqdm
-from scipy import sparse
 
 
 ################
@@ -133,13 +128,12 @@ def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
 # Compare ICA runs #
 ####################
 
-from scipy import sparse
 import numpy as np
 import pandas as pd
 from re import split
-from typing import List, Dict
+from typing import List
 import os
-from scipy import stats, special
+from scipy import stats
 import tqdm
 from graphviz import Digraph
 import warnings
