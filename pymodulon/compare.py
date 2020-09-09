@@ -164,10 +164,7 @@ def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
 
 
 def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_file: Optional[str],
-                cutoff: float = 0.2, auto_find: bool = True,
-                org_1_name: Optional[str] = None,
-                org_2_name: Optional[str] = None,
-                metric='pearson', show_all=False):
+                cutoff: float = 0.2, metric='pearson', show_all: bool = False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
@@ -177,9 +174,6 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_file: Optional[str],
         ortho_file: String of the location where organism data can be found
             (can be found under modulome/data)
         cutoff: Float cut off value for pearson statistical test
-        auto_find: Automatically detect gene prefix
-        org_1_name: Name of first organism
-        org_2_name: Name of second organism
         metric: A string of what statistical test to use (standard is 'pearson')
         show_all: True will show all nodes of the digraph matrix
 
@@ -191,16 +185,10 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_file: Optional[str],
         dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff,
                                           show_all=show_all)
         return dot, name_links
-    else:
-        if auto_find is False and \
-                org_1_name is not None and \
-                org_2_name is not None:
-            translated_S = _pull_bbh_csv(org_1_name, org_2_name, ortho_file, S1)
-            dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
-                                              show_all=show_all)
-        else:
-            translated_S = _pull_bbh_csv(ortho_file, S1)
-            dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
-                                              show_all=show_all)
 
+    else:
+        warnings.warn()
+        translated_S = _pull_bbh_csv(ortho_file, S1)
+        dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
+                                          show_all=show_all)
         return dot, name_links
