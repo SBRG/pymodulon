@@ -9,14 +9,14 @@ from graphviz import Digraph
 from scipy import stats
 
 
-def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
+def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
                     cutoff: float, show_all: bool):
     """
-    Given two S matrices, returns the dot graph and name links of the various
+    Given two M matrices, returns the dot graph and name links of the various
     connected ICA components
     Args:
-        S1: S matrix from the first organism
-        S2: S matrix from the second organism
+        M1: M matrix from the first organism
+        M2: M matrix from the second organism
         metric: Statistical test to use (default:'pearson')
         cutoff: Float cut off value for pearson statistical test
         show_all:
@@ -26,13 +26,13 @@ def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
     """
 
     # Only keep genes found in both S matrices
-    common = set(S1.index) & set(S2.index)
+    common = set(M1.index) & set(M2.index)
 
     if len(common) == 0:
         raise KeyError("No common genes")
 
-    s1 = S1.reindex(common)
-    s2 = S2.reindex(common)
+    s1 = M1.reindex(common)
+    s2 = M2.reindex(common)
 
     # Ensure column names are strings
     s1.columns = s1.columns.astype(str)
@@ -163,8 +163,9 @@ def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
     return S1_copy
 
 
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame, ortho_file: Optional[str],
-                cutoff: float = 0.2, metric='pearson', show_all: bool = False):
+def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
+                ortho_file: Optional[str] = None, cutoff: float = 0.2,
+                metric='pearson', show_all: bool = False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
