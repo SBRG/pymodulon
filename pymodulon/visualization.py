@@ -946,8 +946,16 @@ def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
     Returns:
 
     """
-    a1 = ica_data_1.A[sample1].mean(axis=1)
-    a2 = ica_data_1.A[sample2].mean(axis=1)
+    if ica_data_1.sample_table
+        for names, groups in ica_data_1.sample_table.groupby(
+                ["project_id", "condition_id"]):
+            if names[0] in sample1 and names[1] in sample1:
+                sample1_list = list(groups.index)
+            if names[0] in sample2 and names[1] in sample2:
+                sample2_list = list(groups.index)
+
+    a1 = ica_data_1.A[sample1_list].mean(axis=1)
+    a2 = ica_data_1.A[sample2_list].mean(axis=1)
 
     df_diff = _diff_act(ica_data_1, sample1, sample2, lfc=lfc,
                         fdr_rate=fdr_rate)
