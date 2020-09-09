@@ -342,9 +342,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
         if isnan(reg):
             reg = None
 
-    # If no imodulon_table in IcaData, compute trn enrichment to find regulator
+    # If no imodulon_table in IcaData, compute trn enrichment to find the
+    # regulator. Note that trn enrichment is computed using `max_regs` = 1
     else:
-        # TODO: Ask Anand about max_regs and how important that is
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
         reg = df_enriched.loc[imodulon, 'regulator']
         if isnan(reg):
