@@ -946,23 +946,24 @@ def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
     Returns:
 
     """
-    if ica_data_1.sample_table
-        for names, groups in ica_data_1.sample_table.groupby(
-                ["project_id", "condition_id"]):
-            if names[0] in sample1 and names[1] in sample1:
-                sample1_list = list(groups.index)
-            if names[0] in sample2 and names[1] in sample2:
-                sample2_list = list(groups.index)
+    for names, groups in \
+            ica_data_1.sample_table.groupby(["project_id", "condition_id"]):
+        if names[0] in sample1 and names[1] in sample1:
+            sample1_list = list(groups.index)
+
+        if names[0] in sample2 and names[1] in sample2:
+            sample2_list = list(groups.index)
+
 
     a1 = ica_data_1.A[sample1_list].mean(axis=1)
     a2 = ica_data_1.A[sample2_list].mean(axis=1)
 
-    df_diff = _diff_act(ica_data_1, sample1, sample2, lfc=lfc,
+    df_diff = _diff_act(ica_data_1, sample1_list, sample2_list, lfc=lfc,
                         fdr_rate=fdr_rate)
 
     ax = scatterplot(a1, a2, line45=True, line45_margin=lfc,
-                     xlabel=re.search('(.*)__', sample1[0]).group(1),
-                     ylabel=re.search('(.*)__', sample2[0]).group(1),
+                     xlabel=re.search('(.*)__', sample1_list[0]).group(1),
+                     ylabel=re.search('(.*)__', sample2_list[0]).group(1),
                      **kwargs)
 
     if label:
@@ -970,7 +971,7 @@ def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
         texts = []
         for k in df_diff.index:
             texts.append(ax.text(df_diff.loc[k, 0], df_diff.loc[k, 1], k,
-                                        fontsize=10))
+                                 fontsize=10))
         if adjust:
             expand_args = {'expand_objects': (1.2, 1.4),
                            'expand_points': (1.3, 1.3),
