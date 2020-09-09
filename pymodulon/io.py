@@ -26,7 +26,8 @@ def save_to_json(model: IcaData, fname: str):
 
     # only keeps params that are used to initialize the model
     load_params = IcaData.__init__.__code__.co_varnames
-    param_dict = {key: getattr(model, key) for key in vars(IcaData) if key in load_params}
+    param_dict = {key: getattr(model, key) for key in vars(IcaData) if key in
+                  load_params}
 
     # serialize pandas DataFrames and change sets to lists
     for key, val in param_dict.items():

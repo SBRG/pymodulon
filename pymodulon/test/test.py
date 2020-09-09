@@ -39,6 +39,7 @@ def test_core(capsys):
                        sample_table=sample_table,
                        imodulon_table=imodulon_table, trn=trn,
                        dagostino_cutoff=750)
+    test_io()
     test_optimize_cutoff(capsys)
     test_set_thresholds()
     test_ica_data_consistency(ica_data)
@@ -163,8 +164,8 @@ def test_io():
                        sample_table=sample_table,
                        imodulon_table=imodulon_table,
                        trn=trn, dagostino_cutoff=750)
-    save_to_json(ica_data, 'test/data/model.json')
-    icd_from_json = load_json_model('test/data/model.json')
+    save_to_json(ica_data, 'data/model.json')
+    icd_from_json = load_json_model('data/model.json')
     test_ica_data_consistency(icd_from_json)
 
 
