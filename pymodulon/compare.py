@@ -225,6 +225,28 @@ def make_prots(gbk: os.PathLike, out_path: os.PathLike):
                     fa.write('>{}\n{}\n'.format(lt, seq))
 
 
+def make_prot_db(fasta_file: os.PathLike):
+    """
+
+    Args:
+        fasta_file:
+
+    Returns:
+
+    """
+    cmd_line = ['makeblastdb', "-in", fasta_file, "-parse_seqids", "-dbtype",
+                "prot"]
+
+    print('running makeblastdb with following command line...')
+    print(' '.join(cmd_line))
+    try:
+        subprocess.check_call(cmd_line)
+    except subprocess.CalledProcessError as err:
+        print('makeblastdb run failed. Make sure makeblastdb is'
+              ' installed and working properly, and that the protein FASTA '
+              'file contains no duplicate genes.')
+        raise err
+
 
 # TODO: some genbanks put alternate start codon such as TTG as methionine while
 # others label it as leucine.
@@ -333,15 +355,14 @@ def get_bbh(db1, db2, indir='prots', outdir='bbh', outname=None, mincov=0.8,
 
 
 def __get_gene_lens(file_in):
-   """
-   
-   Args:
-       file_in: 
+    """
 
-   Returns:
+    Args:
+        file_in:
 
-   """
+    Returns:
 
+    """
     handle = open(file_in)
     records = SeqIO.parse(handle, "fasta")
     out = []
@@ -382,7 +403,7 @@ def __run_blastp(db1, db2, out, evalue, threads, force):
         subprocess.check_call(cmd_line)
     except subprocess.CalledProcessError as err:
         print('BLAST run failed. Make sure BLAST is'
-            ' installed and working properly.')
+              ' installed and working properly.')
         raise err
     return out
 
@@ -426,7 +447,7 @@ def __same_output(df1, df2, v=False):
     elif all(df1.eq(df2.rename(columns={'subject': 'gene',
                                         'gene': 'subject'}))):
         print('The two outputs are the same, '
-            'but the genes and subject are switched.')
+              'but the genes and subject are switched.')
         return True
     else:
         print('The two outputs are not the same.')
@@ -464,7 +485,9 @@ if __name__ == '__main__':
     params = vars(p.parse_args())
     params.update({'savefiles': True})
     #     get_bbh(params['db1'], params['db2'],
-            #     mincov=params['mincov'],evalue=params['evalue'],
-            #     force=params['force'], threads=params['threads'],
-            #     savefiles=True,outname=params['outname'])
+    #     mincov=params['mincov'],evalue=params['evalue'],
+    #     force=params['force'], threads=params['threads'],
+    #     savefiles=True,outname=params['outname'])
     get_bbh(**params)
+
+
