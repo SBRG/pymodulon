@@ -349,9 +349,12 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # regulator. Note that trn enrichment is computed using `max_regs` = 1
     else:
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
-        reg = df_enriched.loc[imodulon, 'regulator']
-        if isnan(reg):
-            reg = None
+        df_top_enrich = df_enriched.sort_values(
+            ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+        reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
+        if not isinstance(reg, str):
+            if isnan(reg):
+                reg = None
 
     # Use regulator value to find regulon genes
     if reg is not None:

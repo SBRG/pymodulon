@@ -1,17 +1,14 @@
 import os
-import warnings
-
-import tqdm
-
-import numpy as np
-import pandas as pd
-
 from re import split
+import warnings
 
 from graphviz import Digraph
 from matplotlib.axes import Axes
+import numpy as np
+import pandas as pd
 from scipy import stats
 from typing import *
+import tqdm
 from tqdm import tqdm_notebook as tqdm
 
 
