@@ -934,19 +934,23 @@ def plot_dima(ica_data_1: IcaData, project1: Optional[str],
               sample1_list: Optional[list] = None,
               sample2_list: Optional[list] = None,
               lfc: float = 5, fdr_rate: float = .1, label: bool = True,
-              adjust: bool = True, **kwargs) -> Ax:
+              adjust: bool = True, gene_table = False, **kwargs) -> Ax:
     """
-
+    Plots a Dima plot between two projects or two sets of samples
     Args:
-        ica_data_1:
-        project1:
-        project2:
-        sample1_list:
+        ica_data_1: IcaData object that contains your data
+        project1: Project and condition name in form "PROJECT__CONDITION" for
+        condition one; Ex. "ica__wt_glc"
+        project2: Project and condition name in form "PROJECT__CONDITION" for
+        condition two; Ex. "ica__wt_glc"
+        sample1_list: A list of samples you would like to analyze. The full
+        name of the sample must be inputed; Ex. ["ica__wt_glc__1"
         sample2_list:
         lfc:
         fdr_rate:
         label:
         adjust:
+        gene_table:
         **kwargs:
 
     Returns:
@@ -1004,8 +1008,24 @@ def plot_dima(ica_data_1: IcaData, project1: Optional[str],
             adjust_text(texts, ax=ax,
                         arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
                         only_move={'objects': 'y'}, **expand_args)
+    if gene_table:
+        diff_genes = sorted(list(df_diff.index))
+        non_diff_genes = []
+        for i in range(0, len(ica_data_1.A.index)):
+            if list(ica_data_1.A.index)[i] not in diff_genes:
+                non_diff_genes.append(list(ica_data_1.A.index)[i])
+        if len(diff_genes) - len(non_diff_genes) > 0:
+            for i in range(0, (len(diff_genes) - len(non_diff_genes))):
+                non_diff_genes.append(np.NaN)
+        elif len(diff_genes) - len(non_diff_genes) < 0:
+            for i in range(0, (len(non_diff_genes) - len(diff_genes))):
+                diff_genes.append(np.NaN)
+        compare_DF = pd.DataFrame([diff_genes, non_diff_genes],
+                                  index=["diff_genes", "corr_genes"])
+        return ax, compare_DF
 
-    return ax
+    else:
+        return ax
 
 
 ####################
