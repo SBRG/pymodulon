@@ -944,16 +944,21 @@ def plot_dima(ica_data_1: IcaData, project1: Optional[str],
         project2: Project and condition name in form "PROJECT__CONDITION" for
         condition two; Ex. "ica__wt_glc"
         sample1_list: A list of samples you would like to analyze. The full
-        name of the sample must be inputed; Ex. ["ica__wt_glc__1"
-        sample2_list:
-        lfc:
-        fdr_rate:
-        label:
-        adjust:
-        gene_table:
-        **kwargs:
+        name of the sample must be inputed; Ex. ["ica__wt_glc__1",
+        "ica__wt_glc__2"]
+        sample2_list: A list of samples you would like to analyze. The full
+        name of the sample must be inputed; Ex. ["ica__wt_glc__1",
+        "ica__wt_glc__2"]
+        lfc: Log fold change that will serve as the cutoff for differentially
+        expressed genes
+        fdr_rate: False Detection Rate
+        label: True/false option to label differentially expressed genes
+        adjust: Additional true/false option to adjust labels
+        gene_table: True/false option to display Pandas DataFrame of
+        differentially expressed genes
+        **kwargs: Additional arguments for scatterplot
 
-    Returns:
+    Returns: ax, Optional[diff_DF]
 
     """
     if sample1_list is None or sample2_list is None:
