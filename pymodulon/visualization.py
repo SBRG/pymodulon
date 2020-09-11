@@ -929,42 +929,67 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     return ax
 
 
-def plot_dima(ica_data_1: IcaData, sample1: List, sample2: List,
+def plot_dima(ica_data_1: IcaData, project1: Optional[str],
+              project2: Optional[str],
+              sample1_list: Optional[list] = None,
+              sample2_list: Optional[list] = None,
               lfc: float = 5, fdr_rate: float = .1, label: bool = True,
               adjust: bool = True, **kwargs) -> Ax:
     """
-    Creates a DIMA plot that compares samples
+
     Args:
         ica_data_1:
-        sample1:
-        sample2:
+        project1:
+        project2:
+        sample1_list:
+        sample2_list:
         lfc:
         fdr_rate:
         label:
         adjust:
+        **kwargs:
 
     Returns:
 
     """
-    for names, groups in \
-            ica_data_1.sample_table.groupby(["project_id", "condition_id"]):
-        if names[0] in sample1 and names[1] in sample1:
-            sample1_list = list(groups.index)
+    if sample1_list is None or sample2_list is None:
+        for names, groups in \
+                ica_data_1.sample_table.groupby(["project_id", "condition_id"]):
+            if names[0] in project1 and names[1] in project1:
+                sample1_list = list(groups.index)
 
-        if names[0] in sample2 and names[1] in sample2:
-            sample2_list = list(groups.index)
+            if names[0] in project2 and names[1] in project2:
+                sample2_list = list(groups.index)
 
-
-    a1 = ica_data_1.A[sample1_list].mean(axis=1)
-    a2 = ica_data_1.A[sample2_list].mean(axis=1)
+        a1 = ica_data_1.A[sample1_list].mean(axis=1)
+        a2 = ica_data_1.A[sample2_list].mean(axis=1)
 
     df_diff = _diff_act(ica_data_1, sample1_list, sample2_list, lfc=lfc,
                         fdr_rate=fdr_rate)
+
+    x_lims = max([abs(max(a1)), abs(min(a1))])
+    y_lims = max([abs(max(a2)), abs(min(a2))])
+
+    lims = max([x_lims, y_lims])
 
     ax = scatterplot(a1, a2, line45=True, line45_margin=lfc,
                      xlabel=re.search('(.*)__', sample1_list[0]).group(1),
                      ylabel=re.search('(.*)__', sample2_list[0]).group(1),
                      **kwargs)
+
+    ax.set_xlim([-lims, lims])
+    ax.set_ylim([-lims, lims])
+
+    ax.hlines(0, -lims, lims, linewidth=0.5, color='gray', zorder=2)
+    ax.vlines(0, -lims, lims, linewidth=0.5, color='gray', zorder=2)
+    ax.plot([-lims, lims], [-lims, lims], color='k',
+            linestyle='dashed', linewidth=0.5, zorder=0)
+    ax.plot([max(-lims, -lims + lfc), min(lims, lims + lfc)],
+            [max(-lims, -lims - lfc), min(lims, lims - lfc)],
+            color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
+    ax.plot([max(-lims, -lims - lfc), min(lims, lims - lfc)],
+            [max(-lims, -lims + lfc), min(lims, lims + lfc)],
+            color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
 
     if label:
         df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
