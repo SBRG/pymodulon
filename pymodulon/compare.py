@@ -231,9 +231,15 @@ def make_prot_db(fasta_file: os.PathLike):
     Args:
         fasta_file:
 
-    Returns:
+    Returns: None
 
     """
+    if os.path.isfile(fasta_file + ".phr") \
+            and os.path.isfile(fasta_file + ".pin")\
+            and os.path.isfile(fasta_file + ".psq"):
+        print('BLAST DB files already exist')
+        return None
+
     cmd_line = ['makeblastdb', "-in", fasta_file, "-parse_seqids", "-dbtype",
                 "prot"]
 
@@ -241,12 +247,16 @@ def make_prot_db(fasta_file: os.PathLike):
     print(' '.join(cmd_line))
     try:
         subprocess.check_call(cmd_line)
+        print("Protein DB files created successfully")
     except subprocess.CalledProcessError as err:
-        print('makeblastdb run failed. Make sure makeblastdb is'
+        print('\nmakeblastdb run failed. Make sure makeblastdb is'
               ' installed and working properly, and that the protein FASTA '
-              'file contains no duplicate genes.')
-        raise err
-
+              'file contains no duplicate genes. View the output below to '
+              'see what error occured:\n')
+        status = subprocess.run(cmd_line, capture_output=True)
+        print(status)
+        #raise err
+    return None
 
 # TODO: some genbanks put alternate start codon such as TTG as methionine while
 # others label it as leucine.
@@ -489,5 +499,3 @@ if __name__ == '__main__':
     #     force=params['force'], threads=params['threads'],
     #     savefiles=True,outname=params['outname'])
     get_bbh(**params)
-
-
