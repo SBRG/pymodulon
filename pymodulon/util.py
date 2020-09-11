@@ -1,15 +1,18 @@
 import os
+import warnings
+
+import tqdm
 
 import numpy as np
 import pandas as pd
 
+from re import split
+
+from graphviz import Digraph
 from matplotlib.axes import Axes
 from scipy import stats
 from typing import *
-import warnings
-from graphviz import Digraph
 from tqdm import tqdm_notebook as tqdm
-from scipy import sparse
 
 
 ################
@@ -132,18 +135,6 @@ def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
 ####################
 # Compare ICA runs #
 ####################
-
-from scipy import sparse
-import numpy as np
-import pandas as pd
-from re import split
-from typing import List, Dict
-import os
-from scipy import stats, special
-import tqdm
-from graphviz import Digraph
-import warnings
-
 
 def _make_dot_graph(S1: pd.DataFrame, S2: pd.DataFrame, metric: str,
                     cutoff: float, show_all: bool):
