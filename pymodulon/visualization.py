@@ -945,25 +945,16 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
     """
 
-    sample_table = ica_data.sample_table
-
+    sample1_list = _parse_sample(ica_data, sample1)
+    sample2_list = _parse_sample(ica_data, sample2)
     if isinstance(sample1, str):
-        proj, cond = re.search('(.*):(.*)', sample1).groups()
         xlabel = sample1
-        sample1_list = sample_table[(sample_table.project == proj) &
-                                    (sample_table.condition == cond)].index
     else:
-        sample1_list = sample1
-        xlabel = '\n'.join(sample1_list)
-
+        xlabel = '\n'.join(sample1)
     if isinstance(sample2, str):
-        proj, cond = re.search('(.*):(.*)', sample2).groups()
         ylabel = sample2
-        sample2_list = sample_table[(sample_table.project == proj) &
-                                    (sample_table.condition == cond)].index
     else:
-        sample2_list = sample2
-        ylabel = '\n'.join(sample2_list)
+        ylabel = '\n'.join(sample2)
 
     a1 = ica_data.A[sample1_list].mean(axis=1)
     a2 = ica_data.A[sample2_list].mean(axis=1)
@@ -988,20 +979,7 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
                         arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
                         only_move={'objects': 'y'}, **expand_args)
     if table:
-        diff_genes = sorted(list(df_diff.index))
-        non_diff_genes = []
-        for i in range(0, len(ica_data.A.index)):
-            if list(ica_data.A.index)[i] not in diff_genes:
-                non_diff_genes.append(list(ica_data.A.index)[i])
-        if len(diff_genes) - len(non_diff_genes) > 0:
-            for i in range(0, (len(diff_genes) - len(non_diff_genes))):
-                non_diff_genes.append(np.NaN)
-        elif len(diff_genes) - len(non_diff_genes) < 0:
-            for i in range(0, (len(non_diff_genes) - len(diff_genes))):
-                diff_genes.append(np.NaN)
-        compare_DF = pd.DataFrame([diff_genes, non_diff_genes],
-                                  index=["diff_genes", "corr_genes"])
-        return ax, compare_DF
+        return ax, df_diff
 
     else:
         return ax
