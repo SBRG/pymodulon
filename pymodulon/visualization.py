@@ -532,8 +532,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
         if line45_margin > 0:
             diff = pd.DataFrame(abs(data.x - data.y), index=data.index)
-            diff = diff.loc[diff[0] > line45_margin]
-            data.loc[diff.index, 'group'] = 'hidden'
+            hidden = diff.loc[diff[0] < line45_margin]
+            data.loc[hidden.index, 'group'] = 'hidden'
             ax.plot([max(xmin, ymin + line45_margin),
                      min(xmax, ymax + line45_margin)],
                     [max(ymin, xmin - line45_margin),
