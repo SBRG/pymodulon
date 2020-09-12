@@ -11,4 +11,3 @@ adjusttext>=0.7.3
 scikit-learn>=0.23.1
 setuptools>=49.6.0
 graphviz>=2.40.1
-regex>=2020.7.14
