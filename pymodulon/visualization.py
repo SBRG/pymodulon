@@ -980,24 +980,8 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     x_lims = max([abs(max(a1)), abs(min(a1))])
     y_lims = max([abs(max(a2)), abs(min(a2))])
 
-    lims = max([x_lims, y_lims])
-
     ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
                      xlabel=xlabel, ylabel=ylabel, **kwargs)
-
-    ax.set_xlim([-lims, lims])
-    ax.set_ylim([-lims, lims])
-
-    ax.hlines(0, -lims, lims, linewidth=0.5, color='gray', zorder=2)
-    ax.vlines(0, -lims, lims, linewidth=0.5, color='gray', zorder=2)
-    ax.plot([-lims, lims], [-lims, lims], color='k',
-            linestyle='dashed', linewidth=0.5, zorder=0)
-    ax.plot([max(-lims, -lims + threshold), min(lims, lims + threshold)],
-            [max(-lims, -lims - threshold), min(lims, lims - threshold)],
-            color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
-    ax.plot([max(-lims, -lims - threshold), min(lims, lims - threshold)],
-            [max(-lims, -lims + threshold), min(lims, lims + threshold)],
-            color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
 
     if label:
         df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
