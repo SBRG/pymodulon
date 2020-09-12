@@ -1,22 +1,17 @@
 """
 
 """
-import warnings
-from math import isnan
-from typing import List, Literal, Optional, Mapping, Sequence, Tuple, Union
-
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
-from scipy import stats
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 
 from pymodulon.core import IcaData
-from pymodulon.enrichment import parse_regulon_str
-from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
+from pymodulon.enrichment import *
+from pymodulon.util import _parse_sample
+from pymodulon.util import *
 
 
 #############
@@ -339,16 +334,19 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If regulator is not given, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        if isnan(reg):
+        if pd.isnan(reg):
             reg = None
 
-    # If no imodulon_table in IcaData, compute trn enrichment to find regulator
+    # If no imodulon_table in IcaData, compute trn enrichment to find the
+    # regulator. Note that trn enrichment is computed using `max_regs` = 1
     else:
-        # TODO: Ask Anand about max_regs and how important that is
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
-        reg = df_enriched.loc[imodulon, 'regulator']
-        if isnan(reg):
-            reg = None
+        df_top_enrich = df_enriched.sort_values(
+            ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
+        reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
+        if not isinstance(reg, str):
+            if pd.isnan(reg):
+                reg = None
 
     # Use regulator value to find regulon genes
     if reg is not None:
@@ -527,8 +525,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
                 linestyle='dashed', linewidth=0.5, zorder=0)
 
         if line45_margin > 0:
-            diff = abs(data.x - data.y)
-            data.loc[diff.index, 'group'] = 'hidden'
+            diff = pd.DataFrame(abs(data.x - data.y), index=data.index)
+            hidden = diff.loc[diff[0] < line45_margin]
+            data.loc[hidden.index, 'group'] = 'hidden'
             ax.plot([max(xmin, ymin + line45_margin),
                      min(xmax, ymax + line45_margin)],
                     [max(ymin, xmin - line45_margin),
@@ -925,6 +924,67 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     return ax
 
 
+def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
+              sample2: Union[Collection, str],
+              threshold: float = 5, fdr: float = .1, label: bool = True,
+              adjust: bool = True, table: bool = False, **kwargs) -> Ax:
+    """
+    Plots a Dima plot between two projects or two sets of samples
+    Args:
+        ica_data: IcaData object that contains your data
+        sample1: List of sample IDs or name of "project:condition"
+        sample2: List of sample IDs or name of "project:condition"
+        threshold: Minimum activity difference to determine DiMAs
+        fdr: False Detection Rate
+        label: Label differentially activated iModulons (default: True)
+        adjust: Automatically adjust labels (default: True)
+        table: Return differential iModulon activity table
+        **kwargs: Additional arguments for scatterplot
+
+    Returns: ax, Optional[diff_DF]
+
+    """
+
+    sample1_list = _parse_sample(ica_data, sample1)
+    sample2_list = _parse_sample(ica_data, sample2)
+    if isinstance(sample1, str):
+        xlabel = sample1
+    else:
+        xlabel = '\n'.join(sample1)
+    if isinstance(sample2, str):
+        ylabel = sample2
+    else:
+        ylabel = '\n'.join(sample2)
+
+    a1 = ica_data.A[sample1_list].mean(axis=1)
+    a2 = ica_data.A[sample2_list].mean(axis=1)
+
+    df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
+                   fdr=fdr)
+
+    ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
+                     xlabel=xlabel, ylabel=ylabel, **kwargs)
+
+    if label:
+        df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
+        texts = []
+        for k in df_diff.index:
+            texts.append(ax.text(df_diff.loc[k, 0], df_diff.loc[k, 1], k,
+                                 fontsize=10))
+        if adjust:
+            expand_args = {'expand_objects': (1.2, 1.4),
+                           'expand_points': (1.3, 1.3),
+                           'expand_text': (1.4, 1.4)}
+            adjust_text(texts, ax=ax,
+                        arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
+                        only_move={'objects': 'y'}, **expand_args)
+    if table:
+        return ax, df_diff
+
+    else:
+        return ax
+
+
 ####################
 # Helper Functions #
 ####################
@@ -1018,7 +1078,7 @@ def _adj_r2(f, x, y, params):
 
 def _mod_freedman_diaconis(ica_data, imodulon):
     """
-    Generates optimal bin width estimate if bins is None.
+    Generates bins using optimal bin width estimate.
 
     This is done using a modified Freedman-Diaconis rule. The modification
     is necessary as iModulon gene-weights inherently contains many
@@ -1046,24 +1106,24 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
     # Width calculated using optimal width and iModulon threshold
     if thresh > opt_width:
-        width = thresh/int(thresh/opt_width)
+        width = thresh / int(thresh / opt_width)
     else:
-        width = thresh/2
+        width = thresh / 2
 
     # Use width and thresh to calculate xmin, xmax
     if x.min() < -thresh:
-        multiple = np.ceil(abs(x.min()/width))
-        xmin = -(multiple+1)*width
+        multiple = np.ceil(abs(x.min() / width))
+        xmin = -(multiple + 1) * width
     else:
-        xmin = -(thresh+width)
+        xmin = -(thresh + width)
 
     if x.max() > thresh:
-        multiple = np.ceil(x.max()/width)
-        xmax = (multiple+1)*width
+        multiple = np.ceil(x.max() / width)
+        xmax = (multiple + 1) * width
     else:
-        xmax = (thresh+width)
+        xmax = (thresh + width)
 
-    return np.arange(xmin, xmax+width, width)
+    return np.arange(xmin, xmax + width, width)
 
 
 def _normalize_expr(ica_data, ref_cols):
