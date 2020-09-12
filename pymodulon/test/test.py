@@ -5,7 +5,7 @@ this function to work. """
 
 from os.path import abspath, dirname, join
 from pymodulon.core import IcaData
-from pymodulon.enrichment import *
+from pymodulon.util import *
 from pymodulon.io import save_to_json, load_json_model
 
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
@@ -45,6 +45,7 @@ def test_core(capsys):
     test_ica_data_consistency(ica_data)
     test_compute_regulon_enrichment(ica_data)
     test_compute_trn_enrichment(ica_data)
+    test_util(ica_data)
 
 
 def test_simple_ica_data():
@@ -169,5 +170,8 @@ def test_io():
     test_ica_data_consistency(icd_from_json)
 
 
-def test_util():
-    pass
+def test_util(ica_data):
+    assert(name2num(ica_data, 'thrA') == 'b0002')
+    assert(name2num(ica_data, ['thrA', 'thrB']) == ['b0002', 'b0003'])
+    assert(num2name(ica_data, 'b0002') == 'thrA')
+    assert(num2name(ica_data, ['b0002', 'b0003']) == ['thrA', 'thrB'])

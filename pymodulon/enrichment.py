@@ -1,7 +1,6 @@
 import itertools
-from typing import Union, List
-from warnings import warn
-
+import warnings
+from typing import Union, Iterable
 import numpy as np
 import pandas as pd
 from scipy import stats, special
@@ -10,7 +9,7 @@ from statsmodels.stats.multitest import fdrcorrection
 ImodName = Union[str, int]
 
 
-def contingency(set1: List, set2: List, all_genes: List):
+def contingency(set1: Iterable, set2: Iterable, all_genes: Iterable):
     """
     Creates contingency table for gene enrichment
     Args:
@@ -130,8 +129,8 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     return reg_genes
 
 
-def compute_regulon_enrichment(gene_set: List, regulon_str: str,
-                               all_genes: List, trn: pd.DataFrame):
+def compute_regulon_enrichment(gene_set: Iterable, regulon_str: str,
+                               all_genes: Iterable, trn: pd.DataFrame):
     """
     Computes enrichment statistics for a gene_set in a regulon
     Args:
@@ -148,9 +147,9 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str,
     regulon = parse_regulon_str(regulon_str, trn)
     # Remove genes in regulon that are not in all_genes
     if len(regulon - set(all_genes)) > 0:
-        warn('Some genes are in the regulon but not in all_genes. These genes '
-             'are removed before enrichment '
-             'analysis.', category=UserWarning)
+        warnings.warn('Some genes are in the regulon but not in all_genes. '
+                      'These genes are removed before enrichment analysis.',
+                      category=UserWarning)
         regulon = regulon & set(all_genes)
     result = compute_enrichment(gene_set, regulon, all_genes, regulon_str)
     result.rename({'target_set_size': 'regulon_size'}, inplace=True)
@@ -159,7 +158,8 @@ def compute_regulon_enrichment(gene_set: List, regulon_str: str,
     return result
 
 
-def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
+def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
+                           trn: pd.DataFrame,
                            max_regs: int = 1, fdr: float = 0.01,
                            method: str = 'both', force: bool = False):
     """
@@ -182,13 +182,10 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
     """
 
     # Warning if max_regs is too high
-    if max_regs > 2:
-        warn(
+    if max_regs > 2 and not force:
+        raise ValueError(
             'Using >2 maximum regulators may take time to compute. '
-            'To perform analysis, use force=True',
-            category=RuntimeWarning)
-        if not force:
-            return
+            'To perform analysis, use force=True')
 
     # Only search for regulators known to regulate a gene in gene_set
     # This reduces the total runtime by skipping unnecessary tests
@@ -231,9 +228,9 @@ def compute_trn_enrichment(gene_set: List, all_genes: List, trn: pd.DataFrame,
     return FDR(df_enrich, fdr=fdr, total=total)
 
 
-def compute_annotation_enrichment(gene_set: List, all_genes: List,
+def compute_annotation_enrichment(gene_set: Iterable, all_genes: Iterable,
                                   annotation: pd.DataFrame,
-                                  column='annotation',
+                                  column: str,
                                   fdr: float = 0.01):
     """
     Compare a gene set against a dataframe of gene annotations
