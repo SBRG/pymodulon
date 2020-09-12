@@ -1,23 +1,17 @@
 """
 
 """
-import warnings
-from typing import *
-
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-import re
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
-from scipy import stats
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
-from itertools import combinations
 
 from pymodulon.core import IcaData
-from pymodulon.enrichment import parse_regulon_str, FDR
-from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
+from pymodulon.enrichment import *
+from pymodulon.util import _parse_sample
+from pymodulon.util import *
 
 
 #############
@@ -974,11 +968,8 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     a1 = ica_data.A[sample1_list].mean(axis=1)
     a2 = ica_data.A[sample2_list].mean(axis=1)
 
-    df_diff = _diff_act(ica_data, sample1_list, sample2_list, lfc=threshold,
-                        fdr_rate=fdr)
-
-    x_lims = max([abs(max(a1)), abs(min(a1))])
-    y_lims = max([abs(max(a2)), abs(min(a2))])
+    df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
+                   fdr=fdr)
 
     ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
                      xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -1167,40 +1158,6 @@ def _normalize_expr(ica_data, ref_cols):
         norm = x.mean(axis=1)
 
     return norm
-
-
-def _diff_act(ica_data: IcaData, sample1: List, sample2: List, lfc: float,
-              fdr_rate: float):
-    """
-
-    Args:
-        ica_data:
-        sample1:
-        sample2:
-        lfc:
-        fdr_rate:
-
-    Returns:
-
-    """
-    _diff = pd.DataFrame()
-    for name, group in ica_data.sample_table.groupby(
-            ['project', 'condition']):
-        for i1, i2 in combinations(group.index, 2):
-            _diff['__'.join(name)] = abs(ica_data.A[i1] - ica_data.A[i2])
-    dist = {}
-    for k in ica_data.A.index:
-        dist[k] = stats.lognorm(*stats.lognorm.fit(_diff.loc[k].values)).cdf
-
-    res = pd.DataFrame(index=ica_data.A.index)
-    for k in res.index:
-        a1 = ica_data.A.loc[k, sample1].mean()
-        a2 = ica_data.A.loc[k, sample2].mean()
-        res.loc[k, 'difference'] = a2 - a1
-        res.loc[k, 'pvalue'] = 1 - dist[k](abs(a1 - a2))
-    result = FDR(res, fdr_rate)
-    return result[(abs(result.difference) > lfc)].sort_values('difference',
-                                                       ascending=False)
 
 
 ##########################
