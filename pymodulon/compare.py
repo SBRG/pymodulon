@@ -1,4 +1,3 @@
-import os
 import tqdm
 import warnings
 import os
@@ -22,7 +21,7 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
         M2: M matrix from the second organism
         metric: Statistical test to use (default:'pearson')
         cutoff: Float cut off value for pearson statistical test
-        show_all:
+        show_all: Show all iModulons regardless of their linkage
 
     Returns: Dot graph and name links of connected ICA components
 
@@ -231,7 +230,6 @@ def make_prot_db(fasta_file: os.PathLike):
     make_prot function)
     Args:
         fasta_file: String path to protein FASTA file
-
     Returns: None
 
     """
@@ -249,7 +247,7 @@ def make_prot_db(fasta_file: os.PathLike):
     try:
         subprocess.check_call(cmd_line)
         print("Protein DB files created successfully")
-    except subprocess.CalledProcessError as err:
+    except subprocess.CalledProcessError:
         print('\nmakeblastdb run failed. Make sure makeblastdb is'
               ' installed and working properly, and that the protein FASTA '
               'file contains no duplicate genes. View the output below to '
@@ -264,6 +262,7 @@ def make_prot_db(fasta_file: os.PathLike):
 # others label it as leucine.
 # need to check and fix this.
 
+# noinspection PyTypeChecker
 def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
             outname: os.PathLike = None, mincov: float = 0.8,
             evalue: float = 0.001, threads: int = 1, force: bool = False,
@@ -290,7 +289,7 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
 
     """
     # check if files exist, and vars are appropriate
-    if not __all_clear(db1, db2, outdir, mincov):
+    if not _all_clear(db1, db2, outdir, mincov):
         return None
     # get get the db names, will be used for outfile names
     on1 = '.'.join(os.path.split(db1)[-1].split('.')[:-1])
@@ -300,11 +299,11 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
     bres1 = os.path.join(outdir, '{}_vs_{}.txt'.format(on2, on1))
     bres2 = os.path.join(outdir, '{}_vs_{}.txt'.format(on1, on2))
 
-    out1 = __run_blastp(db1, db2, bres1, evalue, threads, force)
-    out2 = __run_blastp(db2, db1, bres2, evalue, threads, force)
+    _run_blastp(db1, db2, bres1, evalue, threads, force)
+    _run_blastp(db2, db1, bres2, evalue, threads, force)
 
-    db1_lengths = __get_gene_lens(db1)
-    db2_lengths = __get_gene_lens(db2)
+    db1_lengths = _get_gene_lens(db1)
+    db2_lengths = _get_gene_lens(db2)
 
     if not outname:
         outname = '{}_vs_{}_parsed.csv'.format(on1, on2)
@@ -371,7 +370,7 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
     return out
 
 
-def __get_gene_lens(file_in):
+def _get_gene_lens(file_in):
     """
 
     Args:
@@ -390,7 +389,7 @@ def __get_gene_lens(file_in):
     return out
 
 
-def __run_blastp(db1, db2, out, evalue, threads, force):
+def _run_blastp(db1, db2, out, evalue, threads, force):
     """
 
     Args:
@@ -425,7 +424,7 @@ def __run_blastp(db1, db2, out, evalue, threads, force):
     return out
 
 
-def __all_clear(db1, db2, outdir, mincov):
+def _all_clear(db1, db2, outdir, mincov):
     if not 0 < mincov <= 1:
         print('Coverage must be greater than 0 and less than or equal to 1')
         return None
@@ -445,13 +444,12 @@ def __all_clear(db1, db2, outdir, mincov):
     return True
 
 
-def __same_output(df1, df2, v=False):
+def _same_output(df1, df2):
     """
 
     Args:
         df1:
         df2:
-        v:
 
     Returns:
 
@@ -469,40 +467,3 @@ def __same_output(df1, df2, v=False):
     else:
         print('The two outputs are not the same.')
         return False
-
-
-if __name__ == '__main__':
-    import argparse
-
-    p = argparse.ArgumentParser(
-        description='Generate bidirectional BLAST hits. '
-                    'Requires BLAST databases for '
-                    'each organism. Output is saved in the'
-                    ' \'output\' directory.')
-    p.add_argument('db1', help='name of the first BLAST database')
-    p.add_argument('db2', help='name of the second BLAST database')
-    p.add_argument('-m', '--mincov',
-                   help='minimum coverage required to call a hit; default 0.8',
-                   default=0.8, type=float)
-    p.add_argument('-o', '--outdir',
-                   help='output directory for files. If no directory'
-                        'is provided, it will save to \'bbh\' folder',
-                   default='bbh')
-    p.add_argument('-p', '--threads',
-                   help='number of threads to use for BLAST; default 1',
-                   default=1, type=int)
-    p.add_argument('-e', '--evalue',
-                   help='eval threshold for BLAST hits; default 0.001',
-                   type=float,
-                   default=0.001)
-    p.add_argument('--force', help='Overwrite exisiting BBH files',
-                   action='store_true', default=False)
-    p.add_argument('--outname',
-                   help='Name of the file where the result will be saved')
-    params = vars(p.parse_args())
-    params.update({'savefiles': True})
-    #     get_bbh(params['db1'], params['db2'],
-    #     mincov=params['mincov'],evalue=params['evalue'],
-    #     force=params['force'], threads=params['threads'],
-    #     savefiles=True,outname=params['outname'])
-    get_bbh(**params)
