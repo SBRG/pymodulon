@@ -11,4 +11,4 @@ adjusttext>=0.7.3
 scikit-learn>=0.23.1
 setuptools>=49.6.0
 graphviz>=2.40.1
-biopython>=1.78
+biopython>=1.77
