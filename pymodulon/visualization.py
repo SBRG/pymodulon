@@ -2,8 +2,7 @@
 
 """
 import warnings
-from math import isnan
-from typing import List, Literal, Optional, Mapping, Sequence, Tuple, Union
+from typing import *
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -15,10 +14,9 @@ from scipy import stats
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.metrics import r2_score
 from itertools import combinations
-from statsmodels.stats.multitest import fdrcorrection
 
 from pymodulon.core import IcaData
-from pymodulon.enrichment import parse_regulon_str
+from pymodulon.enrichment import parse_regulon_str, FDR
 from pymodulon.util import Ax, ImodName, SeqSetStr, name2num
 
 
@@ -342,7 +340,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If regulator is not given, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        if isnan(reg):
+        if pd.isnan(reg):
             reg = None
 
     # If no imodulon_table in IcaData, compute trn enrichment to find the
@@ -353,7 +351,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
             ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
         reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
         if not isinstance(reg, str):
-            if isnan(reg):
+            if pd.isnan(reg):
                 reg = None
 
     # Use regulator value to find regulon genes
