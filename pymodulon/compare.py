@@ -227,15 +227,16 @@ def make_prots(gbk: os.PathLike, out_path: os.PathLike):
 
 def make_prot_db(fasta_file: os.PathLike):
     """
-
+    Creates GenBank Databases from Protein FASTA of an organism (Output from
+    make_prot function)
     Args:
-        fasta_file:
+        fasta_file: String path to protein FASTA file
 
     Returns: None
 
     """
     if os.path.isfile(fasta_file + ".phr") \
-            and os.path.isfile(fasta_file + ".pin")\
+            and os.path.isfile(fasta_file + ".pin") \
             and os.path.isfile(fasta_file + ".psq"):
         print('BLAST DB files already exist')
         return None
@@ -255,29 +256,35 @@ def make_prot_db(fasta_file: os.PathLike):
               'see what error occured:\n')
         status = subprocess.run(cmd_line, capture_output=True)
         print(status)
-        #raise err
+        # raise err
     return None
+
 
 # TODO: some genbanks put alternate start codon such as TTG as methionine while
 # others label it as leucine.
 # need to check and fix this.
 
-def get_bbh(db1, db2, indir='prots', outdir='bbh', outname=None, mincov=0.8,
-            evalue=0.001, threads=1,
-            force=False, savefiles=True):
+def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
+            outname: os.PathLike = None, mincov: float = 0.8,
+            evalue: float = 0.001, threads: int = 1, force: bool = False,
+            savefiles=True):
     """
-
+    Runs Bidirectional Best Hit BLAST to find orthologs utilizing two protein
+    FASTA files. Outputs a CSV file of all orthologous genes. Adopted from code
     Args:
-        db1:
-        db2:
-        indir:
-        outdir:
-        outname:
-        mincov:
-        evalue:
-        threads:
-        force:
-        savefiles:
+        db1: String path to protein FASTA file (output of make_prots
+        function) for organism 1
+        db2: String path to protein FASTA file (output of make_prots
+        function) for organism 2
+        outdir: String path to output directory, default is "bbh" and will
+        create the directory if it does not exist
+        outname: Default db1_vs_db2_parsed.csv where db[1-2] are the passed
+        arguments name of the csv file where that will save the results
+        mincov: Minimum coverage to call hits in BLAST, must be between 0 and 1
+        evalue: evalue thershold for BLAST hits, Default .001
+        threads: Number of threads to run BLAST, Default 1
+        force: Whether to overwrite existing files or not
+        savefiles: Whether to save files to outdir
 
     Returns:
 

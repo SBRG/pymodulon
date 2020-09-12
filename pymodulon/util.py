@@ -6,12 +6,9 @@ from matplotlib.axes import Axes
 from typing import *
 import numpy as np
 import pandas as pd
-from re import split
 from typing import List
 import os
 from scipy import stats
-import tqdm
-from graphviz import Digraph
 import warnings
 
 ################
