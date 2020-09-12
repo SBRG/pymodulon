@@ -930,62 +930,60 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     return ax
 
 
-def plot_dima(ica_data_1: IcaData, project1: Optional[str],
-              project2: Optional[str],
-              sample1_list: Optional[list] = None,
-              sample2_list: Optional[list] = None,
-              lfc: float = 5, fdr_rate: float = .1, label: bool = True,
-              adjust: bool = True, gene_table = False, **kwargs) -> Ax:
+def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
+              sample2: Union[Collection, str],
+              threshold: float = 5, fdr: float = .1, label: bool = True,
+              adjust: bool = True, table: bool = False, **kwargs) -> Ax:
     """
     Plots a Dima plot between two projects or two sets of samples
     Args:
-        ica_data_1: IcaData object that contains your data
-        project1: Project and condition name in form "PROJECT__CONDITION" for
-        condition one; Ex. "ica__wt_glc"
-        project2: Project and condition name in form "PROJECT__CONDITION" for
-        condition two; Ex. "ica__wt_glc"
-        sample1_list: A list of samples you would like to analyze. The full
-        name of the sample must be inputed; Ex. ["ica__wt_glc__1",
-        "ica__wt_glc__2"]
-        sample2_list: A list of samples you would like to analyze. The full
-        name of the sample must be inputed; Ex. ["ica__wt_glc__1",
-        "ica__wt_glc__2"]
-        lfc: Log fold change that will serve as the cutoff for differentially
-        expressed genes
-        fdr_rate: False Detection Rate
-        label: True/false option to label differentially expressed genes
-        adjust: Additional true/false option to adjust labels
-        gene_table: True/false option to display Pandas DataFrame of
-        differentially expressed genes
+        ica_data: IcaData object that contains your data
+        sample1: List of sample IDs or name of "project:condition"
+        sample2: List of sample IDs or name of "project:condition"
+        threshold: Minimum activity difference to determine DiMAs
+        fdr: False Detection Rate
+        label: Label differentially activated iModulons (default: True)
+        adjust: Automatically adjust labels (default: True)
+        table: Return differential iModulon activity table
         **kwargs: Additional arguments for scatterplot
 
     Returns: ax, Optional[diff_DF]
 
     """
-    if sample1_list is None or sample2_list is None:
-        for names, groups in \
-                ica_data_1.sample_table.groupby(["project_id", "condition_id"]):
-            if names[0] in project1 and names[1] in project1:
-                sample1_list = list(groups.index)
 
-            if names[0] in project2 and names[1] in project2:
-                sample2_list = list(groups.index)
+    sample_table = ica_data.sample_table
 
-        a1 = ica_data_1.A[sample1_list].mean(axis=1)
-        a2 = ica_data_1.A[sample2_list].mean(axis=1)
+    if isinstance(sample1, str):
+        proj, cond = re.search('(.*):(.*)', sample1).groups()
+        xlabel = sample1
+        sample1_list = sample_table[(sample_table.project == proj) &
+                                    (sample_table.condition == cond)].index
+    else:
+        sample1_list = sample1
+        xlabel = '\n'.join(sample1_list)
 
-    df_diff = _diff_act(ica_data_1, sample1_list, sample2_list, lfc=lfc,
-                        fdr_rate=fdr_rate)
+    if isinstance(sample2, str):
+        proj, cond = re.search('(.*):(.*)', sample2).groups()
+        ylabel = sample2
+        sample2_list = sample_table[(sample_table.project == proj) &
+                                    (sample_table.condition == cond)].index
+    else:
+        sample2_list = sample2
+        ylabel = '\n'.join(sample2_list)
+
+    a1 = ica_data.A[sample1_list].mean(axis=1)
+    a2 = ica_data.A[sample2_list].mean(axis=1)
+
+    df_diff = _diff_act(ica_data, sample1_list, sample2_list, lfc=threshold,
+                        fdr_rate=fdr)
 
     x_lims = max([abs(max(a1)), abs(min(a1))])
     y_lims = max([abs(max(a2)), abs(min(a2))])
 
     lims = max([x_lims, y_lims])
 
-    ax = scatterplot(a1, a2, line45=True, line45_margin=lfc,
-                     xlabel=re.search('(.*)__', sample1_list[0]).group(1),
-                     ylabel=re.search('(.*)__', sample2_list[0]).group(1),
-                     **kwargs)
+    ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
+                     xlabel=xlabel, ylabel=ylabel, **kwargs)
 
     ax.set_xlim([-lims, lims])
     ax.set_ylim([-lims, lims])
@@ -994,11 +992,11 @@ def plot_dima(ica_data_1: IcaData, project1: Optional[str],
     ax.vlines(0, -lims, lims, linewidth=0.5, color='gray', zorder=2)
     ax.plot([-lims, lims], [-lims, lims], color='k',
             linestyle='dashed', linewidth=0.5, zorder=0)
-    ax.plot([max(-lims, -lims + lfc), min(lims, lims + lfc)],
-            [max(-lims, -lims - lfc), min(lims, lims - lfc)],
+    ax.plot([max(-lims, -lims + threshold), min(lims, lims + threshold)],
+            [max(-lims, -lims - threshold), min(lims, lims - threshold)],
             color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
-    ax.plot([max(-lims, -lims - lfc), min(lims, lims - lfc)],
-            [max(-lims, -lims + lfc), min(lims, lims + lfc)],
+    ax.plot([max(-lims, -lims - threshold), min(lims, lims - threshold)],
+            [max(-lims, -lims + threshold), min(lims, lims + threshold)],
             color='gray', linestyle='dashed', linewidth=0.5, zorder=0)
 
     if label:
@@ -1014,12 +1012,12 @@ def plot_dima(ica_data_1: IcaData, project1: Optional[str],
             adjust_text(texts, ax=ax,
                         arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
                         only_move={'objects': 'y'}, **expand_args)
-    if gene_table:
+    if table:
         diff_genes = sorted(list(df_diff.index))
         non_diff_genes = []
-        for i in range(0, len(ica_data_1.A.index)):
-            if list(ica_data_1.A.index)[i] not in diff_genes:
-                non_diff_genes.append(list(ica_data_1.A.index)[i])
+        for i in range(0, len(ica_data.A.index)):
+            if list(ica_data.A.index)[i] not in diff_genes:
+                non_diff_genes.append(list(ica_data.A.index)[i])
         if len(diff_genes) - len(non_diff_genes) > 0:
             for i in range(0, (len(diff_genes) - len(non_diff_genes))):
                 non_diff_genes.append(np.NaN)
@@ -1203,7 +1201,7 @@ def _diff_act(ica_data: IcaData, sample1: List, sample2: List, lfc: float,
     """
     _diff = pd.DataFrame()
     for name, group in ica_data.sample_table.groupby(
-            ['project_id', 'condition_id']):
+            ['project', 'condition']):
         for i1, i2 in combinations(group.index, 2):
             _diff['__'.join(name)] = abs(ica_data.A[i1] - ica_data.A[i2])
     dist = {}
@@ -1214,38 +1212,11 @@ def _diff_act(ica_data: IcaData, sample1: List, sample2: List, lfc: float,
     for k in res.index:
         a1 = ica_data.A.loc[k, sample1].mean()
         a2 = ica_data.A.loc[k, sample2].mean()
-        res.loc[k, 'LFC'] = a2 - a1
+        res.loc[k, 'difference'] = a2 - a1
         res.loc[k, 'pvalue'] = 1 - dist[k](abs(a1 - a2))
-    final = FDR(res, fdr_rate)
-    return final[(abs(final.LFC) > lfc)].sort_values('LFC', ascending=False)
-
-
-def FDR(p_values, fdr_rate, total=None):
-    """
-
-    Args:
-        p_values:
-        fdr_rate:
-        total:
-
-    Returns:
-
-    """
-
-    if total is not None:
-        pvals = p_values.pvalue.values.tolist() + [1] * (total - len(p_values))
-        idx = p_values.pvalue.index.tolist() + [None] * (total - len(p_values))
-    else:
-        pvals = p_values.pvalue.values
-        idx = p_values.pvalue.index
-
-    keep, qvals = fdrcorrection(pvals, alpha=fdr_rate)
-
-    result = p_values.copy()
-    result['qvalue'] = qvals[:len(p_values)]
-    result = result[keep[:len(p_values)]]
-
-    return result.sort_values('qvalue')
+    result = FDR(res, fdr_rate)
+    return result[(abs(result.difference) > lfc)].sort_values('difference',
+                                                       ascending=False)
 
 
 ##########################
