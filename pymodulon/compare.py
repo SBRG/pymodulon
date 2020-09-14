@@ -183,7 +183,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
 
     Returns: Dot graph and name links of connected ICA components between the
     two runs or organisms.
-
+gut
     """
     if ortho_file is None:
         dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff,
