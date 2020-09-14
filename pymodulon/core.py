@@ -417,7 +417,7 @@ class IcaData(object):
 
         if imodulons is None:
             imodulon_list = self.imodulon_names
-        elif isinstance(imodulons, str):
+        elif isinstance(imodulons, str) or isinstance(imodulons, int):
             imodulon_list = [imodulons]
         else:
             imodulon_list = imodulons
