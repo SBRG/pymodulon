@@ -8,7 +8,7 @@ project_dir = Path(__file__).parent
 
 setuptools.setup(
     name="pymodulon",
-    version="0.0.1",
+    version="0.0.2",
     description="Python package for analyzing and visualizing iModulons",
     # Allow UTF-8 characters in README with encoding argument.
     long_description=project_dir.joinpath("README.md").read_text(encoding="utf-8"),
@@ -18,8 +18,7 @@ setuptools.setup(
     maintainer="Anand V. Sastry",
     maintainer_email="avsastry@eng.ucsd.edu",
     url="https://github.com/SBRG/pymodulon",
-    packages=setuptools.find_packages("src"),
-    package_dir={"": "src"},
+    packages=setuptools.find_packages(),
     # pip 9.0+ will inspect this field when installing to help users install a
     # compatible version of the library for their Python version.
     python_requires=">3.6",
@@ -47,8 +46,6 @@ setuptools.setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering",
         "Topic :: Scientific/Engineering :: Bio-Informatics"
