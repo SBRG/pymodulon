@@ -212,6 +212,7 @@ def make_prots(gbk: os.PathLike, out_path: os.PathLike):
     :param out_path: path to the output FASTA file
     :return: None
     """
+
     with open(out_path, 'w') as fa:
         for refseq in SeqIO.parse(gbk, 'genbank'):
             for feats in [f for f in refseq.features if f.type == 'CDS']:
