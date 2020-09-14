@@ -129,33 +129,3 @@ def uniprot_id_mapping(prot_list, input_id='ACC+ID', output_id='P_REFSEQ_AC',
     # Only keep one uniprot ID per gene
     mapping = mapping.sort_values(output_name).drop_duplicates(input_name)
     return mapping
-
-
-# KEGG conversion tools were adapted from BioPython
-
-def kegg_conv(database, query):
-    """KEGG conv - convert to KEGG identifiers from NCBI or uniprot identifiers.
-
-    Arguments:
-     - database - Target database (ncbi-geneid, ncbi-proteinid, or uniprot)
-     - query - input query
-    """
-
-    if database not in ['ncbi-geneid', 'ncbi-proteinid', 'uniprot']:
-        raise ValueError(
-            'Database must be ncbi-geneid | ncbi-proteinid | uniprot')
-
-    url = 'http://rest.kegg.jp/conv/{}/{}'.format(database, query)
-
-    # Send mapping request to kegg
-    req = urllib.request.Request(url)
-    with urllib.request.urlopen(req) as f:
-        response = f.read()
-
-    # Load result to pandas dataframe
-    text = StringIO(response.decode('utf-8'))
-    mapping = pd.read_csv(text, sep='\t', header=None,
-                          names=['kegg_id', database])
-    mapping[database] = [entry[entry.find(':') + 1:] for entry in
-                         mapping[database]]
-    return mapping
