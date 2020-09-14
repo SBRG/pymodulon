@@ -1,0 +1,36 @@
+UniProtKB	Q4J9R1	glpK1		GO:0004370	GO_REF:0000024	ISS	UniProtKB:P0A6F3	F	Glycerol kinase 1	Saci_1117	protein	NCBITaxon:330779	20130927	UniProt			glycerol kinase activity
+UniProtKB	Q4J9R1	glpK1		GO:0006071	GO_REF:0000024	ISS	UniProtKB:P0A6F3	P	Glycerol kinase 1	Saci_1117	protein	NCBITaxon:330779	20130927	UniProt			glycerol metabolic process
+UniProtKB	Q4J9M3	malA		GO:0032450	PMID:23396915	IDA		F	Gal_mutarotas_2 domain-containing protein	Saci_1160	protein	NCBITaxon:330779	20131027	CACAO			maltose alpha-glucosidase activity
+UniProtKB	Q4J9L0	Saci_1173		GO:0005515	PMID:24103130	IPI	UniProtKB:Q4J9K6	F	T2SP_E domain-containing protein		protein	NCBITaxon:330779	20200613	IntAct			protein binding
+UniProtKB	Q4J9K8	Saci_1175		GO:0042802	PMID:25865246	IPI	UniProtKB:Q4J9K8	F	Conserved flagellar protein F		protein	NCBITaxon:330779	20200613	IntAct			identical protein binding
+UniProtKB	Q4J9K6	Saci_1177		GO:0005515	PMID:24103130	IPI	UniProtKB:Q4J9L0	F	Conserved protein		protein	NCBITaxon:330779	20200613	IntAct			protein binding
+UniProtKB	Q4J894	Saci_1677		GO:0016429	PMID:20525789	IDA		F	tRNA (adenine(9)-N1)-methyltransferase		protein	NCBITaxon:330779	20110317	UniProt			tRNA (adenine-N1-)-methyltransferase activity
+UniProtKB	Q4J894	Saci_1677		GO:0030488	PMID:20525789	IDA		P	tRNA (adenine(9)-N1)-methyltransferase		protein	NCBITaxon:330779	20110317	UniProt			tRNA methylation
+UniProtKB	Q4J7A3	glpK2		GO:0004370	GO_REF:0000024	ISS	UniProtKB:P0A6F3	F	Glycerol kinase 2	Saci_2033	protein	NCBITaxon:330779	20130927	UniProt			glycerol kinase activity
+UniProtKB	Q4J7A3	glpK2		GO:0006071	GO_REF:0000024	ISS	UniProtKB:P0A6F3	P	Glycerol kinase 2	Saci_2033	protein	NCBITaxon:330779	20130927	UniProt			glycerol metabolic process
+UniProtKB	P98004	soxB		GO:0016682	GO_REF:0000024	ISS	UniProtKB:Q81HT3	F	Quinol oxidase subunit 1	Saci_2088	protein	NCBITaxon:330779	20041006	UniProt			oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor
+UniProtKB	P98004	soxB		GO:0042773	GO_REF:0000024	ISS	UniProtKB:Q81HT3	P	Quinol oxidase subunit 1	Saci_2088	protein	NCBITaxon:330779	20041006	UniProt			ATP synthesis coupled electron transport
+UniProtKB	Q4J6M6	cutB		GO:0005737	PMID:10095793	IDA		C	Glyceraldehyde dehydrogenase medium chain	Saci_2269	protein	NCBITaxon:330779	20130927	UniProt			cytoplasm
+UniProtKB	Q4J6M6	cutB		GO:0016903	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase medium chain	Saci_2269	protein	NCBITaxon:330779	20130927	UniProt			oxidoreductase activity, acting on the aldehyde or oxo group of donors
+UniProtKB	Q4J6M6	cutB		GO:0050660	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase medium chain	Saci_2269	protein	NCBITaxon:330779	20130927	UniProt			flavin adenine dinucleotide binding
+UniProtKB	Q4J6M5	cutC		GO:0005737	PMID:10095793	IDA		C	Glyceraldehyde dehydrogenase small chain	Saci_2270	protein	NCBITaxon:330779	20130927	UniProt			cytoplasm
+UniProtKB	Q4J6M5	cutC		GO:0016903	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase small chain	Saci_2270	protein	NCBITaxon:330779	20130927	UniProt			oxidoreductase activity, acting on the aldehyde or oxo group of donors
+UniProtKB	Q4J6M5	cutC		GO:0051537	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase small chain	Saci_2270	protein	NCBITaxon:330779	20130927	UniProt			2 iron, 2 sulfur cluster binding
+UniProtKB	Q4J6M3	cutA		GO:0005737	PMID:10095793	IDA		C	Glyceraldehyde dehydrogenase large chain	Saci_2271	protein	NCBITaxon:330779	20130927	UniProt			cytoplasm
+UniProtKB	Q4J6M3	cutA		GO:0016903	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase large chain	Saci_2271	protein	NCBITaxon:330779	20130927	UniProt			oxidoreductase activity, acting on the aldehyde or oxo group of donors
+UniProtKB	Q4J6M3	cutA		GO:0043546	PMID:10095793	IDA		F	Glyceraldehyde dehydrogenase large chain	Saci_2271	protein	NCBITaxon:330779	20130927	UniProt			molybdopterin cofactor binding
+UniProtKB	Q4JB24	psmA		GO:0019773	GO_REF:0000024	ISS	UniProtKB:P40302	C	Proteasome subunit alpha	Saci_0613	protein	NCBITaxon:330779	20091001	UniProt			proteasome core complex, alpha-subunit complex
+UniProtKB	Q4JCJ1	ppcA		GO:0000287	DOI:10.1111/j.1574-6968.1997.tb10477.x	IDA		F	Phosphoenolpyruvate carboxylase	Saci_0059	protein	NCBITaxon:330779	20110118	UniProt			magnesium ion binding
+UniProtKB	Q4JCJ1	ppcA		GO:0006107	DOI:10.1111/j.1574-6968.1997.tb10477.x	IDA		P	Phosphoenolpyruvate carboxylase	Saci_0059	protein	NCBITaxon:330779	20110118	UniProt			oxaloacetate metabolic process
+UniProtKB	Q4JCJ1	ppcA		GO:0008964	DOI:10.1111/j.1574-6968.1997.tb10477.x	IDA		F	Phosphoenolpyruvate carboxylase	Saci_0059	protein	NCBITaxon:330779	20110118	UniProt			phosphoenolpyruvate carboxylase activity
+UniProtKB	Q4JCJ1	ppcA		GO:0015977	DOI:10.1111/j.1574-6968.1997.tb10477.x	IDA		P	Phosphoenolpyruvate carboxylase	Saci_0059	protein	NCBITaxon:330779	20110118	UniProt			carbon fixation
+UniProtKB	Q4JC68	Saci_0192		GO:0032508	PMID:16973432	IDA		P	ATP-dependent DNA helicase Saci_0192		protein	NCBITaxon:330779	20120726	UniProt			DNA duplex unwinding
+UniProtKB	Q4JC68	Saci_0192		GO:0043139	PMID:16973432	IDA		F	ATP-dependent DNA helicase Saci_0192		protein	NCBITaxon:330779	20120726	UniProt			5'-3' DNA helicase activity
+UniProtKB	Q4JC68	Saci_0192		GO:0051539	PMID:16973432	IDA		F	ATP-dependent DNA helicase Saci_0192		protein	NCBITaxon:330779	20120726	UniProt			4 iron, 4 sulfur cluster binding
+UniProtKB	Q4JC35	Saci_0225		GO:0008674	PMID:17176250	IDA		F	2-dehydro-3-deoxy-phosphogluconate/2-dehydro-3-deoxy-6-phosphogalactonate aldolase		protein	NCBITaxon:330779	20130412	UniProt			2-dehydro-3-deoxy-6-phosphogalactonate aldolase activity
+UniProtKB	Q4JC35	Saci_0225		GO:0008675	PMID:17176250	IDA		F	2-dehydro-3-deoxy-phosphogluconate/2-dehydro-3-deoxy-6-phosphogalactonate aldolase		protein	NCBITaxon:330779	20130412	UniProt			2-dehydro-3-deoxy-phosphogluconate aldolase activity
+UniProtKB	Q4JBG0	Saci_0459		GO:0004596	GO_REF:0000024	ISS	UniProtKB:Q980R9	F	N-alpha-acetyltransferase		protein	NCBITaxon:330779	20170228	UniProt			peptide alpha-N-acetyltransferase activity
+UniProtKB	P39479	soxA		GO:0016682	GO_REF:0000024	ISS	UniProtKB:Q81HT3	F	Quinol oxidase subunit 2	Saci_2089	protein	NCBITaxon:330779	20041006	UniProt			oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor
+UniProtKB	P39479	soxA		GO:0042773	GO_REF:0000024	ISS	UniProtKB:Q81HT3	P	Quinol oxidase subunit 2	Saci_2089	protein	NCBITaxon:330779	20041006	UniProt			ATP synthesis coupled electron transport
+UniProtKB	Q07271	tfs		GO:0006355	GO_REF:0000024	ISS	UniProtKB:Q9P9I8	P	Transcription factor S	Saci_0171	protein	NCBITaxon:330779	20160108	UniProt			regulation of transcription, DNA-templated
+UniProtKB	Q07271	tfs		GO:0008270	GO_REF:0000024	ISS	UniProtKB:Q56254	F	Transcription factor S	Saci_0171	protein	NCBITaxon:330779	20160108	UniProt			zinc ion binding
