@@ -21,7 +21,10 @@ Installation
 ~~~~~~~~~~~~
 
 Since pymodulon is currently under development, the recommended method to 
-install **pymodulon** is to use the editable ``pip`` installation. First, 
+install **pymodulon** is to use the editable ``pip`` installation. It is
+recommended to do this inside a `virtual environment 
+<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or in a `conda
+environment <https://docs.conda.io/en/latest/>`_. First, 
 download the github repository::
 
 	git clone https://github.com/SBRG/pymodulon.git
@@ -29,6 +32,9 @@ download the github repository::
 Then install with ``pip`` using the ``-e`` flag::
 
 	python -m pip install -e .
+	
+This method of installation will automatically update your 
+package each time you pull from this repository.
 
 .. The recommended method is to install **pymodulon** is to use ``pip`` to
 .. `install pymodulon from PyPI <https://pypi.python.org/pypi/pymodulon>`_. It is
