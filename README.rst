@@ -20,19 +20,25 @@ If you use organism-specific datasets in your work, please cite these datasets:
 Installation
 ~~~~~~~~~~~~
 
-The recommended method is to install **pymodulon** is to use ``pip`` to
-`install pymodulon from PyPI <https://pypi.python.org/pypi/pymodulon>`_. It is
-recommended to do this inside a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
+Since pymodulon is currently under development, the recommended method to 
+install **pymodulon** is to use the editable ``pip`` installation. First, 
+download the github repository::
 
-	pip install pymodulon
+	git clone https://github.com/SBRG/pymodulon.git
 
-If you downloaded the source code, run::
+Then install with ``pip`` using the ``-e`` flag::
 
-	pip install -e .
+	python -m pip install -e .
 
-in the ``pymodulon`` source directory. For additional information, please refer to the
-the `detailed installation instructions <INSTALL.rst>`_.
+.. The recommended method is to install **pymodulon** is to use ``pip`` to
+.. `install pymodulon from PyPI <https://pypi.python.org/pypi/pymodulon>`_. It is
+.. recommended to do this inside a `virtual environment
+.. <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
+
+.. 	pip install pymodulon
+
+.. in the ``pymodulon`` source directory. For additional information, please refer to the
+.. the `detailed installation instructions <INSTALL.rst>`_.
 
 .. |PyPI| image:: https://badge.fury.io/py/pymodulon.svg
     :target: https://pypi.python.org/pypi/pymodulon
