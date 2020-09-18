@@ -99,11 +99,13 @@ def gff2pandas(gff_file):
     # Also filter for genes to get old_locus_tag
     DF_gene = DF_gff[DF_gff.feature == 'gene'].reset_index()
     DF_gene['locus_tag'] = DF_gene.attributes.apply(_get_attr,
-                                                    attr_id='locus_tag')
+                                                    attr_id='locus_tag',
+                                                    ignore=True)
     DF_gene['old_locus_tag'] = DF_gene.attributes.apply(_get_attr,
                                                         attr_id='old_locus_tag',
                                                         ignore=True)
     DF_gene = DF_gene[['locus_tag', 'old_locus_tag']]
+    DF_gene = DF_gene[DF_gene.locus_tag.notnull()]
 
     # Sort by start position
     DF_cds = DF_cds.sort_values('start')
