@@ -130,7 +130,7 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     name1, name2 = list(zip(*links))
     inv_cols = {v: k for k, v in cols.items()}
     name_links = list(zip([inv_cols[x] for x in name1], name2))
-    return dot, name_links
+    return dot, name_links, DF_corr
 
 
 def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
@@ -185,17 +185,19 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
 gut
     """
     if ortho_file is None:
-        dot, name_links = _make_dot_graph(S1, S2, metric=metric, cutoff=cutoff,
+        dot, name_links, DF_corr = _make_dot_graph(S1, S2, metric=metric,
+                                            cutoff=cutoff,
                                           show_all=show_all)
-        return dot, name_links
+        return dot, name_links, DF_corr
 
     else:
         warnings.warn("Please ensure that the order of S1 and S2 match the "
                       "order of the BBH CSV file")
         translated_S = _pull_bbh_csv(ortho_file, S1)
-        dot, name_links = _make_dot_graph(translated_S, S2, metric, cutoff,
+        dot, name_links, DF_corr = _make_dot_graph(translated_S, S2, metric,
+                                                cutoff,
                                           show_all=show_all)
-        return dot, name_links
+        return dot, name_links, DF_corr
 
 
 ####################
