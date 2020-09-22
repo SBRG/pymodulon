@@ -648,7 +648,7 @@ class IcaData(object):
 
         # extract the best cutoff and set it as the cutoff to use
         best_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
-        self._dagostino_cutoff = best_cutoff
+        self._dagostino_cutoff = int(best_cutoff)
 
         if plot:
             fig, ax = plt.subplots(figsize=(4, 4))
