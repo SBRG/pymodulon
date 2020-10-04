@@ -21,7 +21,6 @@ To create the conda environment::
 
 	conda create -n pymodulon python=3.8
 	conda activate pymodulon
-	pip install -r requirements.txt
 
 Next, download the github repository::
 
