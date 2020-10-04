@@ -312,9 +312,11 @@ class IcaData(object):
         """
 
         # Check that iModulon names are unique
-        if self.M.columns.duplicated().any():
+        cols = self.M.columns
+        if cols.duplicated().any():
+            dup_mods = cols[cols.duplicated()].values.tolist()
             raise ValueError('Multiple iModulons exist with name {}.'.format(
-                imodulon))
+                dup_mods))
 
         # Find genes in iModulon
         in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
