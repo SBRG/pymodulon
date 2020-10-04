@@ -310,6 +310,12 @@ class IcaData(object):
         :param imodulon: Name of iModulon
         :return: Pandas Dataframe showing iModulon gene information
         """
+
+        # Check that iModulon names are unique
+        if self.M.columns.duplicated().any():
+            raise ValueError('Multiple iModulons exist with name {}.'.format(
+                imodulon))
+
         # Find genes in iModulon
         in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
 
