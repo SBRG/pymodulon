@@ -266,6 +266,7 @@ class IcaData(object):
         self._cutoff_optimized = False
 
     def _update_imodulon_names(self, new_names):
+
         # Update thresholds
         for old_name, new_name in zip(self._imodulon_names, new_names):
             self._thresholds[new_name] = self._thresholds.pop(old_name)
@@ -284,6 +285,23 @@ class IcaData(object):
             names (e.g. {old_name:new_name})
         :param column: Uses a column from the iModulon table to rename iModulons
         """
+
+        # Check if new names are duplicates
+        name_series = pd.Series(name_dict)
+        dups = name_series[name_series.duplicated(keep=False)]
+        if len(dups) > 0:
+            seen = {}
+            for key, val in dups.items():
+                if val in seen.keys():
+                    name_dict[key] = val + '-' + str(seen[val])
+                    seen[val] += 1
+                else:
+                    name_dict[key] = val + '-1'
+                    seen[val] = 2
+
+                warnings.warn(
+                    'Duplicate iModulon names detected. iModulon {} will '
+                    'be renamed to {}'.format(key, name_dict[key]))
 
         # Rename using the column parameter if given
         if column is not None:
@@ -310,13 +328,6 @@ class IcaData(object):
         :param imodulon: Name of iModulon
         :return: Pandas Dataframe showing iModulon gene information
         """
-
-        # Check that iModulon names are unique
-        cols = self.M.columns
-        if cols.duplicated().any():
-            dup_mods = cols[cols.duplicated()].values.tolist()
-            raise ValueError('Multiple iModulons exist with name {}.'.format(
-                dup_mods))
 
         # Find genes in iModulon
         in_imodulon = abs(self.M[imodulon]) > self.thresholds[imodulon]
@@ -365,7 +376,7 @@ class IcaData(object):
                                             set(self.imodulon_table.columns)
                                             - set(enrichment.columns)]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
-        new_table = pd.concat([keep_rows, df_top_enrich])
+        new_table = pd.concat([keep_rows, df_top_enrich], sort=False)
 
         # Reorder columns
         col_order = enrichment.columns.tolist() + keep_cols.columns.tolist()
