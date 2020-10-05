@@ -1,5 +1,5 @@
-,gene_ontology,TP,f1score,imodulon_size,imodulon,precision,pvalue,qvalue,recall,target_set_size
-0,protein binding,2.0,0.4,8.0,ArnRAB,1.0,1.0627557255973103e-05,0.0002869440459112738,0.25,2.0
-1,identical protein binding,1.0,0.2222222222222222,8.0,ArnRAB,1.0,0.003484320557482366,0.04703832752601195,0.125,1.0
-2,ATP synthesis coupled electron transport,2.0,0.8,3.0,22,1.0,1.1386668488533055e-06,1.5372002459519626e-05,0.6666666666666666,2.0
-3,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor",2.0,0.8,3.0,22,1.0,1.1386668488533055e-06,1.5372002459519626e-05,0.6666666666666666,2.0
+,imodulon,gene_ontology,pvalue,qvalue,precision,recall,f1score,TP,target_set_size,imodulon_size
+0,ArnRAB,protein binding,1.0627557255973103e-05,0.0002869440459112738,1.0,0.25,0.4,2.0,2.0,8.0
+1,ArnRAB,identical protein binding,0.003484320557482366,0.04703832752601195,1.0,0.125,0.2222222222222222,1.0,1.0,8.0
+2,22,ATP synthesis coupled electron transport,1.1386668488533055e-06,1.5372002459519626e-05,1.0,0.6666666666666666,0.8,2.0,2.0,3.0
+3,22,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor",1.1386668488533055e-06,1.5372002459519626e-05,1.0,0.6666666666666666,0.8,2.0,2.0,3.0

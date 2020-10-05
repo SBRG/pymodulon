@@ -512,6 +512,11 @@ class IcaData(object):
         DF_enriched.rename({'gene_set_size': 'imodulon_size'},
                            inplace=True, axis=1)
 
+        enrich_col = DF_enriched.columns[0]
+        col_order = ['imodulon', enrich_col, 'pvalue', 'qvalue', 'precision',
+                     'recall', 'f1score', 'TP', 'target_set_size',
+                     'imodulon_size']
+        DF_enriched = DF_enriched[col_order]
         return DF_enriched
 
     ######################################
