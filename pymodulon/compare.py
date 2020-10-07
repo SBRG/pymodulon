@@ -138,8 +138,13 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     name1, name2 = list(zip(*links))
     inv_cols1 = {v: k for k, v in col_dict1.items()}
     inv_cols2 = {v: k for k, v in col_dict2.items()}
+
+    print(DF_corr.loc[name1[0]][name2[0]])
+
     name_links = list(zip([inv_cols1[x] for x in name1],
-                          [inv_cols2[x] for x in name2]))
+                          [inv_cols2[x] for x in name2],
+                          [DF_corr.loc[name1[x]][name2[x]]
+                           for x in range(0,len(name1))]))
     return dot, name_links
 
 
@@ -205,8 +210,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
                       "order of the BBH CSV file")
         translated_S = _pull_bbh_csv(ortho_file, S1)
         dot, name_links = _make_dot_graph(translated_S, S2, metric,
-                                                cutoff,
-                                          show_all=show_all)
+                                          cutoff, show_all=show_all)
         return dot, name_links
 
 
