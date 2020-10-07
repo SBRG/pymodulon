@@ -36,18 +36,25 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     s1 = M1.reindex(common)
     s2 = M2.reindex(common)
 
-    # Ensure column names are strings
-    s1.columns = s1.columns.astype(str)
-    s2.columns = s2.columns.astype(str)
-
     # Split names in half if necessary for comp1
-    cols = {}
-    for x in s1.columns:
-        if len(x) > 10:
-            cols[x] = x[:len(x) // 2] + '-\n' + x[len(x) // 2:]
+    col_dict1 = {}
+    for col in s1.columns:
+        val = str(col)
+        if len(val) > 10:
+            col_dict1[col] = val[:len(val) // 2] + '-\n' + val[len(val) // 2:]
         else:
-            cols[x] = x
-    s1.columns = [cols[x] for x in s1.columns]
+            col_dict1[col] = val
+    s1.columns = [col_dict1[x] for x in s1.columns]
+
+    # Split names in half if necessary for comp2
+    col_dict2 = {}
+    for col in s2.columns:
+        val = str(col)
+        if len(val) > 10:
+            col_dict2[col] = val[:len(val) // 2] + '-\n' + val[len(val) // 2:]
+        else:
+            col_dict2[col] = val
+    s2.columns = [col_dict2[x] for x in s2.columns]
 
     # Calculate correlation matrix
     corr = np.zeros((len(s1.columns), len(s2.columns)))
@@ -70,6 +77,7 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
                   edge_attr={'arrowsize': '0.5'}, format='png')
 
     # Set up linkage and designate terminal nodes
+    # noinspection PyTypeChecker
     loc1, loc2 = np.where(DF_corr > cutoff)
     links = list(zip(s1.columns[loc1], s2.columns[loc2]))
 
@@ -128,8 +136,10 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
 
     # Reformat names back to normal
     name1, name2 = list(zip(*links))
-    inv_cols = {v: k for k, v in cols.items()}
-    name_links = list(zip([inv_cols[x] for x in name1], name2))
+    inv_cols1 = {v: k for k, v in col_dict1.items()}
+    inv_cols2 = {v: k for k, v in col_dict2.items()}
+    name_links = list(zip([inv_cols1[x] for x in name1],
+                          [inv_cols2[x] for x in name2]))
     return dot, name_links
 
 
@@ -182,7 +192,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
 
     Returns: Dot graph and name links of connected ICA components between the
     two runs or organisms.
-gut
+
     """
     if ortho_file is None:
         dot, name_links = _make_dot_graph(S1, S2, metric=metric,
@@ -214,7 +224,6 @@ def make_prots(gbk: os.PathLike, out_path: os.PathLike):
     :param out_path: path to the output FASTA file
     :return: None
     """
-
     with open(out_path, 'w') as fa:
         for refseq in SeqIO.parse(gbk, 'genbank'):
             for feats in [f for f in refseq.features if f.type == 'CDS']:

@@ -93,7 +93,6 @@ def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
     result = p_values.copy()
     result['qvalue'] = qvals[:len(p_values)]
     result = result[keep[:len(p_values)]]
-
     return result.sort_values('qvalue')
 
 
@@ -224,7 +223,7 @@ def compute_trn_enrichment(gene_set: Iterable, all_genes: Iterable,
 
     if len(enrich_list) == 0:
         return pd.DataFrame()
-    df_enrich = pd.concat(enrich_list, axis=1).T
+    df_enrich = pd.concat(enrich_list, axis=1, sort=False).T
     return FDR(df_enrich, fdr=fdr, total=total)
 
 
@@ -250,6 +249,5 @@ def compute_annotation_enrichment(gene_set: Iterable, all_genes: Iterable,
         target_genes = group['gene_id']
         enrich_list.append(compute_enrichment(gene_set, target_genes,
                                               all_genes, label=name))
-
     df_enrich = pd.concat(enrich_list, axis=1).T
     return FDR(df_enrich, fdr=fdr)

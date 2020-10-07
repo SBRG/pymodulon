@@ -91,6 +91,12 @@ def test_ica_data_consistency(ica_data):
     assert (ica_data.A.index[0] == 'YieP')
     assert ('YieP' in ica_data.thresholds.keys())
 
+    # Try renaming with duplicate names
+    ica_data.rename_imodulons({10: 'test', 11: 'test', 12: 'test'})
+    assert (ica_data.imodulon_names[10] == 'test-1')
+    assert (ica_data.imodulon_names[11] == 'test-2')
+    assert (ica_data.imodulon_names[12] == 'test-3')
+
 
 def test_compute_regulon_enrichment(ica_data):
     print('Testing single enrichment')
