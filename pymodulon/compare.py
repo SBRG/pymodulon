@@ -4,11 +4,14 @@ import os
 import subprocess
 import numpy as np
 import pandas as pd
+import matplotlib.pyplot as plt
 from Bio import SeqIO
 from typing import *
 from graphviz import Digraph
 from scipy import stats
 from glob import glob
+from pymodulon.visualization import scatterplot
+
 
 
 def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
@@ -139,12 +142,10 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     inv_cols1 = {v: k for k, v in col_dict1.items()}
     inv_cols2 = {v: k for k, v in col_dict2.items()}
 
-    print(DF_corr.loc[name1[0]][name2[0]])
-
     name_links = list(zip([inv_cols1[x] for x in name1],
                           [inv_cols2[x] for x in name2],
                           [DF_corr.loc[name1[x]][name2[x]]
-                           for x in range(0,len(name1))]))
+                           for x in range(0, len(name1))]))
     return dot, name_links
 
 
@@ -182,7 +183,8 @@ def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
 
 def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
                 ortho_file: Optional[str] = None, cutoff: float = 0.2,
-                metric='pearson', show_all: bool = False):
+                metric='pearson', show_all: bool = False,
+                plot_express: bool = False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
@@ -201,7 +203,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
     """
     if ortho_file is None:
         dot, name_links = _make_dot_graph(S1, S2, metric=metric,
-                                            cutoff=cutoff,
+                                          cutoff=cutoff,
                                           show_all=show_all)
         return dot, name_links
 
@@ -211,7 +213,44 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
         translated_S = _pull_bbh_csv(ortho_file, S1)
         dot, name_links = _make_dot_graph(translated_S, S2, metric,
                                           cutoff, show_all=show_all)
-        return dot, name_links
+
+        if plot_express is True:
+            common = set(translated_S.index) & set(S2.index)
+            reduced_S1 = translated_S.reindex(common)
+            reduced_S2 = S2.reindex(common)
+
+            print(len(name_links))
+
+            if len(name_links) == 1:
+                subplot_dims = (1, 1)
+            elif len(name_links) == 2:
+                subplot_dims = (1, 2)
+            elif len(name_links) <= 4:
+                subplot_dims = (2, 2)
+            elif len(name_links) <= 6:
+                subplot_dims = (2, 3)
+            elif len(name_links) <= 9:
+                subplot_dims = (3, 3)
+            elif len(name_links) <= 12:
+                subplot_dims = (3, 4)
+            elif len(name_links) <= 16:
+                subplot_dims = (4, 4)
+
+            _, axs = plt.subplots(*subplot_dims, figsize=(12, 12))
+            if len(name_links) != 1:
+                axs = axs.flatten()
+            for num , (compare, ax) in enumerate(zip(name_links, axs)):
+                scatterplot(reduced_S1[compare[0]],
+                            reduced_S2[compare[1]],
+                            fit_line=True,
+                            xlabel="Organism 1: "+str(compare[0]),
+                            ylabel="Organism 2: "+str(compare[1]),
+                            ax=ax)
+
+            return dot, name_links
+
+        else:
+            return dot, name_links
 
 
 ####################
