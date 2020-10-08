@@ -219,8 +219,6 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
             reduced_S1 = translated_S.reindex(common)
             reduced_S2 = S2.reindex(common)
 
-            print(len(name_links))
-
             if len(name_links) == 1:
                 subplot_dims = (1, 1)
             elif len(name_links) == 2:
@@ -236,17 +234,26 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
             elif len(name_links) <= 16:
                 subplot_dims = (4, 4)
 
+
             _, axs = plt.subplots(*subplot_dims, figsize=(12, 12))
+
             if len(name_links) != 1:
                 axs = axs.flatten()
-            for num , (compare, ax) in enumerate(zip(name_links, axs)):
-                scatterplot(reduced_S1[compare[0]],
-                            reduced_S2[compare[1]],
+                for num , (compare, ax) in enumerate(zip(name_links, axs)):
+                    scatterplot(reduced_S1[compare[0]],
+                                reduced_S2[compare[1]],
+                                line45=True, fit_line=True,
+                                xlabel="Organism 1: "+str(compare[0]),
+                                ylabel="Organism 2: "+str(compare[1]),
+                                ax=ax)
+            else:
+                ax = axs
+                scatterplot(reduced_S1[name_links[0][0]],
+                            reduced_S2[name_links[0][1]],
                             fit_line=True,
-                            xlabel="Organism 1: "+str(compare[0]),
-                            ylabel="Organism 2: "+str(compare[1]),
+                            xlabel="Organism 1: " + str(name_links[0][0]),
+                            ylabel="Organism 2: " + str(name_links[0][1]),
                             ax=ax)
-
             return dot, name_links
 
         else:
