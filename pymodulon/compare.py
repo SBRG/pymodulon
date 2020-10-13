@@ -13,7 +13,6 @@ from glob import glob
 from pymodulon.visualization import scatterplot
 
 
-
 def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
                     cutoff: float, show_all: bool):
     """
@@ -230,21 +229,20 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
             elif len(name_links) <= 9:
                 subplot_dims = (3, 3)
             elif len(name_links) <= 12:
-                subplot_dims = (3, 4)
-            elif len(name_links) <= 16:
-                subplot_dims = (4, 4)
+                subplot_dims = (4, 3)
+            elif len(name_links) <= 15:
+                subplot_dims = (5, 3)
 
-
-            _, axs = plt.subplots(*subplot_dims, figsize=(12, 12))
+            _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
 
             if len(name_links) != 1:
                 axs = axs.flatten()
-                for num , (compare, ax) in enumerate(zip(name_links, axs)):
+                for num, (compare, ax) in enumerate(zip(name_links, axs)):
                     scatterplot(reduced_S1[compare[0]],
                                 reduced_S2[compare[1]],
                                 line45=True, fit_line=True,
-                                xlabel="Organism 1: "+str(compare[0]),
-                                ylabel="Organism 2: "+str(compare[1]),
+                                xlabel="Organism 1: " + str(compare[0]),
+                                ylabel="Organism 2: " + str(compare[1]),
                                 ax=ax)
             else:
                 ax = axs
