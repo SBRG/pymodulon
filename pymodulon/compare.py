@@ -212,40 +212,7 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
             reduced_S1 = S1.reindex(common)
             reduced_S2 = S2.reindex(common)
 
-            if len(name_links) == 1:
-                subplot_dims = (1, 1)
-            elif len(name_links) == 2:
-                subplot_dims = (1, 2)
-            elif len(name_links) <= 4:
-                subplot_dims = (2, 2)
-            elif len(name_links) <= 6:
-                subplot_dims = (2, 3)
-            elif len(name_links) <= 9:
-                subplot_dims = (3, 3)
-            elif len(name_links) <= 12:
-                subplot_dims = (4, 3)
-            elif len(name_links) <= 15:
-                subplot_dims = (5, 3)
-
-            _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
-
-            if len(name_links) != 1:
-                axs = axs.flatten()
-                for num, (compare, ax) in enumerate(zip(name_links, axs)):
-                    scatterplot(reduced_S1[compare[0]],
-                                reduced_S2[compare[1]],
-                                line45=True, fit_line=True,
-                                xlabel="ICA Study 1: " + str(compare[0]),
-                                ylabel="ICA Study 2: " + str(compare[1]),
-                                ax=ax)
-            else:
-                ax = axs
-                scatterplot(reduced_S1[name_links[0][0]],
-                            reduced_S2[name_links[0][1]],
-                            fit_line=True,
-                            xlabel="ICA Study 1: " + str(name_links[0][0]),
-                            ylabel="ICA Study 2: " + str(name_links[0][1]),
-                            ax=ax)
+            _plot_scatter(reduced_S1, reduced_S2, name_links)
 
         return dot, name_links
 
@@ -261,44 +228,65 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
             reduced_S1 = translated_S.reindex(common)
             reduced_S2 = S2.reindex(common)
 
-            if len(name_links) == 1:
-                subplot_dims = (1, 1)
-            elif len(name_links) == 2:
-                subplot_dims = (1, 2)
-            elif len(name_links) <= 4:
-                subplot_dims = (2, 2)
-            elif len(name_links) <= 6:
-                subplot_dims = (2, 3)
-            elif len(name_links) <= 9:
-                subplot_dims = (3, 3)
-            elif len(name_links) <= 12:
-                subplot_dims = (4, 3)
-            elif len(name_links) <= 15:
-                subplot_dims = (5, 3)
+            _plot_scatter(reduced_S1, reduced_S2, name_links)
 
-            _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
-
-            if len(name_links) != 1:
-                axs = axs.flatten()
-                for num, (compare, ax) in enumerate(zip(name_links, axs)):
-                    scatterplot(reduced_S1[compare[0]],
-                                reduced_S2[compare[1]],
-                                line45=True, fit_line=True,
-                                xlabel="Organism 1: " + str(compare[0]),
-                                ylabel="Organism 2: " + str(compare[1]),
-                                ax=ax)
-            else:
-                ax = axs
-                scatterplot(reduced_S1[name_links[0][0]],
-                            reduced_S2[name_links[0][1]],
-                            fit_line=True,
-                            xlabel="Organism 1: " + str(name_links[0][0]),
-                            ylabel="Organism 2: " + str(name_links[0][1]),
-                            ax=ax)
             return dot, name_links
 
         else:
             return dot, name_links
+
+
+def _plot_scatter(reduced_S1: pd.DataFrame, reduced_S2: pd.DataFrame,
+                  name_links: list):
+    """
+    Helper function used to creat the actual scatterplots for compare_ica
+    Args:
+        reduced_S1: Pandas Dataframe of ica_data_1 with only common genes
+        reduced_S2: Pandas Dataframe of ica_data_2 with only common genes
+        name_links: name_links list from compare_ica
+
+    Returns: None
+
+    """
+
+    if len(name_links) == 1:
+        subplot_dims = (1, 1)
+    elif len(name_links) == 2:
+        subplot_dims = (1, 2)
+    elif len(name_links) <= 4:
+        subplot_dims = (2, 2)
+    elif len(name_links) <= 6:
+        subplot_dims = (2, 3)
+    elif len(name_links) <= 9:
+        subplot_dims = (3, 3)
+    elif len(name_links) <= 12:
+        subplot_dims = (4, 3)
+    elif len(name_links) <= 15:
+        subplot_dims = (5, 3)
+    else:
+        subplot_dims = None
+
+    _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
+
+    if len(name_links) != 1:
+        axs = axs.flatten()
+        for num, (compare, ax) in enumerate(zip(name_links, axs)):
+            scatterplot(reduced_S1[compare[0]],
+                        reduced_S2[compare[1]],
+                        line45=True, fit_line=True,
+                        xlabel="Organism 1: " + str(compare[0]),
+                        ylabel="Organism 2: " + str(compare[1]),
+                        ax=ax)
+    else:
+        ax = axs
+        scatterplot(reduced_S1[name_links[0][0]],
+                    reduced_S2[name_links[0][1]],
+                    fit_line=True,
+                    xlabel="Organism 1: " + str(name_links[0][0]),
+                    ylabel="Organism 2: " + str(name_links[0][1]),
+                    ax=ax)
+
+    return None
 
 
 ####################
