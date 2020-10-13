@@ -195,6 +195,8 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
         cutoff: Float cut off value for pearson statistical test
         metric: A string of what statistical test to use (standard is 'pearson')
         show_all: True will show all nodes of the digraph matrix
+        plot_express: If true, the compare ICA function will crete a
+        scatterplot that compares the M matricies of each ICA run
 
     Returns: Dot graph and name links of connected ICA components between the
     two runs or organisms.
