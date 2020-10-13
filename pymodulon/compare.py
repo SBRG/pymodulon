@@ -204,6 +204,47 @@ def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
         dot, name_links = _make_dot_graph(S1, S2, metric=metric,
                                           cutoff=cutoff,
                                           show_all=show_all)
+
+        if plot_express is True:
+            common = set(S1.index) & set(S2.index)
+            reduced_S1 = S1.reindex(common)
+            reduced_S2 = S2.reindex(common)
+
+            if len(name_links) == 1:
+                subplot_dims = (1, 1)
+            elif len(name_links) == 2:
+                subplot_dims = (1, 2)
+            elif len(name_links) <= 4:
+                subplot_dims = (2, 2)
+            elif len(name_links) <= 6:
+                subplot_dims = (2, 3)
+            elif len(name_links) <= 9:
+                subplot_dims = (3, 3)
+            elif len(name_links) <= 12:
+                subplot_dims = (4, 3)
+            elif len(name_links) <= 15:
+                subplot_dims = (5, 3)
+
+            _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
+
+            if len(name_links) != 1:
+                axs = axs.flatten()
+                for num, (compare, ax) in enumerate(zip(name_links, axs)):
+                    scatterplot(reduced_S1[compare[0]],
+                                reduced_S2[compare[1]],
+                                line45=True, fit_line=True,
+                                xlabel="ICA Study 1: " + str(compare[0]),
+                                ylabel="ICA Study 2: " + str(compare[1]),
+                                ax=ax)
+            else:
+                ax = axs
+                scatterplot(reduced_S1[name_links[0][0]],
+                            reduced_S2[name_links[0][1]],
+                            fit_line=True,
+                            xlabel="ICA Study 1: " + str(name_links[0][0]),
+                            ylabel="ICA Study 2: " + str(name_links[0][1]),
+                            ax=ax)
+
         return dot, name_links
 
     else:
