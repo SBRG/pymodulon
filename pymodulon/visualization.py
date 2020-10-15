@@ -12,6 +12,7 @@ from pymodulon.core import IcaData
 from pymodulon.enrichment import *
 from pymodulon.util import _parse_sample
 from pymodulon.util import *
+from pymodulon.compare import _convert_gene_index
 
 
 #############
@@ -181,7 +182,7 @@ def plot_expression(ica_data: IcaData, gene: str,
         values = ica_data.X.loc[gene]
         label = '{} Expression'.format(gene)
     else:
-        locus = name2num(ica_data, gene)
+        locus = ica_data.name2num(gene)
         values = ica_data.X.loc[locus]
         label = '${}$ Expression'.format(gene)
 
@@ -713,8 +714,12 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     return ax
 
 
-def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
-                         imodulon2: ImodName, **kwargs) -> Ax:
+def compare_gene_weights(ica_data: IcaData,
+                         imodulon1: ImodName, imodulon2: ImodName,
+                         ica_data2: Optional[IcaData] = None,
+                         ortho_file: str = None,
+                         use_org1_names: bool = True,
+                         **kwargs) -> Ax:
     """
     Compare gene weights between 2 iModulons. The result is shown as a
     scatter-plot. Also shows the D'Agostino cutoff for both iModulons,
@@ -729,6 +734,14 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
         The name of the iModulon to plot on the x-axis
     imodulon2: int, str
         The name of the iModulon to plot on the y-axis
+    ica_data2: pymodulon.core.IcaData
+        IcaData object of second iModulon (if comparing iModulons across
+        objects)
+    ortho_file: os.PathLike
+        Path to orthology file between organisms
+    use_org1_names: bool
+        If true, use gene names from first organism. If false, use gene names
+        from second organism (default: True)
     **kwargs: dict
         keyword arguments passed onto `scatterplot()`
 
@@ -736,9 +749,30 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     -------
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
+
+    Args:
+        use_org1_names:
     """
-    x = ica_data.M[imodulon1]
-    y = ica_data.M[imodulon2]
+    if ica_data2 is None:
+        ica_data2 = ica_data.copy()
+
+    M1, M2 = _convert_gene_index(ica_data.M, ica_data2.M, ortho_file)
+    bin_M1, bin_M2 = _convert_gene_index(ica_data.M_binarized,
+                                         ica_data2.M_binarized, ortho_file)
+
+    # Convert gene table
+    gene_table1, gene_table2 = _convert_gene_index(
+        ica_data.gene_table,
+        ica_data2.gene_table,
+        ortho_file)
+
+    if use_org1_names:
+        gene_table = gene_table1
+    else:
+        gene_table = gene_table2
+
+    x = M1[imodulon1]
+    y = M2[imodulon2]
 
     xlabel = f'{imodulon1} Gene Weight'
     ylabel = f'{imodulon2} Gene Weight'
@@ -765,7 +799,7 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     ymin, ymax = ax.get_ylim()
 
     thresh1 = ica_data.thresholds[imodulon1]
-    thresh2 = ica_data.thresholds[imodulon2]
+    thresh2 = ica_data2.thresholds[imodulon2]
 
     if thresh1 != 0:
         ax.vlines([thresh1, -thresh1], ymin=ymin, ymax=ymax,
@@ -779,10 +813,9 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     ax.set_ylim(ymin, ymax)
 
     # Add labels on data-points
-    bin_M = ica_data.M_binarized
-    component_genes_x = set(bin_M[imodulon1].loc[bin_M[imodulon1] == 1].index)
-    component_genes_y = set(bin_M[imodulon2].loc[bin_M[imodulon2] == 1].index)
-    component_genes = component_genes_x.intersection(component_genes_y)
+    component_genes_x = bin_M1[bin_M1[imodulon1] == 1].index
+    component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
+    component_genes = component_genes_x & component_genes_y
     texts = []
     expand_kwargs = {'expand_objects': (1.2, 1.4),
                      'expand_points': (1.3, 1.3)}
@@ -790,17 +823,24 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     # Add labels: Put gene name if components contain under 20 genes
     auto = None
     if show_labels_cgw == 'auto':
-        auto = (bin_M[imodulon1].astype(bool)
-                & bin_M[imodulon2].astype(bool)).sum() <= 20
+        auto = (bin_M1[imodulon1].astype(bool)
+                & bin_M2[imodulon2].astype(bool)).sum() <= 20
 
     if show_labels_cgw or auto:
         for gene in component_genes:
-            ax.scatter(ica_data.M.loc[gene, imodulon1],
-                       ica_data.M.loc[gene, imodulon2],
+            ax.scatter(M1.loc[gene, imodulon1],
+                       M2.loc[gene, imodulon2],
                        color='r')
-            texts.append(ax.text(ica_data.M.loc[gene, imodulon1],
-                                 ica_data.M.loc[gene, imodulon2],
-                                 ica_data.gene_table.loc[gene, 'gene_name'],
+
+            # Add labels
+            try:
+                gene_name = gene_table.loc[gene, 'gene_name']
+            except KeyError:
+                gene_name = gene
+
+            texts.append(ax.text(M1.loc[gene, imodulon1],
+                                 M2.loc[gene, imodulon2],
+                                 gene_name,
                                  fontsize=12))
 
         expand_kwargs['expand_text'] = (1.4, 1.4)
@@ -856,7 +896,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
         x = ica_data.X.loc[gene1]
         xlabel = f'{gene1} Expression'
     else:
-        locus = name2num(ica_data, gene1)
+        locus = ica_data.name2num(gene1)
         x = ica_data.X.loc[locus]
         xlabel = f'${gene1}$ Expression'
 
@@ -865,7 +905,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
         y = ica_data.X.loc[gene2]
         ylabel = f'{gene2} Expression'
     else:
-        locus = name2num(ica_data, gene2)
+        locus = ica_data.name2num(gene2)
         y = ica_data.X.loc[locus]
         ylabel = f'${gene2}$ Expression'
 

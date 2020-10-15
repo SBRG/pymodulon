@@ -4,13 +4,11 @@ import os
 import subprocess
 import numpy as np
 import pandas as pd
-import matplotlib.pyplot as plt
 from Bio import SeqIO
 from typing import *
 from graphviz import Digraph
 from scipy import stats
 from glob import glob
-from pymodulon.visualization import scatterplot
 
 
 def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
@@ -148,34 +146,36 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     return dot, name_links
 
 
-def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
+def _convert_gene_index(M1: pd.DataFrame, M2: pd.DataFrame,
+                        ortho_file: Optional[str] = None):
     """
-    Receives an the S matrix for an organism and returns the same S matrix
-    with index genes translated into the orthologs in organism 2
+    Reorganizes and renames genes in an M matrix to be consistent with
+    another organism
     Args:
-        ortho_file: String path to the bbh CSV file in the
-        "modulome_compare_data" repository.
-        Ex. "../../modulome_compare_data/bbh_csv/
-        bSubtilis_full_protein_vs_sAureus_full_protein_parsed.csv"
-        S1: Pandas DataFrame of the S matrix for organism 1
+        M1: Pandas Dataframe of the M matrix for organism 1
+        M2: Pandas DataFrame of the M matrix for organism 2
+        ortho_file: Path to orthology file between organisms
+
 
     Returns:
-        Pandas DataFrame of the S matrix for organism 1 with indexes
+        Pandas DataFrame of the M matrix for organism 2 with indexes
         translated into orthologs
 
     """
+    if ortho_file is None:
+        common_genes = M1.index & M2.index
+        return M1.loc[common_genes], M2.loc[common_genes]
+    else:
+        DF_orth = pd.read_csv(ortho_file)
+        DF_orth = DF_orth[DF_orth.gene.isin(M1.index) &
+                          DF_orth.subject.isin(M2.index)]
+        subject2gene = DF_orth.set_index('subject').gene.to_dict()
+        M1_reduced = M1.loc[DF_orth.gene]
+        M2_reduced = M2.loc[DF_orth.subject]
 
-    bbh_DF = pd.read_csv(ortho_file, index_col="gene")
+        M2_reduced.index = [subject2gene[idx] for idx in M2_reduced.index]
+        return M1_reduced, M2_reduced
 
-    S1_copy = S1.copy()
-    S1_index = list(S1_copy.index)
-
-    for i in range(0, len(S1_index)):
-        try:
-            S1_index[i] = bbh_DF.loc[S1_index[i]]["subject"]
-        except KeyError:
-            continue
-    S1_copy.index = S1_index
 
 def compare_ica(M1: pd.DataFrame, M2: pd.DataFrame,
                 ortho_file: Optional[str] = None, cutoff: float = 0.2,
@@ -199,62 +199,6 @@ def compare_ica(M1: pd.DataFrame, M2: pd.DataFrame,
     dot, name_links = _make_dot_graph(new_M1, new_M2, metric,
                                       cutoff, show_all=show_all)
     return dot, name_links
-
-        else:
-            return dot, name_links
-
-
-def _plot_scatter(reduced_S1: pd.DataFrame, reduced_S2: pd.DataFrame,
-                  name_links: list):
-    """
-    Helper function used to creat the actual scatterplots for compare_ica
-    Args:
-        reduced_S1: Pandas Dataframe of ica_data_1 with only common genes
-        reduced_S2: Pandas Dataframe of ica_data_2 with only common genes
-        name_links: name_links list from compare_ica
-
-    Returns: None
-
-    """
-
-    if len(name_links) == 1:
-        subplot_dims = (1, 1)
-    elif len(name_links) == 2:
-        subplot_dims = (1, 2)
-    elif len(name_links) <= 4:
-        subplot_dims = (2, 2)
-    elif len(name_links) <= 6:
-        subplot_dims = (2, 3)
-    elif len(name_links) <= 9:
-        subplot_dims = (3, 3)
-    elif len(name_links) <= 12:
-        subplot_dims = (4, 3)
-    elif len(name_links) <= 15:
-        subplot_dims = (5, 3)
-    else:
-        subplot_dims = None
-
-    _, axs = plt.subplots(*subplot_dims, figsize=(16, 16))
-
-    if len(name_links) != 1:
-        axs = axs.flatten()
-        for num, (compare, ax) in enumerate(zip(name_links, axs)):
-            scatterplot(reduced_S1[compare[0]],
-                        reduced_S2[compare[1]],
-                        line45=True, fit_line=True,
-                        xlabel="Organism 1: " + str(compare[0]),
-                        ylabel="Organism 2: " + str(compare[1]),
-                        ax=ax)
-    else:
-        ax = axs
-        scatterplot(reduced_S1[name_links[0][0]],
-                    reduced_S2[name_links[0][1]],
-                    fit_line=True,
-                    xlabel="Organism 1: " + str(name_links[0][0]),
-                    ylabel="Organism 2: " + str(name_links[0][1]),
-                    ax=ax)
-
-    return None
 
 
 ####################
