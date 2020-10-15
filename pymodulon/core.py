@@ -6,6 +6,7 @@ from typing import Optional, Mapping, List
 from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
 from sklearn.cluster import KMeans
+import copy
 
 
 class IcaData(object):
@@ -722,3 +723,55 @@ class IcaData(object):
             ax.scatter([best_cutoff], [max(f1_scores)], color='r')
 
         return best_cutoff
+
+    def name2num(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+        """
+        Convert a gene name to the locus tag
+        Args:
+            gene: Gene name or list of gene names
+
+        Returns: Locus tag or list of locus tags
+
+        """
+        gene_table = self.gene_table
+        if 'gene_name' not in gene_table.columns:
+            raise ValueError('Gene table does not contain "gene_name" column.')
+
+        if isinstance(gene, str):
+            gene_list = [gene]
+        else:
+            gene_list = gene
+
+        final_list = []
+        for g in gene_list:
+            loci = gene_table[gene_table.gene_name == g].index
+
+            # Ensure only one locus maps to this gene
+            if len(loci) == 0:
+                raise ValueError('Gene does not exist: {}'.format(g))
+            elif len(loci) > 1:
+                warnings.warn('Found multiple genes named {}. Only '
+                              'reporting first locus tag'.format(g))
+
+            final_list.append(loci[0])
+
+        # Return string if string was given as input
+        if isinstance(gene, str):
+            return final_list[0]
+        else:
+            return final_list
+
+    def num2name(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+        """
+        Convert a locus tag to the gene name
+        Args:
+            gene: Locus tag or list of locus tags
+
+        Returns: Gene name or list of gene names
+
+        """
+        result = self.gene_table.loc[gene].gene_name
+        if isinstance(gene, list):
+            return result.tolist()
+        else:
+            return result
