@@ -35,41 +35,41 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     if len(common) == 0:
         raise KeyError("No common genes")
 
-    s1 = M1.reindex(common)
-    s2 = M2.reindex(common)
+    m1 = M1.reindex(common)
+    m2 = M2.reindex(common)
 
     # Split names in half if necessary for comp1
     col_dict1 = {}
-    for col in s1.columns:
+    for col in m1.columns:
         val = str(col)
         if len(val) > 10:
             col_dict1[col] = val[:len(val) // 2] + '-\n' + val[len(val) // 2:]
         else:
             col_dict1[col] = val
-    s1.columns = [col_dict1[x] for x in s1.columns]
+    m1.columns = [col_dict1[x] for x in m1.columns]
 
     # Split names in half if necessary for comp2
     col_dict2 = {}
-    for col in s2.columns:
+    for col in m2.columns:
         val = str(col)
         if len(val) > 10:
             col_dict2[col] = val[:len(val) // 2] + '-\n' + val[len(val) // 2:]
         else:
             col_dict2[col] = val
-    s2.columns = [col_dict2[x] for x in s2.columns]
+    m2.columns = [col_dict2[x] for x in m2.columns]
 
     # Calculate correlation matrix
-    corr = np.zeros((len(s1.columns), len(s2.columns)))
+    corr = np.zeros((len(m1.columns), len(m2.columns)))
 
-    for i, k1 in tqdm.tqdm(enumerate(s1.columns), total=len(s1.columns)):
-        for j, k2 in enumerate(s2.columns):
+    for i, k1 in tqdm.tqdm(enumerate(m1.columns), total=len(m1.columns)):
+        for j, k2 in enumerate(m2.columns):
             if metric == 'pearson':
-                corr[i, j] = abs(stats.pearsonr(s1[k1], s2[k2])[0])
+                corr[i, j] = abs(stats.pearsonr(m1[k1], m2[k2])[0])
             elif metric == 'spearman':
-                corr[i, j] = abs(stats.spearmanr(s1[k1], s2[k2])[0])
+                corr[i, j] = abs(stats.spearmanr(m1[k1], m2[k2])[0])
 
     # Only keep genes found in both S matrices
-    DF_corr = pd.DataFrame(corr, index=s1.columns, columns=s2.columns)
+    DF_corr = pd.DataFrame(corr, index=m1.columns, columns=m2.columns)
 
     # Initialize Graph
     dot = Digraph(engine='dot', graph_attr={'ranksep': '0.3', 'nodesep': '0',
@@ -81,15 +81,15 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
     # Set up linkage and designate terminal nodes
     # noinspection PyTypeChecker
     loc1, loc2 = np.where(DF_corr > cutoff)
-    links = list(zip(s1.columns[loc1], s2.columns[loc2]))
+    links = list(zip(m1.columns[loc1], m2.columns[loc2]))
 
     if len(links) == 0:
         warnings.warn('No components shared across runs')
         return None, None
     if show_all is True:
         # Initialize Nodes
-        for k in sorted(s2.columns):
-            if k in s2.columns[loc2]:
+        for k in sorted(m2.columns):
+            if k in m2.columns[loc2]:
                 color = 'black'
                 font = 'helvetica'
             else:
@@ -98,8 +98,8 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
             dot.node('data2_' + str(k), label=k,
                      _attributes={'fontcolor': color, 'fontname': font})
 
-        for k in s1.columns:
-            if k in s1.columns[loc1]:
+        for k in m1.columns:
+            if k in m1.columns[loc1]:
                 color = 'black'
                 font = 'helvetica'
             else:
@@ -115,15 +115,15 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
                      _attributes={'penwidth': '{:.2f}'.format(width)})
     else:
         # Initialize Nodes
-        for k in sorted(s2.columns):
-            if k in s2.columns[loc2]:
+        for k in sorted(m2.columns):
+            if k in m2.columns[loc2]:
                 color = 'black'
                 font = 'helvetica'
                 dot.node('data2_' + str(k), label=k,
                          _attributes={'fontcolor': color, 'fontname': font})
 
-        for k in s1.columns:
-            if k in s1.columns[loc1]:
+        for k in m1.columns:
+            if k in m1.columns[loc1]:
                 color = 'black'
                 font = 'helvetica'
                 dot.node('data1_' + str(k), label=k,
@@ -131,7 +131,7 @@ def _make_dot_graph(M1: pd.DataFrame, M2: pd.DataFrame, metric: str,
 
         # Add links between related components
         for k1, k2 in links:
-            if k1 in s1.columns[loc1] and k2 in s2.columns[loc2]:
+            if k1 in m1.columns[loc1] and k2 in m2.columns[loc2]:
                 width = DF_corr.loc[k1, k2] * 5
                 dot.edge('data1_' + str(k1), 'data2_' + str(k2),
                          _attributes={'penwidth': '{:.2f}'.format(width)})
@@ -177,60 +177,28 @@ def _pull_bbh_csv(ortho_file: str, S1: pd.DataFrame):
             continue
     S1_copy.index = S1_index
 
-    return S1_copy
-
-
-def compare_ica(S1: pd.DataFrame, S2: pd.DataFrame,
+def compare_ica(M1: pd.DataFrame, M2: pd.DataFrame,
                 ortho_file: Optional[str] = None, cutoff: float = 0.2,
-                metric='pearson', show_all: bool = False,
-                plot_express: bool = False):
+                metric='pearson', show_all: bool = False):
     """
     Compares two S matrices between a single organism or across organisms and
     returns the connected ICA components
     Args:
-        S1: Pandas Dataframe of S matrix 1
-        S2: Pandas Dataframe of S Matrix 2
-        ortho_file: String of the location where organism data can be found
-            (can be found under modulome/data)
+        M1: Pandas Dataframe of M matrix 1
+        M2: Pandas Dataframe of M Matrix 2
+        ortho_file: Path to orthology file between organisms
         cutoff: Float cut off value for pearson statistical test
         metric: A string of what statistical test to use (standard is 'pearson')
         show_all: True will show all nodes of the digraph matrix
-        plot_express: If true, the compare ICA function will crete a
-        scatterplot that compares the M matricies of each ICA run
 
     Returns: Dot graph and name links of connected ICA components between the
     two runs or organisms.
 
     """
-    if ortho_file is None:
-        dot, name_links = _make_dot_graph(S1, S2, metric=metric,
-                                          cutoff=cutoff,
-                                          show_all=show_all)
-
-        if plot_express is True:
-            common = set(S1.index) & set(S2.index)
-            reduced_S1 = S1.reindex(common)
-            reduced_S2 = S2.reindex(common)
-
-            _plot_scatter(reduced_S1, reduced_S2, name_links)
-
-        return dot, name_links
-
-    else:
-        warnings.warn("Please ensure that the order of S1 and S2 match the "
-                      "order of the BBH CSV file")
-        translated_S = _pull_bbh_csv(ortho_file, S1)
-        dot, name_links = _make_dot_graph(translated_S, S2, metric,
-                                          cutoff, show_all=show_all)
-
-        if plot_express is True:
-            common = set(translated_S.index) & set(S2.index)
-            reduced_S1 = translated_S.reindex(common)
-            reduced_S2 = S2.reindex(common)
-
-            _plot_scatter(reduced_S1, reduced_S2, name_links)
-
-            return dot, name_links
+    new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
+    dot, name_links = _make_dot_graph(new_M1, new_M2, metric,
+                                      cutoff, show_all=show_all)
+    return dot, name_links
 
         else:
             return dot, name_links
