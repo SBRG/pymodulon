@@ -724,6 +724,24 @@ class IcaData(object):
 
         return best_cutoff
 
+    def copy(self):
+        # TODO: write docs and test function
+        return copy.deepcopy(self)
+
+    def imodulons_with(self, gene):
+        """
+        Lists iModulons containing :gene:
+        :param gene: Gene locus tag or gene name to search for
+        Returns: A list of iModulons containing :gene:
+
+        """
+
+        # Check that gene exists
+        if gene not in self.X.index:
+            gene = self.name2num(gene)
+
+        return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
+
     def name2num(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
         """
         Convert a gene name to the locus tag
