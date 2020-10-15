@@ -114,8 +114,9 @@ class IcaData(object):
             self.thresholds = thresholds
 
         # Use kmeans if TRN is empty, or kmeans is selected
-        if self.trn.empty or threshold_method == 'kmeans':
+        elif self.trn.empty or threshold_method == 'kmeans':
             self.compute_kmeans_thresholds()
+            self._dagostino_cutoff = None
 
         # Else use D'agostino method
         else:
