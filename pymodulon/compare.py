@@ -164,17 +164,23 @@ def _convert_gene_index(M1: pd.DataFrame, M2: pd.DataFrame,
     """
     if ortho_file is None:
         common_genes = M1.index & M2.index
-        return M1.loc[common_genes], M2.loc[common_genes]
+        M1_new = M1.loc[common_genes]
+        M2_new = M2.loc[common_genes]
     else:
         DF_orth = pd.read_csv(ortho_file)
         DF_orth = DF_orth[DF_orth.gene.isin(M1.index) &
                           DF_orth.subject.isin(M2.index)]
         subject2gene = DF_orth.set_index('subject').gene.to_dict()
-        M1_reduced = M1.loc[DF_orth.gene]
-        M2_reduced = M2.loc[DF_orth.subject]
+        M1_new = M1.loc[DF_orth.gene]
+        M2_new = M2.loc[DF_orth.subject]
 
-        M2_reduced.index = [subject2gene[idx] for idx in M2_reduced.index]
-        return M1_reduced, M2_reduced
+        M2_new.index = [subject2gene[idx] for idx in M2_new.index]
+
+    if len(M1_new) == 0 or len(M2_new) == 0:
+        raise ValueError("No shared genes. Check that matrix 1 conforms to "
+                         "the 'gene' column of the BBH file and matrix 2 "
+                         "conforms to the 'subject' column")
+    return M1_new, M2_new
 
 
 def compare_ica(M1: pd.DataFrame, M2: pd.DataFrame,
