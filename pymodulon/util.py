@@ -38,6 +38,23 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None,
             sep = '\t' if table.endswith('.tsv') else ','
             table = pd.read_csv(table, index_col=index_col, sep=sep)
 
+    # Coerce indices and columns to ints if necessary
+    newcols = []
+    for col in table.columns:
+        try:
+            newcols.append(int(col))
+        except ValueError:
+            newcols.append(col)
+    table.columns = newcols
+
+    newrows = []
+    for row in table.index:
+        try:
+            newrows.append(int(row))
+        except ValueError:
+            newrows.append(row)
+    table.index = newrows
+
     if isinstance(table, pd.DataFrame):
         # dont run _check_table_helper if no index is passed
         return table if index is None else _check_table_helper(table, index,
@@ -51,6 +68,7 @@ def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
                         name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
+
     # Check if all indices are in table
     missing_index = list(set(index) - set(table.index))
     if len(missing_index) > 0:

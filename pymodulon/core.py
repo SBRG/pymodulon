@@ -58,12 +58,6 @@ class IcaData(object):
         M = _check_table(M, 'M')
         A = _check_table(A, 'A')
 
-        # Convert column names of M to int if possible
-        try:
-            M.columns = M.columns.astype(int)
-        except TypeError:
-            pass
-
         # Check that M and A matrices have identical iModulon names
         if M.columns.tolist() != A.index.tolist():
             raise ValueError('M and A matrices have different iModulon names')
