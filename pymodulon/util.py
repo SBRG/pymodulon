@@ -11,7 +11,6 @@ from scipy import stats
 import warnings
 from typing import *
 import re
-
 from pymodulon.enrichment import FDR
 
 ################
@@ -172,3 +171,59 @@ def _parse_sample(ica_data, sample: Union[Collection, str]):
             return samples
     else:
         return sample
+
+
+def recovered_variance(ica_data, genes=None,
+                       samples=None,
+                       imodulons=None):
+    # Check inputs
+    if genes is None:
+        genes = ica_data.X.index
+    elif isinstance(genes, str):
+        genes = [genes]
+
+    gene_loci = set(genes) & set(ica_data.X.index)
+    gene_names = set(genes) - set(ica_data.X.index)
+    name_loci = [ica_data.name2num(gene) for gene in gene_names]
+    genes = list(set(gene_loci) | set(name_loci))
+
+    if samples is None:
+        samples = ica_data.X.columns
+    elif isinstance(samples, str):
+        samples = [samples]
+
+    if imodulons is None:
+        imodulons = ica_data.M.columns
+    elif isinstance(imodulons, str):
+        imodulons = [imodulons]
+
+    # Account for normalization procedures before ICA (X=SA-x_mean)
+    baseline = pd.DataFrame(
+        np.subtract(ica_data.X, ica_data.X.values.mean(axis=0, keepdims=True)),
+        index=ica_data.M.index, columns=ica_data.A.columns)
+    baseline = baseline.loc[genes]
+
+    # Initialize variables
+    base_err = np.linalg.norm(baseline) ** 2
+    MA = np.zeros(baseline.shape)
+    rec_var = [0]
+    ma_arrs = {}
+    ma_weights = {}
+
+    # Get individual modulon contributions
+    for k in imodulons:
+        ma_arr = np.dot(ica_data.M.loc[genes, k].values.reshape(len(genes), 1),
+                        ica_data.A.loc[k, samples].values.reshape(1,
+                                                                  len(samples)))
+        ma_arrs[k] = ma_arr
+        ma_weights[k] = np.sum(ma_arr ** 2)
+
+    # Sum components in order of most important component first
+    sorted_mods = sorted(ma_weights, key=ma_weights.get, reverse=True)
+    # Compute reconstructed variance
+    for k in sorted_mods:
+        MA = MA + ma_arrs[k]
+        sa_err = np.linalg.norm(MA - baseline) ** 2
+        rec_var.append((1 - sa_err / base_err) * 100)
+
+    return rec_var[-1]
