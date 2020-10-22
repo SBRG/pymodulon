@@ -173,7 +173,7 @@ def _parse_sample(ica_data, sample: Union[Collection, str]):
         return sample
 
 
-def recovered_variance(ica_data, genes=None,
+def explained_variance(ica_data, genes=None,
                        samples=None,
                        imodulons=None):
     # Check inputs
