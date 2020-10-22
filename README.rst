@@ -33,6 +33,10 @@ Then install with ``pip`` using the ``-e`` flag::
 This method of installation will automatically update your 
 package each time you pull from this repository.
 
+To update your code, run the following from your local pymodulon folder:
+
+	git pull
+	
 .. The recommended method is to install **pymodulon** is to use ``pip`` to
 .. `install pymodulon from PyPI <https://pypi.python.org/pypi/pymodulon>`_. It is
 .. recommended to do this inside a `virtual environment
