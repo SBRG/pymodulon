@@ -345,7 +345,7 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
     # FILTER GENES THAT HAVE COVERAGE < mincov
     bbh = bbh[bbh.COV >= mincov]
     bbh2 = bbh2[bbh2.COV >= mincov]
-    out = pd.DataFrame()
+    list2struct = []
 
     # find if genes are directionally best hits of each other
     for g in bbh.gene.unique():
@@ -354,7 +354,7 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
             continue
 
         # find BLAST hit with highest percent identity (PID)
-        best_hit = res.loc[res.PID.idxmax()]
+        best_hit = res.loc[res.PID.idxmax()].copy()
         res2 = bbh2[bbh2.gene == best_hit.subject]
         if len(res2) == 0:  # no match
             continue
@@ -363,10 +363,13 @@ def get_bbh(db1: os.PathLike, db2: os.PathLike, outdir: os.PathLike = 'bbh',
 
         # if doing forward then reciprocal BLAST nets the same gene -> BBH
         if g == best_gene2:
-            best_hit.loc[:]['BBH'] = '<=>'
+            best_hit['BBH'] = '<=>'
         else:  # only best hit in one direction
-            best_hit.loc[:]['BBH'] = '->'
-        out = pd.concat([out, pd.DataFrame(best_hit).transpose()])
+            best_hit['BBH'] = '->'
+
+        list2struct.append(best_hit)
+
+    out = pd.DataFrame(list2struct)
 
     out = out[out['BBH'] == '<=>']
 
