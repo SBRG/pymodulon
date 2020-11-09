@@ -1,12 +1,18 @@
 """
 
 """
-import matplotlib.pyplot as plt
-import pandas as pd
+from collections import Counter
+
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
+from scipy.cluster.hierarchy import dendrogram
 from scipy.optimize import curve_fit, OptimizeWarning
-from sklearn.metrics import r2_score
+from sklearn.base import clone
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
@@ -964,7 +970,8 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
               sample2: Union[Collection, str],
               threshold: float = 5, fdr: float = .1, label: bool = True,
-              adjust: bool = True, table: bool = False, **kwargs) -> Ax:
+              adjust: bool = True, table: bool = False,
+              alternate_A: pd.DataFrame = None, **kwargs) -> Ax:
     """
     Plots a Dima plot between two projects or two sets of samples
     Args:
@@ -982,6 +989,12 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
     """
 
+    # use secret option to enable passing of clustered activity matrix
+    if alternate_A is not None:
+        A_to_use = alternate_A
+    else:
+        A_to_use = ica_data.A
+
     sample1_list = _parse_sample(ica_data, sample1)
     sample2_list = _parse_sample(ica_data, sample2)
     if isinstance(sample1, str):
@@ -993,11 +1006,11 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     else:
         ylabel = '\n'.join(sample2)
 
-    a1 = ica_data.A[sample1_list].mean(axis=1)
-    a2 = ica_data.A[sample2_list].mean(axis=1)
+    a1 = A_to_use[sample1_list].mean(axis=1)
+    a2 = A_to_use[sample2_list].mean(axis=1)
 
     df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
-                   fdr=fdr)
+                   fdr=fdr, alternate_A=alternate_A)
 
     ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
                      xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -1020,6 +1033,366 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
     else:
         return ax
+
+
+def cluster_activities(ica_data: IcaData,
+                       distance_threshold: Union[float] = None,
+                       show_thresholding: bool = False,
+                       show_clustermap: bool = True,
+                       show_best_clusters: bool = False,
+                       n_best_clusters: Union[str, int] = 'above_average',
+                       cluster_names: Union[dict] = None,
+                       return_clustermap: bool = False,
+                       # dimca options
+                       dimca_sample1: Union[Collection, str] = None,
+                       dimca_sample2: Union[Collection, str] = None,
+                       dimca_threshold: float = 5, dimca_fdr: float = .1,
+                       dimca_label: bool = True, dimca_adjust: bool = True,
+                       dimca_table: bool = False, **dimca_kwargs
+                       ):
+    """
+    Uses agglomerative (hierarchical) clustering to group iModulons based on
+    correlation between their activities and displays the resulting cluster map
+    and best clusters
+    Returns the cluster object to enable downstream analyses
+
+    Args:
+        ica_data: IcaData object that contains your data
+        distance_threshold: a specific distance threshold (between 0 and 1) to
+            use for defining flat clusters from the hierarchical cluster
+            relationship. Larger values yield fewer clusters. Defaults to None,
+            which will initiate automatic selection of optimal threshold based
+            on maximization of silhouette score across iModulons
+        show_thresholding: indicates if a plot showing automatic thresholding
+            via silhouette scoring should be displayed
+        show_clustermap: indicates if a clustermap should be displayed
+        show_best_clusters: indicates if the best individual clusters should be
+            displayed below the clustermap
+        n_best_clusters: the number of best clusters to show. Defaults to
+            'above_average', where the clusters with silhouette score above the
+            mean will be displayed.
+        cluster_names: a dictionary mapping best cluster indices to names to
+            display above their individual subplots; this option should be used
+            once the clustering has been performed at least once and cluster
+            names have been manually assigned via knowledge mapping
+        return_clustermap: indicates if the clustermap plot object should be
+            returned to allow further customization
+        dimca_sample1: List of sample IDs or name of "project:condition"
+        dimca_sample2: List of sample IDs or name of "project:condition"
+        dimca_threshold: Minimum activity difference to determine DiMCAs
+        dimca_fdr: False Detection Rate
+        dimca_label: Label differentially activated iModulons (default: True)
+        dimca_adjust: Automatically adjust labels (default: True)
+        dimca_table: Return differential iModulon cluster activity table
+        **dimca_kwargs: Additional arguments for DiMCA scatterplot
+
+    Returns: cluster_obj; optionally can return up to four arguments; if
+    return_clustermap is True, returns the seaborn ClusterGrid instance. If a
+    DIMCA is requested, returns the DIMCA axes (and optionally the dimca table
+    if requested). The order is always:
+        [cluster_obj, clustermap, dimca_ax, dimca_table]
+
+    """
+
+    # compute distance matrix; distance metric defined as 1 - correlation to
+    # ensure that correlated iModulons are close in distance, can be clustered
+    correlation_df = ica_data.A.T.corr(method='spearman')
+    distance_matrix = 1 - correlation_df.abs()
+
+    # define a base instance of the clustering object we will use throughout;
+    # the distance threshold here is a dummy; we will replace this with either
+    # the user-specified value or an automatically-selected value
+    agg_cluster_base = AgglomerativeClustering(
+        n_clusters=None,
+        affinity='precomputed',
+        compute_full_tree=True,
+        linkage='complete',
+        distance_threshold=0.5
+    )
+
+    # perform automatic thresholding for default case
+    if distance_threshold is None:
+
+        auto_threshold_df = pd.DataFrame(
+            columns=['threshold', 'score', 'n_clusters']
+        )
+        auto_threshold_df['threshold'] = np.arange(0, 1, 0.025)
+
+        for row in auto_threshold_df.itertuples(index=True):
+
+            # create a copy of the base clusterer with the threshold to try; fit
+            agg_cluster_auto_threshold = clone(agg_cluster_base).set_params(
+                distance_threshold=row.threshold
+            )
+            agg_cluster_auto_threshold.fit(distance_matrix)
+            n_clusters = agg_cluster_auto_threshold.n_clusters_
+            auto_threshold_df.loc[row.Index, 'n_clusters'] = n_clusters
+
+            # score the clustering; handle the edge case where all clusters have
+            # size 1; this is invalid input for silhouette_score
+            if n_clusters == distance_matrix.shape[0]:
+                auto_threshold_df.loc[row.Index, 'score'] = 0
+            else:
+                auto_threshold_df.loc[row.Index, 'score'] = silhouette_score(
+                    distance_matrix,
+                    agg_cluster_auto_threshold.labels_,
+                    metric='precomputed'
+                )
+
+        best_threshold = auto_threshold_df.sort_values(
+            by='score', ascending=False
+        ).iloc[0]['threshold']
+
+        if show_thresholding:
+            _, ax = plt.subplots()
+            ax.yaxis.grid(False)
+            sns.scatterplot(
+                x='threshold', y='score', data=auto_threshold_df,
+                ax=ax, color='blue'
+            )
+            ax.axvline(best_threshold, linestyle='--', color='k')
+            ax.tick_params(axis='both', labelsize=13)
+            ax.tick_params(axis='y', color='blue', labelcolor='blue')
+            ax.set_xlabel('Threshold', fontsize=14)
+            ax.set_ylabel('Silhouette', color='blue', fontsize=14)
+            ax2 = ax.twinx()
+            ax2.yaxis.grid(False)
+            sns.scatterplot(
+                x='threshold', y='n_clusters', data=auto_threshold_df,
+                ax=ax2, color='red'
+            )
+            ax2.tick_params(axis='both', labelsize=13)
+            ax2.tick_params(axis='y', color='red', labelcolor='red')
+            ax2.set_ylabel('# Clusters', fontsize=14, color='red')
+            plt.show()
+
+    else:
+        best_threshold = distance_threshold
+
+    # re-perform the clustering with the best threshold from above
+    agg_cluster_final = clone(agg_cluster_base).set_params(
+        distance_threshold=best_threshold
+    )
+    agg_cluster_final.fit(distance_matrix)
+    labels = agg_cluster_final.labels_
+
+    returns = [agg_cluster_final]
+
+    # compute silhouette scores for each cluster and determine what our best
+    # clusters are; we only need to do this if we are displaying best clusters
+    # OR if we're doing a DIMCA later
+    if show_best_clusters or dimca_sample1 is not None:
+
+        sample_scores = silhouette_samples(
+            distance_matrix, labels, metric='precomputed'
+        )
+        cluster_score_dict = {}
+        for label in set(labels):
+            cluster_score_dict[label] = np.mean(
+                np.array(sample_scores)[np.where(labels == label)[0]]
+            )
+
+        # calculate the best clusters based on the requested method
+        if n_best_clusters == 'above_average':
+            mean_cluster_score = np.mean(list(cluster_score_dict.values()))
+            best_clusters = [
+                cluster for cluster, score in cluster_score_dict.items()
+                if score > mean_cluster_score
+            ]
+        else:
+            best_clusters = list(list(zip(*sorted(
+                cluster_score_dict.items(),
+                key=lambda label_score: label_score[1],
+                reverse=True
+            )))[0])[:min(n_best_clusters, len(cluster_score_dict))]
+
+    if show_clustermap:
+
+        # prepare a linkage matrix so that we can specify the dendrogram to sns
+        # https://stackoverflow.com/questions/29127013/
+        children = agg_cluster_final.children_
+        distance = np.arange(children.shape[0])
+        no_of_observations = np.arange(2, children.shape[0] + 2)
+        linkage_matrix = np.column_stack(
+            [children, distance, no_of_observations]
+        ).astype(float)
+
+        clustermap = sns.clustermap(
+            correlation_df,
+            row_linkage=linkage_matrix, col_linkage=linkage_matrix,
+            xticklabels=False, yticklabels=False,
+            figsize=(10, 10), center=0
+        )
+
+        clustermap.ax_cbar.set_ylabel('Spearman R', fontsize=14)
+
+        # the following code draws squares on the clustermap to highlight
+        # the cluster locations; will also number the best clusters if they
+        # are to be called out after the fact
+        cluster_size_dict = Counter(labels)
+        size_counter = 1
+        top_left = 0
+        best_cluster_labels = []
+        best_cluster_matrices = []
+        best_cluster_scores = []
+        for i, imod_idx in enumerate(clustermap.dendrogram_row.reordered_ind):
+
+            # draw a box around the cluster if we're at the end of the cluster
+            cluster_for_imod = agg_cluster_final.labels_[imod_idx]
+            cluster_size = cluster_size_dict[cluster_for_imod]
+            if cluster_size == size_counter:
+                # usually Rectangle wants bottom left, but the heatmap that sns
+                # makes has the positive direction reversed (axes positions
+                # increase towards the bottom right)
+                clustermap.ax_heatmap.add_patch(
+                    Rectangle(
+                        (top_left, top_left), cluster_size, cluster_size,
+                        fill=False, color='white', lw=1
+                    )
+                )
+
+                # also add a number IF we're calling out later
+                if show_best_clusters:
+                    if cluster_for_imod in best_clusters:
+                        clustermap.ax_heatmap.text(
+                            top_left + cluster_size + 0.05, top_left - 0.05,
+                            str(cluster_for_imod),
+                            color='white', fontsize=20
+                        )
+                        # stash the clustermap data for the best cluster
+                        best_cluster_submatrix = clustermap.data2d.iloc[
+                            top_left: (top_left + cluster_size),
+                            top_left: (top_left + cluster_size)
+                        ]
+                        best_cluster_labels.append(cluster_for_imod)
+                        best_cluster_matrices.append(best_cluster_submatrix)
+                        best_cluster_scores.append(
+                            cluster_score_dict[cluster_for_imod]
+                        )
+
+                # reset the counters being used to establish where to draw boxes
+                size_counter = 1
+                top_left = i + 1
+
+            else:
+                size_counter += 1
+
+        plt.show()
+
+        # now actually display the best clusters if asked to
+        if show_best_clusters:
+
+            # calculate the figure size and arrangement needed to cleanly
+            # display the number of best clusters we have on hand
+            subplot_rows, subplot_cols = 1, 1
+            while subplot_rows * subplot_cols < len(best_cluster_matrices):
+                if subplot_rows / subplot_cols >= 1:
+                    subplot_cols += 1
+                else:
+                    subplot_rows += 1
+            if len(best_cluster_matrices) <= 4:
+                figsize=(10, 6)
+            elif len(best_cluster_matrices) <= 30:
+                figsize=(14, 9)
+            else:
+                figsize=(20, 14)
+
+            _, axs = plt.subplots(subplot_rows, subplot_cols, figsize=figsize)
+            axs = axs.flatten()
+
+            # sort the best clusters by score to display the best one first
+            sorted_lab_mtrx_score_tups = sorted(
+                zip(
+                    best_cluster_labels,
+                    best_cluster_matrices,
+                    best_cluster_scores
+                ),
+                key=lambda label_matrix_score_tup: label_matrix_score_tup[2],
+                reverse=True
+            )
+            for lab_mtrx_score_tup, ax in zip(sorted_lab_mtrx_score_tups, axs):
+
+                cluster_lab, cluster_mtrx, cluster_score = lab_mtrx_score_tup
+
+                sns.heatmap(
+                    cluster_mtrx,
+                    xticklabels=False, center=0, square=True, cbar=False, ax=ax
+                )
+                if cluster_names is not None:
+                    cluster_name = cluster_names.get(
+                        cluster_lab, f'Cluster {cluster_lab}'
+                    )
+                    cluster_title = f'{cluster_name} ({cluster_score:.2f})'
+                else:
+                    cluster_title = f'Cluster {cluster_lab}' \
+                                    f'({cluster_score:.2f})'
+                ax.set_title(cluster_title, fontsize=16)
+                ax.set_yticks(
+                    np.arange(0.5, cluster_mtrx.shape[0] + 0.5, 1)
+                )
+                ax.set_yticklabels(cluster_mtrx.index)
+                ax.tick_params(axis='both', labelsize=11)
+                ax.tick_params(axis='y', rotation=0)
+
+            for i in range(1, len(axs) - len(best_cluster_matrices) + 1):
+                axs[-i].set_visible(False)
+
+            if return_clustermap:
+                returns.append(clustermap)
+
+            plt.tight_layout()
+
+    # do the requested DIMCA comparison if asked; re-use machinery from base
+    # DIMA as much as possible
+    if dimca_sample1 is not None:
+
+        # compute the new activity matrix with the best cluster activities
+        # consolidated; define positive direction as direction with more + corrs
+        cluster_A_df = pd.DataFrame(columns=ica_data.A.columns)
+        all_clustered_ims = []
+        for best_cluster_label in best_clusters:
+
+            cluster_im_inds = np.where(labels == best_cluster_label)[0]
+            cluster_ims = np.array(ica_data.A.index)[cluster_im_inds]
+            all_clustered_ims += list(cluster_ims)
+            cluster_im_A_df = ica_data.A.loc[cluster_ims]
+            cluster_corr_df = correlation_df.loc[cluster_ims, cluster_ims]
+
+            # get the average non-self correlation for each iM in the cluster
+            # use this to invert the row in the cluster A df if negative
+            cluster_size = cluster_corr_df.shape[0]
+            for i in range(cluster_size):
+                non_self_inds = list(set(list(range(cluster_size))) - {i})
+                non_self_corrs = cluster_corr_df.iloc[i, non_self_inds]
+                im_corr_mean = np.mean(non_self_corrs)
+                if im_corr_mean < 0:
+                    cluster_im_A_df.iloc[i, :] = cluster_im_A_df.iloc[i, :] * -1
+
+            # compute the final averaged cluster activity, add to new dataframe
+            # use the provided name for this cluster if we have one
+            cluster_name = cluster_names.get(
+                best_cluster_label, f'Cluster {best_cluster_label}'
+            )
+            cluster_A_df.loc[cluster_name] = cluster_im_A_df.mean(axis=0)
+
+        # now we can add in the singleton iModulons to our new A matrix
+        singleton_ims = set(list(ica_data.A.index)) - set(all_clustered_ims)
+        cluster_A_df = cluster_A_df.append(ica_data.A.loc[list(singleton_ims)])
+
+        # now we can pretty much proceed as normal with DIMCA; just have a
+        # different activity matrix, but the procedure is the same from here
+        dimca_return = plot_dima(ica_data, sample1=dimca_sample1,
+                                 sample2=dimca_sample2,
+                                 threshold=dimca_threshold, fdr=dimca_fdr,
+                                 label=dimca_label, adjust=dimca_adjust,
+                                 table=dimca_table, alternate_A=cluster_A_df,
+                                 **dimca_kwargs)
+        if dimca_table:
+            returns += dimca_return
+        else:
+            returns.append(dimca_return)
+
+    return returns
 
 
 ####################
