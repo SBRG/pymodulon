@@ -8,7 +8,6 @@ from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scipy.cluster.hierarchy import dendrogram
 from scipy.optimize import curve_fit, OptimizeWarning
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
@@ -340,7 +339,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If regulator is not given, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        if pd.isnan(reg):
+        if pd.isna(reg):
             reg = None
 
     # If no imodulon_table in IcaData, compute trn enrichment to find the
@@ -351,7 +350,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
             ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
         reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
         if not isinstance(reg, str):
-            if pd.isnan(reg):
+            if pd.isna(reg):
                 reg = None
 
     # Use regulator value to find regulon genes
