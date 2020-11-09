@@ -1,6 +1,9 @@
+import gzip
 import json
-import pandas as pd
 from typing import Union, TextIO
+
+import pandas as pd
+
 from pymodulon.core import IcaData
 
 """
@@ -8,7 +11,7 @@ Functions for reading and writing model into files.
 """
 
 
-def save_to_json(model: IcaData, fname: str):
+def save_to_json(model: IcaData, fname: str, compress: bool = False):
     """
 
     Save model to the json file
@@ -18,7 +21,8 @@ def save_to_json(model: IcaData, fname: str):
        ICA model to be saved to json file
     fname: string
        path to json file where the model will be saved
-
+    compress: bool
+        indicates if the JSON file should be compressed into a gzip archive
     """
 
     if model.A is None or model.M is None:
@@ -38,8 +42,14 @@ def save_to_json(model: IcaData, fname: str):
 
     if not fname.endswith('.json'):
         fname += '.json'
-    with open(fname, 'w') as fp:
-        json.dump(param_dict, fp)
+
+    if compress:
+        fname += '.gz'
+        with gzip.open(fname, 'wt', encoding="ascii") as zipfile:
+            json.dump(param_dict, zipfile)
+    else:
+        with open(fname, 'w') as fp:
+            json.dump(param_dict, fp)
 
 
 def load_json_model(filename: Union[str, TextIO]) -> IcaData:
@@ -57,8 +67,12 @@ def load_json_model(filename: Union[str, TextIO]) -> IcaData:
 
     """
     if isinstance(filename, str):
-        with open(filename, "r") as file_handle:
-            serial_data = json.load(file_handle)
+        if filename.endswith('.gz'):
+            with gzip.GzipFile(filename, 'r') as zipfile:
+                serial_data = json.loads(zipfile.read().decode('utf-8'))
+        else:
+            with open(filename, "r") as file_handle:
+                serial_data = json.load(file_handle)
     else:
         serial_data = json.load(filename)
     return IcaData(**serial_data)
