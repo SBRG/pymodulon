@@ -112,7 +112,7 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
 
 def dima(ica_data, sample1: Union[Collection, str],
          sample2: Union[Collection, str], threshold: float = 5,
-         fdr: float = 0.1):
+         fdr: float = 0.1, alternate_A: pd.DataFrame = None):
     """
 
     Args:
@@ -125,6 +125,14 @@ def dima(ica_data, sample1: Union[Collection, str],
     Returns:
 
     """
+
+    # use the undocumented alternate_A option to allow custom-built DIMCA
+    # activity matrix to be used in lieu of standard activty matrix
+    if alternate_A is not None:
+        A_to_use = alternate_A
+    else:
+        A_to_use = ica_data.A
+
     _diff = pd.DataFrame()
 
     sample1_list = _parse_sample(ica_data, sample1)
@@ -132,16 +140,16 @@ def dima(ica_data, sample1: Union[Collection, str],
 
     for name, group in ica_data.sample_table.groupby(['project', 'condition']):
         for i1, i2 in combinations(group.index, 2):
-            _diff[':'.join(name)] = abs(ica_data.A[i1] - ica_data.A[i2])
+            _diff[':'.join(name)] = abs(A_to_use[i1] - A_to_use[i2])
     dist = {}
 
-    for k in ica_data.A.index:
+    for k in A_to_use.index:
         dist[k] = stats.lognorm(*stats.lognorm.fit(_diff.loc[k].values)).cdf
 
-    res = pd.DataFrame(index=ica_data.A.index)
+    res = pd.DataFrame(index=A_to_use.index)
     for k in res.index:
-        a1 = ica_data.A.loc[k, sample1_list].mean()
-        a2 = ica_data.A.loc[k, sample2_list].mean()
+        a1 = A_to_use.loc[k, sample1_list].mean()
+        a2 = A_to_use.loc[k, sample2_list].mean()
         res.loc[k, 'difference'] = a2 - a1
         res.loc[k, 'pvalue'] = 1 - dist[k](abs(a1 - a2))
     result = FDR(res, fdr)
