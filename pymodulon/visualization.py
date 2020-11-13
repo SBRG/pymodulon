@@ -1250,13 +1250,19 @@ def cluster_activities(ica_data: IcaData,
                     )
                 )
 
-                # also add a number IF we're calling out later
+                # also add a number (or name) IF we're calling out later
                 if show_best_clusters:
                     if cluster_for_imod in best_clusters:
+                        if cluster_names is not None:
+                            cluster_name = cluster_names.get(
+                                cluster_for_imod, cluster_for_imod
+                            )
+                        else:
+                            cluster_name = cluster_for_imod
                         clustermap.ax_heatmap.text(
                             top_left + cluster_size + 0.05, top_left - 0.05,
-                            str(cluster_for_imod),
-                            color='white', fontsize=20
+                            str(cluster_name),
+                            color='white', fontsize=16
                         )
                         # stash the clustermap data for the best cluster
                         best_cluster_submatrix = clustermap.data2d.iloc[
@@ -1323,7 +1329,7 @@ def cluster_activities(ica_data: IcaData,
                     )
                     cluster_title = f'{cluster_name} ({cluster_score:.2f})'
                 else:
-                    cluster_title = f'Cluster {cluster_lab}' \
+                    cluster_title = f'Cluster {cluster_lab} ' \
                                     f'({cluster_score:.2f})'
                 ax.set_title(cluster_title, fontsize=16)
                 ax.set_yticks(
@@ -1369,9 +1375,11 @@ def cluster_activities(ica_data: IcaData,
 
             # compute the final averaged cluster activity, add to new dataframe
             # use the provided name for this cluster if we have one
-            cluster_name = cluster_names.get(
-                best_cluster_label, f'Cluster {best_cluster_label}'
-            )
+            if cluster_names is not None and \
+                    best_cluster_label in cluster_names:
+                cluster_name = f'{cluster_names[best_cluster_label]} [Clst]'
+            else:
+                cluster_name = f'Cluster {best_cluster_label}'
             cluster_A_df.loc[cluster_name] = cluster_im_A_df.mean(axis=0)
 
         # now we can add in the singleton iModulons to our new A matrix
