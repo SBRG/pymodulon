@@ -6,6 +6,7 @@ from typing import Optional, Mapping, List
 from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
 from sklearn.cluster import KMeans
+import numpy as np
 
 
 class IcaData(object):
@@ -134,6 +135,42 @@ class IcaData(object):
                     # again if the user uploads a new TRN
             else:
                 self.recompute_thresholds(self.dagostino_cutoff)
+
+        #########################
+        # iModulonDB Properties #
+        #########################
+
+        # initialize links
+        self.link_database = 'External Database'
+
+        self.gene_links = dict()
+        for gene in self._m.index:
+            self.gene_links[gene] = np.nan
+        
+        self.tf_links = dict()
+
+        # count some statistics
+        num_genes = self._m.shape[0]
+        num_samps = self._a.shape[1]
+        num_ims = self._m.shape[1]
+        if ('project' in self.sample_table.columns) and ('condition' in self.sample_table.columns):
+            num_conds = len(self.sample_table.groupby(['condition', 'project']))
+        else:
+            num_conds = 'Unknown'
+
+        # initialize dataset_table (appears on dataset pages)
+        self.dataset_table = pd.Series({'Title': 'New Dataset',
+                                        'Organism': 'New Organism',
+                                        'Strain': 'Unknown Strain',
+                                        'Number of Samples': num_samps,
+                                        'Number of Unique Conditions': num_conds,
+                                        'Number of Genes':num_genes,
+                                        'Number of iModulons': num_ims})
+
+        # initialize splash page info
+        self.splash_table = {'large_title': 'New Dataset',
+                             'subtitle': 'Unpublished study',
+                             'author': 'Pymodulon User'}
 
     @property
     def M(self):
@@ -722,3 +759,8 @@ class IcaData(object):
             ax.scatter([best_cutoff], [max(f1_scores)], color='r')
 
         return best_cutoff
+
+    #########################
+    # iModulonDB Properties #
+    #########################
+
