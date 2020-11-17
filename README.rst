@@ -21,6 +21,10 @@ To create the conda environment::
 
 	conda create -n pymodulon python=3.8
 	conda activate pymodulon
+	
+(Optional) Install graphviz::
+
+	conda install -c anaconda graphviz
 
 Next, download the github repository::
 
