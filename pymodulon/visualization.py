@@ -1035,6 +1035,7 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
 
 def cluster_activities(ica_data: IcaData,
+                       correlation_method: str = 'spearman',
                        distance_threshold: Union[float] = None,
                        show_thresholding: bool = False,
                        show_clustermap: bool = True,
@@ -1057,6 +1058,9 @@ def cluster_activities(ica_data: IcaData,
 
     Args:
         ica_data: IcaData object that contains your data
+        correlation_method: the correlation method to use for computing
+            correlations between iModulon activities. Default is
+            Spearman, and alternative option is Pearson.
         distance_threshold: a specific distance threshold (between 0 and 1) to
             use for defining flat clusters from the hierarchical cluster
             relationship. Larger values yield fewer clusters. Defaults to None,
@@ -1095,7 +1099,7 @@ def cluster_activities(ica_data: IcaData,
 
     # compute distance matrix; distance metric defined as 1 - correlation to
     # ensure that correlated iModulons are close in distance, can be clustered
-    correlation_df = ica_data.A.T.corr(method='spearman')
+    correlation_df = ica_data.A.T.corr(method=correlation_method)
     distance_matrix = 1 - correlation_df.abs()
 
     # define a base instance of the clustering object we will use throughout;
@@ -1223,7 +1227,7 @@ def cluster_activities(ica_data: IcaData,
             figsize=(10, 10), center=0
         )
 
-        clustermap.ax_cbar.set_ylabel('Spearman R', fontsize=14)
+        clustermap.ax_cbar.set_ylabel(f'{correlation_method} R', fontsize=14)
 
         # the following code draws squares on the clustermap to highlight
         # the cluster locations; will also number the best clusters if they
