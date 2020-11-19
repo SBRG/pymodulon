@@ -52,6 +52,9 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     if isinstance(projects, str):
         projects = [projects]
 
+    if projects is not None and len(projects) == 1:
+        highlight = projects
+
     if projects is not None and 'project' in sample_table:
         sample_table = sample_table[sample_table.project.isin(projects)]
         values = values[sample_table.index]
