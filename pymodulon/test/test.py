@@ -42,6 +42,7 @@ def test_core(capsys):
     test_io()
     test_optimize_cutoff(capsys)
     test_set_thresholds()
+    test_kmeans_thresholds()
     test_ica_data_consistency(ica_data)
     test_compute_regulon_enrichment(ica_data)
     test_compute_trn_enrichment(ica_data)
@@ -165,6 +166,28 @@ def test_set_thresholds():
                        thresholds=list(range(10, 20)))
     assert (ica_data.thresholds == dict(zip(range(10), range(10, 20))))
     assert (not ica_data._cutoff_optimized)
+
+
+def test_kmeans_thresholds():
+    s_short = s.iloc[:, :10]
+    a_short = a.iloc[:10, :]
+    # Make sure thresholds are different when two threshold methods are used
+    ica_data1 = IcaData(s_short, a_short, gene_table=gene_table,
+                        sample_table=sample_table,
+                        imodulon_table=imodulon_table, trn=trn,
+                        threshold_method='kmeans')
+    ica_data2 = IcaData(s_short, a_short, gene_table=gene_table,
+                        sample_table=sample_table,
+                        imodulon_table=imodulon_table, trn=trn,
+                        threshold_method='dagostino')
+    # Check that kmeans is used when no TRN is given
+    ica_no_trn = IcaData(s_short, a_short, gene_table=gene_table,
+                         sample_table=sample_table,
+                         imodulon_table=imodulon_table)
+    assert (not np.allclose(list(ica_data1.thresholds.values()),
+                            list(ica_data2.thresholds.values())))
+    assert (np.allclose(list(ica_no_trn.thresholds.values()),
+                        list(ica_data1.thresholds.values())))
 
 
 def test_io():
