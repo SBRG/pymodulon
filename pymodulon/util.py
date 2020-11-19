@@ -250,3 +250,24 @@ def explained_variance(ica_data,
         rec_var.append((1 - sa_err / base_err) * 100)
 
     return rec_var[-1]
+
+
+def infer_activities(ica_data, data: pd.DataFrame):
+    """
+    Infer iModulon activities for external data
+    Parameters
+    ----------
+    ica_data: ICA data object
+    data: External expression profiles (must be centered to a reference)
+
+    Returns
+    -------
+    Inferred activities for the expression profiles
+    """
+
+    shared_genes = ica_data.M.index & data.index
+    x = data.loc[shared_genes].values
+    m = ica_data.M.loc[shared_genes].values
+    m_inv = np.linalg.pinv(m)
+    a = np.dot(m_inv, x)
+    return pd.DataFrame(a, index=ica_data.imodulon_names, columns=data.columns)
