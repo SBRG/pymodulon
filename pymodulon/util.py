@@ -181,9 +181,24 @@ def _parse_sample(ica_data, sample: Union[Collection, str]):
         return sample
 
 
-def explained_variance(ica_data, genes=None,
-                       samples=None,
-                       imodulons=None):
+def explained_variance(ica_data,
+                       genes: Optional[Iterable] = None,
+                       samples: Optional[Iterable] = None,
+                       imodulons: Optional[Iterable] = None):
+    """
+    Computes the fraction of variance explained by iModulons
+    Parameters
+    ----------
+    ica_data: ICA data object
+    genes: List of genes to use (default: all genes)
+    samples: List of samples to use (default: all samples)
+    imodulons: List of iModulons to use (default: all iModulons)
+
+    Returns
+    -------
+    Fraction of variance explained by selected iModulons for selected
+    genes/samples
+    """
     # Check inputs
     if genes is None:
         genes = ica_data.X.index
