@@ -24,6 +24,7 @@ from pymodulon.compare import _convert_gene_index
 # Bar Plots #
 #############
 
+# noinspection PyTypeChecker
 def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ylabel: str = '',
             projects: Optional[Union[List, str]] = None,
@@ -151,8 +152,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     # Set axis limits
     xmin = -0.5
     xmax = nbars + 2.5
-    ax.set_xlim((xmin, xmax))
-    ax.set_ylim((ymin, ymax))
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
 
     # Axis labels
     ax.set_ylabel(ylabel, fontsize=12)
@@ -260,6 +261,7 @@ def plot_metadata(ica_data: IcaData, column,
                    highlight, ax, legend_kwargs)
 
 
+# noinspection PyTypeChecker
 def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            regulator: str = None,
                            bins: Optional[Union[int, Sequence, str]] = None,
@@ -411,6 +413,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
 # Scatterplots #
 ################
 
+# noinspection PyTypeChecker
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, str] = 'auto',
@@ -581,8 +584,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
                         expand_objects=(1.2, 1.4),
                         expand_points=(1.3, 1.3))
 
-    ax.set_xlim((xmin, xmax))
-    ax.set_ylim((ymin, ymax))
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
 
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
@@ -1270,9 +1273,11 @@ def cluster_activities(ica_data: IcaData,
                         )
                         # stash the clustermap data for the best cluster
                         best_cluster_submatrix = clustermap.data2d.iloc[
-                            top_left: (top_left + cluster_size),
-                            top_left: (top_left + cluster_size)
-                        ]
+                                                 top_left: (top_left +
+                                                            cluster_size),
+                                                 top_left: (top_left +
+                                                            cluster_size)
+                                                 ]
                         best_cluster_labels.append(cluster_for_imod)
                         best_cluster_matrices.append(best_cluster_submatrix)
                         best_cluster_scores.append(
@@ -1300,11 +1305,11 @@ def cluster_activities(ica_data: IcaData,
                 else:
                     subplot_rows += 1
             if len(best_cluster_matrices) <= 4:
-                figsize=(10, 6)
+                figsize = (10, 6)
             elif len(best_cluster_matrices) <= 30:
-                figsize=(14, 9)
+                figsize = (14, 9)
             else:
-                figsize=(20, 14)
+                figsize = (20, 14)
 
             _, axs = plt.subplots(subplot_rows, subplot_cols, figsize=figsize)
             axs = axs.flatten()
