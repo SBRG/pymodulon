@@ -28,7 +28,13 @@ class IcaData(object):
                  dagostino_cutoff: int = 550,
                  thresholds: Optional[Union[Mapping[ImodName, float],
                                             Iterable]] = None,
-                 threshold_method='dagostino'):
+                 threshold_method='dagostino',
+                 dataset_table: Optional[dict] = None,
+                 splash_table: Optional[dict] = dict(),
+                 gene_links: Optional[dict] = dict(),
+                 tf_links: Optional[dict] = dict(),
+                 link_database: Optional[str] = 'External Database',
+                 cog_colors: Optional[dict] = None):
         """
 
         :param M: S matrix from ICA
@@ -49,6 +55,16 @@ class IcaData(object):
             optimization/computing of thresholds
         :param threshold_method: Either "dagostino" (default with TRN) or
         "kmeans" (default if no TRN provided)
+        :param dataset_table: dictionary of general dataset information 
+            for the details box on the dataset page of iModulonDB (default provided)
+        :param splash_table: dictionary of general information for the splash page
+            link to this dataset, as well as folder names for where its data 
+            is stored in iModulonDB (default provided)
+        :param gene_links: dictionary of genes to links in an external database
+        :param tf_links: dictionary of TFs (from the TRN) to links in a database
+        :param link_database: Name of the database for the gene_links dictionary
+        :param cog_colors: dictionary of COGs from the gene_table to desired 
+            colors for display in iModulonDB. One will be made for you if not provided.
         """
 
         #########################
@@ -112,10 +128,12 @@ class IcaData(object):
         # Initialize thresholds either with or without optimization
         if thresholds is not None:
             self.thresholds = thresholds
+            self._dagostino_cutoff = -1 # Kevin adding this to avoid IO error
 
         # Use kmeans if TRN is empty, or kmeans is selected
-        if self.trn.empty or threshold_method == 'kmeans':
+        elif self.trn.empty or threshold_method == 'kmeans':
             self.compute_kmeans_thresholds()
+            self._dagostino_cutoff = -1 # Kevin adding this to avoid IO error
 
         # Else use D'agostino method
         else:
@@ -141,36 +159,61 @@ class IcaData(object):
         #########################
 
         # initialize links
-        self.link_database = 'External Database'
+        self.link_database = link_database
 
-        self.gene_links = dict()
-        for gene in self._m.index:
-            self.gene_links[gene] = np.nan
+        for gene in set(self._m.index) - set(gene_links.keys()):
+            gene_links[gene] = np.nan
+        self.gene_links = gene_links
         
-        self.tf_links = dict()
+        self.tf_links = tf_links
 
-        # count some statistics
-        num_genes = self._m.shape[0]
-        num_samps = self._a.shape[1]
-        num_ims = self._m.shape[1]
-        if ('project' in self.sample_table.columns) and ('condition' in self.sample_table.columns):
-            num_conds = len(self.sample_table.groupby(['condition', 'project']))
+        # add COG colors
+        if not(cog_colors is None):
+            self.cog_colors = cog_colors
         else:
-            num_conds = 'Unknown'
+            try:
+                self.cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(), 
+                                   ['red','pink','y','orchid','mediumvioletred','green',
+                                    'lightgray','lightgreen','slategray','blue',
+                                    'saddlebrown','turquoise','lightskyblue','c','skyblue',
+                                    'lightblue','fuchsia','dodgerblue','lime','sandybrown',
+                                    'black','goldenrod','chocolate','orange']))
+            except:
+                self.cog_colors = {np.nan:'gray'}
 
-        # initialize dataset_table (appears on dataset pages)
-        self.dataset_table = pd.Series({'Title': 'New Dataset',
-                                        'Organism': 'New Organism',
-                                        'Strain': 'Unknown Strain',
-                                        'Number of Samples': num_samps,
-                                        'Number of Unique Conditions': num_conds,
-                                        'Number of Genes':num_genes,
-                                        'Number of iModulons': num_ims})
+        # dataset table (appears on dataset pages)
+        if not(dataset_table is None):
+            self.dataset_table = dataset_table
+        else:
+            # count some statistics
+            num_genes = self._m.shape[0]
+            num_samps = self._a.shape[1]
+            num_ims = self._m.shape[1]
+            if ('project' in self.sample_table.columns) and ('condition' in self.sample_table.columns):
+                num_conds = len(self.sample_table.groupby(['condition', 'project']))
+            else:
+                num_conds = 'Unknown'
+
+            # initialize dataset_table 
+            self.dataset_table = pd.Series({'Title': 'New Dataset',
+                                            'Organism': 'New Organism',
+                                            'Strain': 'Unknown Strain',
+                                            'Number of Samples': num_samps,
+                                            'Number of Unique Conditions': num_conds,
+                                            'Number of Genes':num_genes,
+                                            'Number of iModulons': num_ims})
 
         # initialize splash page info
-        self.splash_table = {'large_title': 'New Dataset',
-                             'subtitle': 'Unpublished study',
-                             'author': 'Pymodulon User'}
+        default_splash_table = {'large_title': 'New Dataset',
+                                'subtitle': 'Unpublished study',
+                                'author': 'Pymodulon User',
+                                'organism_folder': 'new_org',
+                                'dataset_folder': 'new_dataset'}
+        for k, v in default_splash_table.items():
+            if k not in splash_table:
+                splash_table[k] = v
+        self.splash_table = splash_table
+        
 
     @property
     def M(self):
