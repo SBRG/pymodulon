@@ -62,7 +62,7 @@ def imodulondb_compatibility(model: IcaData, write: Optional[bool] = False):
     
     print()
     # gene table columns
-    gene_table_cols = ['gene_name', 'gene_product', 'start', 'length', 'operon', 'regulator']
+    gene_table_cols = ['gene_name', 'gene_product', 'COG', 'start', 'length', 'operon', 'regulator']
     for col in gene_table_cols:
         if not(col in model.gene_table.columns):
             if col in ['gene_name', 'gene_product']:
@@ -80,12 +80,13 @@ def imodulondb_compatibility(model: IcaData, write: Optional[bool] = False):
     for col in sample_table_cols:
         if not(col in model.sample_table.columns):
             if col == 'sample':
-                print('Sample Table is missing the optional sample column')
-                print('The 0th column will be used to define the names of samples in the activity bar graph unless you add this column.')
-            if col == 'DOI':
+                if not(model.sample_table.index.name == 'sample'):
+                    print('Sample Table is missing the optional sample column')
+                    print('The 0th column will be used to define the names of samples in the activity bar graph unless you add this column.')
+            elif col == 'DOI':
                 print('Sample Table is missing the optional DOI column')
                 print('If you would like to be able to access papers by clicking the activity bars, add this column and populate it with links.')
-            if col == 'Biological Replicates':
+            elif col == 'Biological Replicates':
                 print('Sample Table is missing a %s column'%(col))
                 if write:
                     try:
@@ -195,7 +196,7 @@ def imodulondb_main_site_files(model: IcaData, path_prefix: Optional[str] = '.',
     dataset = model.splash_table['dataset_folder']
     
     # create new folders
-    organism_folder = os.path.join(path_prefix, organism)
+    organism_folder = os.path.join(path_prefix, 'organisms', organism)
     if not(os.path.isdir(organism_folder)):
         os.makedirs(organism_folder)
 
@@ -233,7 +234,7 @@ def imodulondb_main_site_files(model: IcaData, path_prefix: Optional[str] = '.',
         os.makedirs(main_folder)    
         
     # save the metadata files in the main folder
-    model.dataset_table.to_csv(os.path.join(main_folder, 'dataset_meta.csv'))
+    pd.Series(model.dataset_table).to_csv(os.path.join(main_folder, 'dataset_meta.csv'))
     # num_ims - used so that the 'next iModulon' button doesn't overflow
     file = open(main_folder+'/num_ims.txt', 'w')
     file.write(str(model.M.shape[1]))
@@ -374,7 +375,7 @@ def imdb_gene_table_df(model: IcaData, k: Union[int, str]):
     
     # sort
     columns = []
-    for c in ['gene_weight','gene_name', 'gene_product', 'operon', 'regulator']:
+    for c in ['gene_weight','gene_name', 'gene_product', 'COG', 'operon', 'regulator']:
         if c in res.columns:
             columns += [c]
     res = res[columns]
@@ -678,11 +679,11 @@ def parse_regulon_string(model: IcaData, s: str):
     for r in union:
         if '+' in r:
             intersection = r.split(' + ')
-            genes = set(model.trn.gene_id[model.trn.TF == intersection[0]])
+            genes = set(model.trn.gene_id[model.trn.regulator == intersection[0]])
             for i in intersection[1:]:
-                genes = genes.intersection(set(model.trn.gene_id[model.trn.TF == i]))
+                genes = genes.intersection(set(model.trn.gene_id[model.trn.regulator == i]))
         else:
-            genes = set(model.trn.gene_id[model.trn.TF == r])
+            genes = set(model.trn.gene_id[model.trn.regulator == r])
         res = res.union(genes)
     return res
 

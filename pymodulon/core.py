@@ -1,7 +1,7 @@
 import re
 
 from pymodulon.enrichment import *
-from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList
+from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList, _check_dict
 from typing import Optional, Mapping, List
 from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
@@ -154,65 +154,17 @@ class IcaData(object):
             else:
                 self.recompute_thresholds(self.dagostino_cutoff)
 
-        #########################
-        # iModulonDB Properties #
-        #########################
+        ##############################
+        # Load iModulonDB Properties #
+        ##############################
 
         # initialize links
-        self.link_database = link_database
-
-        for gene in set(self._m.index) - set(gene_links.keys()):
-            gene_links[gene] = np.nan
-        self.gene_links = gene_links
-        
-        self.tf_links = tf_links
-
-        # add COG colors
-        if not(cog_colors is None):
-            self.cog_colors = cog_colors
-        else:
-            try:
-                self.cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(), 
-                                   ['red','pink','y','orchid','mediumvioletred','green',
-                                    'lightgray','lightgreen','slategray','blue',
-                                    'saddlebrown','turquoise','lightskyblue','c','skyblue',
-                                    'lightblue','fuchsia','dodgerblue','lime','sandybrown',
-                                    'black','goldenrod','chocolate','orange']))
-            except:
-                self.cog_colors = {np.nan:'gray'}
-
-        # dataset table (appears on dataset pages)
-        if not(dataset_table is None):
-            self.dataset_table = dataset_table
-        else:
-            # count some statistics
-            num_genes = self._m.shape[0]
-            num_samps = self._a.shape[1]
-            num_ims = self._m.shape[1]
-            if ('project' in self.sample_table.columns) and ('condition' in self.sample_table.columns):
-                num_conds = len(self.sample_table.groupby(['condition', 'project']))
-            else:
-                num_conds = 'Unknown'
-
-            # initialize dataset_table 
-            self.dataset_table = pd.Series({'Title': 'New Dataset',
-                                            'Organism': 'New Organism',
-                                            'Strain': 'Unknown Strain',
-                                            'Number of Samples': num_samps,
-                                            'Number of Unique Conditions': num_conds,
-                                            'Number of Genes':num_genes,
-                                            'Number of iModulons': num_ims})
-
-        # initialize splash page info
-        default_splash_table = {'large_title': 'New Dataset',
-                                'subtitle': 'Unpublished study',
-                                'author': 'Pymodulon User',
-                                'organism_folder': 'new_org',
-                                'dataset_folder': 'new_dataset'}
-        for k, v in default_splash_table.items():
-            if k not in splash_table:
-                splash_table[k] = v
+        self.dataset_table = dataset_table
         self.splash_table = splash_table
+        self.link_database = link_database
+        self.gene_links = gene_links
+        self.tf_links = tf_links
+        self.cog_colors = cog_colors
         
 
     @property
@@ -290,6 +242,11 @@ class IcaData(object):
         self._m.index = names
         if self._x is not None:
             self._x.index = names
+            
+        # Update cog_colors
+        if hasattr(self, '_cog_colors'):
+            if self._cog_colors == {np.nan:'gray'}:
+                self.cog_colors = None
 
     @property
     def sample_table(self):
@@ -354,7 +311,7 @@ class IcaData(object):
 
         # mark that our cutoffs are no longer optimized since the TRN
         self._cutoff_optimized = False
-
+    
     def _update_imodulon_names(self, new_names):
 
         # Update thresholds
@@ -802,8 +759,130 @@ class IcaData(object):
             ax.scatter([best_cutoff], [max(f1_scores)], color='r')
 
         return best_cutoff
-
+        
     #########################
     # iModulonDB Properties #
     #########################
+    @property
+    def dataset_table(self):
+        return self._dataset_table
+        
+    @dataset_table.setter
+    def dataset_table(self, new_dst):
+        if not(new_dst is None):
+            self._dataset_table = _check_dict(new_dst, 'dataset')
+        else:
+            # count some statistics
+            num_genes = self._m.shape[0]
+            num_samps = self._a.shape[1]
+            num_ims = self._m.shape[1]
+            if ('project' in self.sample_table.columns) and ('condition' in self.sample_table.columns):
+                num_conds = len(self.sample_table.groupby(['condition', 'project']))
+            else:
+                num_conds = 'Unknown'
 
+            # initialize dataset_table 
+            self._dataset_table = pd.Series({'Title': 'New Dataset',
+                                   'Organism': 'New Organism',
+                                   'Strain': 'Unknown Strain',
+                                   'Number of Samples': num_samps,
+                                   'Number of Unique Conditions': num_conds,
+                                   'Number of Genes':num_genes,
+                                   'Number of iModulons': num_ims})
+                                   
+    @property
+    def splash_table(self):
+        return self._splash_table
+        
+    @splash_table.setter
+    def splash_table(self, new_splash):
+        
+        if isinstance(new_splash, str):
+            new_splash = _check_dict(new_splash, 'splash')
+        
+        self._splash_table = new_splash
+        
+        default_splash_table = {'large_title': 'New Dataset',
+                                'subtitle': 'Unpublished study',
+                                'author': 'Pymodulon User',
+                                'organism_folder': 'new_org',
+                                'dataset_folder': 'new_dataset'}
+        for k, v in default_splash_table.items():
+            if k not in new_splash: # use what is provided, default for what isn't
+                self._splash_table[k] = v
+                
+    @property
+    def link_database(self):
+        return self._link_database
+    
+    @link_database.setter
+    def link_database(self, new_db):
+        if isinstance(new_db, str):
+            self._link_database = new_db
+        else:
+            raise ValueError('link_database must be a string.')
+        
+    @property
+    def gene_links(self):
+        return self._gene_links
+        
+    @gene_links.setter
+    def gene_links(self, new_links):
+        
+        if isinstance(new_links, str):
+            new_links = _check_dict(new_links, 'gene_links')
+        
+        """
+        # uncomment this to be warned for unused gene links
+        for gene in new_links.keys():
+            if not(gene in self._m.index):
+                warnings.warn('The gene %s has a link but is not in the M matrix.'%(gene))
+        """
+        self._gene_links = new_links
+        for gene in set(self._m.index) - set(new_links.keys()):
+            self._gene_links[gene] = np.nan
+            
+    @property
+    def tf_links(self):
+        return self._tf_links
+    
+    @tf_links.setter
+    def tf_links(self, new_links):
+        if isinstance(new_links, str):
+            new_links = _check_dict(new_links, 'tf_links')
+        
+        if not(self.trn.empty):
+            for tf in new_links.keys():
+                if not(tf in list(self.trn.regulator)):
+                    print('%s has a TF link but is not in the TRN'%(tf))
+        
+        self._tf_links = new_links
+        
+    @property
+    def cog_colors(self):
+        return self._cog_colors
+        
+    @cog_colors.setter
+    def cog_colors(self, new_colors):
+        if new_colors is None:
+            try: # generate a good dictionary if gene info is available
+                self._cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(), 
+                                   ['red','pink','y','orchid','mediumvioletred','green',
+                                    'lightgray','lightgreen','slategray','blue',
+                                    'saddlebrown','turquoise','lightskyblue','c','skyblue',
+                                    'lightblue','fuchsia','dodgerblue','lime','sandybrown',
+                                    'black','goldenrod','chocolate','orange']))
+            except: # no gene table or COG column
+                self._cog_colors = {np.nan:'gray'}
+        
+        else:
+            if isinstance(new_colors, str):
+                new_colors = _check_dict(new_colors, 'cog_colors')
+            
+            try:
+                for cog in (set(self.gene_table['COG'].unique()) - set(new_colors.keys())):
+                    new_colors[cog] = 'gray'
+            except:
+                print('COG colors are useless if there is no \'COG\' category in the gene table.')
+            
+            self._cog_colors = new_colors
