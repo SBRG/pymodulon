@@ -11,6 +11,7 @@ from sklearn.metrics import r2_score
 from zipfile import ZipFile
 from scipy.optimize import OptimizeWarning
 from tqdm.notebook import tqdm
+from copy import deepcopy
 warnings.filterwarnings('ignore', category=FutureWarning, append=True)
 warnings.filterwarnings('ignore', category=OptimizeWarning, append=True)
 pd.options.mode.chained_assignment = None
@@ -40,8 +41,16 @@ def imodulondb_compatibility(model: IcaData, write: Optional[bool] = False):
     """
     major_errors = []
     
-    # imodulon table columns
-    im_table_cols = ['name', 'Regulator', 'Function', 'Category', 'n_genes', 'precision', 'recall', 'TF']
+    # imodulon table index
+    im_idx = ''
+    try: 
+        model.imodulon_table.astype(int)
+        im_idx = 'int'
+    except:
+        im_idx = 'str'
+    
+    # imodulon table columns    
+    im_table_cols = ['name', 'TF', 'Regulator', 'Function', 'Category', 'n_genes', 'precision', 'recall', ]
     for col in im_table_cols:
         if not(col in model.imodulon_table.columns):
             print('iModulon Table is missing a %s column'%(col))
@@ -50,15 +59,28 @@ def imodulondb_compatibility(model: IcaData, write: Optional[bool] = False):
                        "so it uses \'+\' and \'/\' and must match the trn."))
             if col == 'Regulator':
                 print(("Note that Regulator is displayed in the dataset page "
-                       "so it can have spelled out \'and\' and \'or\' operators."))
+                       "so it can have spelled out \'and\' and \'or\' operators."
+                       "If you have a TF column, a Regulator column will be"
+                       "generated for you (but not vice versa)."))
 
             if write:
                 if col == 'name':
-                    model.imodulon_table['name'] = ['iModulon %i'%(i) for i in model.imodulon_table.index]
+                    if im_idx == 'int':
+                        model.imodulon_table['name'] = ['iModulon %i'%(i) for i in model.imodulon_table.index]
+                    else:
+                        model.imodulon_table['name'] = model.imodulon_table.index
                 elif col == 'n_genes':
                     model.imodulon_table['n_genes'] = model.M_binarized.sum().astype(int)
+                elif (col == 'Regulator') and ('TF' in model.imodulon_table.columns):
+                    for idx, tf in zip(model.imodulon_table.index, model.imodulon_table.TF):
+                        try:
+                            model.imodulon_table.loc[idx, 'Regulator'] = model.imodulon_table.TF[idx].replace('/', ' or ').replace('+', ' and ')
+                        except:
+                            model.imodulon_table.loc[idx, 'Regulator'] = model.imodulon_table.TF[idx]
                 else:
                     model.imodulon_table[col] = np.nan
+    if write and (im_idx == 'str'):
+        model.rename_imodulons(dict(zip(model.imodulon_names, range(len(model.imodulon_names)))))
     
     print()
     # gene table columns
@@ -125,17 +147,18 @@ def imodulondb_export(model:IcaData, path: Optional[str] = '.', skip_check: Opti
     :param skip_check: whether or not to skip the call to imodulondb_compatibility(), which checks for issues with member variables and columns
     
     '''
+    model1 = deepcopy(model)
     if not(skip_check):
-        imodulondb_compatibility(model, True)
+        imodulondb_compatibility(model1, True)
         
     print('Writing main site files...')
     
-    folder = imodulondb_main_site_files(model, path, cat_order = cat_order)
+    folder = imodulondb_main_site_files(model1, path, cat_order = cat_order)
     
     print('Two progress bars will appear below. The second will take significantly longer than the first.')
     
-    imdb_generate_im_files(model, folder, gene_scatter_x)
-    imdb_generate_gene_files(model, folder)
+    imdb_generate_im_files(model1, folder, gene_scatter_x)
+    imdb_generate_gene_files(model1, folder)
     
 
 

@@ -63,6 +63,8 @@ def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
     return table
 
 def _check_dict(table: Data, name: str, index_col: Optional[int] = 0):
+    if isinstance(table, dict):
+        return table
     try: 
         table = json.loads(table.replace('\'', '\"'))
     except ValueError: 
