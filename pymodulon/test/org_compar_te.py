@@ -3,7 +3,6 @@ import unittest
 
 import pandas as pd
 
-sys.path.append("/home/sbrg/Desktop/pymodulon/")
 from pymodulon.compare import *
 
 
