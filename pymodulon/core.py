@@ -1001,7 +1001,8 @@ class IcaData(object):
         # uncomment this to be warned for unused gene links
         for gene in new_links.keys():
             if not(gene in self._m.index):
-                warnings.warn('The gene %s has a link but is not in the M matrix.'%(gene))
+                warnings.warn('The gene %s has a link
+                but is not in the M matrix.'%(gene))
         """
         self._gene_links = new_links
         for gene in set(self._m.index) - set(new_links.keys()):
@@ -1080,7 +1081,8 @@ class IcaData(object):
                     new_colors[cog] = "gray"
             except KeyError:
                 print(
-                    "COG colors are useless if there is no 'COG' category in the gene table."
+                    "COG colors are useless if there is no "
+                    "'COG' category in the gene table."
                 )
 
             self._cog_colors = new_colors
