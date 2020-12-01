@@ -12,6 +12,7 @@ repos:
     -   id: check-added-large-files
     -   id: no-commit-to-branch
         args: ['--branch', 'master']
+    -   id: requirements-txt-fixer
 -   repo: https://github.com/PyCQA/flake8
     rev: 3.8.4
     hooks:
