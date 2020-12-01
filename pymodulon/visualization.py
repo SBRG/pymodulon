@@ -1421,11 +1421,11 @@ def cluster_activities(ica_data: IcaData,
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
     if metric == 'r2':
-        params, r2 = _get_fit(x, y)
+        params, r2 = get_fit(x, y)
         label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
 
     elif metric == 'pearson':
-        params = curve_fit(_solid_line, x, y)[0]
+        params = curve_fit(solid_line, x, y)[0]
         r, pval = stats.pearsonr(x, y)
         if pval < 1e-10:
             label = f'Pearson R = {r:.2f}\np-value < 1e-10'
@@ -1433,7 +1433,7 @@ def _fit_line(x, y, ax, metric):
             label = f'Pearson R = {r:.2f}\np-value = {pval:.2e}'
 
     elif metric == 'spearman':
-        params = curve_fit(_solid_line, x, y)[0]
+        params = curve_fit(solid_line, x, y)[0]
         r, pval = stats.spearmanr(x, y)
         if pval < 1e-10:
             label = f'Spearman R = {r:.2f}\np-value < 1e-10'
@@ -1446,24 +1446,24 @@ def _fit_line(x, y, ax, metric):
     # Plot line
     if len(params) == 2:
         xvals = np.array([min(x), max(x)])
-        ax.plot(xvals, _solid_line(xvals, *params), label=label,
+        ax.plot(xvals, solid_line(xvals, *params), label=label,
                 color='k', linestyle='dashed', linewidth=1, zorder=5)
     else:
         mid = params[2]
         xvals = np.array([x.min(), mid, x.max()])
-        ax.plot(xvals, _broken_line(xvals, *params), label=label,
+        ax.plot(xvals, broken_line(xvals, *params), label=label,
                 color='k', linestyle='dashed', linewidth=1, zorder=5)
 
 
-def _get_fit(x, y):
-    all_params = [curve_fit(_solid_line, x, y)[0]]
+def get_fit(x, y):
+    all_params = [curve_fit(solid_line, x, y)[0]]
 
     with warnings.catch_warnings():
         warnings.simplefilter('ignore', category=OptimizeWarning)
         for c in [min(x), np.mean(x), max(x)]:
             try:
                 all_params.append(
-                    curve_fit(_broken_line, x, y, p0=[1, 1, c])[0])
+                    curve_fit(broken_line, x, y, p0=[1, 1, c])[0])
             except OptimizeWarning:
                 pass
 
@@ -1472,9 +1472,9 @@ def _get_fit(x, y):
 
     for params in all_params:
         if len(params) == 2:
-            r2 = _adj_r2(_solid_line, x, y, params)
+            r2 = _adj_r2(solid_line, x, y, params)
         else:
-            r2 = _adj_r2(_broken_line, x, y, params)
+            r2 = _adj_r2(broken_line, x, y, params)
 
         if r2 > best_r2:
             best_r2 = r2
@@ -1486,14 +1486,14 @@ def _get_fit(x, y):
     return best_params, best_r2
 
 
-def _broken_line(x, A, B, C):
+def broken_line(x, A, B, C):
     y = np.zeros(len(x), dtype=np.float)
     y += (A * x + B) * (x >= C)
     y += (A * C + B) * (x < C)
     return y
 
 
-def _solid_line(x, A, B):  # this is your 'straight line' y=f(x)
+def solid_line(x, A, B):  # this is your 'straight line' y=f(x)
     y = (A * x + B)
     return y
 
