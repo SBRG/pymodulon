@@ -6,10 +6,10 @@ from typing import *
 
 import numpy as np
 import pandas as pd
-import tqdm
 from Bio import SeqIO
 from graphviz import Digraph
 from scipy import stats
+from tqdm.notebook import tqdm
 
 
 def _make_dot_graph(
@@ -61,7 +61,7 @@ def _make_dot_graph(
     # Calculate correlation matrix
     corr = np.zeros((len(m1.columns), len(m2.columns)))
 
-    for i, k1 in tqdm.tqdm(enumerate(m1.columns), total=len(m1.columns)):
+    for i, k1 in tqdm(enumerate(m1.columns), total=len(m1.columns)):
         for j, k2 in enumerate(m2.columns):
             if metric == "pearson":
                 corr[i, j] = abs(stats.pearsonr(m1[k1], m2[k2])[0])

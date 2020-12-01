@@ -26,7 +26,7 @@ SACI_RS00115,SACI_RS00115,Saci_0025,16715,18421,-,AMP-binding protein,Lipid tran
 SACI_RS00120,SACI_RS00120,Saci_0026,18433,18909,-,NOB1 family endonuclease,Defense mechanisms,A0A0U3HFG5
 SACI_RS00125,SACI_RS00125,Saci_0027,18899,19645,-,NAD(+)/NADH kinase,Nucleotide transport and metabolism,A0A0U3FGV3
 SACI_RS00130,SACI_RS00130,Saci_0028,19654,20007,-,hypothetical protein,No COG annotation,A0A0U3F8U1
-SACI_RS00135,SACI_RS00135,Saci_0029,20087,21088,+,NAD(P)/FAD-dependent oxidoreductase,"Post-translational modification, protein turnover, and chaperones",A0A0U3FYH3
+SACI_RS00135,SACI_RS00135,Saci_0029,20087,21088,+,NAD(P)/FAD-dependent oxidoreductase,"Post-translational modification, protein turnover,and chaperones",A0A0U3FYH3
 SACI_RS00140,SACI_RS00140,Saci_0030,21085,21975,+,methyltransferase domain-containing protein,"Translation, ribosomal structure and biogenesis",A0A0U2X1J8
 SACI_RS11510,SACI_RS11510,Saci_0031,21901,22383,-,DUF371 domain-containing protein,Function unknown,A0A0U3H4L1
 SACI_RS00145,SACI_RS00145,Saci_0032,22370,22651,-,YhbY family RNA-binding protein,"Translation, ribosomal structure and biogenesis",UPI0002B2998B
@@ -37,7 +37,7 @@ SACI_RS00160,SACI_RS00160,Saci_0037,24505,25560,-,hypothetical protein,Amino aci
 SACI_RS00165,SACI_RS00165,Saci_0038,25618,26484,-,ABC transporter substrate-binding protein,Coenzyme transport and metabolism,A0A0U3FX22
 SACI_RS00170,SACI_RS00170,Saci_0039,26513,27022,+,DUF84 family protein,Nucleotide transport and metabolism,A0A0U2NGA1
 SACI_RS00175,SACI_RS00175,Saci_0040,27019,27600,-,hypothetical protein,No COG annotation,A0A0U3HMY4
-SACI_RS00180,trxA,Saci_0041,27676,28014,-,thioredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U2Y1X2
+SACI_RS00180,trxA,Saci_0041,27676,28014,-,thioredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U2Y1X2
 SACI_RS00185,SACI_RS00185,Saci_0042,28098,28811,+,D-aminoacyl-tRNA deacylase,Function unknown,A0A0U3FGG2
 SACI_RS00190,SACI_RS00190,Saci_0043,28791,29417,-,histidine phosphatase family protein,Carbohydrate transport and metabolism,A0A0U3H3Q3
 SACI_RS00195,SACI_RS00195,Saci_0044,29614,30108,+,CBS domain-containing protein,Function unknown,A0A0U3GVE4
@@ -53,7 +53,7 @@ SACI_RS00240,SACI_RS00240,Saci_0053,39583,41070,-,ATP-binding protein,"Replicati
 SACI_RS00245,SACI_RS00245,Saci_0054,41173,41547,-,hypothetical protein,No COG annotation,A0A0U3FX00
 SACI_RS00250,SACI_RS00250,Saci_0055,41687,42094,-,hypothetical protein,No COG annotation,A0A0U3FQ04
 SACI_RS00255,SACI_RS00255,Saci_0057,42224,43735,+,bifunctional ADP-dependent NAD(P)H-hydrate dehydratase/NAD(P)H-hydrate epimerase,Carbohydrate transport and metabolism,A0A0U2WTV7
-SACI_RS00260,SACI_RS00260,Saci_0058,43732,44193,-,peroxiredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U2Y1V6
+SACI_RS00260,SACI_RS00260,Saci_0058,43732,44193,-,peroxiredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U2Y1V6
 SACI_RS00265,SACI_RS00265,Saci_0059,44258,45793,+,phosphoenolpyruvate carboxylase,Carbohydrate transport and metabolism,A0A0U3FGE5
 SACI_RS00270,SACI_RS00270,Saci_0060,45790,46605,+,hypothetical protein,Function unknown,A0A0U3H3P2
 SACI_RS00275,meaB,Saci_0061,46630,47589,-,methylmalonyl Co-A mutase-associated GTPase MeaB,Amino acid transport and metabolism,A0A0U3FP30
@@ -72,7 +72,7 @@ SACI_RS00345,SACI_RS00345,Saci_0075,58023,59261,-,DNA primase,"Replication, reco
 SACI_RS00350,SACI_RS00350,Saci_0076,59271,60356,-,tyrosine--tRNA ligase,"Translation, ribosomal structure and biogenesis",A0A0U2WTT9
 SACI_RS00355,SACI_RS00355,Saci_0077,60401,60751,-,hypothetical protein,No COG annotation,A0A0U3FP99
 SACI_RS00360,SACI_RS00360,Saci_0078,60797,61237,-,YjbQ family protein,Function unknown,A0A0U3H3J8
-SACI_RS00365,SACI_RS00365,Saci_0079,61236,62510,+,AIR synthase,"Post-translational modification, protein turnover, and chaperones",A0A0U3H3M6
+SACI_RS00365,SACI_RS00365,Saci_0079,61236,62510,+,AIR synthase,"Post-translational modification, protein turnover,and chaperones",A0A0U3H3M6
 SACI_RS00370,SACI_RS00370,Saci_0080,62537,63049,+,30S ribosomal protein S13,"Translation, ribosomal structure and biogenesis",A0A0U3FP18
 SACI_RS00375,SACI_RS00375,Saci_0081,63067,63597,+,30S ribosomal protein S4,"Translation, ribosomal structure and biogenesis",A0A0U2NAE0
 SACI_RS00380,SACI_RS00380,Saci_0082,63581,63979,+,30S ribosomal protein S11,"Translation, ribosomal structure and biogenesis",A0A0U3HFC3
@@ -182,12 +182,12 @@ SACI_RS00910,SACI_RS00910,Saci_0189,153665,154324,+,type I 3-dehydroquinate dehy
 SACI_RS00915,SACI_RS00915,Saci_0190,154288,154590,-,Rieske (2Fe-2S) protein,Inorganic ion transport and metabolism,A0A0U3FG13
 SACI_RS00920,SACI_RS00920,Saci_0191,154751,155041,+,hypothetical protein,No COG annotation,A0A0U3GTZ2
 SACI_RS00925,SACI_RS00925,Saci_0192,155041,156696,+,ATP-dependent DNA helicase,"Replication, recombination and repair",A0A0U3H3A2
-SACI_RS00930,SACI_RS00930,Saci_0193,156693,157496,+,thioredoxin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3HBY5
-SACI_RS00935,SACI_RS00935,Saci_0194,157512,157739,+,hypothetical protein,"Post-translational modification, protein turnover, and chaperones",F2Z601
+SACI_RS00930,SACI_RS00930,Saci_0193,156693,157496,+,thioredoxin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3HBY5
+SACI_RS00935,SACI_RS00935,Saci_0194,157512,157739,+,hypothetical protein,"Post-translational modification, protein turnover,and chaperones",F2Z601
 SACI_RS00940,SACI_RS00940,Saci_0195,157840,158475,+,superoxide dismutase,Inorganic ion transport and metabolism,A0A0U3FNS6
 SACI_RS00945,SACI_RS00945,Saci_0196,158508,159587,+,NDP-sugar synthase,Cell wall/membrane/envelope biogenesis,A0A0U2NA86
 SACI_RS00950,SACI_RS00950,,159625,160275,+,hypothetical protein,No COG annotation,A0A0U2W518
-SACI_RS00955,SACI_RS00955,Saci_0198,160314,162212,+,thioredoxin domain-containing protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FY45
+SACI_RS00955,SACI_RS00955,Saci_0198,160314,162212,+,thioredoxin domain-containing protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FY45
 SACI_RS00960,SACI_RS00960,Saci_0199,162209,162913,+,SDR family oxidoreductase,Lipid transport and metabolism,A0A0U2X148
 SACI_RS00965,SACI_RS00965,Saci_0200,162967,163719,+,endonuclease NucS,"Replication, recombination and repair",A0A0U2Y9A9
 SACI_RS00970,SACI_RS00970,Saci_0201,163640,164668,+,glycosyltransferase family 2 protein,Cell wall/membrane/envelope biogenesis,A0A0U3GM53
@@ -318,17 +318,17 @@ SACI_RS01595,SACI_RS01595,Saci_0326,279279,279971,-,4Fe-4S dicluster domain-cont
 SACI_RS01600,SACI_RS01600,Saci_0327,279958,280641,-,hypothetical protein,No COG annotation,A0A0U2Y162
 SACI_RS01605,SACI_RS01605,Saci_0328,280685,281782,-,CoB--CoM heterodisulfide reductase iron-sulfur subunit A family protein,Energy production and conversion,A0A0U3GTK9
 SACI_RS01610,SACI_RS01610,Saci_0329,281837,283147,-,heterodisulfide reductase subunit B,Energy production and conversion,A0A0U3GUQ8
-SACI_RS01615,SACI_RS01615,Saci_0330,283670,283903,+,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FNF5
+SACI_RS01615,SACI_RS01615,Saci_0330,283670,283903,+,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FNF5
 SACI_RS01620,SACI_RS01620,Saci_0331,283916,285073,+,NAD(P)/FAD-dependent oxidoreductase,Function unknown,A0A0U3H3H3
 SACI_RS01625,SACI_RS01625,Saci_0332,285075,285455,+,DsrE family protein,Function unknown,A0A0U3GP07
 SACI_RS01630,SACI_RS01630,Saci_0333,285461,286381,+,DUF1641 domain-containing protein,Function unknown,A0A0U3H7G2
 SACI_RS01635,SACI_RS01635,Saci_0334,286554,287396,-,4Fe-4S dicluster domain-containing protein,Energy production and conversion,A0A0U3FG46
-SACI_RS01640,SACI_RS01640,Saci_0335,287471,287713,-,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3F829
+SACI_RS01640,SACI_RS01640,Saci_0335,287471,287713,-,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3F829
 SACI_RS01645,SACI_RS01645,Saci_0336,287725,288156,-,DsrE/DsrF/DrsH-like family protein,Function unknown,A0A0U3GKJ1
-SACI_RS01650,SACI_RS01650,Saci_0337,288292,288693,+,DsrE family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U2Y8Z1
+SACI_RS01650,SACI_RS01650,Saci_0337,288292,288693,+,DsrE family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U2Y8Z1
 SACI_RS01655,SACI_RS01655,Saci_0338,288700,290034,+,NAD(P)/FAD-dependent oxidoreductase,Energy production and conversion,A0A0U3HAN5
 SACI_RS01660,SACI_RS01660,Saci_0339,290021,290362,+,hypothetical protein,No COG annotation,A0A0U3HAL4
-SACI_RS01665,SACI_RS01665,Saci_0340,290359,290910,+,thioredoxin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3GW70
+SACI_RS01665,SACI_RS01665,Saci_0340,290359,290910,+,thioredoxin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3GW70
 SACI_RS01670,SACI_RS01670,Saci_0341,290876,291247,-,hypothetical protein,No COG annotation,A0A0U2NFM9
 SACI_RS01675,SACI_RS01675,Saci_0342,291259,292092,-,peptidoglycan DD-metalloendopeptidase family protein,No COG annotation,UPI000055222E
 SACI_RS01680,SACI_RS01680,Saci_0343,292093,293148,-,radical SAM protein,Function unknown,A0A0U3FPA0
@@ -340,7 +340,7 @@ SACI_RS01705,SACI_RS01705,Saci_0349,296337,296777,+,glycine cleavage system prot
 SACI_RS01710,SACI_RS01710,Saci_0350,296924,297373,+,glycine cleavage system protein H,Amino acid transport and metabolism,A0A0U2N9U9
 SACI_RS01715,SACI_RS01715,Saci_0351,297373,298470,+,lipoate--protein ligase family protein,Coenzyme transport and metabolism,A0A0U3HEN6
 SACI_RS01720,SACI_RS01720,Saci_0352,298665,299114,+,hypothetical protein,No COG annotation,A0A0U2W4N3
-SACI_RS01725,SACI_RS01725,Saci_0353,299111,299536,+,OsmC family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3F807
+SACI_RS01725,SACI_RS01725,Saci_0353,299111,299536,+,OsmC family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3F807
 SACI_RS01730,SACI_RS01730,Saci_0354,299571,299894,+,hypothetical protein,No COG annotation,A0A0U3GKH9
 SACI_RS01735,SACI_RS01735,Saci_0355,300074,300883,-,winged helix-turn-helix transcriptional regulator,Transcription,A0A0U3GLQ5
 SACI_RS01740,SACI_RS01740,Saci_0356,300888,301091,-,DUF1059 domain-containing protein,Function unknown,A0A0U3H3T8
@@ -377,7 +377,7 @@ SACI_RS01890,SACI_RS01890,Saci_0386,333031,333417,-,hypothetical protein,No COG 
 SACI_RS01895,SACI_RS01895,Saci_0387,333604,333846,+,Rdx family protein,Function unknown,A0A0U2X0P4
 SACI_RS01900,SACI_RS01900,Saci_0388,333891,334880,-,ABC transporter permease,Defense mechanisms,A0A0U3GLM0
 SACI_RS01905,SACI_RS01905,Saci_0389,334855,335682,-,ABC transporter ATP-binding protein,Defense mechanisms,UPI000055225D
-SACI_RS01910,SACI_RS01910,Saci_0390,335633,336574,+,AIR synthase family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3GW27
+SACI_RS01910,SACI_RS01910,Saci_0390,335633,336574,+,AIR synthase family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3GW27
 SACI_RS01915,SACI_RS01915,Saci_0391,336546,337037,+,NTP transferase domain-containing protein,Coenzyme transport and metabolism,A0A0U3FW92
 SACI_RS01920,SACI_RS01920,Saci_0392,337037,337783,+,DUF1614 domain-containing protein,Function unknown,A0A0U2NFJ4
 SACI_RS01925,SACI_RS01925,Saci_0393,337776,338063,-,hypothetical protein,No COG annotation,A0A0U3HM19
@@ -401,7 +401,7 @@ SACI_RS11520,SACI_RS11520,Saci_0411,351460,352395,-,cobalamin biosynthesis prote
 SACI_RS02010,cobS,Saci_0412,352350,353108,-,adenosylcobinamide-GDP ribazoletransferase,Coenzyme transport and metabolism,A0A0U3GGE6
 SACI_RS02015,SACI_RS02015,Saci_0413,353123,354502,+,cobyric acid synthase,Coenzyme transport and metabolism,A0A0U2VVU6
 SACI_RS02020,SACI_RS02020,Saci_0414,354525,355646,+,7-cyano-7-deazaguanine synthase,Nucleotide transport and metabolism,A0A0U3FP39
-SACI_RS02025,htpX,Saci_0415,355615,356610,-,zinc metalloprotease HtpX,"Post-translational modification, protein turnover, and chaperones",A0A0U3GTC8
+SACI_RS02025,htpX,Saci_0415,355615,356610,-,zinc metalloprotease HtpX,"Post-translational modification, protein turnover,and chaperones",A0A0U3GTC8
 SACI_RS02030,SACI_RS02030,Saci_0416,356672,357079,+,CBS domain-containing protein,Function unknown,A0A0U3GUI2
 SACI_RS02035,SACI_RS02035,Saci_0417,357086,357301,+,hypothetical protein,No COG annotation,A0A0U3HBE6
 SACI_RS02040,SACI_RS02040,Saci_0418,357389,358888,+,hypothetical protein,Function unknown,A0A0U3H2S9
@@ -424,7 +424,7 @@ SACI_RS02120,SACI_RS02120,Saci_0436,374461,375144,-,DNA double-strand break repa
 SACI_RS02125,SACI_RS02125,Saci_0437,375206,376042,+,hypothetical protein,Coenzyme transport and metabolism,A0A0U2Y4R1
 SACI_RS02130,SACI_RS02130,Saci_0439,376272,376916,+,hypothetical protein,No COG annotation,A0A0U3HBD4
 SACI_RS02135,SACI_RS02135,Saci_0440,376931,377545,+,M50 family peptidase,Function unknown,A0A0U3H2Q7
-SACI_RS02140,SACI_RS02140,Saci_0441,377559,378125,+,rhomboid family intramembrane serine protease,"Post-translational modification, protein turnover, and chaperones",A0A0U3GNR4
+SACI_RS02140,SACI_RS02140,Saci_0441,377559,378125,+,rhomboid family intramembrane serine protease,"Post-translational modification, protein turnover,and chaperones",A0A0U3GNR4
 SACI_RS02145,SACI_RS02145,Saci_0443,378298,378867,+,adenylate kinase family protein,Nucleotide transport and metabolism,A0A0U2N9Q1
 SACI_RS02150,SACI_RS02150,Saci_0444,378880,379767,+,Mrp/NBP35 family ATP-binding protein,"Cell cycle control, cell division, chromosome partitioning",A0A0U3FXD9
 SACI_RS02155,SACI_RS02155,Saci_0445,379764,379976,-,hypothetical protein,No COG annotation,A0A0U3FFV9
@@ -528,7 +528,7 @@ SACI_RS02655,SACI_RS02655,Saci_0557,454323,455327,-,alcohol dehydrogenase cataly
 SACI_RS02660,SACI_RS02660,Saci_0558,455333,456616,-,glutamine synthetase,Amino acid transport and metabolism,A0A0U3HA49
 SACI_RS02665,SACI_RS02665,Saci_0559,456672,457448,-,class I SAM-dependent methyltransferase family protein,"Translation, ribosomal structure and biogenesis",A0A0U3GKA0
 SACI_RS02670,SACI_RS02670,Saci_0560,457402,458550,-,amidohydrolase,Nucleotide transport and metabolism,A0A0U2NF24
-SACI_RS02685,SACI_RS02685,Saci_0564,459116,459649,+,archaemetzincin family Zn-dependent metalloprotease,"Post-translational modification, protein turnover, and chaperones",A0A0U3H3D1
+SACI_RS02685,SACI_RS02685,Saci_0564,459116,459649,+,archaemetzincin family Zn-dependent metalloprotease,"Post-translational modification, protein turnover,and chaperones",A0A0U3H3D1
 SACI_RS02690,SACI_RS02690,Saci_0565,459626,460045,-,archease,"Translation, ribosomal structure and biogenesis",A0A0U3GVQ8
 SACI_RS11810,cedA2,Saci_0567,460159,460317,-,DNA import protein CedA2,No COG annotation,UPI00005522F4
 SACI_RS02695,cedA,Saci_0568,460333,461115,-,DNA import protein CedA,No COG annotation,A0A0U3GG40
@@ -568,7 +568,7 @@ SACI_RS02855,SACI_RS02855,Saci_0601,481139,481741,-,DUF447 family protein,Functi
 SACI_RS02860,SACI_RS02860,Saci_0602,481827,482549,-,HAD family hydrolase,Function unknown,A0A0U3GVL8
 SACI_RS02865,SACI_RS02865,Saci_0603,482557,484770,-,elongation factor EF-2,"Translation, ribosomal structure and biogenesis",A0A0U3FMZ4
 SACI_RS02870,SACI_RS02870,Saci_0604,484969,485679,-,multidrug MFS transporter,"Replication, recombination and repair",A0A0U2VVC9
-SACI_RS02875,SACI_RS02875,Saci_0605,485705,486082,-,prefoldin subunit beta,"Post-translational modification, protein turnover, and chaperones",A0A0U3GSZ8
+SACI_RS02875,SACI_RS02875,Saci_0605,485705,486082,-,prefoldin subunit beta,"Post-translational modification, protein turnover,and chaperones",A0A0U3GSZ8
 SACI_RS02880,SACI_RS02880,Saci_0606,486079,486312,-,hypothetical protein,Function unknown,A0A0U2WSL2
 SACI_RS02885,SACI_RS02885,Saci_0607,486290,486811,-,Brix domain-containing protein,"Translation, ribosomal structure and biogenesis",A0A0U3GZL6
 SACI_RS02890,SACI_RS02890,Saci_0608,486819,487031,-,50S ribosomal protein L37ae,"Translation, ribosomal structure and biogenesis",A0A0U2Y0I6
@@ -576,7 +576,7 @@ SACI_RS02895,SACI_RS02895,Saci_0609,487042,487872,-,exosome complex protein Rrp4
 SACI_RS02900,SACI_RS02900,Saci_0610,487876,488607,-,exosome complex exonuclease Rrp41,"Translation, ribosomal structure and biogenesis",A0A0U3GNE4
 SACI_RS02905,SACI_RS02905,Saci_0611,488573,489322,-,RNA-binding protein,"Translation, ribosomal structure and biogenesis",A0A0U2W436
 SACI_RS02910,SACI_RS02910,Saci_0612,489324,490025,-,ribosome assembly factor SBDS,"Translation, ribosomal structure and biogenesis",A0A0U3FX20
-SACI_RS02915,psmA,Saci_0613,490043,490771,-,archaeal proteasome endopeptidase complex subunit alpha,"Post-translational modification, protein turnover, and chaperones",A0A0U3GK31
+SACI_RS02915,psmA,Saci_0613,490043,490771,-,archaeal proteasome endopeptidase complex subunit alpha,"Post-translational modification, protein turnover,and chaperones",A0A0U3GK31
 SACI_RS02920,SACI_RS02920,Saci_0614,490869,491291,-,ribonuclease P,"Translation, ribosomal structure and biogenesis",A0A0U3HE34
 SACI_RS02925,SACI_RS02925,Saci_0615,491288,491839,-,RNase P p30-like protein,"Translation, ribosomal structure and biogenesis",A0A0U2Y8B9
 SACI_RS02930,SACI_RS02930,Saci_0616,491814,492248,-,hypothetical protein,"Translation, ribosomal structure and biogenesis",A0A0U3HA35
@@ -602,7 +602,7 @@ SACI_RS03025,SACI_RS03025,Saci_0636,505871,506143,+,hypothetical protein,No COG 
 SACI_RS03030,SACI_RS03030,Saci_0637,506140,507417,-,site-specific integrase,"Replication, recombination and repair",A0A0U3H9Y3
 SACI_RS03040,SACI_RS03040,Saci_0639,507676,509571,-,beta-CASP ribonuclease aCPSF1,Function unknown,A0A0U3GK46
 SACI_RS03045,SACI_RS03045,Saci_0640,509652,510707,+,NAD(P)-dependent glycerol-1-phosphate dehydrogenase,Energy production and conversion,A0A0U2NEY6
-SACI_RS03050,SACI_RS03050,Saci_0641,510704,511477,-,peptidylprolyl isomerase,"Post-translational modification, protein turnover, and chaperones",UPI0002B27E92
+SACI_RS03050,SACI_RS03050,Saci_0641,510704,511477,-,peptidylprolyl isomerase,"Post-translational modification, protein turnover,and chaperones",UPI0002B27E92
 SACI_RS03055,SACI_RS03055,Saci_0642,511503,511688,+,50S ribosomal protein L37e,"Translation, ribosomal structure and biogenesis",A0A0U3GVI6
 SACI_RS03060,speE,Saci_0643,511688,512596,+,polyamine aminopropyltransferase,Amino acid transport and metabolism,A0A0U3FMW9
 SACI_RS03075,SACI_RS03075,Saci_0646,513073,514320,+,adenosylhomocysteinase,Coenzyme transport and metabolism,A0A0U2VV86
@@ -614,20 +614,20 @@ SACI_RS03105,SACI_RS03105,Saci_0652,517187,517702,-,transcription factor TFIIE%2
 SACI_RS03110,SACI_RS03110,Saci_0653,517716,518114,-,tRNA methyltransferase,"Translation, ribosomal structure and biogenesis",A0A0U3GNB5
 SACI_RS03115,hflX,Saci_0654,518264,519322,-,GTPase HflX,Function unknown,F2Z6G1
 SACI_RS03120,SACI_RS03120,Saci_0655,519319,519810,-,TIGR00270 family protein,Transcription,A0A0U2N9G3
-SACI_RS03125,SACI_RS03125,Saci_0656,519882,521072,+,proteasome-activating nucleotidase,"Post-translational modification, protein turnover, and chaperones",F2Z6H9
-SACI_RS03130,SACI_RS03130,Saci_0657,521069,521575,+,PUA domain-containing protein,"Post-translational modification, protein turnover, and chaperones",A0A0U2Y887
+SACI_RS03125,SACI_RS03125,Saci_0656,519882,521072,+,proteasome-activating nucleotidase,"Post-translational modification, protein turnover,and chaperones",F2Z6H9
+SACI_RS03130,SACI_RS03130,Saci_0657,521069,521575,+,PUA domain-containing protein,"Post-translational modification, protein turnover,and chaperones",A0A0U2Y887
 SACI_RS03135,SACI_RS03135,Saci_0658,521575,522297,+,proteasome assembly chaperone family protein,Function unknown,A0A0U3HA06
 SACI_RS03140,tgtA,Saci_0659,522241,523785,-,tRNA guanosine(15) transglycosylase TgtA,"Translation, ribosomal structure and biogenesis",A0A0U3GK27
 SACI_RS03145,SACI_RS03145,Saci_0660,523739,524173,-,Lsm family RNA-binding protein,Transcription,A0A0U3GL12
 SACI_RS03150,SACI_RS03150,Saci_0661,524244,524618,+,DNA-directed RNA polymerase subunit G,No COG annotation,A0A0U2NEW2
-SACI_RS03155,psmB,Saci_0662,524615,525202,-,archaeal proteasome endopeptidase complex subunit beta,"Post-translational modification, protein turnover, and chaperones",A0A0U3GVH3
+SACI_RS03155,psmB,Saci_0662,524615,525202,-,archaeal proteasome endopeptidase complex subunit beta,"Post-translational modification, protein turnover,and chaperones",A0A0U3GVH3
 SACI_RS03160,SACI_RS03160,Saci_0663,525232,526518,-,histidine--tRNA ligase,"Translation, ribosomal structure and biogenesis",UPI000055233E
 SACI_RS03165,SACI_RS03165,Saci_0664,526525,526800,-,hypothetical protein,"Replication, recombination and repair",A0A0U3FMW0
 SACI_RS03170,SACI_RS03170,Saci_0665,526865,527452,+,TFIIB-type zinc ribbon-containing protein,Transcription,A0A0U3FEZ6
-SACI_RS03175,SACI_RS03175,Saci_0666,527522,529183,+,thermosome subunit,"Post-translational modification, protein turnover, and chaperones",A0A0U3FNK6
+SACI_RS03175,SACI_RS03175,Saci_0666,527522,529183,+,thermosome subunit,"Post-translational modification, protein turnover,and chaperones",A0A0U3FNK6
 SACI_RS03180,SACI_RS03180,Saci_0667,529180,530820,-,ATP-binding protein,"Replication, recombination and repair",A0A0U3GSV6
 SACI_RS03185,SACI_RS03185,Saci_0668,530841,531239,-,hypothetical protein,No COG annotation,A0A0U2Y0D6
-SACI_RS03190,SACI_RS03190,Saci_0669,531229,531483,-,MoaD/ThiS family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3HAW4
+SACI_RS03190,SACI_RS03190,Saci_0669,531229,531483,-,MoaD/ThiS family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3HAW4
 SACI_RS03195,SACI_RS03195,Saci_0670,531486,531734,-,30S ribosomal protein S17e,"Translation, ribosomal structure and biogenesis",A0A0U3H285
 SACI_RS03200,SACI_RS03200,Saci_0671,531780,532937,-,fructose 1%2C6-bisphosphatase,Carbohydrate transport and metabolism,A0A0U3FMM9
 SACI_RS03205,SACI_RS03205,Saci_0672,532970,534784,-,ribosome biogenesis/translation initiation ATPase RLI,Amino acid transport and metabolism,A0A0U2W3Z5
@@ -725,7 +725,7 @@ SACI_RS03685,truD,Saci_0769,613286,614407,-,tRNA pseudouridine(13) synthase TruD
 SACI_RS03690,SACI_RS03690,Saci_0770,614404,614766,-,peptidyl-tRNA hydrolase,"Translation, ribosomal structure and biogenesis",A0A0U3GN27
 SACI_RS11585,SACI_RS11585,Saci_0771,614806,615018,+,DUF1610 domain-containing protein,"Translation, ribosomal structure and biogenesis",UPI0000552399
 SACI_RS03695,SACI_RS03695,Saci_0772,615029,615304,+,elongation factor 1-beta,"Translation, ribosomal structure and biogenesis",A0A0U3FYI1
-SACI_RS03700,SACI_RS03700,Saci_0773,615408,617717,+,CDC48 family AAA ATPase,"Post-translational modification, protein turnover, and chaperones",UPI00064E4324
+SACI_RS03700,SACI_RS03700,Saci_0773,615408,617717,+,CDC48 family AAA ATPase,"Post-translational modification, protein turnover,and chaperones",UPI00064E4324
 SACI_RS03705,SACI_RS03705,Saci_0774,617722,617946,+,hypothetical protein,No COG annotation,A0A0U2W3Q4
 SACI_RS03710,SACI_RS03710,Saci_0775,617953,619008,+,flap endonuclease-1,"Replication, recombination and repair",UPI0009B5BDA5
 SACI_RS03715,SACI_RS03715,Saci_0776,619060,619722,+,NAD-binding protein,Coenzyme transport and metabolism,A0A0U3FWP6
@@ -742,7 +742,7 @@ SACI_RS03765,SACI_RS03765,Saci_0787,629075,630055,-,hypothetical protein,"Transl
 SACI_RS03770,SACI_RS03770,Saci_0788,630109,631905,-,ATP-dependent DNA ligase,"Replication, recombination and repair",A0A0U2WS79
 SACI_RS03775,SACI_RS03775,Saci_0789,632052,632570,+,dCTP deaminase,Nucleotide transport and metabolism,A0A0U2Y048
 SACI_RS03780,SACI_RS03780,Saci_0790,632560,633267,-,hypothetical protein,Function unknown,A0A0U3H2H7
-SACI_RS03785,SACI_RS03785,Saci_0791,633321,634028,-,thioredoxin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3H7C9
+SACI_RS03785,SACI_RS03785,Saci_0791,633321,634028,-,thioredoxin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3H7C9
 SACI_RS03790,SACI_RS03790,Saci_0792,634077,634760,-,TIGR00296 family protein,Function unknown,A0A0U3GN12
 SACI_RS03795,SACI_RS03795,Saci_0793,634729,635196,-,Mut7-C RNAse domain-containing protein,Function unknown,A0A0U2W3N3
 SACI_RS03800,SACI_RS03800,Saci_0794,635196,635447,-,hypothetical protein,No COG annotation,A0A0U3FWP1
@@ -788,7 +788,7 @@ SACI_RS03995,SACI_RS03995,Saci_0834,668286,668837,+,DNA-directed RNA polymerase,
 SACI_RS04000,SACI_RS04000,Saci_0835,668837,669043,+,DNA-binding protein,Transcription,A0A0U2WZP5
 SACI_RS04005,SACI_RS04005,Saci_0836,669058,669552,+,DUF359 domain-containing protein,Function unknown,A0A0U2Y7V1
 SACI_RS04010,SACI_RS04010,Saci_0837,669605,670846,-,2%2C3-bisphosphoglycerate-independent phosphoglycerate mutase,Carbohydrate transport and metabolism,A0A0U3FM39
-SACI_RS04015,SACI_RS04015,Saci_0838,670843,673086,-,CDC48 family AAA ATPase,"Post-translational modification, protein turnover, and chaperones",UPI00005523D5
+SACI_RS04015,SACI_RS04015,Saci_0838,670843,673086,-,CDC48 family AAA ATPase,"Post-translational modification, protein turnover,and chaperones",UPI00005523D5
 SACI_RS04020,rgy,,673149,676887,+,reverse gyrase,No COG annotation,
 SACI_RS04025,SACI_RS04025,Saci_0840,676892,677785,+,carbon-nitrogen hydrolase family protein,Function unknown,A0A0U3H9H7
 SACI_RS04030,SACI_RS04030,Saci_0841,677802,678131,-,30S ribosomal protein S25e,"Translation, ribosomal structure and biogenesis",A0A0U3HDL1
@@ -821,12 +821,12 @@ SACI_RS04145,SACI_RS04145,Saci_0867,693704,693973,+,DUF131 domain-containing pro
 SACI_RS11820,SACI_RS11820,,694196,694357,-,integrase,Function unknown,
 SACI_RS04155,SACI_RS04155,Saci_0869,694942,696009,-,glycosyltransferase,Cell wall/membrane/envelope biogenesis,A0A0U3H2B3
 SACI_RS04160,SACI_RS04160,Saci_0870,696029,696892,+,glycosyltransferase,Cell wall/membrane/envelope biogenesis,A0A0U3FN47
-SACI_RS04165,SACI_RS04165,Saci_0871,697526,698449,-,M48 family metalloprotease,"Post-translational modification, protein turnover, and chaperones",A0A0U2WS16
+SACI_RS04165,SACI_RS04165,Saci_0871,697526,698449,-,M48 family metalloprotease,"Post-translational modification, protein turnover,and chaperones",A0A0U2WS16
 SACI_RS04170,cadA,Saci_0872,698592,700817,-,cadmium-translocating P-type ATPase,Inorganic ion transport and metabolism,A0A0U2XZX9
 SACI_RS11610,SACI_RS11610,Saci_0873,700810,700977,-,YHS domain-containing protein,Function unknown,M1ITZ6
 SACI_RS04175,SACI_RS04175,Saci_0874,701108,701617,+,TRASH domain-containing protein,Transcription,M1J1D5
 SACI_RS04180,SACI_RS04180,Saci_0875,701644,701922,+,hypothetical protein,No COG annotation,A0A0U2Y7S2
-SACI_RS04185,SACI_RS04185,Saci_0877,701985,703760,+,AAA family ATPase,"Post-translational modification, protein turnover, and chaperones",F2Z698
+SACI_RS04185,SACI_RS04185,Saci_0877,701985,703760,+,AAA family ATPase,"Post-translational modification, protein turnover,and chaperones",F2Z698
 SACI_RS04190,SACI_RS04190,Saci_0878,703792,704349,+,hypothetical protein,No COG annotation,A0A0U2N947
 SACI_RS04195,SACI_RS04195,Saci_0879,704349,705005,+,hypothetical protein,No COG annotation,A0A0U3FUY5
 SACI_RS04200,SACI_RS04200,Saci_0880,704955,706073,-,ATP-binding cassette domain-containing protein,Inorganic ion transport and metabolism,A0A0U3FEV3
@@ -856,7 +856,7 @@ SACI_RS04325,moaC,Saci_0905,725765,726211,+,cyclic pyranopterin monophosphate sy
 SACI_RS04330,SACI_RS04330,Saci_0906,726195,727508,-,replication factor C large subunit,"Replication, recombination and repair",A0A0U3H2L1
 SACI_RS04335,SACI_RS04335,Saci_0907,727509,728486,-,replication factor C small subunit,"Replication, recombination and repair",A0A0U3GMP5
 SACI_RS04340,SACI_RS04340,Saci_0908,728490,728942,-,YbhB/YbcL family Raf kinase inhibitor-like protein,Function unknown,A0A0U2W386
-SACI_RS04345,psmB,Saci_0909,728973,729584,-,archaeal proteasome endopeptidase complex subunit beta,"Post-translational modification, protein turnover, and chaperones",A0A0U3FWF1
+SACI_RS04345,psmB,Saci_0909,728973,729584,-,archaeal proteasome endopeptidase complex subunit beta,"Post-translational modification, protein turnover,and chaperones",A0A0U3FWF1
 SACI_RS04350,SACI_RS04350,Saci_0910,729607,730794,-,amidase,"Translation, ribosomal structure and biogenesis",A0A0U2WZI0
 SACI_RS04355,SACI_RS04355,Saci_0911,731144,732148,+,alcohol dehydrogenase catalytic domain-containing protein,Energy production and conversion,A0A0U2Y7M3
 SACI_RS04360,SACI_RS04360,Saci_0912,732174,732785,+,hypothetical protein,No COG annotation,A0A0U2XZU9
@@ -869,15 +869,15 @@ SACI_RS04385,SACI_RS04385,Saci_0918,735648,736211,-,nucleotidyltransferase famil
 SACI_RS04390,SACI_RS04390,Saci_0919,736240,736674,+,carbon monoxide dehydrogenase subunit G,Energy production and conversion,A0A0U3HDE0
 SACI_RS04395,SACI_RS04395,Saci_0920,736681,738261,-,50S ribosome-binding GTPase,"Translation, ribosomal structure and biogenesis",A0A0U3FED6
 SACI_RS04400,SACI_RS04400,Saci_0921,738314,738814,+,ZPR1 zinc finger domain-containing protein,Function unknown,UPI0000552422
-SACI_RS04405,SACI_RS04405,Saci_0922,738801,739322,-,Hsp20/alpha crystallin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3GJI7
+SACI_RS04405,SACI_RS04405,Saci_0922,738801,739322,-,Hsp20/alpha crystallin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3GJI7
 SACI_RS04410,mce,Saci_0923,739365,739790,-,methylmalonyl-CoA epimerase,Amino acid transport and metabolism,A0A0U3GTC5
 SACI_RS04415,SACI_RS04415,Saci_0924,739876,741549,+,methylmalonyl-CoA mutase family protein,Lipid transport and metabolism,A0A0U3FBH6
 SACI_RS04420,SACI_RS04420,Saci_0925,741546,742088,-,phosphoribosyltransferase,Coenzyme transport and metabolism,A0A0U3H2J3
 SACI_RS04425,SACI_RS04425,Saci_0926,742081,743175,-,alkaline phosphatase family protein,Function unknown,A0A0U3GUY1
 SACI_RS04430,SACI_RS04430,,743373,744923,+,NAD(P)/FAD-dependent oxidoreductase,"Secondary metabolites biosynthesis, transport, and catabolism",A0A0U3GF91
-SACI_RS04435,SACI_RS04435,Saci_0929,744958,746766,+,AAA family ATPase,"Post-translational modification, protein turnover, and chaperones",A0A0U2W367
+SACI_RS04435,SACI_RS04435,Saci_0929,744958,746766,+,AAA family ATPase,"Post-translational modification, protein turnover,and chaperones",A0A0U2W367
 SACI_RS04440,SACI_RS04440,Saci_0930,746708,747511,-,inositol-1-monophosphatase,Carbohydrate transport and metabolism,A0A0U3FN04
-SACI_RS04445,trxB,Saci_0931,747508,748479,-,thioredoxin-disulfide reductase,"Post-translational modification, protein turnover, and chaperones",A0A0U2WZG5
+SACI_RS04445,trxB,Saci_0931,747508,748479,-,thioredoxin-disulfide reductase,"Post-translational modification, protein turnover,and chaperones",A0A0U2WZG5
 SACI_RS04450,SACI_RS04450,Saci_0932,748556,750064,+,dihydropteroate synthase-like protein,Coenzyme transport and metabolism,A0A0U2XZT2
 SACI_RS04455,SACI_RS04455,Saci_0933,750024,750425,+,hypothetical protein,No COG annotation,A0A0U3H9E4
 SACI_RS04460,SACI_RS04460,Saci_0934,750422,750841,-,6-carboxytetrahydropterin synthase,Coenzyme transport and metabolism,A0A0U3H1P6
@@ -964,10 +964,10 @@ SACI_RS04855,SACI_RS04855,Saci_1017,816113,817498,+,TldD/PmbA family protein,"Re
 SACI_RS04860,SACI_RS04860,Saci_1018,817491,818750,+,TldD/PmbA family protein,Function unknown,A0A0U2WRM7
 SACI_RS04865,SACI_RS04865,Saci_1019,818942,819370,+,small multi-drug export protein,Function unknown,A0A0U2XZL5
 SACI_RS04870,SACI_RS04870,Saci_1020,819407,821452,+,xanthine dehydrogenase family protein molybdopterin-binding subunit,Energy production and conversion,A0A0U3H1B1
-SACI_RS04875,SACI_RS04875,Saci_1021,821803,822612,+,XdhC family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FUD5
+SACI_RS04875,SACI_RS04875,Saci_1021,821803,822612,+,XdhC family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FUD5
 SACI_RS04880,SACI_RS04880,Saci_1022,822609,822950,+,hypothetical protein,No COG annotation,A0A0U2NE59
 SACI_RS04885,SACI_RS04885,Saci_1023,823076,824089,-,pyridoxal-phosphate dependent enzyme,Amino acid transport and metabolism,A0A0U3HKJ8
-SACI_RS04890,SACI_RS04890,Saci_1024,824166,825059,+,trypsin-like peptidase domain-containing protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FM42
+SACI_RS04890,SACI_RS04890,Saci_1024,824166,825059,+,trypsin-like peptidase domain-containing protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FM42
 SACI_RS04895,SACI_RS04895,Saci_1025,825069,825740,+,phosphatase PAP2 family protein,Lipid transport and metabolism,A0A0U3FEH7
 SACI_RS04900,SACI_RS04900,Saci_1026,825821,826270,-,hypothetical protein,No COG annotation,F2Z5W9
 SACI_RS04905,SACI_RS04905,Saci_1027,826480,827391,+,ABC transporter ATP-binding protein,Defense mechanisms,A0A0U3GJ95
@@ -1065,7 +1065,7 @@ SACI_RS05345,SACI_RS05345,Saci_1121,924092,925279,-,thiolase domain-containing p
 SACI_RS05350,SACI_RS05350,Saci_1122,925285,926898,-,long-chain fatty acid--CoA ligase,Lipid transport and metabolism,A0A0U3FDW5
 SACI_RS05355,SACI_RS05355,Saci_1123,926934,928136,-,acyl-CoA dehydrogenase family protein,Lipid transport and metabolism,A0A0U2N8S2
 SACI_RS05360,SACI_RS05360,Saci_1124,928650,928964,+,hypothetical protein,No COG annotation,A0A0U3HDK5
-SACI_RS05365,SACI_RS05365,Saci_1125,929275,929751,-,peroxiredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U3GSS4
+SACI_RS05365,SACI_RS05365,Saci_1125,929275,929751,-,peroxiredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U3GSS4
 SACI_RS05370,SACI_RS05370,Saci_1126,929964,931616,-,AMP-binding protein,Lipid transport and metabolism,M1I4I9
 SACI_RS05375,SACI_RS05375,Saci_1127,932298,934181,+,APC family permease,Amino acid transport and metabolism,UPI00064F3338
 SACI_RS05380,SACI_RS05380,Saci_1128,934620,936272,+,ATP-binding protein,"Replication, recombination and repair",A0A0U3H5M7
@@ -1086,7 +1086,7 @@ SACI_RS05450,SACI_RS05450,Saci_1143,954542,955027,-,hypothetical protein,Energy 
 SACI_RS05455,SACI_RS05455,,954960,955145,+,hypothetical protein,Energy production and conversion,A0A0U3H132
 SACI_RS11845,SACI_RS11845,,955170,955289,+,molybdopterin-dependent oxidoreductase,No COG annotation,UPI0002B27A63
 SACI_RS05460,SACI_RS05460,,955282,955806,+,xanthine dehydrogenase family protein molybdopterin-binding subunit,Energy production and conversion,A0A0U3H177
-SACI_RS05465,SACI_RS05465,Saci_1147,956887,960714,+,S8 family serine peptidase,"Post-translational modification, protein turnover, and chaperones",A0A0U3FDU5
+SACI_RS05465,SACI_RS05465,Saci_1147,956887,960714,+,S8 family serine peptidase,"Post-translational modification, protein turnover,and chaperones",A0A0U3FDU5
 SACI_RS05470,SACI_RS05470,Saci_1148,960722,962470,+,hypothetical protein,Function unknown,A0A0U2N8R4
 SACI_RS05475,SACI_RS05475,,962554,964277,-,acyl--CoA ligase,No COG annotation,
 SACI_RS05480,SACI_RS05480,Saci_1151,964555,965004,+,YbaK/EbsC family protein,Function unknown,A0A0U3HCV8
@@ -1108,7 +1108,7 @@ SACI_RS05555,SACI_RS05555,Saci_1166,981962,983038,+,ABC transporter ATP-binding 
 SACI_RS05560,SACI_RS05560,Saci_1167,983366,983848,-,CBS domain-containing protein,Function unknown,A0A0U3FLF0
 SACI_RS05565,SACI_RS05565,Saci_1168,984081,984524,-,hypothetical protein,Function unknown,A0A0U3H9N8
 SACI_RS05570,SACI_RS05570,Saci_1169,984596,985579,-,FAD-dependent oxidoreductase,Energy production and conversion,A0A0U3HCT4
-SACI_RS05575,msrA,Saci_1170,985690,986256,+,peptide-methionine (S)-S-oxide reductase MsrA,"Post-translational modification, protein turnover, and chaperones",A0A0U3FE68
+SACI_RS05575,msrA,Saci_1170,985690,986256,+,peptide-methionine (S)-S-oxide reductase MsrA,"Post-translational modification, protein turnover,and chaperones",A0A0U3FE68
 SACI_RS05580,SACI_RS05580,Saci_1171,987096,987896,+,MarR family transcriptional regulator,Transcription,A0A0U2W2N5
 SACI_RS05585,SACI_RS05585,Saci_1172,987941,989377,-,type II secretion system F family protein,Cell motility,A0A0U3FVM0
 SACI_RS05590,SACI_RS05590,Saci_1173,989361,990902,-,type II/IV secretion system ATPase subunit,Cell motility,A0A0U2WYW0
@@ -1140,7 +1140,7 @@ SACI_RS05715,SACI_RS05715,Saci_1199,1019088,1020341,-,NDP-sugar synthase,Cell wa
 SACI_RS05720,SACI_RS05720,Saci_1200,1020382,1021716,+,alpha-amylase,Carbohydrate transport and metabolism,A0A0U3GRH7
 SACI_RS05725,SACI_RS05725,Saci_1201,1021713,1023413,+,glycogen/starch synthase,Cell wall/membrane/envelope biogenesis,F2Z6E6
 SACI_RS05730,SACI_RS05730,Saci_1202,1023450,1024052,+,sulfite oxidase-like oxidoreductase,Function unknown,A0A0U3H9K7
-SACI_RS05735,SACI_RS05735,Saci_1203,1024057,1025676,-,TCP-1/cpn60 chaperonin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3H1H5
+SACI_RS05735,SACI_RS05735,Saci_1203,1024057,1025676,-,TCP-1/cpn60 chaperonin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3H1H5
 SACI_RS05740,SACI_RS05740,Saci_1205,1025769,1026086,-,hypothetical protein,No COG annotation,A0A0U3HCR6
 SACI_RS05745,SACI_RS05745,Saci_1206,1026145,1026750,-,hypothetical protein,No COG annotation,A0A0U3FE34
 SACI_RS05750,SACI_RS05750,Saci_1207,1026823,1027203,-,CBS domain-containing protein,Lipid transport and metabolism,A0A0U3F648
@@ -1313,11 +1313,11 @@ SACI_RS06610,SACI_RS06610,Saci_1382,1179672,1181015,-,aminomethyl-transferring g
 SACI_RS06615,gcvT,Saci_1383,1181056,1182111,+,glycine cleavage system aminomethyltransferase GcvT,Amino acid transport and metabolism,A0A0U3H8C5
 SACI_RS06620,gcvH,Saci_1384,1182119,1182535,+,glycine cleavage system protein GcvH,Amino acid transport and metabolism,A0A0U3H8A3
 SACI_RS06625,SACI_RS06625,Saci_1385,1182535,1183281,+,proteasome assembly chaperone family protein,Function unknown,M1J2A9
-SACI_RS06630,SACI_RS06630,Saci_1386,1183286,1183660,+,hypothetical protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FTL1
+SACI_RS06630,SACI_RS06630,Saci_1386,1183286,1183660,+,hypothetical protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FTL1
 SACI_RS06635,SACI_RS06635,Saci_1387,1183734,1184735,+,phosphate uptake regulator PhoU,Transcription,A0A0U3HHW3
-SACI_RS06640,sufC,Saci_1388,1184762,1185508,+,Fe-S cluster assembly ATPase SufC,"Post-translational modification, protein turnover, and chaperones",A0A0U3FJG7
-SACI_RS06645,sufB,Saci_1389,1185579,1187018,+,Fe-S cluster assembly protein SufB,"Post-translational modification, protein turnover, and chaperones",A0A0U3FB76
-SACI_RS06650,SACI_RS06650,Saci_1390,1187019,1188188,+,SufD family Fe-S cluster assembly protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FDA5
+SACI_RS06640,sufC,Saci_1388,1184762,1185508,+,Fe-S cluster assembly ATPase SufC,"Post-translational modification, protein turnover,and chaperones",A0A0U3FJG7
+SACI_RS06645,sufB,Saci_1389,1185579,1187018,+,Fe-S cluster assembly protein SufB,"Post-translational modification, protein turnover,and chaperones",A0A0U3FB76
+SACI_RS06650,SACI_RS06650,Saci_1390,1187019,1188188,+,SufD family Fe-S cluster assembly protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FDA5
 SACI_RS06655,SACI_RS06655,Saci_1391,1188258,1188389,+,ribbon-helix-helix protein%2C CopG family,Function unknown,A0A0U3GQ47
 SACI_RS06665,SACI_RS06665,Saci_1393,1188647,1189630,+,alcohol dehydrogenase catalytic domain-containing protein,Energy production and conversion,A0A0U3H719
 SACI_RS11655,SACI_RS11655,,1189798,1190013,-,integrase,Function unknown,
@@ -1326,7 +1326,7 @@ SACI_RS06680,SACI_RS06680,Saci_1397,1192276,1192473,+,hypothetical protein,No CO
 SACI_RS06685,SACI_RS06685,Saci_1398,1192559,1192849,+,hypothetical protein,No COG annotation,UPI00005525D5
 SACI_RS06690,SACI_RS06690,Saci_1399,1192841,1193146,-,hypothetical protein,No COG annotation,A0A0U3GKC8
 SACI_RS06695,SACI_RS06695,Saci_1400,1193291,1193635,+,hypothetical protein,No COG annotation,A0A0U2W228
-SACI_RS06700,SACI_RS06700,Saci_1401,1193673,1195349,-,thermosome subunit,"Post-translational modification, protein turnover, and chaperones",A0A0U3FYD6
+SACI_RS06700,SACI_RS06700,Saci_1401,1193673,1195349,-,thermosome subunit,"Post-translational modification, protein turnover,and chaperones",A0A0U3FYD6
 SACI_RS06705,SACI_RS06705,Saci_1402,1195473,1196213,+,hypothetical protein,No COG annotation,M1ID91
 SACI_RS06710,SACI_RS06710,Saci_1403,1196140,1196961,-,hypothetical protein,No COG annotation,A0A0U3FV04
 SACI_RS06715,SACI_RS06715,Saci_1404,1197002,1197367,-,hypothetical protein,No COG annotation,A0A0U2Y4C6
@@ -1384,7 +1384,7 @@ SACI_RS06965,SACI_RS06965,Saci_1459,1246465,1246977,-,50S ribosomal protein L11,
 SACI_RS06970,SACI_RS06970,Saci_1460,1246985,1247443,-,transcription elongation factor Spt5,Transcription,A0A0U3FUU8
 SACI_RS06975,SACI_RS06975,Saci_1461,1247457,1247654,-,protein translocase SEC61 complex subunit gamma,"Intracellular trafficking, secretion, and vesicular transport",UPI00001357A4
 SACI_RS06980,ftsY,,1247670,1248779,-,signal recognition particle-docking protein FtsY,"Intracellular trafficking, secretion, and vesicular transport",A0A0U3FSX5
-SACI_RS06985,SACI_RS06985,Saci_1463,1248776,1249225,-,prefoldin subunit alpha,"Post-translational modification, protein turnover, and chaperones",A0A0U2WW59
+SACI_RS06985,SACI_RS06985,Saci_1463,1248776,1249225,-,prefoldin subunit alpha,"Post-translational modification, protein turnover,and chaperones",A0A0U2WW59
 SACI_RS06990,SACI_RS06990,Saci_1464,1249222,1249482,-,50S ribosomal protein L18a,"Translation, ribosomal structure and biogenesis",A0A0U2Y467
 SACI_RS06995,SACI_RS06995,Saci_1465,1249484,1250155,-,translation initiation factor IF-6,"Translation, ribosomal structure and biogenesis",A0A0U3H618
 SACI_RS07000,SACI_RS07000,Saci_1466,1250152,1250541,-,50S ribosomal protein L31e,"Translation, ribosomal structure and biogenesis",A0A0U3H642
@@ -1395,7 +1395,7 @@ SACI_RS07020,SACI_RS07020,Saci_1470,1251589,1252761,+,nicotinate phosphoribosylt
 SACI_RS07025,SACI_RS07025,Saci_1471,1252751,1253803,-,phosphate uptake regulator PhoU,Inorganic ion transport and metabolism,A0A0U3H6W0
 SACI_RS07030,SACI_RS07030,Saci_1472,1253865,1254854,-,DUF711 family protein,Function unknown,A0A0U3GQU6
 SACI_RS07035,SACI_RS07035,Saci_1473,1254908,1255303,+,DsrE/DsrF/DrsH-like family protein,Function unknown,A0A0U3FB10
-SACI_RS07040,SACI_RS07040,Saci_1474,1255303,1255524,+,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3GNN9
+SACI_RS07040,SACI_RS07040,Saci_1474,1255303,1255524,+,sulfurtransferase TusA family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3GNN9
 SACI_RS07045,SACI_RS07045,Saci_1475,1255572,1256459,+,cysteine synthase family protein,Amino acid transport and metabolism,A0A0U3GPX6
 SACI_RS07050,SACI_RS07050,Saci_1477,1256654,1257328,+,hypothetical protein,Signal transduction mechanisms,A0A0U3GLD7
 SACI_RS07055,moaA,Saci_1479,1257537,1258478,+,GTP 3'%2C8-cyclase MoaA,Coenzyme transport and metabolism,A0A0U3GZ31
@@ -1404,7 +1404,7 @@ SACI_RS07065,folE,Saci_1481,1259620,1260249,+,GTP cyclohydrolase I FolE,Coenzyme
 SACI_RS07070,SACI_RS07070,Saci_1482,1260273,1261175,+,MarR family transcriptional regulator,Transcription,A0A0U2Y682
 SACI_RS07075,glnA,Saci_1483,1261179,1262600,-,type I glutamate--ammonia ligase,Amino acid transport and metabolism,A0A0U2WW46
 SACI_RS07080,SACI_RS07080,Saci_1484,1262708,1263322,-,ABC transporter ATP-binding protein,Inorganic ion transport and metabolism,F2Z652
-SACI_RS07085,SACI_RS07085,Saci_1485,1263309,1263734,-,thiol reductase thioredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U3FTD3
+SACI_RS07085,SACI_RS07085,Saci_1485,1263309,1263734,-,thiol reductase thioredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U3FTD3
 SACI_RS07090,SACI_RS07090,Saci_1486,1263956,1264825,+,hypothetical protein,Function unknown,A0A0U2NDF6
 SACI_RS07095,SACI_RS07095,Saci_1487,1264810,1265859,+,RsmB/NOP family class I SAM-dependent RNA methyltransferase,"Translation, ribosomal structure and biogenesis",A0A0U3FRG3
 SACI_RS07100,SACI_RS07100,Saci_1488,1265859,1266368,+,hypothetical protein,Function unknown,A0A0U3FL55
@@ -1575,11 +1575,11 @@ SACI_RS07905,SACI_RS07905,Saci_1657,1411899,1413230,+,DEAD/DEAH box helicase fam
 SACI_RS07910,SACI_RS07910,Saci_1658,1413342,1414172,+,winged helix-turn-helix transcriptional regulator,Transcription,A0A0U3GQS5
 SACI_RS07915,SACI_RS07915,Saci_1659,1414159,1414671,-,hypothetical protein,No COG annotation,A0A0U3H7P7
 SACI_RS07920,SACI_RS07920,Saci_1660,1414671,1415075,-,hypothetical protein,No COG annotation,A0A0U3HHB5
-SACI_RS07925,SACI_RS07925,Saci_1661,1415113,1416585,-,carboxypeptidase M32,"Post-translational modification, protein turnover, and chaperones",A0A0U3H0L8
+SACI_RS07925,SACI_RS07925,Saci_1661,1415113,1416585,-,carboxypeptidase M32,"Post-translational modification, protein turnover,and chaperones",A0A0U3H0L8
 SACI_RS07930,SACI_RS07930,Saci_1662,1416680,1420138,+,MMPL family transporter,"Replication, recombination and repair",A0A0U3GKX1
 SACI_RS07935,SACI_RS07935,Saci_1663,1420122,1420727,-,class I SAM-dependent methyltransferase,"Secondary metabolites biosynthesis, transport, and catabolism",A0A0U2W1E0
 SACI_RS07940,SACI_RS07940,Saci_1664,1420769,1422247,+,AarF/ABC1/UbiB kinase family protein,Function unknown,A0A0U3FUD4
-SACI_RS07945,SACI_RS07945,Saci_1665,1422278,1422658,-,Hsp20/alpha crystallin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3H6D0
+SACI_RS07945,SACI_RS07945,Saci_1665,1422278,1422658,-,Hsp20/alpha crystallin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3H6D0
 SACI_RS07950,SACI_RS07950,Saci_1666,1422783,1423643,+,(Fe-S)-binding protein,Energy production and conversion,A0A0U2Y5Q2
 SACI_RS07955,SACI_RS07955,Saci_1667,1423643,1424809,+,lactate utilization protein,Energy production and conversion,A0A0U3GJ74
 SACI_RS07960,SACI_RS07960,Saci_1668,1424856,1426610,-,hypothetical protein,No COG annotation,A0A0U2VZ71
@@ -1590,9 +1590,9 @@ SACI_RS07980,SACI_RS07980,Saci_1672,1430325,1430801,+,deoxycytidine triphosphate
 SACI_RS07985,SACI_RS07985,Saci_1673,1430819,1431358,-,hypothetical protein,No COG annotation,A0A0U3H5K9
 SACI_RS07990,SACI_RS07990,Saci_1674,1431490,1432317,+,SMP-30/gluconolactonase/LRE family protein,Carbohydrate transport and metabolism,A0A0U3GQA1
 SACI_RS07995,SACI_RS07995,Saci_1675,1432438,1433226,-,M48 family metalloprotease,Energy production and conversion,A0A0U2NBP4
-SACI_RS08000,SACI_RS08000,Saci_1676,1433740,1434384,+,hypothetical protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3GZU6
+SACI_RS08000,SACI_RS08000,Saci_1676,1433740,1434384,+,hypothetical protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3GZU6
 SACI_RS08005,SACI_RS08005,Saci_1677,1434419,1435297,+,tRNA methyltransferase,Function unknown,A0A0U3H8G6
-SACI_RS08010,SACI_RS08010,Saci_1678,1435511,1436146,+,hypothetical protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3H0K0
+SACI_RS08010,SACI_RS08010,Saci_1678,1435511,1436146,+,hypothetical protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3H0K0
 SACI_RS08015,SACI_RS08015,Saci_1679,1436333,1438090,+,S9 family peptidase,Amino acid transport and metabolism,A0A0U3GKV5
 SACI_RS08020,SACI_RS08020,Saci_1680,1438539,1439069,+,hypothetical protein,No COG annotation,A0A0U2W1C7
 SACI_RS11690,SACI_RS11690,,1440169,1440450,-,hypothetical protein,No COG annotation,UPI0002B2670A
@@ -1664,7 +1664,7 @@ SACI_RS08340,SACI_RS08340,Saci_1745,1504651,1506231,+,sodium:solute symporter,Am
 SACI_RS08345,SACI_RS08345,Saci_1746,1506315,1507382,-,hypothetical protein,No COG annotation,A0A0U3H5E1
 SACI_RS08350,SACI_RS08350,Saci_1747,1507564,1508253,+,sulfocyanin,Energy production and conversion,A0A0U2W163
 SACI_RS08355,SACI_RS08355,Saci_1748,1508357,1508773,-,hypothetical protein,No COG annotation,A0A0U3FU38
-SACI_RS08360,SACI_RS08360,Saci_1749,1508754,1509674,-,SPFH domain-containing protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3HH39
+SACI_RS08360,SACI_RS08360,Saci_1749,1508754,1509674,-,SPFH domain-containing protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3HH39
 SACI_RS08365,SACI_RS08365,Saci_1750,1509718,1510194,-,hypothetical protein,No COG annotation,A0A0U2Y5E7
 SACI_RS08370,SACI_RS08370,Saci_1751,1510377,1510661,-,hypothetical protein,No COG annotation,A0A0U3H7C4
 SACI_RS08375,SACI_RS08375,Saci_1752,1510754,1511269,-,hypothetical protein,Function unknown,A0A0U3H7A5
@@ -1695,7 +1695,7 @@ SACI_RS08495,SACI_RS08495,Saci_1776,1538534,1538887,-,hypothetical protein,No CO
 SACI_RS08500,SACI_RS08500,Saci_1777,1538889,1541342,-,penicillin acylase family protein,Function unknown,A0A0U3GPZ0
 SACI_RS08505,SACI_RS08505,Saci_1778,1541809,1543482,+,acyl-CoA dehydrogenase family protein,Lipid transport and metabolism,A0A0U2VYT7
 SACI_RS08510,SACI_RS08510,Saci_1779,1543475,1545016,+,long-chain fatty acid--CoA ligase,Lipid transport and metabolism,A0A0U3H849
-SACI_RS08515,SACI_RS08515,Saci_1780,1545054,1545659,-,pyroglutamyl-peptidase I,"Post-translational modification, protein turnover, and chaperones",A0A0U3FRX0
+SACI_RS08515,SACI_RS08515,Saci_1780,1545054,1545659,-,pyroglutamyl-peptidase I,"Post-translational modification, protein turnover,and chaperones",A0A0U3FRX0
 SACI_RS08520,SACI_RS08520,Saci_1781,1545950,1547152,-,amidohydrolase family protein,"Secondary metabolites biosynthesis, transport, and catabolism",A0A0U3GKK1
 SACI_RS08525,SACI_RS08525,Saci_1782,1547302,1548780,-,MFS transporter,Carbohydrate transport and metabolism,A0A0U2W123
 SACI_RS08530,SACI_RS08530,Saci_1784,1549248,1550798,+,ABC transporter permease subunit,Function unknown,A0A0U2Y3H6
@@ -1739,7 +1739,7 @@ SACI_RS08720,SACI_RS08720,Saci_1819,1586796,1587611,+,EamA family transporter,Am
 SACI_RS08725,SACI_RS08725,Saci_1820,1587618,1588829,-,divalent metal cation transporter,Inorganic ion transport and metabolism,A0A0U2NBG3
 SACI_RS08730,SACI_RS08730,Saci_1821,1588923,1589513,-,DNA polymerase,Function unknown,A0A0U3HGY0
 SACI_RS08735,SACI_RS08735,Saci_1822,1589697,1590029,+,Rieske 2Fe-2S domain-containing protein,Inorganic ion transport and metabolism,A0A0U3FIG0
-SACI_RS08740,trxA,Saci_1823,1590068,1590493,-,thioredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U3FA79
+SACI_RS08740,trxA,Saci_1823,1590068,1590493,-,thioredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U3FA79
 SACI_RS08745,SACI_RS08745,Saci_1824,1590621,1591208,+,hypothetical protein,Nucleotide transport and metabolism,A0A0U3GMU6
 SACI_RS08750,SACI_RS08750,Saci_1825,1591473,1591985,+,DUF4382 domain-containing protein,Function unknown,A0A0U3FC43
 SACI_RS08755,SACI_RS08755,Saci_1826,1592189,1592845,+,hypothetical protein,Carbohydrate transport and metabolism,A0A0U3GPT7
@@ -2001,7 +2001,7 @@ SACI_RS10000,SACI_RS10000,Saci_2068,1886421,1887035,+,DUF2249 domain-containing 
 SACI_RS10005,SACI_RS10005,Saci_2069,1887074,1887406,+,metal-sulfur cluster assembly factor,Function unknown,A0A0U3FYQ8
 SACI_RS10010,SACI_RS10010,Saci_2070,1887403,1888473,+,hypothetical protein,No COG annotation,A0A0U3H4J3
 SACI_RS11900,SACI_RS11900,Saci_2071,1888427,1888774,-,hypothetical protein,No COG annotation,A0A0U3FPY8
-SACI_RS10015,SACI_RS10015,Saci_2072,1888917,1889570,-,hypothetical protein,"Post-translational modification, protein turnover, and chaperones",A0A0U2NAX8
+SACI_RS10015,SACI_RS10015,Saci_2072,1888917,1889570,-,hypothetical protein,"Post-translational modification, protein turnover,and chaperones",A0A0U2NAX8
 SACI_RS10020,SACI_RS10020,Saci_2073,1889944,1891080,-,MFS transporter,Carbohydrate transport and metabolism,A0A0U3HC74
 SACI_RS10025,SACI_RS10025,Saci_2074,1891245,1892489,-,HD domain-containing protein,Function unknown,A0A0U3FHQ7
 SACI_RS10030,SACI_RS10030,Saci_2075,1892482,1892763,-,hypothetical protein,No COG annotation,A0A0U2NH07
@@ -2073,7 +2073,7 @@ SACI_RS10350,SACI_RS10350,Saci_2140,1967961,1968908,-,phosphotriesterase,Functio
 SACI_RS10355,SACI_RS10355,Saci_2141,1969275,1970570,+,glutamine synthetase,Amino acid transport and metabolism,A0A0U3FZ15
 SACI_RS10360,SACI_RS10360,Saci_2142,1970572,1971624,+,amidohydrolase family protein,Function unknown,UPI0002B28E41
 SACI_RS10365,SACI_RS10365,Saci_2143,1971870,1973387,+,4-hydroxyphenylacetate 3-hydroxylase family protein,"Secondary metabolites biosynthesis, transport, and catabolism",A0A0U2YAB2
-SACI_RS10370,SACI_RS10370,Saci_2144,1973605,1974603,-,NAD(P)/FAD-dependent oxidoreductase,"Post-translational modification, protein turnover, and chaperones",A0A0U3FPT7
+SACI_RS10370,SACI_RS10370,Saci_2144,1973605,1974603,-,NAD(P)/FAD-dependent oxidoreductase,"Post-translational modification, protein turnover,and chaperones",A0A0U3FPT7
 SACI_RS10375,SACI_RS10375,Saci_2145,1974724,1975815,+,alcohol dehydrogenase catalytic domain-containing protein,Energy production and conversion,A0A0U2NAT8
 SACI_RS10380,SACI_RS10380,Saci_2146,1976028,1977455,+,phenylacetate--CoA ligase,Coenzyme transport and metabolism,A0A0U3FXQ2
 SACI_RS10385,asd,Saci_2147,1977811,1978869,+,aspartate-semialdehyde dehydrogenase,Amino acid transport and metabolism,A0A0U3FHI6
@@ -2153,7 +2153,7 @@ SACI_RS10745,SACI_RS10745,Saci_2223,2065820,2066245,+,hypothetical protein,Funct
 SACI_RS10750,SACI_RS10750,Saci_2224,2066295,2067353,+,alcohol dehydrogenase catalytic domain-containing protein,Energy production and conversion,A0A0U2NAP3
 SACI_RS10755,SACI_RS10755,Saci_2225,2067743,2069371,+,long-chain-fatty-acid--CoA ligase,Lipid transport and metabolism,UPI0002B2A55A
 SACI_RS10760,SACI_RS10760,Saci_2226,2069481,2069891,+,hypothetical protein,Function unknown,A0A0U3HFW6
-SACI_RS10765,SACI_RS10765,Saci_2227,2070137,2070604,+,peroxiredoxin,"Post-translational modification, protein turnover, and chaperones",A0A0U3FHB5
+SACI_RS10765,SACI_RS10765,Saci_2227,2070137,2070604,+,peroxiredoxin,"Post-translational modification, protein turnover,and chaperones",A0A0U3FHB5
 SACI_RS10770,SACI_RS10770,Saci_2228,2070581,2071147,-,indolepyruvate oxidoreductase subunit beta,Energy production and conversion,A0A0U3F977
 SACI_RS10775,SACI_RS10775,Saci_2229,2071135,2072970,-,indolepyruvate ferredoxin oxidoreductase subunit alpha,Energy production and conversion,A0A0U3FJW9
 SACI_RS10780,SACI_RS10780,Saci_2230,2073136,2073570,-,Zn-ribbon domain-containing OB-fold protein,Function unknown,A0A0U3GUQ7
@@ -2202,9 +2202,9 @@ SACI_RS10990,SACI_RS10990,Saci_2272,2114624,2115058,+,rubrerythrin,Energy produc
 SACI_RS10995,SACI_RS10995,Saci_2273,2115058,2116251,+,glycerol-3-phosphate dehydrogenase,Energy production and conversion,A0A0U2YA01
 SACI_RS11000,SACI_RS11000,Saci_2274,2116346,2116822,+,DUF3501 family protein,Function unknown,A0A0U3HBQ5
 SACI_RS11005,SACI_RS11005,Saci_2275,2116839,2117441,-,magnesium transporter CorA family protein,Inorganic ion transport and metabolism,UPI0009B59DA2
-SACI_RS11010,SACI_RS11010,Saci_2276,2117694,2118719,+,AIR synthase family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FXB4
-SACI_RS11015,SACI_RS11015,Saci_2277,2118781,2122626,-,peptidase S53,"Post-translational modification, protein turnover, and chaperones",A0A0U3FPH7
-SACI_RS11020,SACI_RS11020,Saci_2278,2122816,2123343,-,type 1 glutamine amidotransferase,"Post-translational modification, protein turnover, and chaperones",A0A0U3HN87
+SACI_RS11010,SACI_RS11010,Saci_2276,2117694,2118719,+,AIR synthase family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FXB4
+SACI_RS11015,SACI_RS11015,Saci_2277,2118781,2122626,-,peptidase S53,"Post-translational modification, protein turnover,and chaperones",A0A0U3FPH7
+SACI_RS11020,SACI_RS11020,Saci_2278,2122816,2123343,-,type 1 glutamine amidotransferase,"Post-translational modification, protein turnover,and chaperones",A0A0U3HN87
 SACI_RS11025,SACI_RS11025,Saci_2279,2123432,2124382,+,hypothetical protein,No COG annotation,A0A0U3FPU2
 SACI_RS11030,SACI_RS11030,Saci_2280,2124445,2124966,+,hypothetical protein,No COG annotation,A0A0U3FGR2
 SACI_RS11035,SACI_RS11035,Saci_2281,2125123,2126745,+,thiamine pyrophosphate-requiring protein,Amino acid transport and metabolism,A0A0U3GUL6
@@ -2227,7 +2227,7 @@ SACI_RS11115,SACI_RS11115,Saci_2297,2140872,2141753,-,pirin family protein,Funct
 SACI_RS11120,SACI_RS11120,Saci_2298,2142036,2143856,+,AMP-binding protein,Lipid transport and metabolism,A0A0U3GUI9
 SACI_RS11125,SACI_RS11125,Saci_2299,2143884,2144159,+,4a-hydroxytetrahydrobiopterin dehydratase,Coenzyme transport and metabolism,A0A0U3GVM3
 SACI_RS11130,SACI_RS11130,Saci_2300,2144203,2145855,+,NAD(P)-binding protein,Energy production and conversion,A0A0U3HCK9
-SACI_RS11135,SACI_RS11135,Saci_2301,2146190,2149228,+,S41 family peptidase,"Post-translational modification, protein turnover, and chaperones",A0A0U3GMT3
+SACI_RS11135,SACI_RS11135,Saci_2301,2146190,2149228,+,S41 family peptidase,"Post-translational modification, protein turnover,and chaperones",A0A0U3GMT3
 SACI_RS11140,SACI_RS11140,Saci_2302,2149475,2150302,+,ABC transporter ATP-binding protein,Defense mechanisms,A0A0U3GPZ7
 SACI_RS11770,SACI_RS11770,,2150531,2150794,-,hypothetical protein,No COG annotation,UPI0002B2714E
 SACI_RS11905,SACI_RS11905,,2150787,2151026,+,hypothetical protein,Inorganic ion transport and metabolism,UPI0009C0248D
@@ -2255,9 +2255,9 @@ SACI_RS11255,SACI_RS11255,Saci_2325,2173252,2174823,+,citramalate synthase,Amino
 SACI_RS11260,SACI_RS11260,Saci_2326,2174826,2175716,+,4-hydroxybenzoate octaprenyltransferase,Coenzyme transport and metabolism,A0A0U3FQB4
 SACI_RS11265,SACI_RS11265,Saci_2328,2175798,2176604,-,gamma-glutamylcyclotransferase,Function unknown,M1J1T7
 SACI_RS11270,SACI_RS11270,Saci_2329,2176597,2176887,-,hypothetical protein,No COG annotation,A0A0U2Y238
-SACI_RS11275,SACI_RS11275,Saci_2330,2176874,2177236,-,NfeD family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3H3V3
+SACI_RS11275,SACI_RS11275,Saci_2330,2176874,2177236,-,NfeD family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3H3V3
 SACI_RS11280,SACI_RS11280,Saci_2331,2177273,2178577,+,thermopsin family protease,Function unknown,A0A0U3H3W7
-SACI_RS11285,SACI_RS11285,Saci_2332,2178593,2179369,+,slipin family protein,"Post-translational modification, protein turnover, and chaperones",A0A0U3FPP3
+SACI_RS11285,SACI_RS11285,Saci_2332,2178593,2179369,+,slipin family protein,"Post-translational modification, protein turnover,and chaperones",A0A0U3FPP3
 SACI_RS11290,SACI_RS11290,Saci_2334,2179658,2180950,-,ATP-binding protein,Function unknown,A0A0U3FGL3
 SACI_RS11300,SACI_RS11300,Saci_2336,2181444,2182553,+,tRNA 4-thiouridine(8) synthase ThiI,Coenzyme transport and metabolism,A0A0U3GUG1
 SACI_RS11305,SACI_RS11305,Saci_2337,2182633,2183670,-,myo-inositol-1-phosphate synthase,Lipid transport and metabolism,A0A0U3GVK0
@@ -2293,5 +2293,5 @@ SACI_RS11460,asd,Saci_2370,2217234,2218298,-,aspartate-semialdehyde dehydrogenas
 SACI_RS11465,SACI_RS11465,Saci_2371,2218618,2219355,-,class I SAM-dependent methyltransferase,"Secondary metabolites biosynthesis, transport, and catabolism",A0A0U2NGD2
 SACI_RS11470,SACI_RS11470,Saci_2372,2219468,2220394,+,ornithine cyclodeaminase family protein,Amino acid transport and metabolism,A0A0U2Y205
 SACI_RS11475,SACI_RS11475,Saci_2373,2220381,2220989,-,cob(I)yrinic acid a%2Cc-diamide adenosyltransferase,Coenzyme transport and metabolism,UPI000055294E
-SACI_RS11480,SACI_RS11480,Saci_2374,2221039,2224263,-,S8 family serine peptidase,"Post-translational modification, protein turnover, and chaperones",A0A0U3FPL4
+SACI_RS11480,SACI_RS11480,Saci_2374,2221039,2224263,-,S8 family serine peptidase,"Post-translational modification, protein turnover,and chaperones",A0A0U3FPL4
 SACI_RS11485,SACI_RS11485,Saci_2375,2224402,2225628,+,NADP-dependent isocitrate dehydrogenase,Energy production and conversion,A0A0U2Y4T4
