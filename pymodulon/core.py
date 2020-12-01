@@ -1066,7 +1066,7 @@ class IcaData(object):
                         ],
                     )
                 )
-            except:  # no gene table or COG column
+            except KeyError:  # no gene table or COG column
                 self._cog_colors = {np.nan: "gray"}
 
         else:
@@ -1078,7 +1078,7 @@ class IcaData(object):
                     new_colors.keys()
                 ):
                     new_colors[cog] = "gray"
-            except:
+            except KeyError:
                 print(
                     "COG colors are useless if there is no 'COG' category in the gene table."
                 )

@@ -28,10 +28,10 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
     If it fails, it will print what went wrong, and there is an option (write =
     True) to correct issues.
 
-    'write = True' will assume default values for everything that is needed EXCEPT
+    'inplace = True' will assume default values for everything that is needed EXCEPT
     for the project and condition columns in the sample_table, which must be filled
     in as part of metadata curation. If these columns are missing, alternatives that
-    would work with the code are described inprint statements, but these are not
+    would work with the code are described in print statements, but these are not
     recommended because metadata curation is an important prerequisite to iModulon
     analysis.
 
@@ -52,9 +52,9 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
 
     # imodulon table index
     try:
-        model.imodulon_table.astype(int)
+        model.imodulon_table.index.astype(int)
         im_idx = "int"
-    except:
+    except TypeError:
         im_idx = "str"
 
     # imodulon table columns
@@ -108,7 +108,7 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
                                 .replace("/", " or ")
                                 .replace("+", " and ")
                             )
-                        except:
+                        except AttributeError:
                             model.imodulon_table.loc[
                                 idx, "Regulator"
                             ] = model.imodulon_table.TF[idx]
@@ -173,7 +173,7 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
                             model.sample_table.loc[
                                 group.index, "Biological Replicates"
                             ] = group.shape[0]
-                    except:
+                    except KeyError:
                         print(
                             "Unable to write Biological Replicates column (add project & condition columns first)"
                         )
@@ -235,8 +235,12 @@ def imodulondb_export(
         Path to iModulonDB main hosting folder
     skip_check : bool
         If true, skip compatibility check
-    cat_order: TODO
-    gene_scatter_x: TODO
+    cat_order: list
+        List of categories in the imodulon_table, ordered as you would
+        like them to appear in the dataset table
+    gene_scatter_x: str
+        Option to pass to scatter plot function, determines the X axis
+        on iModulon pages. Currently, only "start" is supported.
 
     Returns
     -------
@@ -294,7 +298,10 @@ def imdb_iM_table(imodulon_table: pd.DataFrame, cat_order: Optional[List] = None
             cat_dict[im_table.Category[k]] for k in im_table.index
         ]
     else:
-        im_table["category_num"] = im_table.index
+        try:
+            im_table["category_num"] = imodulon_table["new_idx"]
+        except KeyError:
+            im_table["category_num"] = im_table.index
 
     return im_table
 
@@ -790,7 +797,7 @@ def gene_color_dict(model: IcaData):
     """
     try:
         gene_cogs = model.gene_table.COG.to_dict()
-    except:
+    except AttributeError:
         gene_cogs = {k: np.nan for k in model.gene_table.index}
     return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
 
@@ -815,7 +822,7 @@ def imdb_gene_scatter_df(
     if gene_scatter_x == "start":
         try:
             res.x = model.gene_table.loc[res.index, "start"]
-        except:
+        except KeyError:
             gene_scatter_x = "gene number"
             res.x = range(len(res.index))
     else:
@@ -827,7 +834,7 @@ def imdb_gene_scatter_df(
     res.name = [model.num2name(l) for l in res.index]
     try:
         res.cog = model.gene_table.COG[res.index]
-    except:
+    except AttributeError:
         res.cog = "Unknown"
 
     gene_colors = gene_color_dict(model)
@@ -1087,7 +1094,7 @@ def get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
                 b_num = model.name2num(tf)
                 if b_num in model.X.index:
                     res += [tf]
-            except:
+            except ValueError:
                 print("TF has no associated expression profile:", tf)
                 print("If %s is not a gene, this behavior is expected." % tf)
                 print(
@@ -1381,7 +1388,7 @@ def imdb_gene_basics_df(model: IcaData, g: str):
     for elt in ["gene_product", "COG", "operon", "regulator"]:
         try:
             res.loc[elt] = row[elt]
-        except:
+        except KeyError:
             res.loc[elt] = np.nan
 
     if type(model.gene_links[g]) == str:
