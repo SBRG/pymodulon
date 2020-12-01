@@ -156,12 +156,14 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
                 if not (model.sample_table.index.name == "sample"):
                     print("Sample Table is missing the optional sample column")
                     print(
-                        "The 0th column will be used to define the names of samples in the activity bar graph unless you add this column."
+                        "The 0th column will be used to define the names of "
+                        "samples in the activity bar graph unless you add this column."
                     )
             elif col == "DOI":
                 print("Sample Table is missing the optional DOI column")
                 print(
-                    "If you would like to be able to access papers by clicking the activity bars, add this column and populate it with links."
+                    "If you would like to be able to access papers by clicking"
+                    " the activity bars, add this column and populate it with links."
                 )
             elif col == "Biological Replicates":
                 print("Sample Table is missing a %s column" % col)
@@ -175,27 +177,36 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
                             ] = group.shape[0]
                     except KeyError:
                         print(
-                            "Unable to write Biological Replicates column (add project & condition columns first)"
+                            "Unable to write Biological Replicates "
+                            "column (add project & condition columns first)"
                         )
             else:
                 print("Sample Table is missing a %s column" % col)
                 print(
-                    "This is an essential column - complete metadata curation and ensure proper naming."
+                    "This is an essential column - complete "
+                    "metadata curation and ensure proper naming."
                 )
                 major_errors += [col]
                 if col == "project":
                     print(
-                        "The project column defines separate groups of conditions, which will have lines between them in activity bar graphs."
+                        "The project column defines separate groups of conditions,"
+                        " which will have lines between them in activity bar graphs."
                     )
                     print(
-                        "You may add a column containing the same project name for all samples if desired, but it is recommended to differentiate them."
+                        "You may add a column containing the same project name for all"
+                        " samples if desired, but it is recommended to differentiate"
+                        " them."
                     )
                 if col == "condition":
                     print(
-                        "The condition column defines biological replicate conditions. You may reuse condition names such as 'control' only if the separate conditions are also in separate projects."
+                        "The condition column defines biological replicate conditions."
+                        " You may reuse condition names such as 'control' only if the "
+                        "separate conditions are also in separate projects."
                     )
                     print(
-                        "You may add a column containing all unique condition names (e.g. integers) if desired, but it is recommended to curate condition names."
+                        "You may add a column containing all unique condition "
+                        "names (e.g. integers) if desired, but it is"
+                        " recommended to curate condition names."
                     )
 
     # X
@@ -456,7 +467,8 @@ def imodulondb_main_site_files(
 
     # make the html
     html = '<div class="col-md-4 col-lg-3">\n'
-    html += '\t<a role="button" class="btn btn-primary btn-outline-light btn-block d-flex flex-column private_set" href="dataset.html?organism='
+    html += '\t<a role="button" class="btn btn-primary btn-outline-light btn-block'
+    html += ' d-flex flex-column private_set" href="dataset.html?organism='
     html += organism
     html += "&dataset="
     html += dataset
@@ -613,7 +625,7 @@ def imdb_gene_table_df(model: IcaData, k: Union[int, str]):
 # Gene Histogram
 
 
-def component_DF(model: IcaData, k: Union[int, str], tfs=None):
+def _component_DF(model: IcaData, k: Union[int, str], tfs=None):
     """
     Helper function for imdb_gene_hist_df
     :param model: IcaData object
@@ -641,7 +653,7 @@ def component_DF(model: IcaData, k: Union[int, str], tfs=None):
     return df.sort_values("gene_weight")
 
 
-def tf_combo_string(row: pd.Series):
+def _tf_combo_string(row: pd.Series):
     """
     Creates a well formated string for the histogram legends
     Helper function for imdb_gene_hist_df
@@ -658,12 +670,12 @@ def tf_combo_string(row: pd.Series):
         return ", ".join(row.index[row][:-1]) + ", and " + row.index[row][-1]
 
 
-def sort_tf_strings(tfs: list, unique_elts: list):
+def _sort_tf_strings(tfs: list, unique_elts: list):
     """
     Sorts TF strings for the legend of the histogram
     Helper function for imdb_gene_hist_df
     :param tfs: the list of tfs which is in a desired order
-    :param unique_elts: all combo strings made by tf_combo_string
+    :param unique_elts: all combo strings made by _tf_combo_string
     :return: a sorted list of combo strings so that they will have consistent ordering
     """
     # unreg always goes first
@@ -699,8 +711,10 @@ def imdb_gene_hist_df(
     :param model: IcaData object
     :param k: iModulon index
     :param bins: number of bins in the histogram
-    :param tol: determines distance to threshold for deciding if a bar is in the iModulon
-    :return: a dataframe for producing the histogram that is compatible with iModulonDB
+    :param tol: determines distance to threshold for deciding
+        if a bar is in the iModulon
+    :return: a dataframe for producing the histogram that is
+        compatible with iModulonDB
     """
     # get TFs
     row = model.imodulon_table.loc[k]
@@ -710,7 +724,7 @@ def imdb_gene_hist_df(
         tfs = _parse_tf_string(model, row.TF, print_output=False)
 
     # get genes
-    DF_gene = component_DF(model, k, tfs)
+    DF_gene = _component_DF(model, k, tfs)
 
     # add a tf_combo column
     if len(tfs) == 0:
@@ -718,11 +732,11 @@ def imdb_gene_hist_df(
     else:
         tf_bools = DF_gene[tfs]
         DF_gene["tf_combos"] = [
-            tf_combo_string(tf_bools.loc[g]) for g in tf_bools.index
+            _tf_combo_string(tf_bools.loc[g]) for g in tf_bools.index
         ]
 
     # get the list of tf combos in the correct order
-    tf_combo_order = sort_tf_strings(tfs, list(DF_gene.tf_combos.unique()))
+    tf_combo_order = _sort_tf_strings(tfs, list(DF_gene.tf_combos.unique()))
 
     # compute bins
     xmin = min(min(DF_gene.gene_weight), -model.thresholds[k])
@@ -788,11 +802,12 @@ def imdb_gene_hist_df(
 # Gene Scatter Plot
 
 
-def gene_color_dict(model: IcaData):
+def _gene_color_dict(model: IcaData):
     """
     Helper function to match genes to colors based on COG
     Used by imdb_gene_scatter_df
-    :param model: IcaData object, needs a gene_table with COG column and cog_colors member dictionary
+    :param model: IcaData object, needs a gene_table with COG column
+        and cog_colors member dictionary
     :return: dictionary associating gene names to colors
     """
     try:
@@ -809,7 +824,8 @@ def imdb_gene_scatter_df(
     Generates a dataframe for the gene scatter plot in iModulonDB
     :param model: an IcaData object
     :param k: an iModulon index
-    :param gene_scatter_x: currently only the default option of 'start' is available. Determines X axis.
+    :param gene_scatter_x: currently only the default option of
+        'start' is available. Determines X axis.
     :return: a dataframe for producing the plot
     """
     columns = ["name", "x", "y", "cog", "color", "link"]
@@ -831,13 +847,13 @@ def imdb_gene_scatter_df(
     res.y = model.M[k]
 
     # add other data
-    res.name = [model.num2name(l) for l in res.index]
+    res.name = [model.num2name(i) for i in res.index]
     try:
         res.cog = model.gene_table.COG[res.index]
     except AttributeError:
         res.cog = "Unknown"
 
-    gene_colors = gene_color_dict(model)
+    gene_colors = _gene_color_dict(model)
     res.color = [to_hex(gene_colors[gene]) for gene in res.index]
 
     # if the gene is in the iModulon, it is clickable
@@ -905,10 +921,10 @@ def imdb_activity_bar_df(model: IcaData, k: Union[int, str]):
 # Regulon Venn Diagram
 
 
-def parse_regulon_string(model: IcaData, s: str):
+def _parse_regulon_string(model: IcaData, s: str):
     """
     The Bacillus microarray dataset uses [] to create unusually complicated TF strings.
-    This function parses those, as a helper to get_reg_genes for imdb_regulon_venn_df.
+    This function parses those, as a helper to _get_reg_genes for imdb_regulon_venn_df.
     :param model: IcaData object
     :param s: the tf string
     :return: set of genes regulated by this string
@@ -937,7 +953,7 @@ def parse_regulon_string(model: IcaData, s: str):
     return res
 
 
-def get_reg_genes(model: IcaData, tf: str):
+def _get_reg_genes(model: IcaData, tf: str):
     """
     Finds the set of genes regulated by the boolean combo of regulators in tf
     :param model: IcaData object
@@ -947,7 +963,7 @@ def get_reg_genes(model: IcaData, tf: str):
 
     # the Bacillus tf strings use '[]' to make complicated boolean combinations
     if "[" in tf:
-        reg_genes = parse_regulon_string(model, tf)
+        reg_genes = _parse_regulon_string(model, tf)
 
     # other datasets can use this simpler code
     else:
@@ -986,7 +1002,7 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
         return None
 
     # Take care of and/or enrichments
-    reg_genes = get_reg_genes(model, tf)
+    reg_genes = _get_reg_genes(model, tf)
 
     # Get component genes
     comp_genes = set(model.view_imodulon(k).index)
@@ -1059,7 +1075,7 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
 # Regulon Scatter Plot
 
 
-def get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
+def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
     """
     Gets a list of gene locus tags associated with the given TF combination
     :param model: IcaData object
@@ -1067,7 +1083,8 @@ def get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
     :return: list of gene loci
     """
 
-    # hard-coded TF names -- should just modify TRN/gene info so everything matches but ok
+    # hard-coded TF names
+    # should just modify TRN/gene info so everything matches but ok
     rename_tfs = {
         "csqR": "yihW",
         "hprR": "yedW",
@@ -1098,7 +1115,8 @@ def get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
                 print("TF has no associated expression profile:", tf)
                 print("If %s is not a gene, this behavior is expected." % tf)
                 print(
-                    "If it is a gene, use consistent naming between the TRN and gene_table."
+                    "If it is a gene, use consistent naming"
+                    " between the TRN and gene_table."
                 )
 
     res = list(set(res))  # remove duplicates
@@ -1114,7 +1132,7 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
     :return: a dataframe for producing the regulon scatter plots in iModulonDB
     """
     row = model.imodulon_table.loc[k]
-    tfs = get_tfs_to_scatter(model, row.TF)
+    tfs = _get_tfs_to_scatter(model, row.TF)
 
     if len(tfs) == 0:
         return None
@@ -1122,7 +1140,6 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
     # coordinates for points
     coord = pd.DataFrame(columns=["A"] + tfs, index=model.A.columns)
     coord["A"] = model.A.loc[k]
-    ylim = np.array([coord["A"].min(), coord["A"].max()])
 
     # params for fit line
     param_df = pd.DataFrame(
@@ -1155,7 +1172,7 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
 
 
 # iModulon Metadata
-def tf_with_links(model: IcaData, tf_str: Union[str, float]):
+def _tf_with_links(model: IcaData, tf_str: Union[str, float]):
     """
     Adds links to the regulator string
     :param model: IcaData object
@@ -1228,7 +1245,7 @@ def imdb_imodulon_basics_df(
     )
     res.loc["name"] = row.loc["name"]
     res.loc["TF"] = row.TF
-    res.loc["Regulator"] = tf_with_links(model, row.TF)
+    res.loc["Regulator"] = _tf_with_links(model, row.TF)
     res.loc["Function"] = row.Function
     res.loc["Category"] = row.Category
     res.loc["has_venn"] = not (reg_venn is None)
@@ -1255,8 +1272,11 @@ def make_im_directory(
     Generates all data for iModulon k, stores it in a subfolder of path_prefix
     :param model: IcaData object
     :param k: iModulon index
-    :param path_prefix: path to the dataset folder. This function creates an 'iModulon_files/k/' subdirectory there to store everything.
-    :param gene_scatter_x: passed to imdb_gene_scatter_df() to indicate the x axis type of that plot
+    :param path_prefix: path to the dataset folder.
+        This function creates an 'iModulon_files/k/' subdirectory there
+        to store everything.
+    :param gene_scatter_x: passed to imdb_gene_scatter_df() to indicate
+        the x axis type of that plot
     """
 
     # generate the plot files
@@ -1410,7 +1430,8 @@ def make_gene_directory(model: IcaData, g: str, path_prefix: Optional[str] = "."
     Generates all data for gene g, stores it in a subfolder of path_prefix
     :param model: IcaData object
     :param g: gene index
-    :param path_prefix: path to the dataset folder. This function creates a 'gene_page_files/k/' subdirectory there to store everything.
+    :param path_prefix: path to the dataset folder. This function creates
+        a 'gene_page_files/k/' subdirectory there to store everything.
     """
 
     im_table_short = model.imodulon_table[["name", "Regulator", "Function", "Category"]]
