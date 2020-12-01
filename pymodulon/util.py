@@ -39,6 +39,23 @@ def _check_table(table: Data, name: str, index: Optional[Collection] = None,
             sep = '\t' if table.endswith('.tsv') else ','
             table = pd.read_csv(table, index_col=index_col, sep=sep)
 
+    # Coerce indices and columns to ints if necessary
+    newcols = []
+    for col in table.columns:
+        try:
+            newcols.append(int(col))
+        except ValueError:
+            newcols.append(col)
+    table.columns = newcols
+
+    newrows = []
+    for row in table.index:
+        try:
+            newrows.append(int(row))
+        except ValueError:
+            newrows.append(row)
+    table.index = newrows
+
     if isinstance(table, pd.DataFrame):
         # dont run _check_table_helper if no index is passed
         return table if index is None else _check_table_helper(table, index,
@@ -52,6 +69,7 @@ def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
                         name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
+
     # Check if all indices are in table
     missing_index = list(set(index) - set(table.index))
     if len(missing_index) > 0:
@@ -65,9 +83,9 @@ def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
 def _check_dict(table: Data, name: str, index_col: Optional[int] = 0):
     if isinstance(table, dict):
         return table
-    try: 
+    try:
         table = json.loads(table.replace('\'', '\"'))
-    except ValueError: 
+    except ValueError:
         sep = '\t' if table.endswith('.tsv') else ','
         table = pd.read_csv(table, index_col=index_col, header = None, sep=sep)
         table = table.to_dict()[1]
@@ -104,65 +122,9 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
         return np.mean([ordered_genes.iloc[i], ordered_genes.iloc[i - 1]])
 
 
-def name2num(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
-    """
-    Convert a gene name to the locus tag
-    Args:
-        ica_data: IcaData object
-        gene: Gene name or list of gene names
-
-    Returns: Locus tag or list of locus tags
-
-    """
-    gene_table = ica_data.gene_table
-    if 'gene_name' not in gene_table.columns:
-        raise ValueError('Gene table does not contain "gene_name" column.')
-
-    if isinstance(gene, str):
-        gene_list = [gene]
-    else:
-        gene_list = gene
-
-    final_list = []
-    for g in gene_list:
-        loci = gene_table[gene_table.gene_name == g].index
-
-        # Ensure only one locus maps to this gene
-        if len(loci) == 0:
-            raise ValueError('Gene does not exist: {}'.format(g))
-        elif len(loci) > 1:
-            warnings.warn('Found multiple genes named {}. Only '
-                          'reporting first locus tag'.format(g))
-
-        final_list.append(loci[0])
-
-    # Return string if string was given as input
-    if isinstance(gene, str):
-        return final_list[0]
-    else:
-        return final_list
-
-
-def num2name(ica_data, gene: Union[Iterable, str]) -> Union[Iterable, str]:
-    """
-    Convert a locus tag to the gene name
-    Args:
-        ica_data: IcaData object
-        gene: Locus tag or list of locus tags
-
-    Returns: Gene name or list of gene names
-
-    """
-    result = ica_data.gene_table.loc[gene].gene_name
-    if isinstance(gene, list):
-        return result.tolist()
-    else:
-        return result
-
-
 def dima(ica_data, sample1: Union[Collection, str],
          sample2: Union[Collection, str], threshold: float = 5,
-         fdr: float = 0.1):
+         fdr: float = 0.1, alternate_A: pd.DataFrame = None):
     """
 
     Args:
@@ -175,6 +137,14 @@ def dima(ica_data, sample1: Union[Collection, str],
     Returns:
 
     """
+
+    # use the undocumented alternate_A option to allow custom-built DIMCA
+    # activity matrix to be used in lieu of standard activty matrix
+    if alternate_A is not None:
+        A_to_use = alternate_A
+    else:
+        A_to_use = ica_data.A
+
     _diff = pd.DataFrame()
 
     sample1_list = _parse_sample(ica_data, sample1)
@@ -182,16 +152,16 @@ def dima(ica_data, sample1: Union[Collection, str],
 
     for name, group in ica_data.sample_table.groupby(['project', 'condition']):
         for i1, i2 in combinations(group.index, 2):
-            _diff[':'.join(name)] = abs(ica_data.A[i1] - ica_data.A[i2])
+            _diff[':'.join(name)] = abs(A_to_use[i1] - A_to_use[i2])
     dist = {}
 
-    for k in ica_data.A.index:
+    for k in A_to_use.index:
         dist[k] = stats.lognorm(*stats.lognorm.fit(_diff.loc[k].values)).cdf
 
-    res = pd.DataFrame(index=ica_data.A.index)
+    res = pd.DataFrame(index=A_to_use.index)
     for k in res.index:
-        a1 = ica_data.A.loc[k, sample1_list].mean()
-        a2 = ica_data.A.loc[k, sample2_list].mean()
+        a1 = A_to_use.loc[k, sample1_list].mean()
+        a2 = A_to_use.loc[k, sample2_list].mean()
         res.loc[k, 'difference'] = a2 - a1
         res.loc[k, 'pvalue'] = 1 - dist[k](abs(a1 - a2))
     result = FDR(res, fdr)
@@ -221,3 +191,95 @@ def _parse_sample(ica_data, sample: Union[Collection, str]):
             return samples
     else:
         return sample
+
+
+def explained_variance(ica_data,
+                       genes: Optional[Iterable] = None,
+                       samples: Optional[Iterable] = None,
+                       imodulons: Optional[Iterable] = None):
+    """
+    Computes the fraction of variance explained by iModulons
+    Parameters
+    ----------
+    ica_data: ICA data object
+    genes: List of genes to use (default: all genes)
+    samples: List of samples to use (default: all samples)
+    imodulons: List of iModulons to use (default: all iModulons)
+
+    Returns
+    -------
+    Fraction of variance explained by selected iModulons for selected
+    genes/samples
+    """
+    # Check inputs
+    if genes is None:
+        genes = ica_data.X.index
+    elif isinstance(genes, str):
+        genes = [genes]
+
+    gene_loci = set(genes) & set(ica_data.X.index)
+    gene_names = set(genes) - set(ica_data.X.index)
+    name_loci = [ica_data.name2num(gene) for gene in gene_names]
+    genes = list(set(gene_loci) | set(name_loci))
+
+    if samples is None:
+        samples = ica_data.X.columns
+    elif isinstance(samples, str):
+        samples = [samples]
+
+    if imodulons is None:
+        imodulons = ica_data.M.columns
+    elif isinstance(imodulons, str):
+        imodulons = [imodulons]
+
+    # Account for normalization procedures before ICA (X=SA-x_mean)
+    baseline = pd.DataFrame(
+        np.subtract(ica_data.X, ica_data.X.values.mean(axis=0, keepdims=True)),
+        index=ica_data.M.index, columns=ica_data.A.columns)
+    baseline = baseline.loc[genes]
+
+    # Initialize variables
+    base_err = np.linalg.norm(baseline) ** 2
+    MA = np.zeros(baseline.shape)
+    rec_var = [0]
+    ma_arrs = {}
+    ma_weights = {}
+
+    # Get individual modulon contributions
+    for k in imodulons:
+        ma_arr = np.dot(ica_data.M.loc[genes, k].values.reshape(len(genes), 1),
+                        ica_data.A.loc[k, samples].values.reshape(1,
+                                                                  len(samples)))
+        ma_arrs[k] = ma_arr
+        ma_weights[k] = np.sum(ma_arr ** 2)
+
+    # Sum components in order of most important component first
+    sorted_mods = sorted(ma_weights, key=ma_weights.get, reverse=True)
+    # Compute reconstructed variance
+    for k in sorted_mods:
+        MA = MA + ma_arrs[k]
+        sa_err = np.linalg.norm(MA - baseline) ** 2
+        rec_var.append((1 - sa_err / base_err) * 100)
+
+    return rec_var[-1]
+
+
+def infer_activities(ica_data, data: pd.DataFrame):
+    """
+    Infer iModulon activities for external data
+    Parameters
+    ----------
+    ica_data: ICA data object
+    data: External expression profiles (must be centered to a reference)
+
+    Returns
+    -------
+    Inferred activities for the expression profiles
+    """
+
+    shared_genes = ica_data.M.index & data.index
+    x = data.loc[shared_genes].values
+    m = ica_data.M.loc[shared_genes].values
+    m_inv = np.linalg.pinv(m)
+    a = np.dot(m_inv, x)
+    return pd.DataFrame(a, index=ica_data.imodulon_names, columns=data.columns)

@@ -42,10 +42,12 @@ def test_core(capsys):
     test_io()
     test_optimize_cutoff(capsys)
     test_set_thresholds()
+    test_kmeans_thresholds()
     test_ica_data_consistency(ica_data)
     test_compute_regulon_enrichment(ica_data)
     test_compute_trn_enrichment(ica_data)
     test_util(ica_data)
+    test_compare()
 
 
 def test_simple_ica_data():
@@ -166,6 +168,28 @@ def test_set_thresholds():
     assert (not ica_data._cutoff_optimized)
 
 
+def test_kmeans_thresholds():
+    s_short = s.iloc[:, :10]
+    a_short = a.iloc[:10, :]
+    # Make sure thresholds are different when two threshold methods are used
+    ica_data1 = IcaData(s_short, a_short, gene_table=gene_table,
+                        sample_table=sample_table,
+                        imodulon_table=imodulon_table, trn=trn,
+                        threshold_method='kmeans')
+    ica_data2 = IcaData(s_short, a_short, gene_table=gene_table,
+                        sample_table=sample_table,
+                        imodulon_table=imodulon_table, trn=trn,
+                        threshold_method='dagostino')
+    # Check that kmeans is used when no TRN is given
+    ica_no_trn = IcaData(s_short, a_short, gene_table=gene_table,
+                         sample_table=sample_table,
+                         imodulon_table=imodulon_table)
+    assert (not np.allclose(list(ica_data1.thresholds.values()),
+                            list(ica_data2.thresholds.values())))
+    assert (np.allclose(list(ica_no_trn.thresholds.values()),
+                        list(ica_data1.thresholds.values())))
+
+
 def test_io():
     ica_data = IcaData(s, a, X=x, gene_table=gene_table,
                        sample_table=sample_table,
@@ -177,7 +201,33 @@ def test_io():
 
 
 def test_util(ica_data):
-    assert(name2num(ica_data, 'thrA') == 'b0002')
-    assert(name2num(ica_data, ['thrA', 'thrB']) == ['b0002', 'b0003'])
-    assert(num2name(ica_data, 'b0002') == 'thrA')
-    assert(num2name(ica_data, ['b0002', 'b0003']) == ['thrA', 'thrB'])
+    assert (ica_data.name2num('thrA') == 'b0002')
+    assert (ica_data.name2num(['thrA', 'thrB']) == ['b0002', 'b0003'])
+    assert (ica_data.num2name('b0002') == 'thrA')
+    assert (ica_data.num2name(['b0002', 'b0003']) == ['thrA', 'thrB'])
+
+
+def test_compare():
+    from pymodulon.compare import _convert_gene_index
+    ica_data1 = load_json_model('data/model.json')
+    ica_data2 = load_json_model('data/10genes.json')
+    ica_data_org = load_json_model('data/saci.json')
+
+    # Test conforming data from same organism
+    M1, M2 = _convert_gene_index(ica_data1.M, ica_data2.M)
+    assert ((M1.index == M2.index).all())
+    assert (len(M1.index) == 10)
+
+    # Test conforming data from different organisms
+    orgM1, orgM2 = _convert_gene_index(ica_data1.M, ica_data_org.M,
+                                       ortho_file='data/example_bbh.csv')
+    assert ((orgM1.index == orgM2.index).all())
+    assert (len(orgM1) > 10)
+
+    # Test conforming gene info data
+    org_table1, org_table2 = _convert_gene_index(ica_data1.gene_table,
+                                                 ica_data_org.gene_table,
+                                                 ortho_file='data/example_bbh'
+                                                            '.csv')
+    assert ((org_table1.index == org_table2.index).all())
+    assert ((org_table1.index == orgM1.index).all())

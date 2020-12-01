@@ -7,6 +7,7 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm_notebook as tqdm
 from sklearn.cluster import KMeans
 import numpy as np
+import copy
 
 
 class IcaData(object):
@@ -55,15 +56,15 @@ class IcaData(object):
             optimization/computing of thresholds
         :param threshold_method: Either "dagostino" (default with TRN) or
         "kmeans" (default if no TRN provided)
-        :param dataset_table: dictionary of general dataset information 
+        :param dataset_table: dictionary of general dataset information
             for the details box on the dataset page of iModulonDB (default provided)
         :param splash_table: dictionary of general information for the splash page
-            link to this dataset, as well as folder names for where its data 
+            link to this dataset, as well as folder names for where its data
             is stored in iModulonDB (default provided)
         :param gene_links: dictionary of genes to links in an external database
         :param tf_links: dictionary of TFs (from the TRN) to links in a database
         :param link_database: Name of the database for the gene_links dictionary
-        :param cog_colors: dictionary of COGs from the gene_table to desired 
+        :param cog_colors: dictionary of COGs from the gene_table to desired
             colors for display in iModulonDB. One will be made for you if not provided.
         """
 
@@ -127,16 +128,23 @@ class IcaData(object):
 
         # Initialize thresholds either with or without optimization
         if thresholds is not None:
+            # Throw a warning if user was expecting d'agostino optimization
+            if optimize_cutoff:
+                warnings.warn("Using manually input thresholds. D'agostino "
+                              "optimization will not be performed")
             self.thresholds = thresholds
-            self._dagostino_cutoff = -1 # Kevin adding this to avoid IO error
 
         # Use kmeans if TRN is empty, or kmeans is selected
         elif self.trn.empty or threshold_method == 'kmeans':
+            # Throw a warning if user was expecting d'agostino optimization
+            if optimize_cutoff:
+                warnings.warn("Using Kmeans threshold method. D'agostino "
+                              "optimization will not be performed")
             self.compute_kmeans_thresholds()
-            self._dagostino_cutoff = -1 # Kevin adding this to avoid IO error
+            self._dagostino_cutoff = None
 
         # Else use D'agostino method
-        else:
+        elif threshold_method == 'dagostino':
             self._dagostino_cutoff = dagostino_cutoff
             self._cutoff_optimized = False
             if optimize_cutoff:
@@ -153,6 +161,10 @@ class IcaData(object):
                     # again if the user uploads a new TRN
             else:
                 self.recompute_thresholds(self.dagostino_cutoff)
+        # Capture improper threshold methods
+        else:
+            raise ValueError('Threshold method must either be "dagostino" or '
+                             '"kmeans"')
 
         ##############################
         # Load iModulonDB Properties #
@@ -165,7 +177,7 @@ class IcaData(object):
         self.gene_links = gene_links
         self.tf_links = tf_links
         self.cog_colors = cog_colors
-        
+
 
     @property
     def M(self):
@@ -242,10 +254,10 @@ class IcaData(object):
         self._m.index = names
         if self._x is not None:
             self._x.index = names
-            
+
         # Update cog_colors
         if hasattr(self, '_cog_colors'):
-            if self._cog_colors == {np.nan:'gray'}:
+            if self._cog_colors == {np.nan: 'gray'}:
                 self.cog_colors = None
 
     @property
@@ -311,7 +323,7 @@ class IcaData(object):
 
         # mark that our cutoffs are no longer optimized since the TRN
         self._cutoff_optimized = False
-    
+
     def _update_imodulon_names(self, new_names):
 
         # Update thresholds
@@ -759,14 +771,85 @@ class IcaData(object):
             ax.scatter([best_cutoff], [max(f1_scores)], color='r')
 
         return best_cutoff
-        
+
+    def copy(self):
+        # TODO: write docs and test function
+        return copy.deepcopy(self)
+
+    def imodulons_with(self, gene):
+        """
+        Lists iModulons containing :gene:
+        :param gene: Gene locus tag or gene name to search for
+        Returns: A list of iModulons containing :gene:
+
+        """
+
+        # Check that gene exists
+        if gene not in self.X.index:
+            gene = self.name2num(gene)
+
+        return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
+
+    def name2num(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+        """
+        Convert a gene name to the locus tag
+        Args:
+            gene: Gene name or list of gene names
+
+        Returns: Locus tag or list of locus tags
+
+        """
+        gene_table = self.gene_table
+        if 'gene_name' not in gene_table.columns:
+            raise ValueError('Gene table does not contain "gene_name" column.')
+
+        if isinstance(gene, str):
+            gene_list = [gene]
+        else:
+            gene_list = gene
+
+        final_list = []
+        for g in gene_list:
+            loci = gene_table[gene_table.gene_name == g].index
+
+            # Ensure only one locus maps to this gene
+            if len(loci) == 0:
+                raise ValueError('Gene does not exist: {}'.format(g))
+            elif len(loci) > 1:
+                warnings.warn('Found multiple genes named {}. Only '
+                              'reporting first locus tag'.format(g))
+
+            final_list.append(loci[0])
+
+        # Return string if string was given as input
+        if isinstance(gene, str):
+            return final_list[0]
+        else:
+            return final_list
+
+    def num2name(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+        """
+        Convert a locus tag to the gene name
+        Args:
+            gene: Locus tag or list of locus tags
+
+        Returns: Gene name or list of gene names
+
+        """
+        result = self.gene_table.loc[gene].gene_name
+        if isinstance(gene, list):
+            return result.tolist()
+        else:
+            return result
+
+
     #########################
     # iModulonDB Properties #
     #########################
     @property
     def dataset_table(self):
         return self._dataset_table
-        
+
     @dataset_table.setter
     def dataset_table(self, new_dst):
         if not(new_dst is None):
@@ -781,7 +864,7 @@ class IcaData(object):
             else:
                 num_conds = 'Unknown'
 
-            # initialize dataset_table 
+            # initialize dataset_table
             self._dataset_table = pd.Series({'Title': 'New Dataset',
                                    'Organism': 'New Organism',
                                    'Strain': 'Unknown Strain',
@@ -789,19 +872,19 @@ class IcaData(object):
                                    'Number of Unique Conditions': num_conds,
                                    'Number of Genes':num_genes,
                                    'Number of iModulons': num_ims})
-                                   
+
     @property
     def splash_table(self):
         return self._splash_table
-        
+
     @splash_table.setter
     def splash_table(self, new_splash):
-        
+
         if isinstance(new_splash, str):
             new_splash = _check_dict(new_splash, 'splash')
-        
+
         self._splash_table = new_splash
-        
+
         default_splash_table = {'large_title': 'New Dataset',
                                 'subtitle': 'Unpublished study',
                                 'author': 'Pymodulon User',
@@ -810,28 +893,28 @@ class IcaData(object):
         for k, v in default_splash_table.items():
             if k not in new_splash: # use what is provided, default for what isn't
                 self._splash_table[k] = v
-                
+
     @property
     def link_database(self):
         return self._link_database
-    
+
     @link_database.setter
     def link_database(self, new_db):
         if isinstance(new_db, str):
             self._link_database = new_db
         else:
             raise ValueError('link_database must be a string.')
-        
+
     @property
     def gene_links(self):
         return self._gene_links
-        
+
     @gene_links.setter
     def gene_links(self, new_links):
-        
+
         if isinstance(new_links, str):
             new_links = _check_dict(new_links, 'gene_links')
-        
+
         """
         # uncomment this to be warned for unused gene links
         for gene in new_links.keys():
@@ -841,32 +924,32 @@ class IcaData(object):
         self._gene_links = new_links
         for gene in set(self._m.index) - set(new_links.keys()):
             self._gene_links[gene] = np.nan
-            
+
     @property
     def tf_links(self):
         return self._tf_links
-    
+
     @tf_links.setter
     def tf_links(self, new_links):
         if isinstance(new_links, str):
             new_links = _check_dict(new_links, 'tf_links')
-        
+
         if not(self.trn.empty):
             for tf in new_links.keys():
                 if not(tf in list(self.trn.regulator)):
                     print('%s has a TF link but is not in the TRN'%(tf))
-        
+
         self._tf_links = new_links
-        
+
     @property
     def cog_colors(self):
         return self._cog_colors
-        
+
     @cog_colors.setter
     def cog_colors(self, new_colors):
         if new_colors is None:
             try: # generate a good dictionary if gene info is available
-                self._cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(), 
+                self._cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(),
                                    ['red','pink','y','orchid','mediumvioletred','green',
                                     'lightgray','lightgreen','slategray','blue',
                                     'saddlebrown','turquoise','lightskyblue','c','skyblue',
@@ -874,15 +957,15 @@ class IcaData(object):
                                     'black','goldenrod','chocolate','orange']))
             except: # no gene table or COG column
                 self._cog_colors = {np.nan:'gray'}
-        
+
         else:
             if isinstance(new_colors, str):
                 new_colors = _check_dict(new_colors, 'cog_colors')
-            
+
             try:
                 for cog in (set(self.gene_table['COG'].unique()) - set(new_colors.keys())):
                     new_colors[cog] = 'gray'
             except:
                 print('COG colors are useless if there is no \'COG\' category in the gene table.')
-            
+
             self._cog_colors = new_colors

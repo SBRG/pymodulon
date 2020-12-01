@@ -1,23 +1,30 @@
 """
 
 """
-import matplotlib.pyplot as plt
-import pandas as pd
+from collections import Counter
+
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
+import matplotlib.pyplot as plt
+import pandas as pd
+import seaborn as sns
 from scipy.optimize import curve_fit, OptimizeWarning
-from sklearn.metrics import r2_score
+from sklearn.base import clone
+from sklearn.cluster import AgglomerativeClustering
+from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
 from pymodulon.util import _parse_sample
 from pymodulon.util import *
+from pymodulon.compare import _convert_gene_index
 
 
 #############
 # Bar Plots #
 #############
 
+# noinspection PyTypeChecker
 def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ylabel: str = '',
             projects: Optional[Union[List, str]] = None,
@@ -44,6 +51,9 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     # Remove extra projects
     if isinstance(projects, str):
         projects = [projects]
+
+    if projects is not None and len(projects) == 1:
+        highlight = projects
 
     if projects is not None and 'project' in sample_table:
         sample_table = sample_table[sample_table.project.isin(projects)]
@@ -145,8 +155,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     # Set axis limits
     xmin = -0.5
     xmax = nbars + 2.5
-    ax.set_xlim((xmin, xmax))
-    ax.set_ylim((ymin, ymax))
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
 
     # Axis labels
     ax.set_ylabel(ylabel, fontsize=12)
@@ -181,7 +191,7 @@ def plot_expression(ica_data: IcaData, gene: str,
         values = ica_data.X.loc[gene]
         label = '{} Expression'.format(gene)
     else:
-        locus = name2num(ica_data, gene)
+        locus = ica_data.name2num(gene)
         values = ica_data.X.loc[locus]
         label = '${}$ Expression'.format(gene)
 
@@ -254,6 +264,7 @@ def plot_metadata(ica_data: IcaData, column,
                    highlight, ax, legend_kwargs)
 
 
+# noinspection PyTypeChecker
 def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
                            regulator: str = None,
                            bins: Optional[Union[int, Sequence, str]] = None,
@@ -333,7 +344,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     # If regulator is not given, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty:
         reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
-        if pd.isnan(reg):
+        if pd.isna(reg):
             reg = None
 
     # If no imodulon_table in IcaData, compute trn enrichment to find the
@@ -344,7 +355,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
             ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
         reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
         if not isinstance(reg, str):
-            if pd.isnan(reg):
+            if pd.isna(reg):
                 reg = None
 
     # Use regulator value to find regulon genes
@@ -405,6 +416,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
 # Scatterplots #
 ################
 
+# noinspection PyTypeChecker
 def scatterplot(x: pd.Series, y: pd.Series,
                 groups: Optional[Mapping] = None,
                 show_labels: Union[bool, str] = 'auto',
@@ -575,8 +587,8 @@ def scatterplot(x: pd.Series, y: pd.Series,
                         expand_objects=(1.2, 1.4),
                         expand_points=(1.3, 1.3))
 
-    ax.set_xlim((xmin, xmax))
-    ax.set_ylim((ymin, ymax))
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
 
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
@@ -713,8 +725,12 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     return ax
 
 
-def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
-                         imodulon2: ImodName, **kwargs) -> Ax:
+def compare_gene_weights(ica_data: IcaData,
+                         imodulon1: ImodName, imodulon2: ImodName,
+                         ica_data2: Optional[IcaData] = None,
+                         ortho_file: str = None,
+                         use_org1_names: bool = True,
+                         **kwargs) -> Ax:
     """
     Compare gene weights between 2 iModulons. The result is shown as a
     scatter-plot. Also shows the D'Agostino cutoff for both iModulons,
@@ -729,6 +745,14 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
         The name of the iModulon to plot on the x-axis
     imodulon2: int, str
         The name of the iModulon to plot on the y-axis
+    ica_data2: pymodulon.core.IcaData
+        IcaData object of second iModulon (if comparing iModulons across
+        objects)
+    ortho_file: os.PathLike
+        Path to orthology file between organisms
+    use_org1_names: bool
+        If true, use gene names from first organism. If false, use gene names
+        from second organism (default: True)
     **kwargs: dict
         keyword arguments passed onto `scatterplot()`
 
@@ -736,9 +760,30 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     -------
     ax: matplotlib.axes instance
         Returns the axes instance on which the scatter-plot is generated
+
+    Args:
+        use_org1_names:
     """
-    x = ica_data.M[imodulon1]
-    y = ica_data.M[imodulon2]
+    if ica_data2 is None:
+        ica_data2 = ica_data.copy()
+
+    M1, M2 = _convert_gene_index(ica_data.M, ica_data2.M, ortho_file)
+    bin_M1, bin_M2 = _convert_gene_index(ica_data.M_binarized,
+                                         ica_data2.M_binarized, ortho_file)
+
+    # Convert gene table
+    gene_table1, gene_table2 = _convert_gene_index(
+        ica_data.gene_table,
+        ica_data2.gene_table,
+        ortho_file)
+
+    if use_org1_names:
+        gene_table = gene_table1
+    else:
+        gene_table = gene_table2
+
+    x = M1[imodulon1]
+    y = M2[imodulon2]
 
     xlabel = f'{imodulon1} Gene Weight'
     ylabel = f'{imodulon2} Gene Weight'
@@ -765,7 +810,7 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     ymin, ymax = ax.get_ylim()
 
     thresh1 = ica_data.thresholds[imodulon1]
-    thresh2 = ica_data.thresholds[imodulon2]
+    thresh2 = ica_data2.thresholds[imodulon2]
 
     if thresh1 != 0:
         ax.vlines([thresh1, -thresh1], ymin=ymin, ymax=ymax,
@@ -779,10 +824,9 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     ax.set_ylim(ymin, ymax)
 
     # Add labels on data-points
-    bin_M = ica_data.M_binarized
-    component_genes_x = set(bin_M[imodulon1].loc[bin_M[imodulon1] == 1].index)
-    component_genes_y = set(bin_M[imodulon2].loc[bin_M[imodulon2] == 1].index)
-    component_genes = component_genes_x.intersection(component_genes_y)
+    component_genes_x = bin_M1[bin_M1[imodulon1] == 1].index
+    component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
+    component_genes = component_genes_x & component_genes_y
     texts = []
     expand_kwargs = {'expand_objects': (1.2, 1.4),
                      'expand_points': (1.3, 1.3)}
@@ -790,17 +834,24 @@ def compare_gene_weights(ica_data: IcaData, imodulon1: ImodName,
     # Add labels: Put gene name if components contain under 20 genes
     auto = None
     if show_labels_cgw == 'auto':
-        auto = (bin_M[imodulon1].astype(bool)
-                & bin_M[imodulon2].astype(bool)).sum() <= 20
+        auto = (bin_M1[imodulon1].astype(bool)
+                & bin_M2[imodulon2].astype(bool)).sum() <= 20
 
     if show_labels_cgw or auto:
         for gene in component_genes:
-            ax.scatter(ica_data.M.loc[gene, imodulon1],
-                       ica_data.M.loc[gene, imodulon2],
+            ax.scatter(M1.loc[gene, imodulon1],
+                       M2.loc[gene, imodulon2],
                        color='r')
-            texts.append(ax.text(ica_data.M.loc[gene, imodulon1],
-                                 ica_data.M.loc[gene, imodulon2],
-                                 ica_data.gene_table.loc[gene, 'gene_name'],
+
+            # Add labels
+            try:
+                gene_name = gene_table.loc[gene, 'gene_name']
+            except KeyError:
+                gene_name = gene
+
+            texts.append(ax.text(M1.loc[gene, imodulon1],
+                                 M2.loc[gene, imodulon2],
+                                 gene_name,
                                  fontsize=12))
 
         expand_kwargs['expand_text'] = (1.4, 1.4)
@@ -856,7 +907,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
         x = ica_data.X.loc[gene1]
         xlabel = f'{gene1} Expression'
     else:
-        locus = name2num(ica_data, gene1)
+        locus = ica_data.name2num(gene1)
         x = ica_data.X.loc[locus]
         xlabel = f'${gene1}$ Expression'
 
@@ -865,7 +916,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
         y = ica_data.X.loc[gene2]
         ylabel = f'{gene2} Expression'
     else:
-        locus = name2num(ica_data, gene2)
+        locus = ica_data.name2num(gene2)
         y = ica_data.X.loc[locus]
         ylabel = f'${gene2}$ Expression'
 
@@ -924,7 +975,8 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
               sample2: Union[Collection, str],
               threshold: float = 5, fdr: float = .1, label: bool = True,
-              adjust: bool = True, table: bool = False, **kwargs) -> Ax:
+              adjust: bool = True, table: bool = False,
+              alternate_A: pd.DataFrame = None, **kwargs) -> Ax:
     """
     Plots a Dima plot between two projects or two sets of samples
     Args:
@@ -942,6 +994,12 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
     """
 
+    # use secret option to enable passing of clustered activity matrix
+    if alternate_A is not None:
+        A_to_use = alternate_A
+    else:
+        A_to_use = ica_data.A
+
     sample1_list = _parse_sample(ica_data, sample1)
     sample2_list = _parse_sample(ica_data, sample2)
     if isinstance(sample1, str):
@@ -953,11 +1011,11 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     else:
         ylabel = '\n'.join(sample2)
 
-    a1 = ica_data.A[sample1_list].mean(axis=1)
-    a2 = ica_data.A[sample2_list].mean(axis=1)
+    a1 = A_to_use[sample1_list].mean(axis=1)
+    a2 = A_to_use[sample2_list].mean(axis=1)
 
     df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
-                   fdr=fdr)
+                   fdr=fdr, alternate_A=alternate_A)
 
     ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
                      xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -980,6 +1038,380 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
 
     else:
         return ax
+
+
+def cluster_activities(ica_data: IcaData,
+                       correlation_method: str = 'spearman',
+                       distance_threshold: Union[float] = None,
+                       show_thresholding: bool = False,
+                       show_clustermap: bool = True,
+                       show_best_clusters: bool = False,
+                       n_best_clusters: Union[str, int] = 'above_average',
+                       cluster_names: Union[dict] = None,
+                       return_clustermap: bool = False,
+                       # dimca options
+                       dimca_sample1: Union[Collection, str] = None,
+                       dimca_sample2: Union[Collection, str] = None,
+                       dimca_threshold: float = 5, dimca_fdr: float = .1,
+                       dimca_label: bool = True, dimca_adjust: bool = True,
+                       dimca_table: bool = False, **dimca_kwargs
+                       ):
+    """
+    Uses agglomerative (hierarchical) clustering to group iModulons based on
+    correlation between their activities and displays the resulting cluster map
+    and best clusters
+    Returns the cluster object to enable downstream analyses
+
+    Args:
+        ica_data: IcaData object that contains your data
+        correlation_method: the correlation method to use for computing
+            correlations between iModulon activities. Default is
+            Spearman, and alternative option is Pearson.
+        distance_threshold: a specific distance threshold (between 0 and 1) to
+            use for defining flat clusters from the hierarchical cluster
+            relationship. Larger values yield fewer clusters. Defaults to None,
+            which will initiate automatic selection of optimal threshold based
+            on maximization of silhouette score across iModulons
+        show_thresholding: indicates if a plot showing automatic thresholding
+            via silhouette scoring should be displayed
+        show_clustermap: indicates if a clustermap should be displayed
+        show_best_clusters: indicates if the best individual clusters should be
+            displayed below the clustermap
+        n_best_clusters: the number of best clusters to show. Defaults to
+            'above_average', where the clusters with silhouette score above the
+            mean will be displayed.
+        cluster_names: a dictionary mapping best cluster indices to names to
+            display above their individual subplots; this option should be used
+            once the clustering has been performed at least once and cluster
+            names have been manually assigned via knowledge mapping
+        return_clustermap: indicates if the clustermap plot object should be
+            returned to allow further customization
+        dimca_sample1: List of sample IDs or name of "project:condition"
+        dimca_sample2: List of sample IDs or name of "project:condition"
+        dimca_threshold: Minimum activity difference to determine DiMCAs
+        dimca_fdr: False Detection Rate
+        dimca_label: Label differentially activated iModulons (default: True)
+        dimca_adjust: Automatically adjust labels (default: True)
+        dimca_table: Return differential iModulon cluster activity table
+        **dimca_kwargs: Additional arguments for DiMCA scatterplot
+
+    Returns: cluster_obj; optionally can return up to four arguments; if
+    return_clustermap is True, returns the seaborn ClusterGrid instance. If a
+    DIMCA is requested, returns the DIMCA axes (and optionally the dimca table
+    if requested). The order is always:
+        [cluster_obj, clustermap, dimca_ax, dimca_table]
+
+    """
+
+    # compute distance matrix; distance metric defined as 1 - correlation to
+    # ensure that correlated iModulons are close in distance, can be clustered
+    correlation_df = ica_data.A.T.corr(method=correlation_method)
+    distance_matrix = 1 - correlation_df.abs()
+
+    # define a base instance of the clustering object we will use throughout;
+    # the distance threshold here is a dummy; we will replace this with either
+    # the user-specified value or an automatically-selected value
+    agg_cluster_base = AgglomerativeClustering(
+        n_clusters=None,
+        affinity='precomputed',
+        compute_full_tree=True,
+        linkage='complete',
+        distance_threshold=0.5
+    )
+
+    # perform automatic thresholding for default case
+    if distance_threshold is None:
+
+        auto_threshold_df = pd.DataFrame(
+            columns=['threshold', 'score', 'n_clusters']
+        )
+        auto_threshold_df['threshold'] = np.arange(0, 1, 0.025)
+
+        for row in auto_threshold_df.itertuples(index=True):
+
+            # create a copy of the base clusterer with the threshold to try; fit
+            agg_cluster_auto_threshold = clone(agg_cluster_base).set_params(
+                distance_threshold=row.threshold
+            )
+            agg_cluster_auto_threshold.fit(distance_matrix)
+            n_clusters = agg_cluster_auto_threshold.n_clusters_
+            auto_threshold_df.loc[row.Index, 'n_clusters'] = n_clusters
+
+            # score the clustering; handle the edge case where all clusters have
+            # size 1; this is invalid input for silhouette_score
+            if n_clusters == distance_matrix.shape[0]:
+                auto_threshold_df.loc[row.Index, 'score'] = 0
+            else:
+                auto_threshold_df.loc[row.Index, 'score'] = silhouette_score(
+                    distance_matrix,
+                    agg_cluster_auto_threshold.labels_,
+                    metric='precomputed'
+                )
+
+        best_threshold = auto_threshold_df.sort_values(
+            by='score', ascending=False
+        ).iloc[0]['threshold']
+
+        if show_thresholding:
+            _, ax = plt.subplots()
+            ax.yaxis.grid(False)
+            sns.scatterplot(
+                x='threshold', y='score', data=auto_threshold_df,
+                ax=ax, color='blue'
+            )
+            ax.axvline(best_threshold, linestyle='--', color='k')
+            ax.tick_params(axis='both', labelsize=13)
+            ax.tick_params(axis='y', color='blue', labelcolor='blue')
+            ax.set_xlabel('Threshold', fontsize=14)
+            ax.set_ylabel('Silhouette', color='blue', fontsize=14)
+            ax2 = ax.twinx()
+            ax2.yaxis.grid(False)
+            sns.scatterplot(
+                x='threshold', y='n_clusters', data=auto_threshold_df,
+                ax=ax2, color='red'
+            )
+            ax2.tick_params(axis='both', labelsize=13)
+            ax2.tick_params(axis='y', color='red', labelcolor='red')
+            ax2.set_ylabel('# Clusters', fontsize=14, color='red')
+            plt.show()
+
+    else:
+        best_threshold = distance_threshold
+
+    # re-perform the clustering with the best threshold from above
+    agg_cluster_final = clone(agg_cluster_base).set_params(
+        distance_threshold=best_threshold
+    )
+    agg_cluster_final.fit(distance_matrix)
+    labels = agg_cluster_final.labels_
+
+    returns = [agg_cluster_final]
+
+    # compute silhouette scores for each cluster and determine what our best
+    # clusters are; we only need to do this if we are displaying best clusters
+    # OR if we're doing a DIMCA later
+    if show_best_clusters or dimca_sample1 is not None:
+
+        sample_scores = silhouette_samples(
+            distance_matrix, labels, metric='precomputed'
+        )
+        cluster_score_dict = {}
+        for label in set(labels):
+            cluster_score_dict[label] = np.mean(
+                np.array(sample_scores)[np.where(labels == label)[0]]
+            )
+
+        # calculate the best clusters based on the requested method
+        if n_best_clusters == 'above_average':
+            mean_cluster_score = np.mean(list(cluster_score_dict.values()))
+            best_clusters = [
+                cluster for cluster, score in cluster_score_dict.items()
+                if score > mean_cluster_score
+            ]
+        else:
+            best_clusters = list(list(zip(*sorted(
+                cluster_score_dict.items(),
+                key=lambda label_score: label_score[1],
+                reverse=True
+            )))[0])[:min(n_best_clusters, len(cluster_score_dict))]
+
+    if show_clustermap:
+
+        # prepare a linkage matrix so that we can specify the dendrogram to sns
+        # https://stackoverflow.com/questions/29127013/
+        children = agg_cluster_final.children_
+        distance = np.arange(children.shape[0])
+        no_of_observations = np.arange(2, children.shape[0] + 2)
+        linkage_matrix = np.column_stack(
+            [children, distance, no_of_observations]
+        ).astype(float)
+
+        clustermap = sns.clustermap(
+            correlation_df,
+            row_linkage=linkage_matrix, col_linkage=linkage_matrix,
+            xticklabels=False, yticklabels=False,
+            figsize=(10, 10), center=0
+        )
+
+        clustermap.ax_cbar.set_ylabel(f'{correlation_method} R', fontsize=14)
+
+        # the following code draws squares on the clustermap to highlight
+        # the cluster locations; will also number the best clusters if they
+        # are to be called out after the fact
+        cluster_size_dict = Counter(labels)
+        size_counter = 1
+        top_left = 0
+        best_cluster_labels = []
+        best_cluster_matrices = []
+        best_cluster_scores = []
+        for i, imod_idx in enumerate(clustermap.dendrogram_row.reordered_ind):
+
+            # draw a box around the cluster if we're at the end of the cluster
+            cluster_for_imod = agg_cluster_final.labels_[imod_idx]
+            cluster_size = cluster_size_dict[cluster_for_imod]
+            if cluster_size == size_counter:
+                # usually Rectangle wants bottom left, but the heatmap that sns
+                # makes has the positive direction reversed (axes positions
+                # increase towards the bottom right)
+                clustermap.ax_heatmap.add_patch(
+                    Rectangle(
+                        (top_left, top_left), cluster_size, cluster_size,
+                        fill=False, color='white', lw=1
+                    )
+                )
+
+                # also add a number (or name) IF we're calling out later
+                if show_best_clusters:
+                    if cluster_for_imod in best_clusters:
+                        if cluster_names is not None:
+                            cluster_name = cluster_names.get(
+                                cluster_for_imod, cluster_for_imod
+                            )
+                        else:
+                            cluster_name = cluster_for_imod
+                        clustermap.ax_heatmap.text(
+                            top_left + cluster_size + 0.05, top_left - 0.05,
+                            str(cluster_name),
+                            color='white', fontsize=16
+                        )
+                        # stash the clustermap data for the best cluster
+                        best_cluster_submatrix = clustermap.data2d.iloc[
+                                                 top_left: (top_left +
+                                                            cluster_size),
+                                                 top_left: (top_left +
+                                                            cluster_size)
+                                                 ]
+                        best_cluster_labels.append(cluster_for_imod)
+                        best_cluster_matrices.append(best_cluster_submatrix)
+                        best_cluster_scores.append(
+                            cluster_score_dict[cluster_for_imod]
+                        )
+
+                # reset the counters being used to establish where to draw boxes
+                size_counter = 1
+                top_left = i + 1
+
+            else:
+                size_counter += 1
+
+        plt.show()
+
+        # now actually display the best clusters if asked to
+        if show_best_clusters:
+
+            # calculate the figure size and arrangement needed to cleanly
+            # display the number of best clusters we have on hand
+            subplot_rows, subplot_cols = 1, 1
+            while subplot_rows * subplot_cols < len(best_cluster_matrices):
+                if subplot_rows / subplot_cols >= 1:
+                    subplot_cols += 1
+                else:
+                    subplot_rows += 1
+            if len(best_cluster_matrices) <= 4:
+                figsize = (10, 6)
+            elif len(best_cluster_matrices) <= 30:
+                figsize = (14, 9)
+            else:
+                figsize = (20, 14)
+
+            _, axs = plt.subplots(subplot_rows, subplot_cols, figsize=figsize)
+            axs = axs.flatten()
+
+            # sort the best clusters by score to display the best one first
+            sorted_lab_mtrx_score_tups = sorted(
+                zip(
+                    best_cluster_labels,
+                    best_cluster_matrices,
+                    best_cluster_scores
+                ),
+                key=lambda label_matrix_score_tup: label_matrix_score_tup[2],
+                reverse=True
+            )
+            for lab_mtrx_score_tup, ax in zip(sorted_lab_mtrx_score_tups, axs):
+
+                cluster_lab, cluster_mtrx, cluster_score = lab_mtrx_score_tup
+
+                sns.heatmap(
+                    cluster_mtrx,
+                    xticklabels=False, center=0, square=True, cbar=False, ax=ax
+                )
+                if cluster_names is not None:
+                    cluster_name = cluster_names.get(
+                        cluster_lab, f'Cluster {cluster_lab}'
+                    )
+                    cluster_title = f'{cluster_name} ({cluster_score:.2f})'
+                else:
+                    cluster_title = f'Cluster {cluster_lab} ' \
+                                    f'({cluster_score:.2f})'
+                ax.set_title(cluster_title, fontsize=16)
+                ax.set_yticks(
+                    np.arange(0.5, cluster_mtrx.shape[0] + 0.5, 1)
+                )
+                ax.set_yticklabels(cluster_mtrx.index)
+                ax.tick_params(axis='both', labelsize=11)
+                ax.tick_params(axis='y', rotation=0)
+
+            for i in range(1, len(axs) - len(best_cluster_matrices) + 1):
+                axs[-i].set_visible(False)
+
+            if return_clustermap:
+                returns.append(clustermap)
+
+            plt.tight_layout()
+
+    # do the requested DIMCA comparison if asked; re-use machinery from base
+    # DIMA as much as possible
+    if dimca_sample1 is not None:
+
+        # compute the new activity matrix with the best cluster activities
+        # consolidated; define positive direction as direction with more + corrs
+        cluster_A_df = pd.DataFrame(columns=ica_data.A.columns)
+        all_clustered_ims = []
+        for best_cluster_label in best_clusters:
+
+            cluster_im_inds = np.where(labels == best_cluster_label)[0]
+            cluster_ims = np.array(ica_data.A.index)[cluster_im_inds]
+            all_clustered_ims += list(cluster_ims)
+            cluster_im_A_df = ica_data.A.loc[cluster_ims]
+            cluster_corr_df = correlation_df.loc[cluster_ims, cluster_ims]
+
+            # get the average non-self correlation for each iM in the cluster
+            # use this to invert the row in the cluster A df if negative
+            cluster_size = cluster_corr_df.shape[0]
+            for i in range(cluster_size):
+                non_self_inds = list(set(list(range(cluster_size))) - {i})
+                non_self_corrs = cluster_corr_df.iloc[i, non_self_inds]
+                im_corr_mean = np.mean(non_self_corrs)
+                if im_corr_mean < 0:
+                    cluster_im_A_df.iloc[i, :] = cluster_im_A_df.iloc[i, :] * -1
+
+            # compute the final averaged cluster activity, add to new dataframe
+            # use the provided name for this cluster if we have one
+            if cluster_names is not None and \
+                    best_cluster_label in cluster_names:
+                cluster_name = f'{cluster_names[best_cluster_label]} [Clst]'
+            else:
+                cluster_name = f'Cluster {best_cluster_label}'
+            cluster_A_df.loc[cluster_name] = cluster_im_A_df.mean(axis=0)
+
+        # now we can add in the singleton iModulons to our new A matrix
+        singleton_ims = set(list(ica_data.A.index)) - set(all_clustered_ims)
+        cluster_A_df = cluster_A_df.append(ica_data.A.loc[list(singleton_ims)])
+
+        # now we can pretty much proceed as normal with DIMCA; just have a
+        # different activity matrix, but the procedure is the same from here
+        dimca_return = plot_dima(ica_data, sample1=dimca_sample1,
+                                 sample2=dimca_sample2,
+                                 threshold=dimca_threshold, fdr=dimca_fdr,
+                                 label=dimca_label, adjust=dimca_adjust,
+                                 table=dimca_table, alternate_A=cluster_A_df,
+                                 **dimca_kwargs)
+        if dimca_table:
+            returns += dimca_return
+        else:
+            returns.append(dimca_return)
+
+    return returns
 
 
 ####################
