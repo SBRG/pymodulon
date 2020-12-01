@@ -80,16 +80,16 @@ def _check_table_helper(table: pd.DataFrame, index: Optional[Collection],
     table = table.loc[index]
     return table
 
-def _check_dict(table: Data, name: str, index_col: Optional[int] = 0):
-    if isinstance(table, dict):
-        return table
+
+def _check_dict(table: str, index_col: Optional[int] = 0):
     try:
         table = json.loads(table.replace('\'', '\"'))
     except ValueError:
         sep = '\t' if table.endswith('.tsv') else ','
-        table = pd.read_csv(table, index_col=index_col, header = None, sep=sep)
+        table = pd.read_csv(table, index_col=index_col, header=None, sep=sep)
         table = table.to_dict()[1]
     return table
+
 
 def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
     """
