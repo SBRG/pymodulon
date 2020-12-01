@@ -1,6 +1,7 @@
 """
 General utility functions for the pymodulon package
 """
+import json
 import os
 import re
 import warnings
@@ -83,6 +84,16 @@ def _check_table_helper(
 
     # Remove extra indices from table
     table = table.loc[index]
+    return table
+
+
+def _check_dict(table: str, index_col: Optional[int] = 0):
+    try:
+        table = json.loads(table.replace("'", '"'))
+    except ValueError:
+        sep = "\t" if table.endswith(".tsv") else ","
+        table = pd.read_csv(table, index_col=index_col, header=None, sep=sep)
+        table = table.to_dict()[1]
     return table
 
 
