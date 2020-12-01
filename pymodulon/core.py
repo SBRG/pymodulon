@@ -1,18 +1,24 @@
+import copy
 import re
+from typing import List, Mapping, Optional
+
+import numpy as np
+from matplotlib import pyplot as plt
+from sklearn.cluster import KMeans
+from tqdm import tqdm_notebook as tqdm
 
 from pymodulon.enrichment import *
-from pymodulon.util import _check_table, compute_threshold, Data, ImodNameList, \
-    _check_dict
-from typing import Optional, Mapping, List
-from matplotlib import pyplot as plt
-from tqdm import tqdm_notebook as tqdm
-from sklearn.cluster import KMeans
-import numpy as np
-import copy
+from pymodulon.util import (
+    Data,
+    ImodNameList,
+    _check_dict,
+    _check_table,
+    compute_threshold,
+)
 
 
 class IcaData(object):
-    """ Class representation of all iModulon-related data
+    """Class representation of all iModulon-related data
     Parameters
     ----------
 
@@ -21,22 +27,26 @@ class IcaData(object):
 
     """
 
-    def __init__(self, M: Data, A: Data, X: Optional[Data] = None,
-                 gene_table: Optional[Data] = None,
-                 sample_table: Optional[Data] = None,
-                 imodulon_table: Optional[Data] = None,
-                 trn: Optional[Data] = None,
-                 optimize_cutoff: bool = False,
-                 dagostino_cutoff: int = 550,
-                 thresholds: Optional[Union[Mapping[ImodName, float],
-                                            Iterable]] = None,
-                 threshold_method='dagostino',
-                 dataset_table: Optional[dict] = None,
-                 splash_table: Optional[dict] = None,
-                 gene_links: Optional[dict] = None,
-                 tf_links: Optional[dict] = None,
-                 link_database: Optional[str] = 'External Database',
-                 cog_colors: Optional[dict] = None):
+    def __init__(
+        self,
+        M: Data,
+        A: Data,
+        X: Optional[Data] = None,
+        gene_table: Optional[Data] = None,
+        sample_table: Optional[Data] = None,
+        imodulon_table: Optional[Data] = None,
+        trn: Optional[Data] = None,
+        optimize_cutoff: bool = False,
+        dagostino_cutoff: int = 550,
+        thresholds: Optional[Union[Mapping[ImodName, float], Iterable]] = None,
+        threshold_method="dagostino",
+        dataset_table: Optional[dict] = None,
+        splash_table: Optional[dict] = None,
+        gene_links: Optional[dict] = None,
+        tf_links: Optional[dict] = None,
+        link_database: Optional[str] = "External Database",
+        cog_colors: Optional[dict] = None,
+    ):
         """
 
         :param M: S matrix from ICA
@@ -73,8 +83,8 @@ class IcaData(object):
         # Load M and A matrices #
         #########################
 
-        M = _check_table(M, 'M')
-        A = _check_table(A, 'A')
+        M = _check_table(M, "M")
+        A = _check_table(A, "A")
 
         # Convert column names of M to int if possible
         try:
@@ -84,16 +94,15 @@ class IcaData(object):
 
         # Check that M and A matrices have identical iModulon names
         if M.columns.tolist() != A.index.tolist():
-            raise ValueError('M and A matrices have different iModulon names')
+            raise ValueError("M and A matrices have different iModulon names")
 
         # Ensure that M and A matrices have unique indices/columns
         if M.index.duplicated().any():
-            raise ValueError('M matrix contains duplicate gene names')
+            raise ValueError("M matrix contains duplicate gene names")
         if A.columns.duplicated().any():
-            raise ValueError('A matrix contains duplicate sample names')
+            raise ValueError("A matrix contains duplicate sample names")
         if M.columns.duplicated().any():
-            raise ValueError('M and A matrices contain '
-                             'duplicate iModulon names')
+            raise ValueError("M and A matrices contain " "duplicate iModulon names")
 
         # Store M and A
         self._m = M
@@ -131,30 +140,36 @@ class IcaData(object):
         if thresholds is not None:
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warnings.warn("Using manually input thresholds. D'agostino "
-                              "optimization will not be performed")
+                warnings.warn(
+                    "Using manually input thresholds. D'agostino "
+                    "optimization will not be performed"
+                )
             self.thresholds = thresholds
 
         # Use kmeans if TRN is empty, or kmeans is selected
-        elif self.trn.empty or threshold_method == 'kmeans':
+        elif self.trn.empty or threshold_method == "kmeans":
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warnings.warn("Using Kmeans threshold method. D'agostino "
-                              "optimization will not be performed")
+                warnings.warn(
+                    "Using Kmeans threshold method. D'agostino "
+                    "optimization will not be performed"
+                )
             self.compute_kmeans_thresholds()
             self._dagostino_cutoff = None
 
         # Else use D'agostino method
-        elif threshold_method == 'dagostino':
+        elif threshold_method == "dagostino":
             self._dagostino_cutoff = dagostino_cutoff
             self._cutoff_optimized = False
             if optimize_cutoff:
                 if trn is None:
-                    raise ValueError('Thresholds cannot be optimized '
-                                     'if no TRN is provided.')
+                    raise ValueError(
+                        "Thresholds cannot be optimized " "if no TRN is provided."
+                    )
                 else:
-                    warnings.warn('Optimizing iModulon thresholds, '
-                                  'may take 2-3 minutes...')
+                    warnings.warn(
+                        "Optimizing iModulon thresholds, " "may take 2-3 minutes..."
+                    )
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
@@ -164,8 +179,9 @@ class IcaData(object):
                 self.recompute_thresholds(self.dagostino_cutoff)
         # Capture improper threshold methods
         else:
-            raise ValueError('Threshold method must either be "dagostino" or '
-                             '"kmeans"')
+            raise ValueError(
+                'Threshold method must either be "dagostino" or ' '"kmeans"'
+            )
 
         ##############################
         # Load iModulonDB Properties #
@@ -206,13 +222,13 @@ class IcaData(object):
 
     @X.setter
     def X(self, x_matrix):
-        x = _check_table(x_matrix, 'X')
+        x = _check_table(x_matrix, "X")
 
         # Check that gene and sample names conform to M and A matrices
         if x.columns.tolist() != self.A.columns.tolist():
-            raise ValueError('X and A matrices have different sample names')
+            raise ValueError("X and A matrices have different sample names")
         if x.index.tolist() != self.M.index.tolist():
-            raise ValueError('X and M matrices have different gene names')
+            raise ValueError("X and M matrices have different gene names")
 
         # Set x matrix
         self._x = x
@@ -245,7 +261,7 @@ class IcaData(object):
 
     @gene_table.setter
     def gene_table(self, new_table):
-        table = _check_table(new_table, 'gene', self._gene_names)
+        table = _check_table(new_table, "gene", self._gene_names)
         self._gene_table = table
 
         # Update gene names
@@ -256,8 +272,8 @@ class IcaData(object):
             self._x.index = names
 
         # Update cog_colors
-        if hasattr(self, '_cog_colors'):
-            if self._cog_colors == {np.nan: 'gray'}:
+        if hasattr(self, "_cog_colors"):
+            if self._cog_colors == {np.nan: "gray"}:
                 self.cog_colors = None
 
     @property
@@ -266,7 +282,7 @@ class IcaData(object):
 
     @sample_table.setter
     def sample_table(self, new_table):
-        table = _check_table(new_table, 'sample', self._sample_names)
+        table = _check_table(new_table, "sample", self._sample_names)
         self._sample_table = table
 
         # Update sample names
@@ -282,7 +298,7 @@ class IcaData(object):
 
     @imodulon_table.setter
     def imodulon_table(self, new_table):
-        table = _check_table(new_table, 'imodulon', self._imodulon_names)
+        table = _check_table(new_table, "imodulon", self._imodulon_names)
         self._imodulon_table = table
 
     # TRN
@@ -292,34 +308,34 @@ class IcaData(object):
 
     @trn.setter
     def trn(self, new_trn):
-        self._trn = _check_table(new_trn, 'TRN', index_col=None)
+        self._trn = _check_table(new_trn, "TRN", index_col=None)
         if not self._trn.empty:
             # Check that regulator and gene_id columns are filled in
             if self._trn.regulator.isnull().any():
-                raise ValueError('Null value detected in "regulator" column '
-                                 'of TRN')
+                raise ValueError('Null value detected in "regulator" column ' "of TRN")
             if self._trn.gene_id.isnull().any():
-                raise ValueError('Null value detected in "gene_id" column '
-                                 'of TRN')
+                raise ValueError('Null value detected in "gene_id" column ' "of TRN")
 
             # Make sure regulators do not contain / or + characters
-            self._trn.regulator = [re.sub('\\+', ';', re.sub('/', ';', reg)) for
-                                   reg in self._trn.regulator]
+            self._trn.regulator = [
+                re.sub("\\+", ";", re.sub("/", ";", reg)) for reg in self._trn.regulator
+            ]
 
             # Only include genes that are in S/X matrix
             extra_genes = set(self._trn.gene_id) - set(self.gene_names)
             if len(extra_genes) > 0:
-                warnings.warn('The following genes are in the TRN but not in '
-                              'your M '
-                              'matrix: {}'.format(extra_genes))
+                warnings.warn(
+                    "The following genes are in the TRN but not in "
+                    "your M "
+                    "matrix: {}".format(extra_genes)
+                )
             self._trn = self._trn[self._trn.gene_id.isin(self.gene_names)]
 
             # Save regulator information to gene table
             reg_dict = {}
-            for name, group in self._trn.groupby('gene_id'):
-                reg_dict[name] = ','.join(group.regulator)
-            self._gene_table['regulator'] = pd.Series(reg_dict).reindex(
-                self.gene_names)
+            for name, group in self._trn.groupby("gene_id"):
+                reg_dict[name] = ",".join(group.regulator)
+            self._gene_table["regulator"] = pd.Series(reg_dict).reindex(self.gene_names)
 
         # mark that our cutoffs are no longer optimized since the TRN
         self._cutoff_optimized = False
@@ -336,8 +352,9 @@ class IcaData(object):
         self._m.columns = new_names
         self._imodulon_table.index = new_names
 
-    def rename_imodulons(self, name_dict: Mapping[ImodName, ImodName] = None,
-                         column=None) -> None:
+    def rename_imodulons(
+        self, name_dict: Mapping[ImodName, ImodName] = None, column=None
+    ) -> None:
         """
         Rename an iModulon.
         :param name_dict: Dictionary mapping old iModulon names to new
@@ -353,16 +370,17 @@ class IcaData(object):
             for key, val in dups.items():
                 if val in seen.keys():
                     # noinspection PyUnresolvedReferences
-                    name_dict[key] = val + '-' + str(seen[val])
+                    name_dict[key] = val + "-" + str(seen[val])
                     seen[val] += 1
                 else:
                     # noinspection PyUnresolvedReferences
-                    name_dict[key] = val + '-1'
+                    name_dict[key] = val + "-1"
                     seen[val] = 2
 
                 warnings.warn(
-                    'Duplicate iModulon names detected. iModulon {} will '
-                    'be renamed to {}'.format(key, name_dict[key]))
+                    "Duplicate iModulon names detected. iModulon {} will "
+                    "be renamed to {}".format(key, name_dict[key])
+                )
 
         # Rename using the column parameter if given
         if column is not None:
@@ -370,15 +388,18 @@ class IcaData(object):
                 new_names = self.imodulon_table[column]
                 self._imodulon_table = self._imodulon_table.drop(column, axis=1)
             else:
-                raise ValueError('{} is not a column in '
-                                 'the iModulon table'.format(column))
+                raise ValueError(
+                    "{} is not a column in " "the iModulon table".format(column)
+                )
         else:
             new_names = self.imodulon_names
 
         # Use dictionary to rename iModulons
         if name_dict is not None:
-            new_names = [name_dict[name] if name in name_dict.keys() else name
-                         for name in new_names]
+            new_names = [
+                name_dict[name] if name in name_dict.keys() else name
+                for name in new_names
+            ]
         self._update_imodulon_names(new_names)
 
     # Show enriched
@@ -395,7 +416,7 @@ class IcaData(object):
 
         # Get gene weights information
         gene_weights = self.M.loc[in_imodulon, imodulon]
-        gene_weights.name = 'gene_weight'
+        gene_weights.name = "gene_weight"
         gene_rows = self.gene_table.loc[in_imodulon]
         final_rows = pd.concat([gene_weights, gene_rows], axis=1)
 
@@ -415,7 +436,7 @@ class IcaData(object):
             if sorted_weights.iloc[0] > 2 * sorted_weights.iloc[1]:
                 single_genes_imodulons.append(imodulon)
                 if save:
-                    self.imodulon_table.loc[imodulon, 'single_gene'] = True
+                    self.imodulon_table.loc[imodulon, "single_gene"] = True
         return single_genes_imodulons
 
     ###############
@@ -431,11 +452,12 @@ class IcaData(object):
         """
         if isinstance(enrichment, pd.Series):
             enrichment = pd.DataFrame(enrichment)
-        keep_rows = self.imodulon_table[~self.imodulon_table.index.isin(
-            enrichment.index)]
-        keep_cols = self.imodulon_table.loc[enrichment.index,
-                                            set(self.imodulon_table.columns)
-                                            - set(enrichment.columns)]
+        keep_rows = self.imodulon_table[
+            ~self.imodulon_table.index.isin(enrichment.index)
+        ]
+        keep_cols = self.imodulon_table.loc[
+            enrichment.index, set(self.imodulon_table.columns) - set(enrichment.columns)
+        ]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich], sort=False)
 
@@ -448,8 +470,9 @@ class IcaData(object):
 
         self.imodulon_table = new_table
 
-    def compute_regulon_enrichment(self, imodulon: ImodName, regulator: str,
-                                   save: bool = False):
+    def compute_regulon_enrichment(
+        self, imodulon: ImodName, regulator: str, save: bool = False
+    ):
         """
         Compare an iModulon against a regulon. (Note: q-values cannot be
         computed for single enrichments)
@@ -461,21 +484,27 @@ class IcaData(object):
         :return: Pandas Series containing enrichment statistics
         """
         imod_genes = self.view_imodulon(imodulon).index
-        enrich = compute_regulon_enrichment(imod_genes, regulator,
-                                            self.gene_names, self.trn)
-        enrich.rename({'gene_set_size': 'imodulon_size'}, inplace=True)
+        enrich = compute_regulon_enrichment(
+            imod_genes, regulator, self.gene_names, self.trn
+        )
+        enrich.rename({"gene_set_size": "imodulon_size"}, inplace=True)
         if save:
             table = self.imodulon_table
             for key, value in enrich.items():
                 table.loc[imodulon, key] = value
-                table.loc[imodulon, 'regulator'] = enrich.name
+                table.loc[imodulon, "regulator"] = enrich.name
             self.imodulon_table = table
         return enrich
 
-    def compute_trn_enrichment(self, imodulons: Optional[ImodNameList] = None,
-                               fdr: float = 1e-5, max_regs: int = 1,
-                               save: bool = False, method: str = 'both',
-                               force: bool = False) -> pd.DataFrame:
+    def compute_trn_enrichment(
+        self,
+        imodulons: Optional[ImodNameList] = None,
+        fdr: float = 1e-5,
+        max_regs: int = 1,
+        save: bool = False,
+        method: str = "both",
+        force: bool = False,
+    ) -> pd.DataFrame:
         """
         Compare iModulons against all regulons
 
@@ -504,41 +533,57 @@ class IcaData(object):
 
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
-            df_enriched = compute_trn_enrichment(gene_list, self.gene_names,
-                                                 self.trn, max_regs=max_regs,
-                                                 fdr=fdr, method=method,
-                                                 force=force)
-            df_enriched['imodulon'] = imodulon
+            df_enriched = compute_trn_enrichment(
+                gene_list,
+                self.gene_names,
+                self.trn,
+                max_regs=max_regs,
+                fdr=fdr,
+                method=method,
+                force=force,
+            )
+            df_enriched["imodulon"] = imodulon
             enrichments.append(df_enriched)
 
         df_enriched = pd.concat(enrichments, axis=0, sort=True)
 
         # Set regulator as column instead of axis
-        df_enriched.index.name = 'regulator'
+        df_enriched.index.name = "regulator"
         df_enriched.reset_index(inplace=True)
 
         # Reorder columns
-        df_enriched.rename({'gene_set_size': 'imodulon_size'},
-                           inplace=True, axis=1)
-        col_order = ['imodulon', 'regulator', 'pvalue', 'qvalue', 'precision',
-                     'recall', 'f1score', 'TP', 'regulon_size',
-                     'imodulon_size', 'n_regs']
+        df_enriched.rename({"gene_set_size": "imodulon_size"}, inplace=True, axis=1)
+        col_order = [
+            "imodulon",
+            "regulator",
+            "pvalue",
+            "qvalue",
+            "precision",
+            "recall",
+            "f1score",
+            "TP",
+            "regulon_size",
+            "imodulon_size",
+            "n_regs",
+        ]
         df_enriched = df_enriched[col_order]
 
         # Sort by q-value
-        df_enriched.sort_values(['imodulon', 'qvalue', 'n_regs'])
+        df_enriched.sort_values(["imodulon", "qvalue", "n_regs"])
 
         if save:
-            df_top_enrich = df_enriched.drop_duplicates('imodulon')
-            self._update_imodulon_table(df_top_enrich.set_index('imodulon'))
+            df_top_enrich = df_enriched.drop_duplicates("imodulon")
+            self._update_imodulon_table(df_top_enrich.set_index("imodulon"))
 
         return df_enriched
 
-    def compute_annotation_enrichment(self, annotation: pd.DataFrame,
-                                      column: str,
-                                      imodulons: Optional[ImodNameList] = None,
-                                      fdr: float = 0.1) \
-            -> pd.DataFrame:
+    def compute_annotation_enrichment(
+        self,
+        annotation: pd.DataFrame,
+        column: str,
+        imodulons: Optional[ImodNameList] = None,
+        fdr: float = 0.1,
+    ) -> pd.DataFrame:
 
         # TODO: write test function
         # TODO: Figure out save function
@@ -555,12 +600,14 @@ class IcaData(object):
 
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
-            df_enriched = compute_annotation_enrichment(gene_list,
-                                                        self.gene_names,
-                                                        column=column,
-                                                        annotation=annotation,
-                                                        fdr=fdr)
-            df_enriched['imodulon'] = imodulon
+            df_enriched = compute_annotation_enrichment(
+                gene_list,
+                self.gene_names,
+                column=column,
+                annotation=annotation,
+                fdr=fdr,
+            )
+            df_enriched["imodulon"] = imodulon
             enrichments.append(df_enriched)
 
         DF_enriched = pd.concat(enrichments, axis=0, sort=True)
@@ -570,13 +617,21 @@ class IcaData(object):
         DF_enriched.reset_index(inplace=True)
 
         # Rename column
-        DF_enriched.rename({'gene_set_size': 'imodulon_size'},
-                           inplace=True, axis=1)
+        DF_enriched.rename({"gene_set_size": "imodulon_size"}, inplace=True, axis=1)
 
         enrich_col = DF_enriched.columns[0]
-        col_order = ['imodulon', enrich_col, 'pvalue', 'qvalue', 'precision',
-                     'recall', 'f1score', 'TP', 'target_set_size',
-                     'imodulon_size']
+        col_order = [
+            "imodulon",
+            enrich_col,
+            "pvalue",
+            "qvalue",
+            "precision",
+            "recall",
+            "f1score",
+            "TP",
+            "target_set_size",
+            "imodulon_size",
+        ]
         DF_enriched = DF_enriched[col_order]
         return DF_enriched
 
@@ -599,22 +654,22 @@ class IcaData(object):
         new_thresh_len = len(new_thresholds)
         imod_names_len = len(self._imodulon_names)
         if new_thresh_len != imod_names_len:
-            raise ValueError('new_threshold has {:d} elements, but should '
-                             'have {:d} elements'.format(new_thresh_len,
-                                                         imod_names_len))
+            raise ValueError(
+                "new_threshold has {:d} elements, but should "
+                "have {:d} elements".format(new_thresh_len, imod_names_len)
+            )
         if isinstance(new_thresholds, dict):
             # fix json peculiarity of saving int dict keys as string
             thresh_copy = new_thresholds.copy()
             for key in thresh_copy.keys():
-                if isinstance(key, str) and all([char.isdigit()
-                                                 for char in key]):
+                if isinstance(key, str) and all([char.isdigit() for char in key]):
                     new_thresholds.update({int(key): new_thresholds.pop(key)})
 
             self._thresholds = new_thresholds
         elif isinstance(new_thresholds, list):
             self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
         else:
-            raise TypeError('new_thresholds must be list or dict')
+            raise TypeError("new_thresholds must be list or dict")
 
     def change_threshold(self, imodulon: ImodName, value):
         """
@@ -638,8 +693,10 @@ class IcaData(object):
         self._cutoff_optimized = False
 
     def _update_thresholds(self, dagostino_cutoff: int):
-        self._thresholds = {k: compute_threshold(self._m[k], dagostino_cutoff)
-                            for k in self._imodulon_names}
+        self._thresholds = {
+            k: compute_threshold(self._m[k], dagostino_cutoff)
+            for k in self._imodulon_names
+        }
         self._dagostino_cutoff = dagostino_cutoff
 
     def _kmeans_cluster(self, imodulon):
@@ -648,7 +705,7 @@ class IcaData(object):
         model.fit(abs(data).values.reshape(-1, 1))
 
         df = pd.DataFrame(abs(data))
-        df['cluster'] = model.labels_
+        df["cluster"] = model.labels_
 
         # Get top two clusters
         counts = df.cluster.value_counts().sort_values(ascending=True)
@@ -667,8 +724,7 @@ class IcaData(object):
         Computes iModulon thresholds using K-means clustering
         Returns: None
         """
-        self._thresholds = {k: self._kmeans_cluster(k) for k in
-                            self._imodulon_names}
+        self._thresholds = {k: self._kmeans_cluster(k) for k in self._imodulon_names}
 
     def reoptimize_thresholds(self, progress=True, plot=True):
         """
@@ -682,8 +738,10 @@ class IcaData(object):
             self._cutoff_optimized = True
             self._update_thresholds(self.dagostino_cutoff)
         else:
-            print('Cutoff already optimized, and no new TRN data provided. '
-                  'Re-optimization will return same cutoff.')
+            print(
+                "Cutoff already optimized, and no new TRN data provided. "
+                "Re-optimization will return same cutoff."
+            )
         return self.dagostino_cutoff
 
     def _optimize_dagostino_cutoff(self, progress, plot):
@@ -702,20 +760,19 @@ class IcaData(object):
         all_genes = list(self.M.index)
         for imod in self.M.columns:
 
-            genes_top20 = list(
-                abs(self.M[imod]).sort_values().iloc[-20:].index)
-            imod_enrichment_df = compute_trn_enrichment(genes_top20, all_genes,
-                                                        self.trn, max_regs=1)
+            genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
+            imod_enrichment_df = compute_trn_enrichment(
+                genes_top20, all_genes, self.trn, max_regs=1
+            )
 
             # compute_trn_enrichment is being hijacked a bit; we want
             # the index to be components, not the enriched TFs
-            imod_enrichment_df['TF'] = imod_enrichment_df.index
-            imod_enrichment_df['component'] = imod
+            imod_enrichment_df["TF"] = imod_enrichment_df.index
+            imod_enrichment_df["component"] = imod
 
             if not imod_enrichment_df.empty:
                 # take the best single-TF enrichment row (by q-value)
-                top_enrichment = imod_enrichment_df.sort_values(
-                    by='qvalue').iloc[0, :]
+                top_enrichment = imod_enrichment_df.sort_values(by="qvalue").iloc[0, :]
                 top_enrichments.append(top_enrichment)
 
         # perform a sensitivity analysis to determine threshold effects
@@ -733,27 +790,29 @@ class IcaData(object):
             for enrich_row in top_enrichments:
                 # for this enrichment row, get all the genes regulated
                 # by the regulator chosen above
-                regulon_genes = list(self.trn[self.trn['regulator']
-                                              == enrich_row['TF']].gene_id)
+                regulon_genes = list(
+                    self.trn[self.trn["regulator"] == enrich_row["TF"]].gene_id
+                )
 
                 # compute the weighting threshold based on this cutoff to try
-                thresh = compute_threshold(self.M[enrich_row['component']],
-                                           cutoff)
-                component_genes = self.M[abs(self.M[enrich_row['component']])
-                                         > thresh].index.tolist()
+                thresh = compute_threshold(self.M[enrich_row["component"]], cutoff)
+                component_genes = self.M[
+                    abs(self.M[enrich_row["component"]]) > thresh
+                ].index.tolist()
 
                 # Compute the contingency table (aka confusion matrix)
                 # for overlap between the regulon and iM genes
-                ((tp, fp), (fn, tn)) = contingency(regulon_genes,
-                                                   component_genes,
-                                                   all_genes)
+                ((tp, fp), (fn, tn)) = contingency(
+                    regulon_genes, component_genes, all_genes
+                )
 
                 # Calculate F1 score for one regulator-component pair
                 # and add it to the running list for this cutoff
                 precision = np.true_divide(tp, tp + fp) if tp > 0 else 0
                 recall = np.true_divide(tp, tp + fn) if tp > 0 else 0
-                f1_score = (2 * precision * recall) / (precision + recall) \
-                    if tp > 0 else 0
+                f1_score = (
+                    (2 * precision * recall) / (precision + recall) if tp > 0 else 0
+                )
                 cutoff_f1_scores.append(f1_score)
 
             # Get mean of F1 score for this potential cutoff
@@ -768,7 +827,7 @@ class IcaData(object):
             ax.set_xlabel("D'agostino Test Statistic", fontsize=14)
             ax.set_ylabel("Mean F1 score")
             ax.plot(cutoffs_to_try, f1_scores)
-            ax.scatter([best_cutoff], [max(f1_scores)], color='r')
+            ax.scatter([best_cutoff], [max(f1_scores)], color="r")
 
         return best_cutoff
 
@@ -800,7 +859,7 @@ class IcaData(object):
 
         """
         gene_table = self.gene_table
-        if 'gene_name' not in gene_table.columns:
+        if "gene_name" not in gene_table.columns:
             raise ValueError('Gene table does not contain "gene_name" column.')
 
         if isinstance(gene, str):
@@ -814,10 +873,12 @@ class IcaData(object):
 
             # Ensure only one locus maps to this gene
             if len(loci) == 0:
-                raise ValueError('Gene does not exist: {}'.format(g))
+                raise ValueError("Gene does not exist: {}".format(g))
             elif len(loci) > 1:
-                warnings.warn('Found multiple genes named {}. Only '
-                              'reporting first locus tag'.format(g))
+                warnings.warn(
+                    "Found multiple genes named {}. Only "
+                    "reporting first locus tag".format(g)
+                )
 
             final_list.append(loci[0])
 
@@ -857,27 +918,34 @@ class IcaData(object):
             num_genes = self._m.shape[0]
             num_samps = self._a.shape[1]
             num_ims = self._m.shape[1]
-            if ('project' in self.sample_table.columns) and (
-                    'condition' in self.sample_table.columns):
-                num_conds = len(self.sample_table.groupby(['condition', 'project']))
+            if ("project" in self.sample_table.columns) and (
+                "condition" in self.sample_table.columns
+            ):
+                num_conds = len(self.sample_table.groupby(["condition", "project"]))
             else:
-                num_conds = 'Unknown'
+                num_conds = "Unknown"
 
             # initialize dataset_table
-            self._dataset_table = pd.Series({'Title': 'New Dataset',
-                                             'Organism': 'New Organism',
-                                             'Strain': 'Unknown Strain',
-                                             'Number of Samples': num_samps,
-                                             'Number of Unique Conditions': num_conds,
-                                             'Number of Genes': num_genes,
-                                             'Number of iModulons': num_ims})
+            self._dataset_table = pd.Series(
+                {
+                    "Title": "New Dataset",
+                    "Organism": "New Organism",
+                    "Strain": "Unknown Strain",
+                    "Number of Samples": num_samps,
+                    "Number of Unique Conditions": num_conds,
+                    "Number of Genes": num_genes,
+                    "Number of iModulons": num_ims,
+                }
+            )
         elif isinstance(new_dst, dict):
             self._dataset_table = new_dst
         elif isinstance(new_dst, str):
             self._dataset_table = _check_dict(new_dst)
         else:
-            raise ValueError('New dataset must be None, a filename, a dictionary, '
-                             'or a JSON string')
+            raise ValueError(
+                "New dataset must be None, a filename, a dictionary, "
+                "or a JSON string"
+            )
 
     @property
     def splash_table(self):
@@ -894,11 +962,13 @@ class IcaData(object):
 
         self._splash_table = new_splash
 
-        default_splash_table = {'large_title': 'New Dataset',
-                                'subtitle': 'Unpublished study',
-                                'author': 'Pymodulon User',
-                                'organism_folder': 'new_org',
-                                'dataset_folder': 'new_dataset'}
+        default_splash_table = {
+            "large_title": "New Dataset",
+            "subtitle": "Unpublished study",
+            "author": "Pymodulon User",
+            "organism_folder": "new_org",
+            "dataset_folder": "new_dataset",
+        }
         for k, v in default_splash_table.items():
             if k not in new_splash:  # use what is provided, default for what isn't
                 self._splash_table[k] = v
@@ -912,7 +982,7 @@ class IcaData(object):
         if isinstance(new_db, str):
             self._link_database = new_db
         else:
-            raise ValueError('link_database must be a string.')
+            raise ValueError("link_database must be a string.")
 
     @property
     def gene_links(self):
@@ -953,7 +1023,7 @@ class IcaData(object):
         if not self.trn.empty:
             for tf in new_links.keys():
                 if not (tf in list(self.trn.regulator)):
-                    print('%s has a TF link but is not in the TRN' % tf)
+                    print("%s has a TF link but is not in the TRN" % tf)
 
         self._tf_links = new_links
 
@@ -965,30 +1035,52 @@ class IcaData(object):
     def cog_colors(self, new_colors):
         if new_colors is None:
             try:  # generate a good dictionary if gene info is available
-                self._cog_colors = dict(zip(self.gene_table['COG'].unique().tolist(),
-                                            ['red', 'pink', 'y', 'orchid',
-                                             'mediumvioletred', 'green',
-                                             'lightgray', 'lightgreen', 'slategray',
-                                             'blue',
-                                             'saddlebrown', 'turquoise',
-                                             'lightskyblue', 'c', 'skyblue',
-                                             'lightblue', 'fuchsia', 'dodgerblue',
-                                             'lime', 'sandybrown',
-                                             'black', 'goldenrod', 'chocolate',
-                                             'orange']))
+                self._cog_colors = dict(
+                    zip(
+                        self.gene_table["COG"].unique().tolist(),
+                        [
+                            "red",
+                            "pink",
+                            "y",
+                            "orchid",
+                            "mediumvioletred",
+                            "green",
+                            "lightgray",
+                            "lightgreen",
+                            "slategray",
+                            "blue",
+                            "saddlebrown",
+                            "turquoise",
+                            "lightskyblue",
+                            "c",
+                            "skyblue",
+                            "lightblue",
+                            "fuchsia",
+                            "dodgerblue",
+                            "lime",
+                            "sandybrown",
+                            "black",
+                            "goldenrod",
+                            "chocolate",
+                            "orange",
+                        ],
+                    )
+                )
             except:  # no gene table or COG column
-                self._cog_colors = {np.nan: 'gray'}
+                self._cog_colors = {np.nan: "gray"}
 
         else:
             if isinstance(new_colors, str):
                 new_colors = _check_dict(new_colors)
 
             try:
-                for cog in (
-                        set(self.gene_table['COG'].unique()) - set(new_colors.keys())):
-                    new_colors[cog] = 'gray'
+                for cog in set(self.gene_table["COG"].unique()) - set(
+                    new_colors.keys()
+                ):
+                    new_colors[cog] = "gray"
             except:
                 print(
-                    'COG colors are useless if there is no \'COG\' category in the gene table.')
+                    "COG colors are useless if there is no 'COG' category in the gene table."
+                )
 
             self._cog_colors = new_colors

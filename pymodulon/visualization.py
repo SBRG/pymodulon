@@ -3,34 +3,36 @@
 """
 from collections import Counter
 
-from adjustText import adjust_text
-from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import pandas as pd
 import seaborn as sns
-from scipy.optimize import curve_fit, OptimizeWarning
+from adjustText import adjust_text
+from matplotlib.patches import Rectangle
+from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 
+from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
 from pymodulon.enrichment import *
-from pymodulon.util import _parse_sample
 from pymodulon.util import *
-from pymodulon.compare import _convert_gene_index
-
+from pymodulon.util import _parse_sample
 
 #############
 # Bar Plots #
 #############
 
 # noinspection PyTypeChecker
-def barplot(values: pd.Series, sample_table: pd.DataFrame,
-            ylabel: str = '',
-            projects: Optional[Union[List, str]] = None,
-            highlight: Optional[Union[List, str]] = None,
-            ax: Optional[Ax] = None,
-            legend_kwargs: Optional[Mapping] = None) -> Ax:
+def barplot(
+    values: pd.Series,
+    sample_table: pd.DataFrame,
+    ylabel: str = "",
+    projects: Optional[Union[List, str]] = None,
+    highlight: Optional[Union[List, str]] = None,
+    ax: Optional[Ax] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
@@ -55,7 +57,7 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     if projects is not None and len(projects) == 1:
         highlight = projects
 
-    if projects is not None and 'project' in sample_table:
+    if projects is not None and "project" in sample_table:
         sample_table = sample_table[sample_table.project.isin(projects)]
         values = values[sample_table.index]
 
@@ -72,13 +74,12 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     yrange = ymax - ymin
 
     # Add project-specific information
-    if 'project' in sample_table.columns and \
-            'condition' in sample_table.columns:
+    if "project" in sample_table.columns and "condition" in sample_table.columns:
 
         # Sort data by project/condition to ensure replicates are together
-        metadata = sample_table.loc[:, ['project', 'condition']]
-        metadata = metadata.sort_values(['project', 'condition'])
-        metadata['name'] = metadata.project + ' - ' + metadata.condition
+        metadata = sample_table.loc[:, ["project", "condition"]]
+        metadata = metadata.sort_values(["project", "condition"])
+        metadata["name"] = metadata.project + " - " + metadata.condition
 
         # Coerce highlight to iterable
         if highlight is None:
@@ -87,59 +88,85 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
             highlight = [highlight]
 
         # Get X and Y values for scatter points
-        metadata['y'] = values
-        metadata['x'] = np.cumsum(~metadata[['name']].duplicated())
+        metadata["y"] = values
+        metadata["x"] = np.cumsum(~metadata[["name"]].duplicated())
 
         # Get heights for barplot
-        bar_vals = metadata.groupby('x').mean()
+        bar_vals = metadata.groupby("x").mean()
 
         # Add colors and names
-        bar_vals['name'] = metadata.drop_duplicates('name').name.values
-        bar_vals['project'] = metadata.drop_duplicates('name').project.values
+        bar_vals["name"] = metadata.drop_duplicates("name").name.values
+        bar_vals["project"] = metadata.drop_duplicates("name").project.values
 
         # Plot bars for highlighted samples
         color_vals = bar_vals[bar_vals.project.isin(highlight)]
-        color_cycle = ['tab:red', 'tab:orange', 'tab:green',
-                       'tab:purple', 'tab:brown', 'tab:pink', 'tab:gray',
-                       'tab:olive', 'tab:cyan']
+        color_cycle = [
+            "tab:red",
+            "tab:orange",
+            "tab:green",
+            "tab:purple",
+            "tab:brown",
+            "tab:pink",
+            "tab:gray",
+            "tab:olive",
+            "tab:cyan",
+        ]
         i = 0
-        for name, group in color_vals.groupby('name'):
-            ax.bar(group.index, group.y, color=color_cycle[i], width=1,
-                   linewidth=0, align='edge', zorder=1, label=name)
+        for name, group in color_vals.groupby("name"):
+            ax.bar(
+                group.index,
+                group.y,
+                color=color_cycle[i],
+                width=1,
+                linewidth=0,
+                align="edge",
+                zorder=1,
+                label=name,
+            )
             i = (i + 1) % len(color_cycle)
 
         # Plot bars for non-highlighted samples
         other_vals = bar_vals[~bar_vals.project.isin(highlight)]
-        ax.bar(other_vals.index, other_vals.y, color='tab:blue', width=1,
-               linewidth=0, align='edge', zorder=1, label=None)
-        ax.scatter(metadata.x + 0.5, metadata.y, color='k', zorder=2, s=10)
+        ax.bar(
+            other_vals.index,
+            other_vals.y,
+            color="tab:blue",
+            width=1,
+            linewidth=0,
+            align="edge",
+            zorder=1,
+            label=None,
+        )
+        ax.scatter(metadata.x + 0.5, metadata.y, color="k", zorder=2, s=10)
 
         # Get project names and sizes
         projects = metadata.project.drop_duplicates()
-        md_cond = metadata.drop_duplicates(['name'])
-        project_sizes = [len(md_cond[md_cond.project == proj]) for proj in
-                         projects]
+        md_cond = metadata.drop_duplicates(["name"])
+        project_sizes = [len(md_cond[md_cond.project == proj]) for proj in projects]
         nbars = len(md_cond)
 
         # Draw lines to discriminate between projects
         proj_lines = np.cumsum([1] + project_sizes)
-        ax.vlines(proj_lines, ymin, ymax,
-                  colors='lightgray',
-                  linewidth=1)
+        ax.vlines(proj_lines, ymin, ymax, colors="lightgray", linewidth=1)
 
         # Add project names
         texts = []
         start = 2
         for proj, size in zip(projects, project_sizes):
             x = start + size / 2
-            texts.append(ax.text(x, ymin - yrange * 0.02, proj, ha='right',
-                                 va='top', rotation=45))
+            texts.append(
+                ax.text(
+                    x, ymin - yrange * 0.02, proj, ha="right", va="top", rotation=45
+                )
+            )
             start += size
 
         # Add legend
         if not color_vals.empty:
-            kwargs = {'bbox_to_anchor': (1, 1), 'ncol': len(
-                color_vals.name.unique()) // 6 + 1}
+            kwargs = {
+                "bbox_to_anchor": (1, 1),
+                "ncol": len(color_vals.name.unique()) // 6 + 1,
+            }
 
             if legend_kwargs is not None:
                 kwargs.update(legend_kwargs)
@@ -147,9 +174,8 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
             ax.legend(**kwargs)
 
     else:
-        warnings.warn('Missing "project" and "condition" columns in sample '
-                      'table.')
-        ax.bar(range(len(values)), values, width=1, align='edge')
+        warnings.warn('Missing "project" and "condition" columns in sample ' "table.")
+        ax.bar(range(len(values)), values, width=1, align="edge")
         nbars = len(values)
 
     # Set axis limits
@@ -163,16 +189,19 @@ def barplot(values: pd.Series, sample_table: pd.DataFrame,
     ax.set_xticks([])
 
     # X-axis
-    ax.hlines(0, xmin, xmax, color='k')
+    ax.hlines(0, xmin, xmax, color="k")
 
     return ax
 
 
-def plot_expression(ica_data: IcaData, gene: str,
-                    projects: Union[List, str] = None,
-                    highlight: Union[List, str] = None,
-                    ax: Optional[Ax] = None,
-                    legend_kwargs: Optional[Mapping] = None) -> Ax:
+def plot_expression(
+    ica_data: IcaData,
+    gene: str,
+    projects: Union[List, str] = None,
+    highlight: Union[List, str] = None,
+    ax: Optional[Ax] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Creates a barplot showing an gene's expression across the compendium
     Args:
@@ -189,21 +218,25 @@ def plot_expression(ica_data: IcaData, gene: str,
     # Check that gene exists
     if gene in ica_data.X.index:
         values = ica_data.X.loc[gene]
-        label = '{} Expression'.format(gene)
+        label = "{} Expression".format(gene)
     else:
         locus = ica_data.name2num(gene)
         values = ica_data.X.loc[locus]
-        label = '${}$ Expression'.format(gene)
+        label = "${}$ Expression".format(gene)
 
-    return barplot(values, ica_data.sample_table, label, projects,
-                   highlight, ax, legend_kwargs)
+    return barplot(
+        values, ica_data.sample_table, label, projects, highlight, ax, legend_kwargs
+    )
 
 
-def plot_activities(ica_data: IcaData, imodulon: ImodName,
-                    projects: Union[List, str] = None,
-                    highlight: Union[List, str] = None,
-                    ax: Optional[Ax] = None,
-                    legend_kwargs: Optional[Mapping] = None) -> Ax:
+def plot_activities(
+    ica_data: IcaData,
+    imodulon: ImodName,
+    projects: Union[List, str] = None,
+    highlight: Union[List, str] = None,
+    ax: Optional[Ax] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Creates a barplot showing an iModulon's activity across the compendium
     Args:
@@ -221,19 +254,23 @@ def plot_activities(ica_data: IcaData, imodulon: ImodName,
     if imodulon in ica_data.A.index:
         values = ica_data.A.loc[imodulon]
     else:
-        raise ValueError(f'iModulon does not exist: {imodulon}')
+        raise ValueError(f"iModulon does not exist: {imodulon}")
 
-    label = '{} iModulon\nActivity'.format(imodulon)
+    label = "{} iModulon\nActivity".format(imodulon)
 
-    return barplot(values, ica_data.sample_table, label, projects,
-                   highlight, ax, legend_kwargs)
+    return barplot(
+        values, ica_data.sample_table, label, projects, highlight, ax, legend_kwargs
+    )
 
 
-def plot_metadata(ica_data: IcaData, column,
-                  projects: Union[List, str] = None,
-                  highlight: Union[List, str] = None,
-                  ax: Optional[Ax] = None,
-                  legend_kwargs: Optional[Mapping] = None) -> Ax:
+def plot_metadata(
+    ica_data: IcaData,
+    column,
+    projects: Union[List, str] = None,
+    highlight: Union[List, str] = None,
+    ax: Optional[Ax] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Creates a barplot for values in the sample table
 
@@ -251,32 +288,32 @@ def plot_metadata(ica_data: IcaData, column,
     if column in ica_data.sample_table.columns:
         # Make sure the column is filled with numbers
         if not pd.api.types.is_numeric_dtype(ica_data.sample_table[column]):
-            raise ValueError('Metadata column {} is not numeric'.format(column))
+            raise ValueError("Metadata column {} is not numeric".format(column))
 
         # Remove null values
         table = ica_data.sample_table[ica_data.sample_table[column].notnull()]
         values = ica_data.sample_table[column]
 
     else:
-        raise ValueError('Column not in sample table: {}'.format(column))
+        raise ValueError("Column not in sample table: {}".format(column))
 
-    return barplot(values, table, column, projects,
-                   highlight, ax, legend_kwargs)
+    return barplot(values, table, column, projects, highlight, ax, legend_kwargs)
 
 
 # noinspection PyTypeChecker
-def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
-                           regulator: str = None,
-                           bins: Optional[Union[int, Sequence, str]] = None,
-                           kind: str = 'overlap',
-                           ax: Optional[Ax] = None,
-                           hist_label: Tuple[str, str] = ('Not regulated',
-                                                          'Regulon Genes'),
-                           color: Union[Sequence[Tuple],
-                                        Sequence[str]] = ('#aaaaaa', 'salmon'),
-                           alpha: float = 0.7,
-                           ax_font_kwargs: Optional[Mapping] = None,
-                           legend_kwargs: Optional[Mapping] = None) -> Ax:
+def plot_regulon_histogram(
+    ica_data: IcaData,
+    imodulon: ImodName,
+    regulator: str = None,
+    bins: Optional[Union[int, Sequence, str]] = None,
+    kind: str = "overlap",
+    ax: Optional[Ax] = None,
+    hist_label: Tuple[str, str] = ("Not regulated", "Regulon Genes"),
+    color: Union[Sequence[Tuple], Sequence[str]] = ("#aaaaaa", "salmon"),
+    alpha: float = 0.7,
+    ax_font_kwargs: Optional[Mapping] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
 
@@ -321,7 +358,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     """
     # Check that iModulon exists
     if imodulon not in ica_data.M.columns:
-        raise ValueError(f'iModulon does not exist: {imodulon}')
+        raise ValueError(f"iModulon does not exist: {imodulon}")
 
     # If ax is None, create ax on which to generate histogram
     if ax is None:
@@ -343,7 +380,7 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
 
     # If regulator is not given, use imodulon_table to find regulator
     elif not ica_data.imodulon_table.empty:
-        reg = ica_data.imodulon_table.loc[imodulon, 'regulator']
+        reg = ica_data.imodulon_table.loc[imodulon, "regulator"]
         if pd.isna(reg):
             reg = None
 
@@ -352,8 +389,9 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
     else:
         df_enriched = ica_data.compute_trn_enrichment(imodulons=imodulon)
         df_top_enrich = df_enriched.sort_values(
-            ['imodulon', 'qvalue', 'n_regs']).drop_duplicates('imodulon')
-        reg = df_top_enrich.set_index('imodulon').loc[imodulon, 'regulator']
+            ["imodulon", "qvalue", "n_regs"]
+        ).drop_duplicates("imodulon")
+        reg = df_top_enrich.set_index("imodulon").loc[imodulon, "regulator"]
         if not isinstance(reg, str):
             if pd.isna(reg):
                 reg = None
@@ -369,42 +407,50 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
         ax_font_kwargs = {}
 
     if legend_kwargs is None:
-        legend_kwargs = dict({'loc': 'upper right'})
+        legend_kwargs = dict({"loc": "upper right"})
 
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
     reg_arr = ica_data.M[imodulon].loc[reg_genes]
     non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
 
-    if kind == 'overlap':
-        ax.hist(non_reg_arr, bins=bin_arr, alpha=alpha, color=color[0],
-                label=hist_label[0])
-        ax.hist(reg_arr, bins=bin_arr, alpha=alpha, color=color[1],
-                label=hist_label[1])
+    if kind == "overlap":
+        ax.hist(
+            non_reg_arr, bins=bin_arr, alpha=alpha, color=color[0], label=hist_label[0]
+        )
+        ax.hist(reg_arr, bins=bin_arr, alpha=alpha, color=color[1], label=hist_label[1])
 
-    elif kind == 'side':
-        arr = np.array([non_reg_arr, reg_arr], dtype='object')
+    elif kind == "side":
+        arr = np.array([non_reg_arr, reg_arr], dtype="object")
         ax.hist(arr, bins=bin_arr, alpha=alpha, color=color, label=hist_label)
 
     else:
-        raise ValueError(f'{kind} is not a valid option. `kind` must be '
-                         'either "overlap" or "side"')
+        raise ValueError(
+            f"{kind} is not a valid option. `kind` must be "
+            'either "overlap" or "side"'
+        )
 
     # Set y-axis to log-scale
-    ax.set_yscale('log')
+    ax.set_yscale("log")
 
     # Add thresholds to scatterplot (dashed lines)
     ymin, ymax = ax.get_ylim()
     thresh = abs(ica_data.thresholds[imodulon])
     if thresh != 0:
-        ax.vlines([-thresh, thresh], ymin=ymin, ymax=ymax,
-                  colors='k', linestyles='dashed', linewidth=1)
+        ax.vlines(
+            [-thresh, thresh],
+            ymin=ymin,
+            ymax=ymax,
+            colors="k",
+            linestyles="dashed",
+            linewidth=1,
+        )
 
     ax.set_ylim(ymin, ymax)
 
     # Set x and y labels
-    ax.set_xlabel(f'{imodulon} Gene Weight', **ax_font_kwargs)
-    ax.set_ylabel('Number of Genes', **ax_font_kwargs)
+    ax.set_xlabel(f"{imodulon} Gene Weight", **ax_font_kwargs)
+    ax.set_ylabel("Number of Genes", **ax_font_kwargs)
 
     # Add legend
     ax.legend(**legend_kwargs)
@@ -417,21 +463,25 @@ def plot_regulon_histogram(ica_data: IcaData, imodulon: ImodName,
 ################
 
 # noinspection PyTypeChecker
-def scatterplot(x: pd.Series, y: pd.Series,
-                groups: Optional[Mapping] = None,
-                show_labels: Union[bool, str] = 'auto',
-                adjust_labels: bool = True,
-                line45: bool = False,
-                line45_margin: float = 0,
-                fit_line: bool = False,
-                fit_metric: str = 'pearson',
-                xlabel: str = '', ylabel: str = '',
-                ax: Optional[Ax] = None,
-                legend: bool = True,
-                ax_font_kwargs: Optional[Mapping] = None,
-                scatter_kwargs: Optional[Mapping] = None,
-                label_font_kwargs: Optional[Mapping] = None,
-                legend_kwargs: Optional[Mapping] = None) -> Ax:
+def scatterplot(
+    x: pd.Series,
+    y: pd.Series,
+    groups: Optional[Mapping] = None,
+    show_labels: Union[bool, str] = "auto",
+    adjust_labels: bool = True,
+    line45: bool = False,
+    line45_margin: float = 0,
+    fit_line: bool = False,
+    fit_metric: str = "pearson",
+    xlabel: str = "",
+    ylabel: str = "",
+    ax: Optional[Ax] = None,
+    legend: bool = True,
+    ax_font_kwargs: Optional[Mapping] = None,
+    scatter_kwargs: Optional[Mapping] = None,
+    label_font_kwargs: Optional[Mapping] = None,
+    legend_kwargs: Optional[Mapping] = None,
+) -> Ax:
     """
     Generates a scatter-plot of the data given, with options for coloring by
     group, adding labels, adding lines, and generating correlation or
@@ -488,21 +538,24 @@ def scatterplot(x: pd.Series, y: pd.Series,
     if ax is None:
         fig, ax = plt.subplots()
 
-    if show_labels == 'auto':
-        show_labels = (len(x) <= 20)
+    if show_labels == "auto":
+        show_labels = len(x) <= 20
 
-    if not (isinstance(x, pd.Series) and isinstance(y, pd.Series) and
-            (x.sort_index().index == y.sort_index().index).all()):
-        raise TypeError('X and Y must be pandas series with the same index')
+    if not (
+        isinstance(x, pd.Series)
+        and isinstance(y, pd.Series)
+        and (x.sort_index().index == y.sort_index().index).all()
+    ):
+        raise TypeError("X and Y must be pandas series with the same index")
 
     # Set up data object
-    data = pd.DataFrame({'x': x, 'y': y})
+    data = pd.DataFrame({"x": x, "y": y})
 
     # Add group information
-    data['group'] = ''
+    data["group"] = ""
     if groups is not None:
         for k, val in groups.items():
-            data.loc[k, 'group'] = val
+            data.loc[k, "group"] = val
 
     # Handle custom kwargs
     if ax_font_kwargs is None:
@@ -531,37 +584,46 @@ def scatterplot(x: pd.Series, y: pd.Series,
     # Add 45 degree line
     if line45:
         # Plot diagonal lines
-        ax.plot([allmin, allmax], [allmin, allmax], color='k',
-                linestyle='dashed', linewidth=0.5, zorder=0)
+        ax.plot(
+            [allmin, allmax],
+            [allmin, allmax],
+            color="k",
+            linestyle="dashed",
+            linewidth=0.5,
+            zorder=0,
+        )
 
         if line45_margin > 0:
             diff = pd.DataFrame(abs(data.x - data.y), index=data.index)
             hidden = diff.loc[diff[0] < line45_margin]
-            data.loc[hidden.index, 'group'] = 'hidden'
-            ax.plot([max(xmin, ymin + line45_margin),
-                     min(xmax, ymax + line45_margin)],
-                    [max(ymin, xmin - line45_margin),
-                     min(ymax, xmax - line45_margin)],
-                    color='gray', linestyle='dashed',
-                    linewidth=0.5, zorder=0)
-            ax.plot([max(xmin, ymin - line45_margin),
-                     min(xmax, ymax - line45_margin)],
-                    [max(ymin, xmin + line45_margin),
-                     min(ymax, xmax + line45_margin)],
-                    color='gray', linestyle='dashed',
-                    linewidth=0.5, zorder=0)
+            data.loc[hidden.index, "group"] = "hidden"
+            ax.plot(
+                [max(xmin, ymin + line45_margin), min(xmax, ymax + line45_margin)],
+                [max(ymin, xmin - line45_margin), min(ymax, xmax - line45_margin)],
+                color="gray",
+                linestyle="dashed",
+                linewidth=0.5,
+                zorder=0,
+            )
+            ax.plot(
+                [max(xmin, ymin - line45_margin), min(xmax, ymax - line45_margin)],
+                [max(ymin, xmin + line45_margin), min(ymax, xmax + line45_margin)],
+                color="gray",
+                linestyle="dashed",
+                linewidth=0.5,
+                zorder=0,
+            )
 
-    for name, group in data.groupby('group'):
+    for name, group in data.groupby("group"):
 
         # Override defaults for hidden points
         kwargs = scatter_kwargs.copy()
-        if name == 'hidden':
-            kwargs.update({'c': 'gray', 'alpha': 0.7, 'linewidth': 0,
-                           'label': None})
-        elif name == '':
-            kwargs.update({'label': None})
+        if name == "hidden":
+            kwargs.update({"c": "gray", "alpha": 0.7, "linewidth": 0, "label": None})
+        elif name == "":
+            kwargs.update({"label": None})
         else:
-            kwargs.update({'label': name})
+            kwargs.update({"label": name})
 
         ax.scatter(group.x, group.y, **kwargs, zorder=1)
 
@@ -571,9 +633,9 @@ def scatterplot(x: pd.Series, y: pd.Series,
 
     # Add lines at 0
     if xmin < 0 < xmax:
-        ax.hlines(0, xmin, xmax, linewidth=0.5, color='gray', zorder=2)
+        ax.hlines(0, xmin, xmax, linewidth=0.5, color="gray", zorder=2)
     if ymin < 0 < ymax:
-        ax.vlines(0, ymin, ymax, linewidth=0.5, color='gray', zorder=2)
+        ax.vlines(0, ymin, ymax, linewidth=0.5, color="gray", zorder=2)
 
     # Add labels
     if show_labels:
@@ -581,11 +643,14 @@ def scatterplot(x: pd.Series, y: pd.Series,
         for idx in x.index:
             texts.append(ax.text(x[idx], y[idx], idx, **label_font_kwargs))
         if adjust_labels:
-            adjust_text(texts, ax=ax,
-                        arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
-                        only_move={'objects': 'y'},
-                        expand_objects=(1.2, 1.4),
-                        expand_points=(1.3, 1.3))
+            adjust_text(
+                texts,
+                ax=ax,
+                arrowprops=dict(arrowstyle="-", color="k", lw=0.5),
+                only_move={"objects": "y"},
+                expand_objects=(1.2, 1.4),
+                expand_points=(1.3, 1.3),
+            )
 
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
@@ -599,11 +664,15 @@ def scatterplot(x: pd.Series, y: pd.Series,
     return ax
 
 
-def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
-                      xaxis=None, xname='',
-                      by: Optional[str] = 'start',
-                      ref_cols: Optional[SeqSetStr] = None,
-                      **kwargs) -> Ax:
+def plot_gene_weights(
+    ica_data: IcaData,
+    imodulon: ImodName,
+    xaxis=None,
+    xname="",
+    by: Optional[str] = "start",
+    ref_cols: Optional[SeqSetStr] = None,
+    **kwargs,
+) -> Ax:
     """
     Generates a scatter-plot, with gene weights on the y-axis, and either
     the mean expression, gene length, or gene start site on the x-axis.
@@ -638,9 +707,9 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     # Check that iModulon exists
     if imodulon in ica_data.M.columns:
         y = ica_data.M[imodulon]
-        ylabel = f'{imodulon} Gene Weight'
+        ylabel = f"{imodulon} Gene Weight"
     else:
-        raise ValueError(f'iModulon does not exist: {imodulon}')
+        raise ValueError(f"iModulon does not exist: {imodulon}")
 
     # If experimental `xaxis` parameter is used, use custom values for x-axis
     if xaxis is not None:
@@ -649,32 +718,31 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
 
     else:
         #  Ensure 'by' has a valid input and assign x, xlabel accordingly
-        if by in ('log-tpm', 'log-tpm-norm'):
+        if by in ("log-tpm", "log-tpm-norm"):
             x = _normalize_expr(ica_data, ref_cols)
-            xlabel = 'Mean Expression'
-        elif by == 'length':
+            xlabel = "Mean Expression"
+        elif by == "length":
             x = np.log10(ica_data.gene_table.length)
-            xlabel = 'Gene Length (log10-scale)'
-        elif by == 'start':
+            xlabel = "Gene Length (log10-scale)"
+        elif by == "start":
             x = ica_data.gene_table.start
-            xlabel = 'Gene Start'
+            xlabel = "Gene Start"
         else:
-            raise ValueError('"by" must be "log-tpm-norm", "length", '
-                             'or "start"')
+            raise ValueError('"by" must be "log-tpm-norm", "length", ' 'or "start"')
 
     # Override specific kwargs (their implementation is different
     # in this function)
-    show_labels_pgw = kwargs.pop('show_labels', 'auto')
-    adjust_labels_pgw = kwargs.pop('adjust_labels', True)
-    legend_pgw = kwargs.pop('legend', True)
-    legend_kwargs_pgw = kwargs.pop('legend_kwargs', None)
+    show_labels_pgw = kwargs.pop("show_labels", "auto")
+    adjust_labels_pgw = kwargs.pop("adjust_labels", True)
+    legend_pgw = kwargs.pop("legend", True)
+    legend_kwargs_pgw = kwargs.pop("legend_kwargs", None)
 
-    kwargs['show_labels'] = kwargs['adjust_labels'] = kwargs['legend'] = False
-    kwargs['legend_kwargs'] = None
+    kwargs["show_labels"] = kwargs["adjust_labels"] = kwargs["legend"] = False
+    kwargs["legend_kwargs"] = None
 
     # Remove xlabel and ylabel kwargs if provided
-    kwargs.pop('xlabel', None)
-    kwargs.pop('ylabel', None)
+    kwargs.pop("xlabel", None)
+    kwargs.pop("ylabel", None)
 
     # Scatter Plot
     ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -685,8 +753,14 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
 
     thresh = ica_data.thresholds[imodulon]
     if thresh != 0:
-        ax.hlines([thresh, -thresh], xmin=xmin, xmax=xmax,
-                  colors='k', linestyles='dashed', linewidth=1)
+        ax.hlines(
+            [thresh, -thresh],
+            xmin=xmin,
+            xmax=xmax,
+            colors="k",
+            linestyles="dashed",
+            linewidth=1,
+        )
 
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
@@ -694,29 +768,44 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     bin_M = ica_data.M_binarized
     component_genes = set(bin_M[imodulon].loc[bin_M[imodulon] == 1].index)
     texts = []
-    expand_kwargs = {'expand_objects': (1.2, 1.4),
-                     'expand_points': (1.3, 1.3)}
+    expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
     # Add labels: Put gene name if components contain under 20 genes
-    if show_labels_pgw is True or (show_labels_pgw is not False
-                                   and len(component_genes) <= 20):
+    if show_labels_pgw is True or (
+        show_labels_pgw is not False and len(component_genes) <= 20
+    ):
         for gene in component_genes:
-            texts.append(ax.text(x[gene], ica_data.M.loc[gene, imodulon],
-                                 ica_data.gene_table.loc[gene, 'gene_name'],
-                                 fontsize=12))
+            texts.append(
+                ax.text(
+                    x[gene],
+                    ica_data.M.loc[gene, imodulon],
+                    ica_data.gene_table.loc[gene, "gene_name"],
+                    fontsize=12,
+                )
+            )
 
-        expand_kwargs['expand_text'] = (1.4, 1.4)
+        expand_kwargs["expand_text"] = (1.4, 1.4)
 
     # Add labels: Repel texts from other text and points
-    rect = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh)),
-                                  width=xmax - xmin,
-                                  height=2 * abs(thresh),
-                                  fill=False, linewidth=0))
+    rect = ax.add_patch(
+        Rectangle(
+            xy=(xmin, -abs(thresh)),
+            width=xmax - xmin,
+            height=2 * abs(thresh),
+            fill=False,
+            linewidth=0,
+        )
+    )
 
     if adjust_labels_pgw:
-        adjust_text(texts=texts, add_objects=[rect], ax=ax,
-                    arrowprops=dict(arrowstyle='-', color='k', lw=0.5),
-                    only_move={'objects': 'y'}, **expand_kwargs)
+        adjust_text(
+            texts=texts,
+            add_objects=[rect],
+            ax=ax,
+            arrowprops=dict(arrowstyle="-", color="k", lw=0.5),
+            only_move={"objects": "y"},
+            **expand_kwargs,
+        )
 
     # Add legend
     if legend_pgw and legend_kwargs_pgw:
@@ -725,12 +814,15 @@ def plot_gene_weights(ica_data: IcaData, imodulon: ImodName,
     return ax
 
 
-def compare_gene_weights(ica_data: IcaData,
-                         imodulon1: ImodName, imodulon2: ImodName,
-                         ica_data2: Optional[IcaData] = None,
-                         ortho_file: str = None,
-                         use_org1_names: bool = True,
-                         **kwargs) -> Ax:
+def compare_gene_weights(
+    ica_data: IcaData,
+    imodulon1: ImodName,
+    imodulon2: ImodName,
+    ica_data2: Optional[IcaData] = None,
+    ortho_file: str = None,
+    use_org1_names: bool = True,
+    **kwargs,
+) -> Ax:
     """
     Compare gene weights between 2 iModulons. The result is shown as a
     scatter-plot. Also shows the D'Agostino cutoff for both iModulons,
@@ -768,14 +860,14 @@ def compare_gene_weights(ica_data: IcaData,
         ica_data2 = ica_data.copy()
 
     M1, M2 = _convert_gene_index(ica_data.M, ica_data2.M, ortho_file)
-    bin_M1, bin_M2 = _convert_gene_index(ica_data.M_binarized,
-                                         ica_data2.M_binarized, ortho_file)
+    bin_M1, bin_M2 = _convert_gene_index(
+        ica_data.M_binarized, ica_data2.M_binarized, ortho_file
+    )
 
     # Convert gene table
     gene_table1, gene_table2 = _convert_gene_index(
-        ica_data.gene_table,
-        ica_data2.gene_table,
-        ortho_file)
+        ica_data.gene_table, ica_data2.gene_table, ortho_file
+    )
 
     if use_org1_names:
         gene_table = gene_table1
@@ -785,22 +877,22 @@ def compare_gene_weights(ica_data: IcaData,
     x = M1[imodulon1]
     y = M2[imodulon2]
 
-    xlabel = f'{imodulon1} Gene Weight'
-    ylabel = f'{imodulon2} Gene Weight'
+    xlabel = f"{imodulon1} Gene Weight"
+    ylabel = f"{imodulon2} Gene Weight"
 
     # Override specific kwargs (their implementation is different
     # in this function)
-    show_labels_cgw = kwargs.pop('show_labels', 'auto')
-    adjust_labels_cgw = kwargs.pop('adjust_labels', True)
-    legend_cgw = kwargs.pop('legend', True)
-    legend_kwargs_cgw = kwargs.pop('legend_kwargs', None)
+    show_labels_cgw = kwargs.pop("show_labels", "auto")
+    adjust_labels_cgw = kwargs.pop("adjust_labels", True)
+    legend_cgw = kwargs.pop("legend", True)
+    legend_kwargs_cgw = kwargs.pop("legend_kwargs", None)
 
-    kwargs['show_labels'] = kwargs['adjust_labels'] = kwargs['legend'] = False
-    kwargs['legend_kwargs'] = None
+    kwargs["show_labels"] = kwargs["adjust_labels"] = kwargs["legend"] = False
+    kwargs["legend_kwargs"] = None
 
     # Remove xlabel and ylabel kwargs if provided
-    kwargs.pop('xlabel', None)
-    kwargs.pop('ylabel', None)
+    kwargs.pop("xlabel", None)
+    kwargs.pop("ylabel", None)
 
     # Scatter Plot
     ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -813,12 +905,24 @@ def compare_gene_weights(ica_data: IcaData,
     thresh2 = ica_data2.thresholds[imodulon2]
 
     if thresh1 != 0:
-        ax.vlines([thresh1, -thresh1], ymin=ymin, ymax=ymax,
-                  colors='k', linestyles='dashed', linewidth=1)
+        ax.vlines(
+            [thresh1, -thresh1],
+            ymin=ymin,
+            ymax=ymax,
+            colors="k",
+            linestyles="dashed",
+            linewidth=1,
+        )
 
     if thresh2 != 0:
-        ax.hlines([thresh2, -thresh2], xmin=xmin, xmax=xmax,
-                  colors='k', linestyles='dashed', linewidth=1)
+        ax.hlines(
+            [thresh2, -thresh2],
+            xmin=xmin,
+            xmax=xmax,
+            colors="k",
+            linestyles="dashed",
+            linewidth=1,
+        )
 
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
@@ -828,49 +932,66 @@ def compare_gene_weights(ica_data: IcaData,
     component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
     component_genes = component_genes_x & component_genes_y
     texts = []
-    expand_kwargs = {'expand_objects': (1.2, 1.4),
-                     'expand_points': (1.3, 1.3)}
+    expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
     # Add labels: Put gene name if components contain under 20 genes
     auto = None
-    if show_labels_cgw == 'auto':
-        auto = (bin_M1[imodulon1].astype(bool)
-                & bin_M2[imodulon2].astype(bool)).sum() <= 20
+    if show_labels_cgw == "auto":
+        auto = (
+            bin_M1[imodulon1].astype(bool) & bin_M2[imodulon2].astype(bool)
+        ).sum() <= 20
 
     if show_labels_cgw or auto:
         for gene in component_genes:
-            ax.scatter(M1.loc[gene, imodulon1],
-                       M2.loc[gene, imodulon2],
-                       color='r')
+            ax.scatter(M1.loc[gene, imodulon1], M2.loc[gene, imodulon2], color="r")
 
             # Add labels
             try:
-                gene_name = gene_table.loc[gene, 'gene_name']
+                gene_name = gene_table.loc[gene, "gene_name"]
             except KeyError:
                 gene_name = gene
 
-            texts.append(ax.text(M1.loc[gene, imodulon1],
-                                 M2.loc[gene, imodulon2],
-                                 gene_name,
-                                 fontsize=12))
+            texts.append(
+                ax.text(
+                    M1.loc[gene, imodulon1],
+                    M2.loc[gene, imodulon2],
+                    gene_name,
+                    fontsize=12,
+                )
+            )
 
-        expand_kwargs['expand_text'] = (1.4, 1.4)
+        expand_kwargs["expand_text"] = (1.4, 1.4)
 
     # Add labels: Repel texts from other text and points
-    rectx = ax.add_patch(Rectangle(xy=(xmin, -abs(thresh2)),
-                                   width=xmax - xmin,
-                                   height=2 * abs(thresh2),
-                                   fill=False, linewidth=0))
+    rectx = ax.add_patch(
+        Rectangle(
+            xy=(xmin, -abs(thresh2)),
+            width=xmax - xmin,
+            height=2 * abs(thresh2),
+            fill=False,
+            linewidth=0,
+        )
+    )
 
-    recty = ax.add_patch(Rectangle(xy=(-abs(thresh1), ymin),
-                                   width=2 * abs(thresh1),
-                                   height=ymax - ymin,
-                                   fill=False, linewidth=0))
+    recty = ax.add_patch(
+        Rectangle(
+            xy=(-abs(thresh1), ymin),
+            width=2 * abs(thresh1),
+            height=ymax - ymin,
+            fill=False,
+            linewidth=0,
+        )
+    )
 
     if adjust_labels_cgw:
-        adjust_text(texts=texts, add_objects=[rectx, recty], ax=ax,
-                    arrowprops=dict(arrowstyle='-', color='k', lw=0.5),
-                    only_move={'objects': 'y'}, **expand_kwargs)
+        adjust_text(
+            texts=texts,
+            add_objects=[rectx, recty],
+            ax=ax,
+            arrowprops=dict(arrowstyle="-", color="k", lw=0.5),
+            only_move={"objects": "y"},
+            **expand_kwargs,
+        )
 
     # Add legend
     if legend_cgw and legend_kwargs_cgw:
@@ -879,8 +1000,7 @@ def compare_gene_weights(ica_data: IcaData,
     return ax
 
 
-def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
-                       **kwargs) -> Ax:
+def compare_expression(ica_data: IcaData, gene1: str, gene2: str, **kwargs) -> Ax:
     """
     Compares Gene Expression values between two genes. The result is shown
     as a scatter-plot.
@@ -905,29 +1025,28 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str,
     # Check that gene1 exists
     if gene1 in ica_data.X.index:
         x = ica_data.X.loc[gene1]
-        xlabel = f'{gene1} Expression'
+        xlabel = f"{gene1} Expression"
     else:
         locus = ica_data.name2num(gene1)
         x = ica_data.X.loc[locus]
-        xlabel = f'${gene1}$ Expression'
+        xlabel = f"${gene1}$ Expression"
 
     # Check that gene2 exists
     if gene2 in ica_data.X.index:
         y = ica_data.X.loc[gene2]
-        ylabel = f'{gene2} Expression'
+        ylabel = f"{gene2} Expression"
     else:
         locus = ica_data.name2num(gene2)
         y = ica_data.X.loc[locus]
-        ylabel = f'${gene2}$ Expression'
+        ylabel = f"${gene2}$ Expression"
 
     # Remove xlabel, ylabel, and fit_line kwargs if provided
-    kwargs.pop('xlabel', None)
-    kwargs.pop('ylabel', None)
-    kwargs.pop('fit_line', None)
+    kwargs.pop("xlabel", None)
+    kwargs.pop("ylabel", None)
+    kwargs.pop("fit_line", None)
 
     # Scatter Plot
-    ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel,
-                     fit_line=True, **kwargs)
+    ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, fit_line=True, **kwargs)
 
     return ax
 
@@ -957,26 +1076,32 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
     x = ica_data.A.loc[imodulon1]
     y = ica_data.A.loc[imodulon2]
 
-    xlabel = f'{imodulon1} iModulon Activity'
-    ylabel = f'{imodulon2} iModulon Activity'
+    xlabel = f"{imodulon1} iModulon Activity"
+    ylabel = f"{imodulon2} iModulon Activity"
 
     # Remove xlabel, ylabel, and fit_line kwargs if provided
-    kwargs.pop('xlabel', None)
-    kwargs.pop('ylabel', None)
-    kwargs.pop('fit_line', None)
+    kwargs.pop("xlabel", None)
+    kwargs.pop("ylabel", None)
+    kwargs.pop("fit_line", None)
 
     # Scatter Plot
-    ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel,
-                     fit_line=True, **kwargs)
+    ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, fit_line=True, **kwargs)
 
     return ax
 
 
-def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
-              sample2: Union[Collection, str],
-              threshold: float = 5, fdr: float = .1, label: bool = True,
-              adjust: bool = True, table: bool = False,
-              alternate_A: pd.DataFrame = None, **kwargs) -> Ax:
+def plot_dima(
+    ica_data: IcaData,
+    sample1: Union[Collection, str],
+    sample2: Union[Collection, str],
+    threshold: float = 5,
+    fdr: float = 0.1,
+    label: bool = True,
+    adjust: bool = True,
+    table: bool = False,
+    alternate_A: pd.DataFrame = None,
+    **kwargs,
+) -> Ax:
     """
     Plots a Dima plot between two projects or two sets of samples
     Args:
@@ -1005,34 +1130,52 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     if isinstance(sample1, str):
         xlabel = sample1
     else:
-        xlabel = '\n'.join(sample1)
+        xlabel = "\n".join(sample1)
     if isinstance(sample2, str):
         ylabel = sample2
     else:
-        ylabel = '\n'.join(sample2)
+        ylabel = "\n".join(sample2)
 
     a1 = A_to_use[sample1_list].mean(axis=1)
     a2 = A_to_use[sample2_list].mean(axis=1)
 
-    df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
-                   fdr=fdr, alternate_A=alternate_A)
+    df_diff = dima(
+        ica_data,
+        sample1_list,
+        sample2_list,
+        threshold=threshold,
+        fdr=fdr,
+        alternate_A=alternate_A,
+    )
 
-    ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
-                     xlabel=xlabel, ylabel=ylabel, **kwargs)
+    ax = scatterplot(
+        a1,
+        a2,
+        line45=True,
+        line45_margin=threshold,
+        xlabel=xlabel,
+        ylabel=ylabel,
+        **kwargs,
+    )
 
     if label:
-        df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
+        df_diff = pd.concat([df_diff, a1, a2], join="inner", axis=1)
         texts = []
         for k in df_diff.index:
-            texts.append(ax.text(df_diff.loc[k, 0], df_diff.loc[k, 1], k,
-                                 fontsize=10))
+            texts.append(ax.text(df_diff.loc[k, 0], df_diff.loc[k, 1], k, fontsize=10))
         if adjust:
-            expand_args = {'expand_objects': (1.2, 1.4),
-                           'expand_points': (1.3, 1.3),
-                           'expand_text': (1.4, 1.4)}
-            adjust_text(texts, ax=ax,
-                        arrowprops=dict(arrowstyle="-", color='k', lw=0.5),
-                        only_move={'objects': 'y'}, **expand_args)
+            expand_args = {
+                "expand_objects": (1.2, 1.4),
+                "expand_points": (1.3, 1.3),
+                "expand_text": (1.4, 1.4),
+            }
+            adjust_text(
+                texts,
+                ax=ax,
+                arrowprops=dict(arrowstyle="-", color="k", lw=0.5),
+                only_move={"objects": "y"},
+                **expand_args,
+            )
     if table:
         return ax, df_diff
 
@@ -1040,22 +1183,26 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
         return ax
 
 
-def cluster_activities(ica_data: IcaData,
-                       correlation_method: str = 'spearman',
-                       distance_threshold: Union[float] = None,
-                       show_thresholding: bool = False,
-                       show_clustermap: bool = True,
-                       show_best_clusters: bool = False,
-                       n_best_clusters: Union[str, int] = 'above_average',
-                       cluster_names: Union[dict] = None,
-                       return_clustermap: bool = False,
-                       # dimca options
-                       dimca_sample1: Union[Collection, str] = None,
-                       dimca_sample2: Union[Collection, str] = None,
-                       dimca_threshold: float = 5, dimca_fdr: float = .1,
-                       dimca_label: bool = True, dimca_adjust: bool = True,
-                       dimca_table: bool = False, **dimca_kwargs
-                       ):
+def cluster_activities(
+    ica_data: IcaData,
+    correlation_method: str = "spearman",
+    distance_threshold: Union[float] = None,
+    show_thresholding: bool = False,
+    show_clustermap: bool = True,
+    show_best_clusters: bool = False,
+    n_best_clusters: Union[str, int] = "above_average",
+    cluster_names: Union[dict] = None,
+    return_clustermap: bool = False,
+    # dimca options
+    dimca_sample1: Union[Collection, str] = None,
+    dimca_sample2: Union[Collection, str] = None,
+    dimca_threshold: float = 5,
+    dimca_fdr: float = 0.1,
+    dimca_label: bool = True,
+    dimca_adjust: bool = True,
+    dimca_table: bool = False,
+    **dimca_kwargs,
+):
     """
     Uses agglomerative (hierarchical) clustering to group iModulons based on
     correlation between their activities and displays the resulting cluster map
@@ -1113,19 +1260,17 @@ def cluster_activities(ica_data: IcaData,
     # the user-specified value or an automatically-selected value
     agg_cluster_base = AgglomerativeClustering(
         n_clusters=None,
-        affinity='precomputed',
+        affinity="precomputed",
         compute_full_tree=True,
-        linkage='complete',
-        distance_threshold=0.5
+        linkage="complete",
+        distance_threshold=0.5,
     )
 
     # perform automatic thresholding for default case
     if distance_threshold is None:
 
-        auto_threshold_df = pd.DataFrame(
-            columns=['threshold', 'score', 'n_clusters']
-        )
-        auto_threshold_df['threshold'] = np.arange(0, 1, 0.025)
+        auto_threshold_df = pd.DataFrame(columns=["threshold", "score", "n_clusters"])
+        auto_threshold_df["threshold"] = np.arange(0, 1, 0.025)
 
         for row in auto_threshold_df.itertuples(index=True):
 
@@ -1135,44 +1280,46 @@ def cluster_activities(ica_data: IcaData,
             )
             agg_cluster_auto_threshold.fit(distance_matrix)
             n_clusters = agg_cluster_auto_threshold.n_clusters_
-            auto_threshold_df.loc[row.Index, 'n_clusters'] = n_clusters
+            auto_threshold_df.loc[row.Index, "n_clusters"] = n_clusters
 
             # score the clustering; handle the edge case where all clusters have
             # size 1; this is invalid input for silhouette_score
             if n_clusters == distance_matrix.shape[0]:
-                auto_threshold_df.loc[row.Index, 'score'] = 0
+                auto_threshold_df.loc[row.Index, "score"] = 0
             else:
-                auto_threshold_df.loc[row.Index, 'score'] = silhouette_score(
+                auto_threshold_df.loc[row.Index, "score"] = silhouette_score(
                     distance_matrix,
                     agg_cluster_auto_threshold.labels_,
-                    metric='precomputed'
+                    metric="precomputed",
                 )
 
         best_threshold = auto_threshold_df.sort_values(
-            by='score', ascending=False
-        ).iloc[0]['threshold']
+            by="score", ascending=False
+        ).iloc[0]["threshold"]
 
         if show_thresholding:
             _, ax = plt.subplots()
             ax.yaxis.grid(False)
             sns.scatterplot(
-                x='threshold', y='score', data=auto_threshold_df,
-                ax=ax, color='blue'
+                x="threshold", y="score", data=auto_threshold_df, ax=ax, color="blue"
             )
-            ax.axvline(best_threshold, linestyle='--', color='k')
-            ax.tick_params(axis='both', labelsize=13)
-            ax.tick_params(axis='y', color='blue', labelcolor='blue')
-            ax.set_xlabel('Threshold', fontsize=14)
-            ax.set_ylabel('Silhouette', color='blue', fontsize=14)
+            ax.axvline(best_threshold, linestyle="--", color="k")
+            ax.tick_params(axis="both", labelsize=13)
+            ax.tick_params(axis="y", color="blue", labelcolor="blue")
+            ax.set_xlabel("Threshold", fontsize=14)
+            ax.set_ylabel("Silhouette", color="blue", fontsize=14)
             ax2 = ax.twinx()
             ax2.yaxis.grid(False)
             sns.scatterplot(
-                x='threshold', y='n_clusters', data=auto_threshold_df,
-                ax=ax2, color='red'
+                x="threshold",
+                y="n_clusters",
+                data=auto_threshold_df,
+                ax=ax2,
+                color="red",
             )
-            ax2.tick_params(axis='both', labelsize=13)
-            ax2.tick_params(axis='y', color='red', labelcolor='red')
-            ax2.set_ylabel('# Clusters', fontsize=14, color='red')
+            ax2.tick_params(axis="both", labelsize=13)
+            ax2.tick_params(axis="y", color="red", labelcolor="red")
+            ax2.set_ylabel("# Clusters", fontsize=14, color="red")
             plt.show()
 
     else:
@@ -1193,7 +1340,7 @@ def cluster_activities(ica_data: IcaData,
     if show_best_clusters or dimca_sample1 is not None:
 
         sample_scores = silhouette_samples(
-            distance_matrix, labels, metric='precomputed'
+            distance_matrix, labels, metric="precomputed"
         )
         cluster_score_dict = {}
         for label in set(labels):
@@ -1202,18 +1349,25 @@ def cluster_activities(ica_data: IcaData,
             )
 
         # calculate the best clusters based on the requested method
-        if n_best_clusters == 'above_average':
+        if n_best_clusters == "above_average":
             mean_cluster_score = np.mean(list(cluster_score_dict.values()))
             best_clusters = [
-                cluster for cluster, score in cluster_score_dict.items()
+                cluster
+                for cluster, score in cluster_score_dict.items()
                 if score > mean_cluster_score
             ]
         else:
-            best_clusters = list(list(zip(*sorted(
-                cluster_score_dict.items(),
-                key=lambda label_score: label_score[1],
-                reverse=True
-            )))[0])[:min(n_best_clusters, len(cluster_score_dict))]
+            best_clusters = list(
+                list(
+                    zip(
+                        *sorted(
+                            cluster_score_dict.items(),
+                            key=lambda label_score: label_score[1],
+                            reverse=True,
+                        )
+                    )
+                )[0]
+            )[: min(n_best_clusters, len(cluster_score_dict))]
 
     if show_clustermap:
 
@@ -1228,12 +1382,15 @@ def cluster_activities(ica_data: IcaData,
 
         clustermap = sns.clustermap(
             correlation_df,
-            row_linkage=linkage_matrix, col_linkage=linkage_matrix,
-            xticklabels=False, yticklabels=False,
-            figsize=(10, 10), center=0
+            row_linkage=linkage_matrix,
+            col_linkage=linkage_matrix,
+            xticklabels=False,
+            yticklabels=False,
+            figsize=(10, 10),
+            center=0,
         )
 
-        clustermap.ax_cbar.set_ylabel(f'{correlation_method} R', fontsize=14)
+        clustermap.ax_cbar.set_ylabel(f"{correlation_method} R", fontsize=14)
 
         # the following code draws squares on the clustermap to highlight
         # the cluster locations; will also number the best clusters if they
@@ -1255,8 +1412,12 @@ def cluster_activities(ica_data: IcaData,
                 # increase towards the bottom right)
                 clustermap.ax_heatmap.add_patch(
                     Rectangle(
-                        (top_left, top_left), cluster_size, cluster_size,
-                        fill=False, color='white', lw=1
+                        (top_left, top_left),
+                        cluster_size,
+                        cluster_size,
+                        fill=False,
+                        color="white",
+                        lw=1,
                     )
                 )
 
@@ -1270,22 +1431,20 @@ def cluster_activities(ica_data: IcaData,
                         else:
                             cluster_name = cluster_for_imod
                         clustermap.ax_heatmap.text(
-                            top_left + cluster_size + 0.05, top_left - 0.05,
+                            top_left + cluster_size + 0.05,
+                            top_left - 0.05,
                             str(cluster_name),
-                            color='white', fontsize=16
+                            color="white",
+                            fontsize=16,
                         )
                         # stash the clustermap data for the best cluster
                         best_cluster_submatrix = clustermap.data2d.iloc[
-                                                 top_left: (top_left +
-                                                            cluster_size),
-                                                 top_left: (top_left +
-                                                            cluster_size)
-                                                 ]
+                            top_left : (top_left + cluster_size),
+                            top_left : (top_left + cluster_size),
+                        ]
                         best_cluster_labels.append(cluster_for_imod)
                         best_cluster_matrices.append(best_cluster_submatrix)
-                        best_cluster_scores.append(
-                            cluster_score_dict[cluster_for_imod]
-                        )
+                        best_cluster_scores.append(cluster_score_dict[cluster_for_imod])
 
                 # reset the counters being used to establish where to draw boxes
                 size_counter = 1
@@ -1319,13 +1478,9 @@ def cluster_activities(ica_data: IcaData,
 
             # sort the best clusters by score to display the best one first
             sorted_lab_mtrx_score_tups = sorted(
-                zip(
-                    best_cluster_labels,
-                    best_cluster_matrices,
-                    best_cluster_scores
-                ),
+                zip(best_cluster_labels, best_cluster_matrices, best_cluster_scores),
                 key=lambda label_matrix_score_tup: label_matrix_score_tup[2],
-                reverse=True
+                reverse=True,
             )
             for lab_mtrx_score_tup, ax in zip(sorted_lab_mtrx_score_tups, axs):
 
@@ -1333,23 +1488,24 @@ def cluster_activities(ica_data: IcaData,
 
                 sns.heatmap(
                     cluster_mtrx,
-                    xticklabels=False, center=0, square=True, cbar=False, ax=ax
+                    xticklabels=False,
+                    center=0,
+                    square=True,
+                    cbar=False,
+                    ax=ax,
                 )
                 if cluster_names is not None:
                     cluster_name = cluster_names.get(
-                        cluster_lab, f'Cluster {cluster_lab}'
+                        cluster_lab, f"Cluster {cluster_lab}"
                     )
-                    cluster_title = f'{cluster_name} ({cluster_score:.2f})'
+                    cluster_title = f"{cluster_name} ({cluster_score:.2f})"
                 else:
-                    cluster_title = f'Cluster {cluster_lab} ' \
-                                    f'({cluster_score:.2f})'
+                    cluster_title = f"Cluster {cluster_lab} " f"({cluster_score:.2f})"
                 ax.set_title(cluster_title, fontsize=16)
-                ax.set_yticks(
-                    np.arange(0.5, cluster_mtrx.shape[0] + 0.5, 1)
-                )
+                ax.set_yticks(np.arange(0.5, cluster_mtrx.shape[0] + 0.5, 1))
                 ax.set_yticklabels(cluster_mtrx.index)
-                ax.tick_params(axis='both', labelsize=11)
-                ax.tick_params(axis='y', rotation=0)
+                ax.tick_params(axis="both", labelsize=11)
+                ax.tick_params(axis="y", rotation=0)
 
             for i in range(1, len(axs) - len(best_cluster_matrices) + 1):
                 axs[-i].set_visible(False)
@@ -1387,11 +1543,10 @@ def cluster_activities(ica_data: IcaData,
 
             # compute the final averaged cluster activity, add to new dataframe
             # use the provided name for this cluster if we have one
-            if cluster_names is not None and \
-                    best_cluster_label in cluster_names:
-                cluster_name = f'{cluster_names[best_cluster_label]} [Clst]'
+            if cluster_names is not None and best_cluster_label in cluster_names:
+                cluster_name = f"{cluster_names[best_cluster_label]} [Clst]"
             else:
-                cluster_name = f'Cluster {best_cluster_label}'
+                cluster_name = f"Cluster {best_cluster_label}"
             cluster_A_df.loc[cluster_name] = cluster_im_A_df.mean(axis=0)
 
         # now we can add in the singleton iModulons to our new A matrix
@@ -1400,12 +1555,18 @@ def cluster_activities(ica_data: IcaData,
 
         # now we can pretty much proceed as normal with DIMCA; just have a
         # different activity matrix, but the procedure is the same from here
-        dimca_return = plot_dima(ica_data, sample1=dimca_sample1,
-                                 sample2=dimca_sample2,
-                                 threshold=dimca_threshold, fdr=dimca_fdr,
-                                 label=dimca_label, adjust=dimca_adjust,
-                                 table=dimca_table, alternate_A=cluster_A_df,
-                                 **dimca_kwargs)
+        dimca_return = plot_dima(
+            ica_data,
+            sample1=dimca_sample1,
+            sample2=dimca_sample2,
+            threshold=dimca_threshold,
+            fdr=dimca_fdr,
+            label=dimca_label,
+            adjust=dimca_adjust,
+            table=dimca_table,
+            alternate_A=cluster_A_df,
+            **dimca_kwargs,
+        )
         if dimca_table:
             returns += dimca_return
         else:
@@ -1418,27 +1579,28 @@ def cluster_activities(ica_data: IcaData,
 # Helper Functions #
 ####################
 
+
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
-    if metric == 'r2':
+    if metric == "r2":
         params, r2 = get_fit(x, y)
-        label = '$R^2_{{adj}}$ = {:.2f}'.format(r2)
+        label = "$R^2_{{adj}}$ = {:.2f}".format(r2)
 
-    elif metric == 'pearson':
+    elif metric == "pearson":
         params = curve_fit(solid_line, x, y)[0]
         r, pval = stats.pearsonr(x, y)
         if pval < 1e-10:
-            label = f'Pearson R = {r:.2f}\np-value < 1e-10'
+            label = f"Pearson R = {r:.2f}\np-value < 1e-10"
         else:
-            label = f'Pearson R = {r:.2f}\np-value = {pval:.2e}'
+            label = f"Pearson R = {r:.2f}\np-value = {pval:.2e}"
 
-    elif metric == 'spearman':
+    elif metric == "spearman":
         params = curve_fit(solid_line, x, y)[0]
         r, pval = stats.spearmanr(x, y)
         if pval < 1e-10:
-            label = f'Spearman R = {r:.2f}\np-value < 1e-10'
+            label = f"Spearman R = {r:.2f}\np-value < 1e-10"
         else:
-            label = f'Spearman R = {r:.2f}\np-value = {pval:.2e}'
+            label = f"Spearman R = {r:.2f}\np-value = {pval:.2e}"
 
     else:
         raise ValueError('Metric must be "pearson", "spearman", or "r2"')
@@ -1446,24 +1608,37 @@ def _fit_line(x, y, ax, metric):
     # Plot line
     if len(params) == 2:
         xvals = np.array([min(x), max(x)])
-        ax.plot(xvals, solid_line(xvals, *params), label=label,
-                color='k', linestyle='dashed', linewidth=1, zorder=5)
+        ax.plot(
+            xvals,
+            solid_line(xvals, *params),
+            label=label,
+            color="k",
+            linestyle="dashed",
+            linewidth=1,
+            zorder=5,
+        )
     else:
         mid = params[2]
         xvals = np.array([x.min(), mid, x.max()])
-        ax.plot(xvals, broken_line(xvals, *params), label=label,
-                color='k', linestyle='dashed', linewidth=1, zorder=5)
+        ax.plot(
+            xvals,
+            broken_line(xvals, *params),
+            label=label,
+            color="k",
+            linestyle="dashed",
+            linewidth=1,
+            zorder=5,
+        )
 
 
 def get_fit(x, y):
     all_params = [curve_fit(solid_line, x, y)[0]]
 
     with warnings.catch_warnings():
-        warnings.simplefilter('ignore', category=OptimizeWarning)
+        warnings.simplefilter("ignore", category=OptimizeWarning)
         for c in [min(x), np.mean(x), max(x)]:
             try:
-                all_params.append(
-                    curve_fit(broken_line, x, y, p0=[1, 1, c])[0])
+                all_params.append(curve_fit(broken_line, x, y, p0=[1, 1, c])[0])
             except OptimizeWarning:
                 pass
 
@@ -1494,7 +1669,7 @@ def broken_line(x, A, B, C):
 
 
 def solid_line(x, A, B):  # this is your 'straight line' y=f(x)
-    y = (A * x + B)
+    y = A * x + B
     return y
 
 
@@ -1550,7 +1725,7 @@ def _mod_freedman_diaconis(ica_data, imodulon):
         multiple = np.ceil(x.max() / width)
         xmax = (multiple + 1) * width
     else:
-        xmax = (thresh + width)
+        xmax = thresh + width
 
     return np.arange(xmin, xmax + width, width)
 
@@ -1570,6 +1745,7 @@ def _normalize_expr(ica_data, ref_cols):
 ##########################
 # Experimental Functions #
 ##########################
+
 
 def _set_xaxis(xaxis: Union[Mapping, pd.Series], y: pd.Series):
     """
@@ -1596,7 +1772,9 @@ def _set_xaxis(xaxis: Union[Mapping, pd.Series], y: pd.Series):
     x = xaxis if isinstance(xaxis, pd.Series) else pd.Series(xaxis)
 
     if not x.sort_index().index.equals(y.sort_index().index):
-        raise ValueError('Given x-values do not align with gene and their '
-                         'respective gene-weights on the y-axis')
+        raise ValueError(
+            "Given x-values do not align with gene and their "
+            "respective gene-weights on the y-axis"
+        )
 
     return x

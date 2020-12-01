@@ -33,7 +33,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3 :: Only",
         "Programming Language :: Python :: 3.8",
         "Topic :: Scientific/Engineering",
-        "Topic :: Scientific/Engineering :: Bio-Informatics"
+        "Topic :: Scientific/Engineering :: Bio-Informatics",
     ],
     platforms="GNU/Linux, Mac OS X > 10.7, Microsoft Windows >= 7",
 )
