@@ -1,6 +1,6 @@
 import itertools
 import warnings
-from typing import Iterable, Union
+from typing import Set, Union
 
 import numpy as np
 import pandas as pd
@@ -10,7 +10,21 @@ from statsmodels.stats.multitest import fdrcorrection
 ImodName = Union[str, int]
 
 
-def contingency(set1: Iterable, set2: Iterable, all_genes: Iterable):
+def contingency(set1: Set, set2: Set, all_genes: Set):
+    """
+    Creates contingency table for gene enrichment
+
+    Parameters
+    ----------
+    set1 : Set
+        Set of genes (e.g. regulon)
+    set2 : Set
+    all_genes
+
+    Returns
+    -------
+
+    """
     """
     Creates contingency table for gene enrichment
     Args:
@@ -139,7 +153,7 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
 
 
 def compute_regulon_enrichment(
-    gene_set: Iterable, regulon_str: str, all_genes: Iterable, trn: pd.DataFrame
+    gene_set: Set, regulon_str: str, all_genes: Set, trn: pd.DataFrame
 ):
     """
     Computes enrichment statistics for a gene_set in a regulon
@@ -171,8 +185,8 @@ def compute_regulon_enrichment(
 
 
 def compute_trn_enrichment(
-    gene_set: Iterable,
-    all_genes: Iterable,
+    gene_set: Set,
+    all_genes: Set,
     trn: pd.DataFrame,
     max_regs: int = 1,
     fdr: float = 0.01,
@@ -249,24 +263,34 @@ def compute_trn_enrichment(
 
 
 def compute_annotation_enrichment(
-    gene_set: Iterable,
-    all_genes: Iterable,
+    gene_set: Set,
+    all_genes: Set,
     annotation: pd.DataFrame,
     column: str,
     fdr: float = 0.01,
 ):
     """
     Compare a gene set against a dataframe of gene annotations
-    Args:
-        gene_set: Gene set for enrichment (e.g. genes in iModulon)
-        all_genes: List of all genes
-        annotation: Table containing gene annotations
-        column: Name of column in the annotation DataFrame (default =
-        'annotation')
-        fdr: False detection rate (default = 0.01)
 
-    Returns: Pandas dataframe containing statistically significant enrichments
+    Parameters
+    ----------
+    gene_set : Set
+        Gene set for enrichment (e.g. genes in iModulon)
+    all_genes : Set
+        List of all genes
+    annotation : pd.DataFrame
+        Table containing gene annotations
+    column : str
+        Name of column in the annotation DataFrame (default: 'annotation')
+    fdr : float
+        False detection rate (default: 0.01)
+
+    Returns
+    -------
+    pd.DataFrame
+       Table containing statistically significant enrichments
     """
+
     # TODO: Create test functions
     enrich_list = []
     for name, group in annotation.groupby(column):

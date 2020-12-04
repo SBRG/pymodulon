@@ -36,7 +36,7 @@ class IcaData(object):
         trn: Optional[Data] = None,
         dagostino_cutoff: int = 550,
         optimize_cutoff: bool = False,
-        thresholds: Optional[Union[Mapping[ImodName, float], Iterable]] = None,
+        thresholds: Optional[Union[Mapping[ImodName, float], List]] = None,
         threshold_method="dagostino",
         dataset_table: Optional[dict] = None,
         splash_table: Optional[dict] = None,
@@ -543,7 +543,7 @@ class IcaData(object):
 
         imod_genes = self.view_imodulon(imodulon).index
         enrich = compute_regulon_enrichment(
-            imod_genes, regulator, self.gene_names, self.trn
+            set(imod_genes), regulator, set(self.gene_names), self.trn
         )
         enrich.rename({"gene_set_size": "imodulon_size"}, inplace=True)
         if save:
@@ -603,8 +603,8 @@ class IcaData(object):
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
             df_enriched = compute_trn_enrichment(
-                gene_list,
-                self.gene_names,
+                set(gene_list),
+                set(self.gene_names),
                 self.trn,
                 max_regs=max_regs,
                 fdr=fdr,
@@ -690,8 +690,8 @@ class IcaData(object):
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
             df_enriched = compute_annotation_enrichment(
-                gene_list,
-                self.gene_names,
+                set(gene_list),
+                set(self.gene_names),
                 column=column,
                 annotation=annotation,
                 fdr=fdr,
@@ -888,7 +888,7 @@ class IcaData(object):
 
             genes_top20 = list(abs(self.M[imod]).sort_values().iloc[-20:].index)
             imod_enrichment_df = compute_trn_enrichment(
-                genes_top20, all_genes, self.trn, max_regs=1
+                set(genes_top20), set(all_genes), self.trn, max_regs=1
             )
 
             # compute_trn_enrichment is being hijacked a bit; we want
@@ -929,7 +929,7 @@ class IcaData(object):
                 # Compute the contingency table (aka confusion matrix)
                 # for overlap between the regulon and iM genes
                 ((tp, fp), (fn, tn)) = contingency(
-                    regulon_genes, component_genes, all_genes
+                    set(regulon_genes), component_genes, set(all_genes)
                 )
 
                 # Calculate F1 score for one regulator-component pair
@@ -990,13 +990,13 @@ class IcaData(object):
 
         return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
 
-    def name2num(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+    def name2num(self, gene: Union[List[str], str]) -> Union[List[str], str]:
         """
         Convert a gene name to the locus tag
 
         Parameters
         ----------
-        gene : str
+        gene : Union[List[str],str]
             Gene name or list of gene names
 
         Returns
@@ -1034,13 +1034,13 @@ class IcaData(object):
         else:
             return final_list
 
-    def num2name(self, gene: Union[Iterable, str]) -> Union[Iterable, str]:
+    def num2name(self, gene: Union[List[str], str]) -> Union[List[str], str]:
         """
         Get the name of a gene from its locus tag
 
         Parameters
         ----------
-        gene : str
+        gene : Union[List[str], str]
             Locus tag or list of locus tags
 
         Returns
