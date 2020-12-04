@@ -6,7 +6,7 @@ import os
 import re
 import sys
 from itertools import chain
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 from zipfile import ZipFile
 
 import numpy as np
@@ -246,7 +246,7 @@ def imodulondb_export(
         Path to iModulonDB main hosting folder
     skip_check : bool
         If true, skip compatibility check
-    cat_order : list
+    cat_order : List
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table
     gene_scatter_x : str
@@ -554,7 +554,7 @@ def _parse_tf_string(model: IcaData, tf_str: str, print_output: Optional[bool] =
 
     Returns
     -------
-    list
+    List
         List of relevant TFs
     """
 
@@ -686,19 +686,22 @@ def _tf_combo_string(row: pd.Series):
         return ", ".join(row.index[row][:-1]) + ", and " + row.index[row][-1]
 
 
-def _sort_tf_strings(tfs: list, unique_elts: list):
+def _sort_tf_strings(tfs: List[str], unique_elts: List[str]):
     """
     Sorts TF strings for the legend of the histogram. Helper function for
     imdb_gene_hist_df.
 
     Parameters
     ----------
-    tfs : List of TFs in the desired order
-    unique_elts : All combination strings made by _tf_combo_string
+    tfs : List[str]
+        List of TFs in the desired order
+    unique_elts : List[str]
+        All combination strings made by _tf_combo_string
 
     Returns
     -------
-    A sorted list of combination strings that have a consistent ordering
+    List
+        A sorted list of combination strings that have a consistent ordering
     """
 
     # unreg always goes first
@@ -1024,7 +1027,7 @@ def _parse_regulon_string(model: IcaData, s: str):
     return res
 
 
-def _get_reg_genes(model: IcaData, tf: str) -> set:
+def _get_reg_genes(model: IcaData, tf: str) -> Set:
     """
     Finds the set of genes regulated by the boolean combination of regulators in a TF
     string
@@ -1038,7 +1041,7 @@ def _get_reg_genes(model: IcaData, tf: str) -> set:
 
     Returns
     -------
-    list
+    Set
         Set of regulated genes
     """
 
@@ -1091,8 +1094,7 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
         return None
 
     # Take care of and/or enrichments
-    # noinspection PyTypeChecker
-    reg_genes = _get_reg_genes(model, tf)  # type: set
+    reg_genes = _get_reg_genes(model, tf)
 
     # Get component genes
     comp_genes = set(model.view_imodulon(k).index)
@@ -1176,7 +1178,7 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
         String of TFs, or np.nan
     Returns
     -------
-    list
+    List
         List of gene loci
     """
 
@@ -1237,19 +1239,16 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
     """
 
     row = model.imodulon_table.loc[k]
-    # noinspection PyTypeChecker
-    tfs = _get_tfs_to_scatter(model, row.TF)  # type: set
+    tfs = _get_tfs_to_scatter(model, row.TF)
 
     if len(tfs) == 0:
         return None
 
     # coordinates for points
-    # noinspection PyTypeChecker
     coord = pd.DataFrame(columns=["A"] + tfs, index=model.A.columns)
     coord["A"] = model.A.loc[k]
 
     # params for fit line
-    # noinspection PyTypeChecker
     param_df = pd.DataFrame(
         columns=["A"] + tfs, index=["R2", "xmin", "xmid", "xmax", "ystart", "yend"]
     )
