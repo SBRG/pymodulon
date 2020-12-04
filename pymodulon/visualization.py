@@ -1,5 +1,5 @@
 """
-
+Plotting functions for iModulons
 """
 from collections import Counter
 
@@ -23,7 +23,7 @@ from pymodulon.util import _parse_sample
 # Bar Plots #
 #############
 
-# noinspection PyTypeChecker
+
 def barplot(
     values: pd.Series,
     sample_table: pd.DataFrame,
@@ -300,7 +300,6 @@ def plot_metadata(
     return barplot(values, table, column, projects, highlight, ax, legend_kwargs)
 
 
-# noinspection PyTypeChecker
 def plot_regulon_histogram(
     ica_data: IcaData,
     imodulon: ImodName,
@@ -422,6 +421,7 @@ def plot_regulon_histogram(
 
     elif kind == "side":
         arr = np.array([non_reg_arr, reg_arr], dtype="object")
+        # noinspection PyTypeChecker
         ax.hist(arr, bins=bin_arr, alpha=alpha, color=color, label=hist_label)
 
     else:
@@ -462,7 +462,7 @@ def plot_regulon_histogram(
 # Scatterplots #
 ################
 
-# noinspection PyTypeChecker
+
 def scatterplot(
     x: pd.Series,
     y: pd.Series,
@@ -1103,6 +1103,29 @@ def plot_dima(
     **kwargs,
 ) -> Ax:
     """
+    Plots a DiMA plot between two projects or two sets of samples
+
+    Parameters
+    ----------
+    ica_data : IcaData
+        IcaData object
+    sample1 : Union[Collection,str]
+        List of sample IDs or name of "project:condition"
+    sample2 : Union[Collection,str]
+        List of sample IDs or name of "project:condition"
+    threshold
+    fdr
+    label
+    adjust
+    table
+    alternate_A
+    kwargs
+
+    Returns
+    -------
+
+    """
+    """
     Plots a Dima plot between two projects or two sets of samples
     Args:
         ica_data: IcaData object that contains your data
@@ -1254,6 +1277,8 @@ def cluster_activities(
     # ensure that correlated iModulons are close in distance, can be clustered
     correlation_df = ica_data.A.T.corr(method=correlation_method)
     distance_matrix = 1 - correlation_df.abs()
+    best_clusters = []
+    cluster_score_dict = {}
 
     # define a base instance of the clustering object we will use throughout;
     # the distance threshold here is a dummy; we will replace this with either

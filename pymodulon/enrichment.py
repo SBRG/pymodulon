@@ -1,3 +1,7 @@
+"""
+Contains functions for gene set enrichment analysis
+"""
+
 import itertools
 import warnings
 from typing import Set, Union
@@ -19,20 +23,14 @@ def contingency(set1: Set, set2: Set, all_genes: Set):
     set1 : Set
         Set of genes (e.g. regulon)
     set2 : Set
-    all_genes
+        Set of genes (e.g. iModulon)
+    all_genes : Set
+        Set of all genes
 
     Returns
     -------
-
-    """
-    """
-    Creates contingency table for gene enrichment
-    Args:
-        set1: Set of genes (e.g. regulon)
-        set2: Set of genes (e.g. i-modulon)
-        all_genes: Set of all genes
-
-    Returns: Contingency table
+    np.ndarray
+        Contingency table
 
     """
 
@@ -46,21 +44,29 @@ def contingency(set1: Set, set2: Set, all_genes: Set):
     fp = len(set2 - set1)
     tn = len(all_genes - set1 - set2)
     fn = len(set1 - set2)
-    return [[tp, fp], [fn, tn]]
+    return np.array([[tp, fp], [fn, tn]])
 
 
 def compute_enrichment(gene_set, target_genes, all_genes, label=None):
     """
     Computes enrichment statistic for gene_set in target_genes.
-    Args:
-        gene_set: Gene set for enrichment (e.g. genes in iModulon)
-        target_genes: Genes to be enriched against (e.g. genes in regulon or
+
+    Parameters
+    ----------
+    gene_set : Set
+        Gene set for enrichment (e.g. genes in iModulon)
+    target_genes : Set
+        Genes to be enriched against (e.g. genes in regulon or
             GO term)
-        all_genes: List of all genes
-        label: Label for target_genes (e.g. regulator name or GO term)
+    all_genes : Set
+        Set of all genes
+    label : str
+        Label for target_genes (e.g. regulator name or GO term)
 
-    Returns: Pandas Series containing enrichment statistics
-
+    Returns
+    -------
+    pd.Series
+        Table containing statistically significant enrichments
     """
 
     # Create contingency table
@@ -95,15 +101,21 @@ def compute_enrichment(gene_set, target_genes, all_genes, label=None):
 
 def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
     """
-    Runs false detection correction over a pandas Dataframe
-    Args:
-        p_values: Pandas Dataframe with 'pvalue' column
-        fdr: False detection rate
-        total: Total number of tests (for multi-enrichment)
+    Runs false detection correction for a table of statistics
 
-    Returns: Pandas DataFrame containing entries that passed multiple
-    hypothesis correction
+    Parameters
+    ----------
+    p_values : pd.DataFrame
+        DataFrame with a 'pvalue' column
+    fdr : float
+        False detection rate
+    total : int
+        Total number of tests (for multi-enrichment)
 
+    Returns
+    -------
+    pd.DataFrame
+        Table containing entries that passed multiple hypothesis correction
     """
 
     if total is not None:
@@ -122,13 +134,19 @@ def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
 def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     """
     Converts a complex regulon (regulon_str) into a list of genes
-    Args:
-        regulon_str: Complex regulon, where "/" uses genes in any regulon and
-            "+" uses genes in all regulons
-        trn: Pandas dataframe containing transcriptional regulatory network
 
-    Returns: Set of genes regulated by regulon_str
+    Parameters
+    ----------
+    regulon_str : str
+        Complex regulon, where "/" uses genes in any regulon and "+" uses genes in
+        all regulons
+    trn : pd.DataFrame
+        Table containing transcriptional regulatory network
 
+    Returns
+    -------
+    Set
+        Set of genes regulated by regulon_str
     """
 
     if regulon_str == "":
@@ -157,15 +175,23 @@ def compute_regulon_enrichment(
 ):
     """
     Computes enrichment statistics for a gene_set in a regulon
-    Args:
-        gene_set: Gene set for enrichment (e.g. genes in iModulon)
-        regulon_str: Complex regulon, where "/" uses genes in any regulon and
-            "+" uses genes in all regulons
-        all_genes: List of all genes
-        trn: Pandas dataframe containing transcriptional regulatory network
 
-    Returns: Pandas dataframe containing enrichment statistics
+    Parameters
+    ----------
+    gene_set : Set
+        Gene set for enrichment (e.g. genes in iModulon)
+    regulon_str : str
+        Complex regulon, where "/" uses genes in any regulon and "+" uses genes in
+        all regulons
+    all_genes : Set
+        List of all genes
+    trn : pd.DataFrame
+        Table ontaining transcriptional regulatory network
 
+    Returns
+    -------
+    pd.DataFrame
+        Table containing statistically significant enrichments
     """
 
     regulon = parse_regulon_str(regulon_str, trn)
@@ -195,21 +221,31 @@ def compute_trn_enrichment(
 ):
     """
     Compare a gene set against an entire TRN
-    Args:
-        gene_set: Gene set for enrichment (e.g. genes in iModulon)
-        all_genes: List of all genes
-        trn: Pandas dataframe containing transcriptional regulatory network
-        max_regs: Maximum number of regulators to include in complex regulon
-            (default: 1)
-        fdr: False detection rate (default: 0.01)
-        method: How to combine complex regulons. 'or' computes enrichment
-            against union of regulons, 'and' computes enrichment against
-            intersection of regulons, and 'both' performs both tests
-            (default: 'both')
-        force: Allows computation of >2 regulators
 
-    Returns: Pandas dataframe containing statistically significant enrichments
+    Parameters
+    ----------
+    gene_set : Set
+        Gene set for enrichment (e.g. genes in iModulon)
+    all_genes : Set
+        Set of all genes
+    trn : pd.DataFrame
+        Table containing transcriptional regulatory network
+    max_regs : int
+        Maximum number of regulators to include in complex regulon (default: 1)
+    fdr : float
+        False detection rate
+    method : str
+        How to combine complex regulons. (default: 'both')
+        "or" computes enrichment against union of regulons
+        "and" computes enrichment against intersection of regulons
+        "both" performs both tests
+    force : bool
+        Allows computation of >2 regulators
 
+    Returns
+    -------
+    pd.DataFrame
+        Table containing statistically significant enrichments
     """
 
     # Warning if max_regs is too high
