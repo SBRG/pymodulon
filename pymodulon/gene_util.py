@@ -5,19 +5,26 @@ Utility functions for gene annotation
 import re
 import urllib
 from io import StringIO
+from typing import Optional
 
 import pandas as pd
 
 
-def cog2str(cog):
+def cog2str(cog: str) -> str:
     """
-    cog2str: Get the description for a COG category letter
-    Args:
-        cog: COG category letter
+    Get the full description for a COG category letter
 
-    Returns:
+    Parameters
+    ----------
+    cog : str
+        COG category letter
+
+    Returns
+    -------
+    str
         Description of COG category
     """
+
     cog_dict = {
         "A": "RNA processing and modification",
         "B": "Chromatin structure and dynamics",
@@ -50,15 +57,22 @@ def cog2str(cog):
     return cog_dict[cog]
 
 
-def _get_attr(attributes, attr_id, ignore=False):
+def _get_attr(attributes: str, attr_id: str, ignore: bool = False) -> Optional[str]:
     """
     Helper function for parsing GFF annotations
-    Args:
-        attributes: Dictionary of attributes
-        attr_id: Attribute ID
-        ignore: Ignore error if ID not in attributes
 
-    Returns:
+    Parameters
+    ----------
+    attributes : str
+        Attribute string
+    attr_id : str
+        Attribute ID
+    ignore : bool
+        If true, ignore errors if ID is not in attributes
+
+    Returns
+    -------
+    str
         Value of attribute
     """
 
@@ -71,15 +85,20 @@ def _get_attr(attributes, attr_id, ignore=False):
             raise ValueError("{} not in attributes: {}".format(attr_id, attributes))
 
 
-def gff2pandas(gff_file):
+def gff2pandas(gff_file: str):
     """
-    Converts GFF file to pandas DataFrame
-    Args:
-        gff_file: Path to GFF file
+    Converts a GFF file to a DataFrame
+    Parameters
+    ----------
+    gff_file : str
+        Path to GFF file
 
-    Returns:
-        Pandas DataFrame containing GFF information
+    Returns
+    -------
+    pd.DataFrame
+        GFF formatted as a DataFrame
     """
+
     with open(gff_file, "r") as f:
         lines = f.readlines()
 
@@ -151,15 +170,27 @@ def uniprot_id_mapping(
     output_name="output_id",
 ):
     """
-    Convert a list of uniprot IDs to Refseq or Genbank IDs
-    Args:
-        prot_list:
-        input_id:
-        output_id:
-        input_name:
-        output_name:
+    Python wrapper for the uniprot ID mapping tool (See
+    https://www.uniprot.org/uploadlists/)
 
-    Returns:
+    Parameters
+    ----------
+    prot_list : List
+        List of proteins to be mapped
+    input_id : str
+        ID type for the mapping input (default: "ACC+ID")
+    output_id : str
+        ID type for the mapping output (default: "P_REFSEQ_AC")
+    input_name : str
+        Column name for input IDs
+    output_name : str
+        Column name for output IDs
+
+    Returns
+    -------
+    pd.DataFrame
+        Table containing two columns, one listing the inputs, and one listing the
+        mapped outputs. Column names are defined by input_name and output_name.
 
     """
 
