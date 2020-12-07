@@ -4,7 +4,7 @@ Core functions for the IcaData object
 
 import copy
 import re
-from typing import List, Mapping, Optional
+from typing import Dict, List, Optional
 
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
@@ -36,7 +36,7 @@ class IcaData(object):
         trn: Optional[Data] = None,
         dagostino_cutoff: int = 550,
         optimize_cutoff: bool = False,
-        thresholds: Optional[Union[Mapping[ImodName, float], List]] = None,
+        thresholds: Optional[Union[Dict[ImodName, float], List]] = None,
         threshold_method="dagostino",
         dataset_table: Optional[dict] = None,
         splash_table: Optional[dict] = None,
@@ -369,7 +369,7 @@ class IcaData(object):
         self._imodulon_table.index = new_names
 
     def rename_imodulons(
-        self, name_dict: Mapping[ImodName, ImodName] = None, column=None
+        self, name_dict: Dict[ImodName, ImodName] = None, column=None
     ) -> None:
         """
         Rename an iModulon.
