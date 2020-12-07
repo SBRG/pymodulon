@@ -260,6 +260,10 @@ class IcaData(object):
         """ Get iModulon names """
         return self._imodulon_table.index.tolist()
 
+    @imodulon_names.setter
+    def imodulon_names(self, new_names):
+        self._update_imodulon_names(new_names)
+
     @property
     def sample_names(self) -> List:
         """ Get sample names """
@@ -358,15 +362,36 @@ class IcaData(object):
 
     def _update_imodulon_names(self, new_names):
 
+        name_series = pd.Series(new_names, index=self.imodulon_names)
+
+        # Check if new names are duplicates
+        dups = name_series[name_series.duplicated(keep=False)]
+        if len(dups) > 0:
+            seen = {}
+            # For duplicated names, add a "-1" or "-2" etc.
+            for key, val in dups.items():
+                if val in seen.keys():
+                    name_series[key] = val + "-" + str(seen[val])
+                    seen[val] += 1
+                else:
+                    name_series[key] = val + "-1"
+                    seen[val] = 2
+
+                warnings.warn(
+                    "Duplicate iModulon names detected. iModulon {} will "
+                    "be renamed to {}".format(key, name_series[key])
+                )
+
         # Update thresholds
-        for old_name, new_name in zip(self._imodulon_names, new_names):
+        for old_name, new_name in name_series.items():
             self._thresholds[new_name] = self._thresholds.pop(old_name)
 
         # Update iModulon names
-        self._imodulon_names = new_names
-        self._a.index = new_names
-        self._m.columns = new_names
-        self._imodulon_table.index = new_names
+        final_names = name_series.values.tolist()
+        self._imodulon_names = final_names
+        self._a.index = final_names
+        self._m.columns = final_names
+        self._imodulon_table.index = final_names
 
     def rename_imodulons(
         self, name_dict: Dict[ImodName, ImodName] = None, column=None
@@ -387,44 +412,20 @@ class IcaData(object):
         None
         """
 
-        # Check if new names are duplicates
-        name_series = pd.Series(name_dict)
-        dups = name_series[name_series.duplicated(keep=False)]
-        if len(dups) > 0:
-            seen = {}
-            for key, val in dups.items():
-                if val in seen.keys():
-                    # noinspection PyUnresolvedReferences
-                    name_dict[key] = val + "-" + str(seen[val])
-                    seen[val] += 1
-                else:
-                    # noinspection PyUnresolvedReferences
-                    name_dict[key] = val + "-1"
-                    seen[val] = 2
-
-                warnings.warn(
-                    "Duplicate iModulon names detected. iModulon {} will "
-                    "be renamed to {}".format(key, name_dict[key])
-                )
-
         # Rename using the column parameter if given
         if column is not None:
-            if column in self.imodulon_table.columns:
-                new_names = self.imodulon_table[column]
-                self._imodulon_table = self._imodulon_table.drop(column, axis=1)
-            else:
-                raise ValueError(
-                    "{} is not a column in " "the iModulon table".format(column)
-                )
+            new_names = self.imodulon_table[column]
+            raise DeprecationWarning(
+                "column paramter will be removed soon. Please "
+                "use 'ica_data.imodulon_names = "
+                "ica_data.imodulon_table[column]'"
+            )
         else:
-            new_names = self.imodulon_names
-
-        # Use dictionary to rename iModulons
-        if name_dict is not None:
             new_names = [
                 name_dict[name] if name in name_dict.keys() else name
-                for name in new_names
+                for name in self.imodulon_names
             ]
+
         self._update_imodulon_names(new_names)
 
     # Show enriched
