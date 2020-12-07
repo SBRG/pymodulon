@@ -118,7 +118,7 @@ class IcaData(object):
         if A.columns.duplicated().any():
             raise ValueError("A matrix contains duplicate sample names")
         if M.columns.duplicated().any():
-            raise ValueError("M and A matrices contain " "duplicate iModulon names")
+            raise ValueError("M and A matrices contain duplicate iModulon names")
 
         # Store M and A
         self._m = M
@@ -160,6 +160,7 @@ class IcaData(object):
                     "Using manually input thresholds. D'agostino "
                     "optimization will not be performed"
                 )
+            self._dagostino_cutoff = None
             self.thresholds = thresholds
 
         # Use kmeans if TRN is empty, or kmeans is selected
@@ -180,11 +181,11 @@ class IcaData(object):
             if optimize_cutoff:
                 if trn is None:
                     raise ValueError(
-                        "Thresholds cannot be optimized " "if no TRN is provided."
+                        "Thresholds cannot be optimized if no TRN is provided."
                     )
                 else:
                     warnings.warn(
-                        "Optimizing iModulon thresholds, " "may take 2-3 minutes..."
+                        "Optimizing iModulon thresholds, may take 2-3 minutes..."
                     )
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
@@ -195,9 +196,7 @@ class IcaData(object):
                 self.recompute_thresholds(self.dagostino_cutoff)
         # Capture improper threshold methods
         else:
-            raise ValueError(
-                'Threshold method must either be "dagostino" or ' '"kmeans"'
-            )
+            raise ValueError('Threshold method must either be "dagostino" or "kmeans"')
 
         ##############################
         # Load iModulonDB Properties #
