@@ -1114,33 +1114,23 @@ def plot_dima(
         List of sample IDs or name of "project:condition"
     sample2 : Union[List,str]
         List of sample IDs or name of "project:condition"
-    threshold :
-    fdr
-    label
-    adjust
-    table
-    alternate_A
-    kwargs
+    threshold : float
+        Minimum activity difference to determine DiMAs (default: 5)
+    fdr : float
+        False detection rate (default: 0.1)
+    label : bool
+        Label differentially activated iModulons (default: True)
+    adjust : bool
+        Automatically adjust labels (default: True)
+    table : bool
+        Return differential iModulon activity table (default: False)
+    **kwargs : dict
+        Additional arguments for scatterplot
 
     Returns
     -------
-
-    """
-    """
-    Plots a Dima plot between two projects or two sets of samples
-    Args:
-        ica_data: IcaData object that contains your data
-        sample1: List of sample IDs or name of "project:condition"
-        sample2: List of sample IDs or name of "project:condition"
-        threshold: Minimum activity difference to determine DiMAs
-        fdr: False Detection Rate
-        label: Label differentially activated iModulons (default: True)
-        adjust: Automatically adjust labels (default: True)
-        table: Return differential iModulon activity table
-        **kwargs: Additional arguments for scatterplot
-
-    Returns: ax, Optional[diff_DF]
-
+    Ax
+        DiMA plot
     """
 
     # use secret option to enable passing of clustered activity matrix
