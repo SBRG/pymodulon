@@ -6,7 +6,7 @@ import os
 import re
 import warnings
 from itertools import combinations
-from typing import *
+from typing import List, Optional, Sequence, Set, TypeVar, Union
 
 import numpy as np
 import pandas as pd
@@ -25,9 +25,7 @@ ImodName = Union[str, int]
 ImodNameList = Union[ImodName, List[ImodName]]
 
 
-def _check_table(
-    table: Data, name: str, index: Optional[Collection] = None, index_col=0
-):
+def _check_table(table: Data, name: str, index: Optional[List] = None, index_col=0):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -67,9 +65,7 @@ def _check_table(
         )
 
 
-def _check_table_helper(
-    table: pd.DataFrame, index: Optional[Collection], name: ImodName
-):
+def _check_table_helper(table: pd.DataFrame, index: Optional[List], name: ImodName):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
 
@@ -130,8 +126,8 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
 
 def dima(
     ica_data,
-    sample1: Union[Collection, str],
-    sample2: Union[Collection, str],
+    sample1: Union[List, str],
+    sample2: Union[List, str],
     threshold: float = 5,
     fdr: float = 0.1,
     alternate_A: pd.DataFrame = None,
@@ -181,7 +177,7 @@ def dima(
     )
 
 
-def _parse_sample(ica_data, sample: Union[Collection, str]):
+def _parse_sample(ica_data, sample: Union[List, str]):
     """
     Parses sample inputs into a list of sample IDs
     Args:
@@ -209,9 +205,9 @@ def _parse_sample(ica_data, sample: Union[Collection, str]):
 
 def explained_variance(
     ica_data,
-    genes: Optional[Iterable] = None,
-    samples: Optional[Iterable] = None,
-    imodulons: Optional[Iterable] = None,
+    genes: Optional[List] = None,
+    samples: Optional[List] = None,
+    imodulons: Optional[List] = None,
 ):
     """
     Computes the fraction of variance explained by iModulons

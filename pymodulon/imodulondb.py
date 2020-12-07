@@ -15,7 +15,7 @@ from matplotlib.colors import to_hex
 from tqdm.notebook import tqdm
 
 from pymodulon.core import IcaData
-from pymodulon.visualization import broken_line, get_fit, solid_line
+from pymodulon.plotting import broken_line, get_fit, solid_line
 
 ##################
 # User Functions #
