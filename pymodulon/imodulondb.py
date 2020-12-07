@@ -15,7 +15,7 @@ from matplotlib.colors import to_hex
 from tqdm.notebook import tqdm
 
 from pymodulon.core import IcaData
-from pymodulon.plotting import broken_line, get_fit, solid_line
+from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
 ##################
 # User Functions #
@@ -1260,13 +1260,13 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
         coord[tf] = model.X.loc[model.name2num(tf)]
         xlim = np.array([coord[tf].min(), coord[tf].max()])
         # fit line
-        params, r2 = get_fit(coord[tf], coord["A"])
+        params, r2 = _get_fit(coord[tf], coord["A"])
         if len(params) == 2:  # unbroken
-            y = solid_line(xlim, *params)
+            y = _solid_line(xlim, *params)
             out = [xlim[0], np.nan, xlim[1], y[0], y[1]]
         else:  # broken
             xvals = np.array([xlim[0], params[2], xlim[1]])
-            y = broken_line(xvals, *params)
+            y = _broken_line(xvals, *params)
             out = [xlim[0], params[2], xlim[1], y[0], y[2]]
 
         param_df[tf] = [r2] + out
