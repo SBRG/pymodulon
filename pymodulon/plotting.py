@@ -468,6 +468,7 @@ def scatterplot(
     x: pd.Series,
     y: pd.Series,
     groups: Optional[Dict] = None,
+    colors: Optional[List] = None,
     show_labels: Union[bool, str] = "auto",
     adjust_labels: bool = True,
     line45: bool = False,
@@ -496,6 +497,8 @@ def scatterplot(
         The data to be plotted on the x-axis
     groups: dict
         A mapping of data-points that form groups in the data
+    colors: list
+        List of colors to use for different groups
     show_labels: bool, str
         An option that toggles whether data-points are given labels
     adjust_labels: bool
@@ -559,6 +562,15 @@ def scatterplot(
             data.loc[k, "group"] = val
 
     # Handle custom kwargs
+    if colors is None:
+        if isinstance(colors, str):
+            colors = [colors]
+        elif groups is not None:
+            # Use default colors
+            colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
+        else:
+            colors = ["black"]
+
     if ax_font_kwargs is None:
         ax_font_kwargs = {}
 
@@ -615,10 +627,16 @@ def scatterplot(
                 zorder=0,
             )
 
+    # Add colors to the data
+    cdict = dict(zip(data["group"].unique(), colors))
+
     for name, group in data.groupby("group"):
+        kwargs = scatter_kwargs.copy()
+
+        # Update colors
+        kwargs.update({"c": cdict["group"]})
 
         # Override defaults for hidden points
-        kwargs = scatter_kwargs.copy()
         if name == "hidden":
             kwargs.update({"c": "gray", "alpha": 0.7, "linewidth": 0, "label": None})
         elif name == "":
