@@ -468,7 +468,7 @@ def scatterplot(
     x: pd.Series,
     y: pd.Series,
     groups: Optional[Dict] = None,
-    colors: Optional[List] = None,
+    colors: Optional[Union[str, List, Dict]] = None,
     show_labels: Union[bool, str] = "auto",
     adjust_labels: bool = True,
     line45: bool = False,
@@ -497,8 +497,9 @@ def scatterplot(
         The data to be plotted on the x-axis
     groups: dict
         A mapping of data-points that form groups in the data
-    colors: list
-        List of colors to use for different groups
+    colors: str, list, or dict
+        Color of points, list of colors to use for different groups, or dictionary
+        mapping colors to groups
     show_labels: bool, str
         An option that toggles whether data-points are given labels
     adjust_labels: bool
@@ -523,7 +524,7 @@ def scatterplot(
         The axes instance on which to generate the scatter-plot. If None is
         provided, generates a new figure and axes instance to use
     legend: bool
-        An option on whether to show the legend
+        An option on whether to show the legend (default: True)
     ax_font_kwargs: dict
         kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
     scatter_kwargs: dict
@@ -562,15 +563,6 @@ def scatterplot(
             data.loc[k, "group"] = val
 
     # Handle custom kwargs
-    if colors is None:
-        if isinstance(colors, str):
-            colors = [colors]
-        elif groups is not None:
-            # Use default colors
-            colors = plt.rcParams["axes.prop_cycle"].by_key()["color"]
-        else:
-            colors = ["black"]
-
     if ax_font_kwargs is None:
         ax_font_kwargs = {}
 
@@ -628,17 +620,35 @@ def scatterplot(
             )
 
     # Add colors to the data
-    cdict = dict(zip(data["group"].unique(), colors))
+    # If colors is already a dict, just update the hidden color
+    try:
+        if "hidden" not in colors.keys():
+            colors.update({"hidden": "gray"})
+        if "" not in colors.keys():
+            colors.update({"": "tab:blue"})
+    except AttributeError:
+
+        groups = [item for item in data["group"].unique() if item not in ["hidden", ""]]
+        if colors is None:
+            colorlist = plt.rcParams["axes.prop_cycle"].by_key()["color"][1:]
+        elif isinstance(colors, str):
+            colorlist = [colors] * len(groups)
+        else:
+            colorlist = list(colors)
+
+        # Deal with short colorlists
+        if len(colorlist) < len(groups):
+            colorlist = colorlist * (len(groups) // len(colorlist) + 1)
+
+        colors = dict(zip(groups, colorlist))
+        colors.update({"hidden": "gray", "": "tab:blue"})
 
     for name, group in data.groupby("group"):
         kwargs = scatter_kwargs.copy()
-
-        # Update colors
-        kwargs.update({"c": cdict["group"]})
-
+        kwargs["c"] = colors[name]
         # Override defaults for hidden points
         if name == "hidden":
-            kwargs.update({"c": "gray", "alpha": 0.7, "linewidth": 0, "label": None})
+            kwargs.update({"alpha": 0.7, "linewidth": 0, "label": None})
         elif name == "":
             kwargs.update({"label": None})
         else:
@@ -677,7 +687,7 @@ def scatterplot(
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
 
-    if (legend and legend_kwargs) or fit_line:
+    if legend or fit_line:
         ax.legend(**legend_kwargs)
 
     return ax
@@ -730,6 +740,11 @@ def plot_gene_weights(
     else:
         raise ValueError(f"iModulon does not exist: {imodulon}")
 
+    # Get genes in the iModulon
+    bin_M = ica_data.M_binarized
+    component_genes = set(bin_M[imodulon].loc[bin_M[imodulon] == 1].index)
+    other_genes = set(bin_M[imodulon].loc[bin_M[imodulon] == 0].index)
+
     # If experimental `xaxis` parameter is used, use custom values for x-axis
     if xaxis is not None:
         x = _set_xaxis(xaxis=xaxis, y=y)
@@ -753,15 +768,29 @@ def plot_gene_weights(
     # in this function)
     show_labels_pgw = kwargs.pop("show_labels", "auto")
     adjust_labels_pgw = kwargs.pop("adjust_labels", True)
-    legend_pgw = kwargs.pop("legend", True)
-    legend_kwargs_pgw = kwargs.pop("legend_kwargs", None)
+    legend_kwargs_pgw = kwargs.pop("legend_kwargs", {})
 
-    kwargs["show_labels"] = kwargs["adjust_labels"] = kwargs["legend"] = False
-    kwargs["legend_kwargs"] = None
+    kwargs["show_labels"] = kwargs["adjust_labels"] = False
 
     # Remove xlabel and ylabel kwargs if provided
     kwargs.pop("xlabel", None)
     kwargs.pop("ylabel", None)
+
+    # Default legend should be on the side of the plot
+    if (
+        "bbox_to_anchor" not in legend_kwargs_pgw.keys()
+        and "loc" not in legend_kwargs_pgw.keys()
+    ):
+        legend_kwargs_pgw.update({"bbox_to_anchor": (1, 1), "loc": 2})
+        kwargs["legend_kwargs"] = legend_kwargs_pgw
+
+    # Update colors for COG groups
+    if "COG" in ica_data.gene_table.columns and "groups" not in kwargs:
+        mod_cogs = ica_data.gene_table.loc[component_genes].COG
+        hidden_cogs = pd.Series("hidden", index=other_genes)
+        all_cogs = pd.concat([mod_cogs, hidden_cogs])
+        colors = [ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())]
+        kwargs.update({"groups": all_cogs, "colors": colors})
 
     # Scatter Plot
     ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, **kwargs)
@@ -784,8 +813,6 @@ def plot_gene_weights(
     ax.set_xlim(xmin, xmax)
     ax.set_ylim(ymin, ymax)
 
-    bin_M = ica_data.M_binarized
-    component_genes = set(bin_M[imodulon].loc[bin_M[imodulon] == 1].index)
     texts = []
     expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
@@ -825,10 +852,6 @@ def plot_gene_weights(
             only_move={"objects": "y"},
             **expand_kwargs,
         )
-
-    # Add legend
-    if legend_pgw and legend_kwargs_pgw:
-        ax.legend(**legend_kwargs_pgw)
 
     return ax
 
@@ -903,8 +926,8 @@ def compare_gene_weights(
     # in this function)
     show_labels_cgw = kwargs.pop("show_labels", "auto")
     adjust_labels_cgw = kwargs.pop("adjust_labels", True)
-    legend_cgw = kwargs.pop("legend", True)
-    legend_kwargs_cgw = kwargs.pop("legend_kwargs", None)
+    legend_cgw = kwargs.pop("legend", False)
+    legend_kwargs_cgw = kwargs.pop("legend_kwargs", {})
 
     kwargs["show_labels"] = kwargs["adjust_labels"] = kwargs["legend"] = False
     kwargs["legend_kwargs"] = None
@@ -1013,7 +1036,7 @@ def compare_gene_weights(
         )
 
     # Add legend
-    if legend_cgw and legend_kwargs_cgw:
+    if legend_cgw:
         ax.legend(**legend_kwargs_cgw)
 
     return ax
@@ -1157,6 +1180,15 @@ def plot_dima(
     else:
         A_to_use = ica_data.A
 
+    # Override specific kwargs (their implementation is different
+    # in this function)
+    legend_cgw = kwargs.pop("legend", False)
+    legend_kwargs_cgw = kwargs.pop("legend_kwargs", {})
+
+    kwargs["legend"] = False
+    kwargs["legend_kwargs"] = None
+
+    # Get x and y coordinates
     sample1_list = _parse_sample(ica_data, sample1)
     sample2_list = _parse_sample(ica_data, sample2)
     if isinstance(sample1, str):
@@ -1208,6 +1240,11 @@ def plot_dima(
                 only_move={"objects": "y"},
                 **expand_args,
             )
+
+    # Add legend if requested
+    if legend_cgw:
+        ax.legend(**legend_kwargs_cgw)
+
     if table:
         return ax, df_diff
 
