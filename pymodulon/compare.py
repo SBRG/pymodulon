@@ -6,10 +6,10 @@ from typing import *
 
 import numpy as np
 import pandas as pd
-import tqdm
 from Bio import SeqIO
 from graphviz import Digraph
 from scipy import stats
+from tqdm.notebook import tqdm
 
 
 def _make_dot_graph(
@@ -18,15 +18,26 @@ def _make_dot_graph(
     """
     Given two M matrices, returns the dot graph and name links of the various
     connected ICA components
-    Args:
-        M1: M matrix from the first organism
-        M2: M matrix from the second organism
-        metric: Statistical test to use (default:'pearson')
-        cutoff: Float cut off value for pearson statistical test
-        show_all: Show all iModulons regardless of their linkage
 
-    Returns: Dot graph and name links of connected ICA components
+    Parameters
+    ----------
+    M1 : pd.DataFrame
+        M matrix from the first organism
+    M2 : pd.DataFrame
+        M matrix from the second organism
+    metric : str
+        Correlation metric to use (either "pearson" or "spearman")
+    cutoff : float
+        Cut off value for correlation metric
+    show_all : bool
+        Show all iModulons regardless of their linkage
 
+    Returns
+    -------
+    dot
+        Dot graph of connected iModulons
+    links
+        Links and distances of connected iModulons
     """
 
     # Only keep genes found in both S matrices
@@ -61,7 +72,7 @@ def _make_dot_graph(
     # Calculate correlation matrix
     corr = np.zeros((len(m1.columns), len(m2.columns)))
 
-    for i, k1 in tqdm.tqdm(enumerate(m1.columns), total=len(m1.columns)):
+    for i, k1 in tqdm(enumerate(m1.columns), total=len(m1.columns)):
         for j, k2 in enumerate(m2.columns):
             if metric == "pearson":
                 corr[i, j] = abs(stats.pearsonr(m1[k1], m2[k2])[0])
@@ -182,17 +193,22 @@ def _convert_gene_index(
     """
     Reorganizes and renames genes in an M matrix to be consistent with
     another organism
-    Args:
-        M1: Pandas Dataframe of the M matrix for organism 1
-        M2: Pandas DataFrame of the M matrix for organism 2
-        ortho_file: Path to orthology file between organisms
 
+    Parameters
+    ----------
+    M1 : pd.DataFrame
+        M matrix from the first organism
+    M2 : pd.DataFrame
+        M matrix from the second organism
+    ortho_file : str
+        Path to orthology file between organisms
 
-    Returns:
-        Pandas DataFrame of the M matrix for organism 2 with indexes
-        translated into orthologs
-
+    Returns
+    -------
+    pd.DataFrame
+        M matrix for organism 2 with indexes translated into orthologs
     """
+
     if ortho_file is None:
         common_genes = M1.index & M2.index
         M1_new = M1.loc[common_genes]
@@ -224,20 +240,32 @@ def compare_ica(
     show_all: bool = False,
 ):
     """
-    Compares two S matrices between a single organism or across organisms and
-    returns the connected ICA components
-    Args:
-        M1: Pandas Dataframe of M matrix 1
-        M2: Pandas Dataframe of M Matrix 2
-        ortho_file: Path to orthology file between organisms
-        cutoff: Float cut off value for pearson statistical test
-        metric: A string of what statistical test to use (standard is 'pearson')
-        show_all: True will show all nodes of the digraph matrix
+    Compares two M matrices between a single organism or across organisms and
+    returns the connected iModulons
 
-    Returns: Dot graph and name links of connected ICA components between the
-    two runs or organisms.
+    Parameters
+    ----------
+    M1 : pd.DataFrame
+        M matrix from the first organism
+    M2 : pd.DataFrame
+        M matrix from the second organism
+    ortho_file : str
+        Path to orthology file between organisms
+    metric : str
+        Correlation metric to use (either "pearson" or "spearman")
+    cutoff : float
+        Cut off value for correlation metric
+    show_all : bool
+        Show all iModulons regardless of their linkage
 
+    Returns
+    -------
+    dot
+        Dot graph of connected iModulons
+    links
+        Links and distances of connected iModulons
     """
+
     new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
     dot, name_links = _make_dot_graph(new_M1, new_M2, metric, cutoff, show_all=show_all)
     return dot, name_links
@@ -247,17 +275,23 @@ def compare_ica(
 # BBH CSV Creation #
 ####################
 
-#
-
 
 def make_prots(gbk: os.PathLike, out_path: os.PathLike):
     """
     Makes protein files for all the genes in the genbank file. Adapted from
-    code by Saguat Poudel
-    :param gbk: path to input genbank file
-    :param out_path: path to the output FASTA file
-    :return: None
+    code by Saugat Poudel
+    Parameters
+    ----------
+    gbk : str
+        Path to input genbank file
+    out_path : str
+        Path to the output FASTA file
+
+    Returns
+    -------
+    None
     """
+
     with open(out_path, "w") as fa:
         for refseq in SeqIO.parse(gbk, "genbank"):
             for feats in [f for f in refseq.features if f.type == "CDS"]:
@@ -272,13 +306,18 @@ def make_prots(gbk: os.PathLike, out_path: os.PathLike):
 
 def make_prot_db(fasta_file: os.PathLike):
     """
-    Creates GenBank Databases from Protein FASTA of an organism (Output from
-    make_prot function)
-    Args:
-        fasta_file: String path to protein FASTA file
-    Returns: None
+    Creates GenBank Databases from Protein FASTA of an organism
 
+    Parameters
+    ----------
+    fasta_file : str
+        Path to protein FASTA file
+
+    Returns
+    -------
+    None
     """
+
     if (
         os.path.isfile(fasta_file + ".phr")
         and os.path.isfile(fasta_file + ".pin")
@@ -325,25 +364,35 @@ def get_bbh(
 ):
     """
     Runs Bidirectional Best Hit BLAST to find orthologs utilizing two protein
-    FASTA files. Outputs a CSV file of all orthologous genes. Adopted from code
-    Args:
-        db1: String path to protein FASTA file (output of make_prots
-        function) for organism 1
-        db2: String path to protein FASTA file (output of make_prots
-        function) for organism 2
-        outdir: String path to output directory, default is "bbh" and will
-        create the directory if it does not exist
-        outname: Default db1_vs_db2_parsed.csv where db[1-2] are the passed
-        arguments name of the csv file where that will save the results
-        mincov: Minimum coverage to call hits in BLAST, must be between 0 and 1
-        evalue: evalue thershold for BLAST hits, Default .001
-        threads: Number of threads to run BLAST, Default 1
-        force: Whether to overwrite existing files or not
-        savefiles: Whether to save files to outdir
+    FASTA files. Outputs a CSV file of all orthologous genes.
 
-    Returns:
+    Parameters
+    ----------
+    db1 : str
+        Path to protein FASTA file for organism 1
+    db2 : str
+        Path to protein FASTA file for organism 2
+    outdir : str
+        Path to output directory (default: "bbh")
+    outname : str
+        Name of output CSV file (default: <db1>_vs_<db2>_parsed.csv)
+    mincov : float
+        Minimum coverage to call hits in BLAST, must be between 0 and 1 (default: 0.8)
+    evalue : float
+        E-value threshold for BlAST hist (default: .001)
+    threads : int
+        Number of threads to use for BLAST (default: 1)
+    force : bool
+        If True, overwrite existing files (default: False)
+    savefiles : bool
+        If True, save files to <outdir> (default: True)
 
+    Returns
+    -------
+    pd.DataFrame
+        Table of bi-directional BLAST hits between the two organisms
     """
+
     # check if files exist, and vars are appropriate
     if not _all_clear(db1, db2, outdir, mincov):
         return None
@@ -442,13 +491,19 @@ def get_bbh(
 
 def _get_gene_lens(file_in):
     """
+    Computes gene lengths
 
-    Args:
-        file_in:
+    Parameters
+    ----------
+    file_in : str
+        Input file path
 
-    Returns:
-
+    Returns
+    -------
+    pd.DataFrame
+        Table of gene lengths
     """
+
     handle = open(file_in)
     records = SeqIO.parse(handle, "fasta")
     out = []
@@ -461,17 +516,27 @@ def _get_gene_lens(file_in):
 
 def _run_blastp(db1, db2, out, evalue, threads, force):
     """
+    Runs BLASTP between two organisms
 
-    Args:
-        db1:
-        db2:
-        out:
-        evalue:
-        threads:
-        force:
+    Parameters
+    ----------
+    db1 : str
+        Path to protein FASTA file for organism 1
+    db2 : str
+        Path to protein FASTA file for organism 2
+    out : str
+        Path for BLASTP output
+    evalue : float
+        E-value threshold for BlAST hist=
+    threads : int
+        Number of threads to use for BLAST
+    force : bool
+        If True, overwrite existing files
 
-    Returns:
-
+    Returns
+    -------
+    out : str
+        Path of BLASTP output
     """
 
     if not force and os.path.isfile(out):
@@ -526,15 +591,6 @@ def _all_clear(db1, db2, outdir, mincov):
 
 
 def _same_output(df1, df2):
-    """
-
-    Args:
-        df1:
-        df2:
-
-    Returns:
-
-    """
     df1 = df1.reset_index(drop=True)
     df2 = df2.reset_index(drop=True)
     if all(df1.eq(df2)):

@@ -6,7 +6,7 @@ import os
 import re
 import sys
 from itertools import chain
-from typing import List, Optional, Union
+from typing import List, Optional, Set, Union
 from zipfile import ZipFile
 
 import numpy as np
@@ -240,16 +240,16 @@ def imodulondb_export(
 
     Parameters
     ----------
-    model: IcaData
+    model : IcaData
         IcaData object to export
     path : str
         Path to iModulonDB main hosting folder
     skip_check : bool
         If true, skip compatibility check
-    cat_order: list
+    cat_order : List
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table
-    gene_scatter_x: str
+    gene_scatter_x : str
         Option to pass to scatter plot function, determines the X axis
         on iModulon pages. Currently, only "start" is supported.
 
@@ -281,11 +281,11 @@ def imodulondb_export(
 
 def imdb_iM_table(imodulon_table: pd.DataFrame, cat_order: Optional[List] = None):
     """
-    Reformats the iModulon table according to TODO
+    Reformats the iModulon table according
 
     Parameters
     ----------
-    imodulon_table: DataFrame
+    imodulon_table : DataFrame
         Table formatted similar to IcaData.imodulon_table
     cat_order : List
         List of categories in imodulon_table.Category, ordered as desired
@@ -503,8 +503,9 @@ def imdb_generate_im_files(
         IcaData object
     path_prefix : str
         Dataset folder in which to store the files
-    gene_scatter_x : TODO
-        passed to imdb_gene_scatter_df()
+    gene_scatter_x : str
+        Column from the gene table that specificies what to use on the X-axis of the
+        gene scatter plot
 
     Returns
     -------
@@ -557,7 +558,7 @@ def _parse_tf_string(model: IcaData, tf_str: str, print_output: Optional[bool] =
 
     Returns
     -------
-    list
+    List
         List of relevant TFs
     """
 
@@ -588,17 +589,14 @@ def imdb_gene_table_df(model: IcaData, k: Union[int, str]):
     ----------
     model : IcaData
         IcaData object
-    k :
+    k : Union[int,str]
+        iModulon name
 
     Returns
     -------
+    DataFrame of the gene table that is compatible with iModulonDB
+    """
 
-    """
-    """
-    :param model: IcaData object
-    :param k: index of iModulon to generate
-    :returns: pd.DataFrame of the gene table that is compatible with iModulonDB
-    """
     # get TFs and large table
     row = model.imodulon_table.loc[k]
     tfs = _parse_tf_string(model, row.TF, print_output=True)
@@ -632,9 +630,20 @@ def imdb_gene_table_df(model: IcaData, k: Union[int, str]):
 def _component_DF(model: IcaData, k: Union[int, str], tfs=None):
     """
     Helper function for imdb_gene_hist_df
-    :param model: IcaData object
-    :param k: iModulon index
-    :param tfs: list of tfs
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+    tfs : List
+        List of TFs
+
+    Returns
+    -------
+    gene_table
+        Gene table for the iModulon
     """
 
     df = pd.DataFrame(model.M[k].sort_values())
@@ -659,10 +668,17 @@ def _component_DF(model: IcaData, k: Union[int, str], tfs=None):
 
 def _tf_combo_string(row: pd.Series):
     """
-    Creates a well formated string for the histogram legends
-    Helper function for imdb_gene_hist_df
-    :param row: boolean series indexed by TFs for a given gene
-    :return: a string formatted for display ('Regulated by ...')
+    Creates a formatted string for the histogram legends. Helper function for
+    imdb_gene_hist_df.
+
+    Parameters
+    ----------
+    row : pd.Series
+        Boolean series indexed by TFs for a given gene
+
+    Returns
+    -------
+    A string formatted for display (i.e. "Regulated by ...")
     """
     if row.sum() == 0:
         return "unreg"
@@ -674,14 +690,24 @@ def _tf_combo_string(row: pd.Series):
         return ", ".join(row.index[row][:-1]) + ", and " + row.index[row][-1]
 
 
-def _sort_tf_strings(tfs: list, unique_elts: list):
+def _sort_tf_strings(tfs: List[str], unique_elts: List[str]):
     """
-    Sorts TF strings for the legend of the histogram
-    Helper function for imdb_gene_hist_df
-    :param tfs: the list of tfs which is in a desired order
-    :param unique_elts: all combo strings made by _tf_combo_string
-    :return: a sorted list of combo strings so that they will have consistent ordering
+    Sorts TF strings for the legend of the histogram. Helper function for
+    imdb_gene_hist_df.
+
+    Parameters
+    ----------
+    tfs : List[str]
+        List of TFs in the desired order
+    unique_elts : List[str]
+        All combination strings made by _tf_combo_string
+
+    Returns
+    -------
+    List
+        A sorted list of combination strings that have a consistent ordering
     """
+
     # unreg always goes first
     unique_elts.remove("unreg")
     sorted_elts = ["unreg"]
@@ -712,14 +738,25 @@ def imdb_gene_hist_df(
     tol: Optional[float] = 0.001,
 ):
     """
-    :param model: IcaData object
-    :param k: iModulon index
-    :param bins: number of bins in the histogram
-    :param tol: determines distance to threshold for deciding
-        if a bar is in the iModulon
-    :return: a dataframe for producing the histogram that is
-        compatible with iModulonDB
+    Creates the gene histogram for an iModulon
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+    bins : int
+        Number of bins in the histogram
+    tol : float
+        Distance to threshold for deciding if a bar is in the iModulon
+
+    Returns
+    -------
+    gene_hist_table
+        A dataframe for producing the histogram that is compatible with iModulonDB
     """
+
     # get TFs
     row = model.imodulon_table.loc[k]
     if not (type(row.TF) == str):
@@ -808,12 +845,21 @@ def imdb_gene_hist_df(
 
 def _gene_color_dict(model: IcaData):
     """
-    Helper function to match genes to colors based on COG
-    Used by imdb_gene_scatter_df
-    :param model: IcaData object, needs a gene_table with COG column
-        and cog_colors member dictionary
-    :return: dictionary associating gene names to colors
+    Helper function to match genes to colors based on COG. Used by
+    imdb_gene_scatter_df.
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+
+    Returns
+    -------
+    dict
+        Dictionary associating gene names to colors
+
     """
+
     try:
         gene_cogs = model.gene_table.COG.to_dict()
     except AttributeError:
@@ -826,12 +872,22 @@ def imdb_gene_scatter_df(
 ):
     """
     Generates a dataframe for the gene scatter plot in iModulonDB
-    :param model: an IcaData object
-    :param k: an iModulon index
-    :param gene_scatter_x: currently only the default option of
-        'start' is available. Determines X axis.
-    :return: a dataframe for producing the plot
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+    gene_scatter_x : str
+        Determines x-axis of the scatterplot
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe for producing the scatterplot
     """
+
     columns = ["name", "x", "y", "cog", "color", "link"]
     res = pd.DataFrame(columns=columns, index=model.M.index)
     res.index.name = "locus"
@@ -880,9 +936,18 @@ def imdb_gene_scatter_df(
 def imdb_activity_bar_df(model: IcaData, k: Union[int, str]):
     """
     Generates a dataframe for the activity bar graph of iModulon k
-    :param model: IcaData object
-    :param k: the iModulon's index
-    :return: a dataframe for producing the activity bar graph for iModulonDB
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe for producing the activity bar graph for iModulonDB
     """
 
     samp_table = model.sample_table.reset_index(drop=True)
@@ -929,11 +994,20 @@ def _parse_regulon_string(model: IcaData, s: str):
     """
     The Bacillus microarray dataset uses [] to create unusually complicated TF strings.
     This function parses those, as a helper to _get_reg_genes for imdb_regulon_venn_df.
-    :param model: IcaData object
-    :param s: the tf string
-    :return: set of genes regulated by this string
 
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    s : str
+        TF string
+
+    Returns
+    -------
+    set
+        Set of genes regulated by this string
     """
+
     res = set()
     if not (isinstance(s, str)):
         return res
@@ -957,12 +1031,22 @@ def _parse_regulon_string(model: IcaData, s: str):
     return res
 
 
-def _get_reg_genes(model: IcaData, tf: str):
+def _get_reg_genes(model: IcaData, tf: str) -> Set:
     """
-    Finds the set of genes regulated by the boolean combo of regulators in tf
-    :param model: IcaData object
-    :param tf: string of tfs separated by +, /, and/or []
-    :return: set of regulated genes
+    Finds the set of genes regulated by the boolean combination of regulators in a TF
+    string
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    tf : str
+        string of TFs separated by +, /, and/or []
+
+    Returns
+    -------
+    Set
+        Set of regulated genes
     """
 
     # the Bacillus tf strings use '[]' to make complicated boolean combinations
@@ -992,11 +1076,19 @@ def _get_reg_genes(model: IcaData, tf: str):
 
 def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
     """
-    Generates a dataframe for the regulon venn diagram of iModulon k
-    Returns None if there is no diagram to draw
-    :param model: IcaData object
-    :param k: index of iModulon
-    :return: a dataframe for producing the venn diagram in iModulonDB
+    Generates a dataframe for the regulon venn diagram of iModulon k. Returns None
+    if there is no diagram to draw
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+
+    Returns
+    -------
+    pd.DataFrame
+        A DataFrame for producing the venn diagram in iModulonDB
     """
 
     row = model.imodulon_table.loc[k]
@@ -1081,10 +1173,17 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
 
 def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
     """
-    Gets a list of gene locus tags associated with the given TF combination
-    :param model: IcaData object
-    :param tf_string: string of TFs, or np.nan
-    :return: list of gene loci
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    tf_string : Union[str,np.nan]
+        String of TFs, or np.nan
+    Returns
+    -------
+    List
+        List of gene loci
     """
 
     # hard-coded TF names
@@ -1129,12 +1228,20 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
 
 def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
     """
-    Generates a dataframe for the regulon scatter plots of iModulon k
-    Returns None if there are no scatter plots to make
-    :param model: IcaData object
-    :param k: index of iModulon
-    :return: a dataframe for producing the regulon scatter plots in iModulonDB
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe for producing the regulon scatter plots in iModulonDB
     """
+
     row = model.imodulon_table.loc[k]
     tfs = _get_tfs_to_scatter(model, row.TF)
 
@@ -1179,10 +1286,19 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
 def _tf_with_links(model: IcaData, tf_str: Union[str, float]):
     """
     Adds links to the regulator string
-    :param model: IcaData object
-    :param tf_str: regulator string for a given iModulon, or np.nan
-    :return: string with links added
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    tf_str : str
+        Regulator string for a given iModulon, or np.nan
+
+    Returns
+    -------
+    str
+        String with links added
     """
+
     tf_links = model.tf_links
 
     if not (type(tf_str) == str):
@@ -1224,12 +1340,24 @@ def imdb_imodulon_basics_df(
 ):
     """
     Generates a dataframe for the metadata of iModulon k
-    :param model: IcaData object
-    :param k: index of iModulon
-    :reg_venn: ouput of imdb_regulon_venn_df(model, k)
-    :reg_scatter: output of imdb_regulon_scatter_df(model, k)
-    :return: a dataframe of metadata for iModulon k in iModulonDB
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+    reg_venn : pd.DataFrame
+        Output of imdb_regulon_venn_df(model, k)
+    reg_scatter : pd.DataFrame
+        Output of imdb_regulon_scatter_df(model, k)
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe of metadata for iModulon k in iModulonDB
     """
+
     row = model.imodulon_table.loc[k]
 
     res = pd.Series(
@@ -1273,14 +1401,23 @@ def make_im_directory(
     gene_scatter_x="start",
 ):
     """
-    Generates all data for iModulon k, stores it in a subfolder of path_prefix
-    :param model: IcaData object
-    :param k: iModulon index
-    :param path_prefix: path to the dataset folder.
-        This function creates an 'iModulon_files/k/' subdirectory there
-        to store everything.
-    :param gene_scatter_x: passed to imdb_gene_scatter_df() to indicate
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    k : Union[int,str]
+        iModulon name
+    path_prefix : str
+        Path to the dataset folder. This function creates an 'iModulon_files/k/'
+        subdirectory there to store everything.
+    gene_scatter_x : str
+        Passed to imdb_gene_scatter_df() to indicate
         the x axis type of that plot
+
+    Returns
+    -------
+    None
     """
 
     # generate the plot files
@@ -1322,10 +1459,17 @@ def make_im_directory(
 
 def imdb_gene_activity_bar_df(model: IcaData, gene_id: str):
     """
-    Generates a dataframe for the expression bar graph of gene_id
-    :param model: IcaData object
-    :param gene_id: locus tag of gene
-    :return: a dataframe for the activity bar of gene in iModulonDB
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    gene_id : str
+        Locus tag of gene
+
+    Returns
+    -------
+    A dataframe for the activity bar of gene in iModulonDB
     """
 
     # get the row of A
@@ -1372,12 +1516,23 @@ def imdb_gene_im_table_df(
 ):
     """
     Generates a dataframe for the iModulon table of gene g
-    :param model: IcaData object
-    :param g: locus tag of gene
-    :param im_table: pre-cleaned version of model.imodulon_table
-    :param m_bin: boolean transpose version of model.M_binarized
-    :return: a dataframe for the iModulon table of gene g in iModulonDB
+
+    Parameters
+    ----------
+    model: IcaData
+        IcaData object
+    g : str
+        Gene locus tag
+    im_table : pd.DataFrame
+        Pre-cleaned version of model.imodulon_table
+    m_bin : pd.DataFrame
+        Boolean transpose version of model.M_binarized
+
+    Returns
+    -------
+    A dataframe for the iModulon table of gene g in iModulonDB
     """
+
     perGene_table = im_table.copy()
     perGene_table.insert(column="in_iM", value=m_bin.loc[:, g], loc=1)
     perGene_table.insert(column="gene_weight", value=model.M.loc[g, :], loc=2)
@@ -1395,10 +1550,18 @@ def imdb_gene_im_table_df(
 
 def imdb_gene_basics_df(model: IcaData, g: str):
     """
-    Generates a dataframe for the metadata of gene g
-    :param model: IcaData object
-    :param g: locus tag of gene
-    :return: a dataframe for the metadata of gene g in iModulonDB
+
+    Parameters
+    ----------
+    model: IcaData
+        IcaData object
+    g : str
+        Gene locus
+
+    Returns
+    -------
+    pd.DataFrame
+        A dataframe for the metadata of gene g in iModulonDB
     """
 
     row = model.gene_table.loc[g]
@@ -1432,10 +1595,21 @@ def imdb_gene_basics_df(model: IcaData, g: str):
 def make_gene_directory(model: IcaData, g: str, path_prefix: Optional[str] = "."):
     """
     Generates all data for gene g, stores it in a subfolder of path_prefix
-    :param model: IcaData object
-    :param g: gene index
-    :param path_prefix: path to the dataset folder. This function creates
+
+    Parameters
+    ----------
+    model : IcaData
+        IcaData object
+    g : str
+        Gene locus
+    path_prefix : str
+        Path to the dataset folder. This function creates
         a 'gene_page_files/k/' subdirectory there to store everything.
+
+    Returns
+    -------
+    pd.DataFrame
+        Table containing iModulon information for the gene
     """
 
     im_table_short = model.imodulon_table[["name", "Regulator", "Function", "Category"]]
