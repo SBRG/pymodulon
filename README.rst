@@ -10,9 +10,9 @@ To learn about iModulons, how they are computed, and what they can tell you, see
 Installation
 ~~~~~~~~~~~~
 
-Since pymodulon is currently under development, the recommended method to 
+Since pymodulon is currently under development, the recommended method to
 install **pymodulon** is to use the editable ``pip`` installation. It is
-recommended to do this inside a `virtual environment 
+recommended to do this inside a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or in a `conda
 environment <https://docs.conda.io/en/latest/>`_. This is because we require
 Python 3.8 for certain functionalities.
@@ -21,7 +21,7 @@ To create the conda environment::
 
 	conda create -n pymodulon python=3.8
 	conda activate pymodulon
-	
+
 (Optional) Install graphviz::
 
 	conda install -c anaconda graphviz
@@ -33,8 +33,8 @@ Next, download the github repository::
 Then install with ``pip`` using the ``-e`` flag::
 
 	python -m pip install -e .
-	
-This method of installation will automatically update your 
+
+This method of installation will automatically update your
 package each time you pull from this repository.
 
 To update your code, run the following from your local pymodulon folder::
@@ -50,6 +50,10 @@ To update your code, run the following from your local pymodulon folder::
 
 .. in the ``pymodulon`` source directory. For additional information, please refer to the
 .. the `detailed installation instructions <INSTALL.rst>`_.
+
+Development
+-----------
+If you would like to assist in development, please install `pre-commit <https://pre-commit.com/>`_ to ensure code style and consistency.
 
 Cite
 ----
