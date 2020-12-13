@@ -1,5 +1,6 @@
 """
 
+
 """
 from collections import Counter
 
@@ -1017,8 +1018,21 @@ def plot_dima(ica_data: IcaData, sample1: Union[Collection, str],
     df_diff = dima(ica_data, sample1_list, sample2_list, threshold=threshold,
                    fdr=fdr, alternate_A=alternate_A)
 
-    ax = scatterplot(a1, a2, line45=True, line45_margin=threshold,
-                     xlabel=xlabel, ylabel=ylabel, **kwargs)
+    diff_group = []
+    no_diff_group = []
+    for i in a1.index:
+        if i in df_diff.index:
+            diff_group.append(i)
+        else:
+            no_diff_group.append(i)
+    groups = {}
+    for i in diff_group:
+        groups.update({i:""})
+    for i in no_diff_group:
+        groups.update({i:"hidden"})
+
+    ax = scatterplot(a1, a2, xlabel=xlabel, ylabel=ylabel, groups=groups,
+                     **kwargs)
 
     if label:
         df_diff = pd.concat([df_diff, a1, a2], join='inner', axis=1)
