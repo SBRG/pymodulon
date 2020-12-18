@@ -814,8 +814,12 @@ def _gene_color_dict(model: IcaData):
         gene_cogs = model.gene_table.COG.to_dict()
     except AttributeError:
         gene_cogs = {k: np.nan for k in model.gene_table.index}
-    return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
-
+    
+    try:
+    	return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+    except KeyError:
+    	model.cog_colors = None
+    	return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
 
 def imdb_gene_scatter_df(
     model: IcaData, k: Union[str, int], gene_scatter_x: Optional[str] = "start"
