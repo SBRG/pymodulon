@@ -51,6 +51,10 @@ To update your code, run the following from your local pymodulon folder::
 .. in the ``pymodulon`` source directory. For additional information, please refer to the
 .. the `detailed installation instructions <INSTALL.rst>`_.
 
+Development
+-----------
+If you would like to assist in development, please install `pre-commit <https://pre-commit.com/>`_ to ensure code style and consistency.
+
 Cite
 ----
 Please cite the original *E. coli* iModulon paper: `Sastry et al. Nature Communications. 2019. <https://www.nature.com/articles/s41467-019-13483-w>`_

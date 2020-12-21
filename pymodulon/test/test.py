@@ -63,6 +63,9 @@ def test_simple_ica_data():
 
 
 def test_ica_data_consistency(ica_data):
+    # Make a copy
+    ica_data = ica_data.copy()
+
     # Ensure that gene names are consistent
     gene_list = ica_data.gene_names
     assert (
@@ -110,6 +113,11 @@ def test_ica_data_consistency(ica_data):
     assert ica_data.imodulon_names[10] == "test-1"
     assert ica_data.imodulon_names[11] == "test-2"
     assert ica_data.imodulon_names[12] == "test-3"
+
+    # Test imodulon_names setter
+    ica_data.imodulon_names = ["test"] * 92
+    assert ica_data.imodulon_names[0] == "test-1"
+    assert ica_data.imodulon_names[71] == "test-72"
 
 
 def test_compute_regulon_enrichment(ica_data):

@@ -1,3 +1,7 @@
+"""
+Functions for reading and writing model into files.
+"""
+
 import gzip
 import json
 from typing import TextIO, Union
@@ -6,23 +10,19 @@ import pandas as pd
 
 from pymodulon.core import IcaData
 
-"""
-Functions for reading and writing model into files.
-"""
-
 
 def save_to_json(model: IcaData, fname: str, compress: bool = False):
     """
-
     Save model to the json file
+
     Parameters
     ----------
     model: IcaData
        ICA model to be saved to json file
     fname: string
-       path to json file where the model will be saved
+       Path to json file where the model will be saved
     compress: bool
-        indicates if the JSON file should be compressed into a gzip archive
+        Indicates if the JSON file should be compressed into a gzip archive
     """
 
     if model.A is None or model.M is None:
@@ -56,16 +56,17 @@ def save_to_json(model: IcaData, fname: str, compress: bool = False):
 def load_json_model(filename: Union[str, TextIO]) -> IcaData:
     """
     Load a ICA model from a file in JSON format.
+
     Parameters
     ----------
-    filename : str or file-like
+    filename : str or TextIO
         File path or descriptor that contains the JSON document describing the
         ICA model.
+
     Returns
     -------
     IcaData
         The ICA model as represented in the JSON document.
-
     """
     if isinstance(filename, str):
         if filename.endswith(".gz"):
@@ -76,5 +77,11 @@ def load_json_model(filename: Union[str, TextIO]) -> IcaData:
                 serial_data = json.load(file_handle)
     else:
         serial_data = json.load(filename)
+
+    # Remove deprecated arguments
+    deprecated_args = ["cog_colors", "_dagostino_cutoff"]
+    for arg in deprecated_args:
+        if arg in serial_data.keys():
+            serial_data.pop(arg)
 
     return IcaData(**serial_data)
