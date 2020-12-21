@@ -450,7 +450,11 @@ def imodulondb_main_site_files(
     enrich_df = model.imodulon_table.copy()
     enrich_df["component"] = enrich_df.index
     enrich_df = enrich_df[["component", "name", "Regulator", "Function"]]
-    enrich_df = enrich_df.sort_values(by="name").fillna(value="N/A")
+    try:
+        enrich_df = enrich_df.sort_values(by="name").fillna(value="N/A")
+    except TypeError:
+        enrich_df["name"] = enrich_df["name"].astype(str)
+        enrich_df = enrich_df.sort_values(by="name").fillna(value="N/A")
     if not (os.path.isdir(main_folder + "/iModulon_files")):
         os.makedirs(main_folder + "/iModulon_files")
     enrich_df.to_json(main_folder + "/iModulon_files/im_list.json", orient="records")
@@ -860,7 +864,12 @@ def _gene_color_dict(model: IcaData):
         gene_cogs = model.gene_table.COG.to_dict()
     except AttributeError:
         gene_cogs = {k: np.nan for k in model.gene_table.index}
-    return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+
+    try:
+        return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+    except KeyError:
+        model.cog_colors = None
+        return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
 
 
 def imdb_gene_scatter_df(
