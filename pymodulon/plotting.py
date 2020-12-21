@@ -1709,7 +1709,9 @@ def _get_fit(x, y):
         warnings.simplefilter("ignore", category=OptimizeWarning)
         for c in [min(x), np.mean(x), max(x)]:
             try:
-                all_params.append(curve_fit(_broken_line, x, y, p0=[1, 1, c])[0])
+                all_params.append(
+                    curve_fit(_broken_line, x, y, p0=[1, 1, c], maxfev=5000)[0]
+                )
             except OptimizeWarning:
                 pass
 
