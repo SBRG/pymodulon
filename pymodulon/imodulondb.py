@@ -867,8 +867,41 @@ def _gene_color_dict(model: IcaData):
 
     try:
         return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
-    except KeyError:
-        model.cog_colors = None
+    except (KeyError, AttributeError):
+        # previously, this would call the setter using:
+        # model.cog_colors = None
+        cogs = sorted(model.gene_table.COG.unique())
+        model.cog_colors = dict(
+            zip(
+                cogs,
+                [
+                    "red",
+                    "pink",
+                    "y",
+                    "orchid",
+                    "mediumvioletred",
+                    "green",
+                    "lightgray",
+                    "lightgreen",
+                    "slategray",
+                    "blue",
+                    "saddlebrown",
+                    "turquoise",
+                    "lightskyblue",
+                    "c",
+                    "skyblue",
+                    "lightblue",
+                    "fuchsia",
+                    "dodgerblue",
+                    "lime",
+                    "sandybrown",
+                    "black",
+                    "goldenrod",
+                    "chocolate",
+                    "orange",
+                ],
+            )
+        )
         return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
 
 
@@ -1210,7 +1243,6 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
         tfs = re.split("[+/]", tf_string)
 
         for tf in tfs:
-            tf = tf[0].lower() + tf[1:]
 
             if tf in rename_tfs.keys():
                 tf = rename_tfs[tf]
