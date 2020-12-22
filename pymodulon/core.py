@@ -43,7 +43,6 @@ class IcaData(object):
         gene_links: Optional[dict] = None,
         tf_links: Optional[dict] = None,
         link_database: Optional[str] = "External Database",
-        cog_colors: Optional[dict] = None,
     ):
         """
         Initialize IcaData object
@@ -90,9 +89,6 @@ class IcaData(object):
             Dictionary of TFs (from the TRN) to links in a database
         link_database : str
             Name of the database for the gene_links dictionary
-        cog_colors : dict
-            Dictionary of COGs from the gene_table to desired colors for display in
-            iModulonDB. One will be made for you if not provided.
         """
 
         #########################
@@ -208,7 +204,33 @@ class IcaData(object):
         self.link_database = link_database
         self.gene_links = gene_links
         self.tf_links = tf_links
-        self.cog_colors = cog_colors
+
+        # Add hard-coded COG colors
+        self.cog_colors = {
+            "Amino acid transport and metabolism": "red",
+            "Carbohydrate transport and metabolism": "pink",
+            "Cell cycle control, cell division, chromosome partitioning": "y",
+            "Cell motility": "orchid",
+            "Cell wall/membrane/envelope biogenesis": "mediumvioletred",
+            "Coenzyme transport and metabolism": "green",
+            "Defense mechanisms": "lightgray",
+            "Energy production and conversion": "lightgreen",
+            "Function unknown": "slategray",
+            "Inorganic ion transport and metabolism": "blue",
+            "Intracellular trafficking, secretion, "
+            "and vesicular transport": "saddlebrown",
+            "Lipid transport and metabolism": "turquoise",
+            "No COG Annotation": "lightskyblue",
+            "Nucleotide transport and metabolism": "c",
+            "Posttranslational modification, protein turnover, chaperones": "skyblue",
+            "RNA processing and modification": "lightblue",
+            "Replication, recombination and repair": "fuchsia",
+            "Secondary metabolites biosynthesis, "
+            "transport and catabolism": "dodgerblue",
+            "Signal transduction mechanisms": "lime",
+            "Transcription": "sandybrown",
+            "Translation, ribosomal structure and biogenesis": "black",
+        }
 
     @property
     def M(self):
@@ -289,11 +311,6 @@ class IcaData(object):
         self._m.index = names
         if self._x is not None:
             self._x.index = names
-
-        # Update cog_colors
-        if hasattr(self, "_cog_colors"):
-            if self._cog_colors == {np.nan: "gray"}:
-                self.cog_colors = None
 
     @property
     def sample_table(self):
@@ -413,7 +430,6 @@ class IcaData(object):
 
         # Rename using the column parameter if given
         if column is not None:
-            new_names = self.imodulon_table[column]
             raise DeprecationWarning(
                 "column paramter will be removed soon. Please "
                 "use 'ica_data.imodulon_names = "
@@ -1039,7 +1055,8 @@ class IcaData(object):
 
         final_list = []
         for g in gene_list:
-            loci = gene_table[gene_table.gene_name == g].index
+            g_names = gene_table.gene_name.apply(lambda x: x.casefold())
+            loci = gene_table[g_names == g.casefold()].index
 
             # Ensure only one locus maps to this gene
             if len(loci) == 0:
@@ -1202,62 +1219,3 @@ class IcaData(object):
                     print("%s has a TF link but is not in the TRN" % tf)
 
         self._tf_links = new_links
-
-    @property
-    def cog_colors(self):
-        return self._cog_colors
-
-    @cog_colors.setter
-    def cog_colors(self, new_colors):
-        if new_colors is None:
-            try:  # generate a good dictionary if gene info is available
-                self._cog_colors = dict(
-                    zip(
-                        self.gene_table["COG"].unique().tolist(),
-                        [
-                            "red",
-                            "pink",
-                            "y",
-                            "orchid",
-                            "mediumvioletred",
-                            "green",
-                            "lightgray",
-                            "lightgreen",
-                            "slategray",
-                            "blue",
-                            "saddlebrown",
-                            "turquoise",
-                            "lightskyblue",
-                            "c",
-                            "skyblue",
-                            "lightblue",
-                            "fuchsia",
-                            "dodgerblue",
-                            "lime",
-                            "sandybrown",
-                            "black",
-                            "goldenrod",
-                            "chocolate",
-                            "orange",
-                        ],
-                    )
-                )
-            except KeyError:  # no gene table or COG column
-                self._cog_colors = {np.nan: "gray"}
-
-        else:
-            if isinstance(new_colors, str):
-                new_colors = _check_dict(new_colors)
-
-            try:
-                for cog in set(self.gene_table["COG"].unique()) - set(
-                    new_colors.keys()
-                ):
-                    new_colors[cog] = "gray"
-            except KeyError:
-                print(
-                    "COG colors are useless if there is no "
-                    "'COG' category in the gene table."
-                )
-
-            self._cog_colors = new_colors

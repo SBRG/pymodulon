@@ -15,7 +15,7 @@ from matplotlib.colors import to_hex
 from tqdm.notebook import tqdm
 
 from pymodulon.core import IcaData
-from pymodulon.visualization import broken_line, get_fit, solid_line
+from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
 ##################
 # User Functions #
@@ -864,7 +864,11 @@ def _gene_color_dict(model: IcaData):
         gene_cogs = model.gene_table.COG.to_dict()
     except AttributeError:
         gene_cogs = {k: np.nan for k in model.gene_table.index}
-    return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+
+    try:
+        return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+    except (KeyError, AttributeError):
+        set(gene_cogs.values()) - set(model.cog_colors.keys())
 
 
 def imdb_gene_scatter_df(
@@ -1205,7 +1209,6 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
         tfs = re.split("[+/]", tf_string)
 
         for tf in tfs:
-            tf = tf[0].lower() + tf[1:]
 
             if tf in rename_tfs.keys():
                 tf = rename_tfs[tf]
@@ -1264,13 +1267,13 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
         coord[tf] = model.X.loc[model.name2num(tf)]
         xlim = np.array([coord[tf].min(), coord[tf].max()])
         # fit line
-        params, r2 = get_fit(coord[tf], coord["A"])
+        params, r2 = _get_fit(coord[tf], coord["A"])
         if len(params) == 2:  # unbroken
-            y = solid_line(xlim, *params)
+            y = _solid_line(xlim, *params)
             out = [xlim[0], np.nan, xlim[1], y[0], y[1]]
         else:  # broken
             xvals = np.array([xlim[0], params[2], xlim[1]])
-            y = broken_line(xvals, *params)
+            y = _broken_line(xvals, *params)
             out = [xlim[0], params[2], xlim[1], y[0], y[2]]
 
         param_df[tf] = [r2] + out

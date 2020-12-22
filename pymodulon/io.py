@@ -78,4 +78,10 @@ def load_json_model(filename: Union[str, TextIO]) -> IcaData:
     else:
         serial_data = json.load(filename)
 
+    # Remove deprecated arguments
+    deprecated_args = ["cog_colors", "_dagostino_cutoff"]
+    for arg in deprecated_args:
+        if arg in serial_data.keys():
+            serial_data.pop(arg)
+
     return IcaData(**serial_data)
