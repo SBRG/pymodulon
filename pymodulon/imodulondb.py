@@ -868,41 +868,7 @@ def _gene_color_dict(model: IcaData):
     try:
         return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
     except (KeyError, AttributeError):
-        # previously, this would call the setter using:
-        # model.cog_colors = None
-        cogs = sorted(model.gene_table.COG.unique())
-        model.cog_colors = dict(
-            zip(
-                cogs,
-                [
-                    "red",
-                    "pink",
-                    "y",
-                    "orchid",
-                    "mediumvioletred",
-                    "green",
-                    "lightgray",
-                    "lightgreen",
-                    "slategray",
-                    "blue",
-                    "saddlebrown",
-                    "turquoise",
-                    "lightskyblue",
-                    "c",
-                    "skyblue",
-                    "lightblue",
-                    "fuchsia",
-                    "dodgerblue",
-                    "lime",
-                    "sandybrown",
-                    "black",
-                    "goldenrod",
-                    "chocolate",
-                    "orange",
-                ],
-            )
-        )
-        return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
+        set(gene_cogs.values()) - set(model.cog_colors.keys())
 
 
 def imdb_gene_scatter_df(

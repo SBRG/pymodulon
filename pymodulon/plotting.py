@@ -499,7 +499,7 @@ def scatterplot(
         A mapping of data-points that form groups in the data
     colors: str, list, or dict
         Color of points, list of colors to use for different groups, or dictionary
-        mapping colors to groups
+        mapping groups to colors
     show_labels: bool, str
         An option that toggles whether data-points are given labels
     adjust_labels: bool
@@ -789,8 +789,8 @@ def plot_gene_weights(
         mod_cogs = ica_data.gene_table.loc[component_genes].COG
         hidden_cogs = pd.Series("hidden", index=other_genes)
         all_cogs = pd.concat([mod_cogs, hidden_cogs])
-        colors = [ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())]
-        kwargs.update({"groups": all_cogs, "colors": colors})
+        # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
+        kwargs.update({"groups": all_cogs, "colors": ica_data.cog_colors})
 
     # Scatter Plot
     ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, **kwargs)

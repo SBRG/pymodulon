@@ -205,40 +205,32 @@ class IcaData(object):
         self.gene_links = gene_links
         self.tf_links = tf_links
 
-        # Initialize COG colors
-        if "COG" in self.gene_table.columns:
-            cogs = sorted(self.gene_table.COG.unique())
-            self.cog_colors = dict(
-                zip(
-                    cogs,
-                    [
-                        "red",
-                        "pink",
-                        "y",
-                        "orchid",
-                        "mediumvioletred",
-                        "green",
-                        "lightgray",
-                        "lightgreen",
-                        "slategray",
-                        "blue",
-                        "saddlebrown",
-                        "turquoise",
-                        "lightskyblue",
-                        "c",
-                        "skyblue",
-                        "lightblue",
-                        "fuchsia",
-                        "dodgerblue",
-                        "lime",
-                        "sandybrown",
-                        "black",
-                        "goldenrod",
-                        "chocolate",
-                        "orange",
-                    ],
-                )
-            )
+        # Add hard-coded COG colors
+        self.cog_colors = {
+            "Amino acid transport and metabolism": "red",
+            "Carbohydrate transport and metabolism": "pink",
+            "Cell cycle control, cell division, chromosome partitioning": "y",
+            "Cell motility": "orchid",
+            "Cell wall/membrane/envelope biogenesis": "mediumvioletred",
+            "Coenzyme transport and metabolism": "green",
+            "Defense mechanisms": "lightgray",
+            "Energy production and conversion": "lightgreen",
+            "Function unknown": "slategray",
+            "Inorganic ion transport and metabolism": "blue",
+            "Intracellular trafficking, secretion, "
+            "and vesicular transport": "saddlebrown",
+            "Lipid transport and metabolism": "turquoise",
+            "No COG Annotation": "lightskyblue",
+            "Nucleotide transport and metabolism": "c",
+            "Posttranslational modification, protein turnover, chaperones": "skyblue",
+            "RNA processing and modification": "lightblue",
+            "Replication, recombination and repair": "fuchsia",
+            "Secondary metabolites biosynthesis, "
+            "transport and catabolism": "dodgerblue",
+            "Signal transduction mechanisms": "lime",
+            "Transcription": "sandybrown",
+            "Translation, ribosomal structure and biogenesis": "black",
+        }
 
     @property
     def M(self):
