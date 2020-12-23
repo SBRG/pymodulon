@@ -543,7 +543,8 @@ class IcaData(object):
         self.imodulon_table = new_table
 
     def compute_regulon_enrichment(
-        self, imodulon: ImodName, regulator: str, save: bool = False
+        self, imodulon: ImodName, regulator: str, save: bool = False,
+        evidence: Union[list, str] = None
     ):
         """
         Compare an iModulon against a regulon. (Note: q-values cannot be computed
@@ -558,6 +559,8 @@ class IcaData(object):
             uses genes in all regulons
         save : bool
             If true, save enrichment score to the imodulon_table
+        evidence: Union[list, str]
+            Evidence level of TRN interactions to include during TRN enrichment
 
         Returns
         -------
@@ -565,9 +568,18 @@ class IcaData(object):
             Table containing enrichment statistics
         """
 
+        if evidence is not None:
+            if isinstance(evidence, str):
+                evidences_to_use = [evidence]
+            else:
+                evidences_to_use = evidence
+            trn_to_use = self.trn[self.trn['evidence'].isin(evidences_to_use)]
+        else:
+            trn_to_use = self.trn
+
         imod_genes = self.view_imodulon(imodulon).index
         enrich = compute_regulon_enrichment(
-            set(imod_genes), regulator, set(self.gene_names), self.trn
+            set(imod_genes), regulator, set(self.gene_names), trn_to_use
         )
         enrich.rename({"gene_set_size": "imodulon_size"}, inplace=True)
         if save:
@@ -586,6 +598,7 @@ class IcaData(object):
         save: bool = False,
         method: str = "both",
         force: bool = False,
+        evidence: Union[list, str] = None
     ) -> pd.DataFrame:
         """
         Compare iModulons against all regulons in the TRN
@@ -608,6 +621,8 @@ class IcaData(object):
             'both' performs both tests
         force : bool
             If false, prevents computation of >2 regulators (default: False)
+        evidence: Union[list, str]
+            Evidence level of TRN interactions to include during TRN enrichment
 
         Returns
         -------
@@ -624,12 +639,21 @@ class IcaData(object):
         else:
             imodulon_list = imodulons
 
+        if evidence is not None:
+            if isinstance(evidence, str):
+                evidences_to_use = [evidence]
+            else:
+                evidences_to_use = evidence
+            trn_to_use = self.trn[self.trn['evidence'].isin(evidences_to_use)]
+        else:
+            trn_to_use = self.trn
+
         for imodulon in imodulon_list:
             gene_list = self.view_imodulon(imodulon).index
             df_enriched = compute_trn_enrichment(
                 set(gene_list),
                 set(self.gene_names),
-                self.trn,
+                trn_to_use,
                 max_regs=max_regs,
                 fdr=fdr,
                 method=method,

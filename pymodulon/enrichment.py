@@ -186,7 +186,7 @@ def compute_regulon_enrichment(
     all_genes : Set
         List of all genes
     trn : pd.DataFrame
-        Table ontaining transcriptional regulatory network
+        Table containing transcriptional regulatory network
 
     Returns
     -------
