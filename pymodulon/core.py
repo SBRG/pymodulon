@@ -30,6 +30,7 @@ class IcaData(object):
         M: Data,
         A: Data,
         X: Optional[Data] = None,
+        log_tpm: Optional[Data] = None,
         gene_table: Optional[Data] = None,
         sample_table: Optional[Data] = None,
         imodulon_table: Optional[Data] = None,
@@ -54,7 +55,9 @@ class IcaData(object):
         A : Union[str, pd.DataFrame]
             A matrix from ICA
         X : Union[str, pd.DataFrame]
-            log-TPM expression matrix
+            log-TPM expression matrix, centered to reference condition(s)
+        log_tpm : Union[str, pd.DataFrame]
+            Raw log-TPM expression matrix (without centering)
         gene_table : Union[str, pd.DataFrame]
             Table containing genome annotation
         sample_table : Union[str, pd.DataFrame]
@@ -129,6 +132,11 @@ class IcaData(object):
             self._x = None
         else:
             self.X = X
+
+        if log_tpm is None:
+            self._log_tpm = None
+        else:
+            self.log_tpm = log_tpm
 
         ####################
         # Load data tables #
@@ -282,6 +290,29 @@ class IcaData(object):
     def X(self):
         # Delete X matrix
         del self._x
+
+    @property
+    def log_tpm(self):
+        """ Get log_tpm matrix """
+        return self._log_tpm
+
+    @log_tpm.setter
+    def log_tpm(self, lt_matrix):
+        log_tpm = _check_table(lt_matrix, "X")
+
+        # Check that gene and sample names conform to M and A matrices
+        if log_tpm.columns.tolist() != self.A.columns.tolist():
+            raise ValueError("log-TPM and A matrices have different sample names")
+        if log_tpm.index.tolist() != self.M.index.tolist():
+            raise ValueError("log-TPM and M matrices have different gene names")
+
+        # Set log-tpm matrix
+        self._log_tpm = log_tpm
+
+    @log_tpm.deleter
+    def log_tpm(self):
+        # Delete log-TPM matrix
+        del self._log_tpm
 
     # Gene, sample and iModulon name properties
     @property
@@ -543,8 +574,11 @@ class IcaData(object):
         self.imodulon_table = new_table
 
     def compute_regulon_enrichment(
-        self, imodulon: ImodName, regulator: str, save: bool = False,
-        evidence: Union[list, str] = None
+        self,
+        imodulon: ImodName,
+        regulator: str,
+        save: bool = False,
+        evidence: Union[list, str] = None,
     ):
         """
         Compare an iModulon against a regulon. (Note: q-values cannot be computed
@@ -573,7 +607,7 @@ class IcaData(object):
                 evidences_to_use = [evidence]
             else:
                 evidences_to_use = evidence
-            trn_to_use = self.trn[self.trn['evidence'].isin(evidences_to_use)]
+            trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
         else:
             trn_to_use = self.trn
 
@@ -598,7 +632,7 @@ class IcaData(object):
         save: bool = False,
         method: str = "both",
         force: bool = False,
-        evidence: Union[list, str] = None
+        evidence: Union[list, str] = None,
     ) -> pd.DataFrame:
         """
         Compare iModulons against all regulons in the TRN
@@ -644,7 +678,7 @@ class IcaData(object):
                 evidences_to_use = [evidence]
             else:
                 evidences_to_use = evidence
-            trn_to_use = self.trn[self.trn['evidence'].isin(evidences_to_use)]
+            trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
         else:
             trn_to_use = self.trn
 
