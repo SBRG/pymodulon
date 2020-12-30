@@ -449,6 +449,12 @@ def get_bbh(
     bbh2 = pd.merge(bbh2, db2_lengths)
     bbh2["COV"] = bbh2["alnLength"] / bbh2["gene_length"]
 
+    # Strip "lcl|" from protein files taken from NCBI
+    bbh.gene = bbh.gene.str.strip("lcl|")
+    bbh.subject = bbh.subject.str.strip("lcl|")
+    bbh2.gene = bbh2.gene.str.strip("lcl|")
+    bbh2.subject = bbh2.subject.str.strip("lcl|")
+
     # FILTER GENES THAT HAVE COVERAGE < mincov
     bbh = bbh[bbh.COV >= mincov]
     bbh2 = bbh2[bbh2.COV >= mincov]
