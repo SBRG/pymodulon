@@ -418,7 +418,7 @@ def get_bbh(
 
     if not force and out_file in files:
         print("bbh already parsed for", on1, on2)
-        out = pd.read_csv(out_file)
+        out = pd.read_csv(out_file, index_col=0)
         return out
     print("parsing BBHs for", on1, on2)
 
