@@ -549,7 +549,9 @@ def scatterplot(
     if not (
         isinstance(x, pd.Series)
         and isinstance(y, pd.Series)
-        and (x.sort_index().index == y.sort_index().index).all()
+        and (
+            x.index.astype(str).sort_values() == y.index.astype(str).sort_values()
+        ).all()
     ):
         raise TypeError("X and Y must be pandas series with the same index")
 
@@ -681,8 +683,15 @@ def scatterplot(
                 expand_points=(1.3, 1.3),
             )
 
-    ax.set_xlim(xmin, xmax)
-    ax.set_ylim(ymin, ymax)
+    if np.allclose(xmin, xmax):
+        ax.set_xlim(xmin - 1, xmax + 1)
+    else:
+        ax.set_xlim(xmin, xmax)
+
+    if np.allclose(ymin, ymax):
+        ax.set_ylim(ymin - 1, ymax + 1)
+    else:
+        ax.set_ylim(ymin, ymax)
 
     ax.set_xlabel(xlabel, **ax_font_kwargs)
     ax.set_ylabel(ylabel, **ax_font_kwargs)
