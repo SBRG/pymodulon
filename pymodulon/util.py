@@ -308,14 +308,16 @@ def mutual_info_distance(x, y):
     return 1 - mi(x, y) / entropy(np.hstack([x, y]))
 
 
-# the following code is taken from the NPEET package; it cannot be installed via pip, so
-# the necessary functions are copied here; the package appears to be un-maintained, so updates
-# are not very likely; this is the GitHub page: https://github.com/gregversteeg/NPEET
+# the following code is taken from the NPEET package; it cannot be installed via pip,
+# so the necessary functions are copied here; the package appears to be un-maintained,
+# so updates are not very likely; this is the GitHub page:
+# https://github.com/gregversteeg/NPEET
+
 
 def mi(x, y, z=None, k=3, base=2, alpha=0):
-    """ Mutual information of x and y (conditioned on z if z is not None)
-        x, y should be a list of vectors, e.g. x = [[1.3], [3.7], [5.1], [2.4]]
-        if x is a one-dimensional scalar and we have four samples
+    """Mutual information of x and y (conditioned on z if z is not None)
+    x, y should be a list of vectors, e.g. x = [[1.3], [3.7], [5.1], [2.4]]
+    if x is a one-dimensional scalar and we have four samples
     """
     assert len(x) == len(y), "Arrays should have same length"
     assert k <= len(x) - 1, "Set k smaller than num. samples - 1"
@@ -333,22 +335,30 @@ def mi(x, y, z=None, k=3, base=2, alpha=0):
     tree = build_tree(points)
     dvec = query_neighbors(tree, points, k)
     if z is None:
-        a, b, c, d = avgdigamma(x, dvec), avgdigamma(
-            y, dvec), digamma(k), digamma(len(x))
+        a, b, c, d = (
+            avgdigamma(x, dvec),
+            avgdigamma(y, dvec),
+            digamma(k),
+            digamma(len(x)),
+        )
         if alpha > 0:
             d += lnc_correction(tree, points, k, alpha)
     else:
         xz = np.c_[x, z]
         yz = np.c_[y, z]
-        a, b, c, d = avgdigamma(xz, dvec), avgdigamma(
-            yz, dvec), avgdigamma(z, dvec), digamma(k)
-    return (-a - b + c + d) / np.log(base)
+        a, b, c, d = (
+            avgdigamma(xz, dvec),
+            avgdigamma(yz, dvec),
+            avgdigamma(z, dvec),
+            digamma(k),
+        )
+    return max(0, (-a - b + c + d) / np.log(base))
 
 
 def entropy(x, k=3, base=2):
-    """ The classic K-L k-nearest neighbor continuous entropy estimator
-        x should be a list of vectors, e.g. x = [[1.3], [3.7], [5.1], [2.4]]
-        if x is a one-dimensional scalar and we have four samples
+    """The classic K-L k-nearest neighbor continuous entropy estimator
+    x should be a list of vectors, e.g. x = [[1.3], [3.7], [5.1], [2.4]]
+    if x is a one-dimensional scalar and we have four samples
     """
     assert k <= len(x) - 1, "Set k smaller than num. samples - 1"
     x = np.asarray(x)
@@ -357,7 +367,7 @@ def entropy(x, k=3, base=2):
     tree = build_tree(x)
     nn = query_neighbors(tree, x, k)
     const = digamma(n_elements) - digamma(k) + n_features * np.log(2)
-    return (const + n_features * np.log(nn).mean()) / np.log(base)
+    return max(0, (const + n_features * np.log(nn).mean()) / np.log(base))
 
 
 def add_noise(x, intens=1e-10):
@@ -367,8 +377,8 @@ def add_noise(x, intens=1e-10):
 
 def build_tree(points):
     if points.shape[1] >= 20:
-        return BallTree(points, metric='chebyshev')
-    return KDTree(points, metric='chebyshev')
+        return BallTree(points, metric="chebyshev")
+    return KDTree(points, metric="chebyshev")
 
 
 def query_neighbors(tree, x, k):
@@ -389,7 +399,7 @@ def lnc_correction(tree, points, k, alpha):
     n_sample = points.shape[0]
     for point in points:
         # Find k-nearest neighbors in joint space, p=inf means max norm
-        knn = tree.query(point[None, :], k=k+1, return_distance=False)[0]
+        knn = tree.query(point[None, :], k=k + 1, return_distance=False)[0]
         knn_points = points[knn]
         # Substract mean of k-nearest neighbor points
         knn_points = knn_points - knn_points[0]
