@@ -49,7 +49,7 @@ def barplot(
 
     Returns: A matplotlib axis object
 
-    """f
+    """
 
     # Remove extra projects
     if isinstance(projects, str):
@@ -1224,7 +1224,7 @@ def plot_dima(
     groups = {}
     for i in A_to_use.index:
         if i not in df_diff:
-            groups.update({i:"hidden"})
+            groups.update({i: "hidden"})
 
     ax = scatterplot(
         a1,
