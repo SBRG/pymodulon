@@ -283,7 +283,6 @@ def compute_trn_enrichment(
                 "/".join(regs) for regs in group2
             ]
             total += 2 * num_tests
-            print(reg_list)
         else:
             raise ValueError("'method' must be either 'and', 'or', or 'both'")
 
