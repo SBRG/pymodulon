@@ -163,7 +163,7 @@ def test_optimize_cutoff(capsys):
         optimize_cutoff=True,
         dagostino_cutoff=1776,
     )
-    assert ica_data.dagostino_cutoff == 550
+    assert ica_data.dagostino_cutoff == 500
     assert ica_data._cutoff_optimized
 
     # make sure that reoptimize doesn't run if trn isn't changed
@@ -179,7 +179,7 @@ def test_optimize_cutoff(capsys):
     assert not ica_data._cutoff_optimized
 
     ica_data.reoptimize_thresholds(progress=False, plot=False)
-    assert ica_data.dagostino_cutoff == 550
+    assert ica_data.dagostino_cutoff == 500
     assert ica_data._cutoff_optimized
 
 
