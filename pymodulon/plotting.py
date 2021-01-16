@@ -12,7 +12,12 @@ from matplotlib.patches import Rectangle
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
+from sklearn.metrics import (
+    pairwise_distances,
+    r2_score,
+    silhouette_samples,
+    silhouette_score,
+)
 
 from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
@@ -1296,7 +1301,7 @@ def cluster_activities(
         ica_data: IcaData object that contains your data
         correlation_method: the correlation method to use for computing
             correlations between iModulon activities. Default is
-            Spearman, and alternative option is Pearson.
+            "spearman". Supported alternatives are "pearson" and "mutual_info"
         distance_threshold: a specific distance threshold (between 0 and 1) to
             use for defining flat clusters from the hierarchical cluster
             relationship. Larger values yield fewer clusters. Defaults to None,
@@ -1335,8 +1340,18 @@ def cluster_activities(
 
     # compute distance matrix; distance metric defined as 1 - correlation to
     # ensure that correlated iModulons are close in distance, can be clustered
-    correlation_df = ica_data.A.T.corr(method=correlation_method)
-    distance_matrix = 1 - correlation_df.abs()
+    if correlation_method in ["spearman", "pearson"]:
+        correlation_df = ica_data.A.T.corr(method=correlation_method)
+        distance_matrix = 1 - correlation_df.abs()
+    elif correlation_method == "mutual_info":
+        distance_matrix = pairwise_distances(ica_data.A, metric=mutual_info_distance)
+        np.fill_diagonal(distance_matrix, 0)
+        correlation_df = pd.DataFrame(
+            1 - distance_matrix, columns=ica_data.A.index, index=ica_data.A.index
+        )
+    else:
+        raise ValueError(f"Correlation method {correlation_method} is unsupported.")
+
     best_clusters = []
     cluster_score_dict = {}
 

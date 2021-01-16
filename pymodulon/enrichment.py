@@ -275,18 +275,18 @@ def compute_trn_enrichment(
 
     # Perform enrichments for >1 regulator
     for n_regs in range(2, max_regs + 1):
-        group = itertools.combinations(imod_regs, n_regs)
+        group1, group2 = itertools.tee(itertools.combinations(imod_regs, n_regs))
         num_tests = int(special.comb(len(trn.regulator.unique()), n_regs))
 
         if method == "and":
-            reg_list = ["+".join(regs) for regs in group]
+            reg_list = ["+".join(regs) for regs in group1]
             total += num_tests
         elif method == "or":
-            reg_list = ["/".join(regs) for regs in group]
+            reg_list = ["/".join(regs) for regs in group1]
             total += num_tests
         elif method == "both":
-            reg_list = ["+".join(regs) for regs in group] + [
-                "/".join(regs) for regs in group
+            reg_list = ["+".join(regs) for regs in group1] + [
+                "/".join(regs) for regs in group2
             ]
             total += 2 * num_tests
         else:
