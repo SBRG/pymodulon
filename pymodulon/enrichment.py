@@ -268,7 +268,13 @@ def compute_trn_enrichment(
     enrich_list = []
     total = 0
 
-    for n_regs in range(1, max_regs + 1):
+    # Perform enrichments for 1 regulator
+    for reg in imod_regs:
+        enrich_list.append(compute_regulon_enrichment(gene_set, reg, all_genes, trn))
+    total += len(imod_regs)
+
+    # Perform enrichments for >1 regulator
+    for n_regs in range(2, max_regs + 1):
         group = itertools.combinations(imod_regs, n_regs)
         num_tests = int(special.comb(len(trn.regulator.unique()), n_regs))
 
