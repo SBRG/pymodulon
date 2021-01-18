@@ -3,6 +3,7 @@
 Note that the testing requirements must be installed (e.g. :mod:`pytest`) for
 this function to work. """
 
+
 from os.path import abspath, dirname, join
 
 from pymodulon.core import IcaData
@@ -251,9 +252,10 @@ def test_io():
         trn=trn,
         dagostino_cutoff=750,
     )
-    save_to_json(ica_data, "data/model.json")
-    icd_from_json = load_json_model("data/model.json")
+    save_to_json(ica_data, join("data", "model_tmp.json"))
+    icd_from_json = load_json_model(join("data", "model_tmp.json"))
     test_ica_data_consistency(icd_from_json)
+    os.remove(join("data", "model_tmp.json"))
 
 
 def test_util(ica_data):
@@ -266,9 +268,9 @@ def test_util(ica_data):
 def test_compare():
     from pymodulon.compare import _convert_gene_index
 
-    ica_data1 = load_json_model("data/model.json")
-    ica_data2 = load_json_model("data/10genes.json")
-    ica_data_org = load_json_model("data/saci.json")
+    ica_data1 = load_json_model(join("data", "model.json"))
+    ica_data2 = load_json_model(join("data", "10genes.json"))
+    ica_data_org = load_json_model(join("data", "saci.json"))
 
     # Test conforming data from same organism
     M1, M2 = _convert_gene_index(ica_data1.M, ica_data2.M)
@@ -277,7 +279,7 @@ def test_compare():
 
     # Test conforming data from different organisms
     orgM1, orgM2 = _convert_gene_index(
-        ica_data1.M, ica_data_org.M, ortho_file="data/example_bbh.csv"
+        ica_data1.M, ica_data_org.M, ortho_file=join("data", "example_bbh.csv")
     )
     assert (orgM1.index == orgM2.index).all()
     assert len(orgM1) > 10
@@ -286,7 +288,7 @@ def test_compare():
     org_table1, org_table2 = _convert_gene_index(
         ica_data1.gene_table,
         ica_data_org.gene_table,
-        ortho_file="data/example_bbh" ".csv",
+        ortho_file=join("data", "example_bbh.csv"),
     )
     assert (org_table1.index == org_table2.index).all()
     assert (org_table1.index == orgM1.index).all()
