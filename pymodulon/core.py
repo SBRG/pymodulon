@@ -607,7 +607,15 @@ class IcaData(object):
                 evidences_to_use = [evidence]
             else:
                 evidences_to_use = evidence
-            trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
+
+            if "evidence" in self.trn.columns:
+                trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
+            else:
+                warnings.warn(
+                    'TRN does not contain an "evidence" column. Ignoring '
+                    "evidence argument."
+                )
+                trn_to_use = self.trn
         else:
             trn_to_use = self.trn
 

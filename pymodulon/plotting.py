@@ -12,7 +12,12 @@ from matplotlib.patches import Rectangle
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
+from sklearn.metrics import (
+    pairwise_distances,
+    r2_score,
+    silhouette_samples,
+    silhouette_score,
+)
 
 from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
