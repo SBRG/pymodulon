@@ -41,14 +41,14 @@ def save_to_json(model: IcaData, fname: str, compress: bool = False):
         elif isinstance(val, set):
             param_dict.update({key: list(val)})
 
-    if not fname.endswith(".json"):
-        fname += ".json"
-
     if compress:
-        fname += ".gz"
+        if not fname.endswith(".json.gz"):
+            fname += ".json.gz"
         with gzip.open(fname, "wt", encoding="ascii") as zipfile:
             json.dump(param_dict, zipfile)
     else:
+        if not fname.endswith(".json"):
+            fname += ".json"
         with open(fname, "w") as fp:
             json.dump(param_dict, fp)
 
