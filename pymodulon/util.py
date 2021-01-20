@@ -305,7 +305,11 @@ def infer_activities(ica_data, data: pd.DataFrame):
 def mutual_info_distance(x, y):
     x = np.asarray(x).reshape(x.shape[0], 1)
     y = np.asarray(y).reshape(x.shape[0], 1)
-    return 1 - mi(x, y) / entropy(np.hstack([x, y]))
+    h = entropy(np.hstack([x, y]))
+    if h == 0:
+        return 0
+    else:
+        return 1 - mi(x, y) / h
 
 
 # the following code is taken from the NPEET package; it cannot be installed via pip,

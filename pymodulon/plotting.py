@@ -12,12 +12,7 @@ from matplotlib.patches import Rectangle
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
-from sklearn.metrics import (
-    pairwise_distances,
-    r2_score,
-    silhouette_samples,
-    silhouette_score,
-)
+from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 
 from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
@@ -1342,17 +1337,13 @@ def cluster_activities(
 
     # compute distance matrix; distance metric defined as 1 - correlation to
     # ensure that correlated iModulons are close in distance, can be clustered
-    if correlation_method in ["spearman", "pearson"]:
+
+    if correlation_method == "mutual_info":
+        correlation_df = ica_data.A.T.corr(method=mutual_info_distance)
+        distance_matrix = 1 - correlation_df.abs()
+    else:
         correlation_df = ica_data.A.T.corr(method=correlation_method)
         distance_matrix = 1 - correlation_df.abs()
-    elif correlation_method == "mutual_info":
-        distance_matrix = pairwise_distances(ica_data.A, metric=mutual_info_distance)
-        np.fill_diagonal(distance_matrix, 0)
-        correlation_df = pd.DataFrame(
-            1 - distance_matrix, columns=ica_data.A.index, index=ica_data.A.index
-        )
-    else:
-        raise ValueError(f"Correlation method {correlation_method} is unsupported.")
 
     best_clusters = []
     cluster_score_dict = {}
@@ -1386,7 +1377,7 @@ def cluster_activities(
 
             # score the clustering; handle the edge case where all clusters have
             # size 1; this is invalid input for silhouette_score
-            if n_clusters == distance_matrix.shape[0]:
+            if n_clusters == distance_matrix.shape[0] or n_clusters == 1:
                 auto_threshold_df.loc[row.Index, "score"] = 0
             else:
                 auto_threshold_df.loc[row.Index, "score"] = silhouette_score(
@@ -1492,7 +1483,10 @@ def cluster_activities(
             center=0,
         )
 
-        clustermap.ax_cbar.set_ylabel(f"{correlation_method} R", fontsize=14)
+        if correlation_method == "mutual_info":
+            clustermap.ax_cbar.set_ylabel("Normalized MI", fontsize=14)
+        else:
+            clustermap.ax_cbar.set_ylabel(f"{correlation_method} R", fontsize=14)
 
         # the following code draws squares on the clustermap to highlight
         # the cluster locations; will also number the best clusters if they
@@ -1555,6 +1549,9 @@ def cluster_activities(
             else:
                 size_counter += 1
 
+        if return_clustermap:
+            returns.append(clustermap)
+
         plt.show()
 
         # now actually display the best clusters if asked to
@@ -1611,9 +1608,6 @@ def cluster_activities(
 
             for i in range(1, len(axs) - len(best_cluster_matrices) + 1):
                 axs[-i].set_visible(False)
-
-            if return_clustermap:
-                returns.append(clustermap)
 
             plt.tight_layout()
 
