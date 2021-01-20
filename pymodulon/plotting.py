@@ -1339,8 +1339,11 @@ def cluster_activities(
     # ensure that correlated iModulons are close in distance, can be clustered
 
     if correlation_method == "mutual_info":
-        correlation_df = ica_data.A.T.corr(method=mutual_info_distance)
-        distance_matrix = 1 - correlation_df.abs()
+        correlation_df = 1 - ica_data.A.T.corr(method=mutual_info_distance)
+        distance_matrix = 1 - correlation_df.abs() - np.eye(len(correlation_df))
+        correlation_df = (correlation_df - correlation_df.min().min()) / (
+            correlation_df.max().max()
+        ) + np.eye(len(correlation_df))
     else:
         correlation_df = ica_data.A.T.corr(method=correlation_method)
         distance_matrix = 1 - correlation_df.abs()

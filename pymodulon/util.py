@@ -307,7 +307,7 @@ def mutual_info_distance(x, y):
     y = np.asarray(y).reshape(x.shape[0], 1)
     h = entropy(np.hstack([x, y]))
     if h == 0:
-        return 0
+        return 1
     else:
         return 1 - mi(x, y) / h
 
