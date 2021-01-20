@@ -220,7 +220,10 @@ def _convert_gene_index(
         M1_new = M1.loc[DF_orth.gene]
         M2_new = M2.loc[DF_orth.subject]
 
-        M2_new.index = [subject2gene[idx] for idx in M2_new.index]
+        # Reset index of M2 to conform with M1
+        M2_new.index.name = "locus_tag"
+        M2_new.reset_index(inplace=True)
+        M2_new.index = [subject2gene[idx] for idx in M2_new.locus_tag]
 
     if len(M1_new) == 0 or len(M2_new) == 0:
         raise ValueError(

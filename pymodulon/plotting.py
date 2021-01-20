@@ -830,12 +830,26 @@ def plot_gene_weights(
         show_labels_pgw is not False and len(component_genes) <= 20
     ):
         for gene in component_genes:
+
+            # Add labels
+            text_kwargs = {"fontstyle": "normal"}
+            try:
+                gene_name = ica_data.gene_table.loc[gene, "gene_name"]
+
+                # Italicize gene if there is a specific name (not locus tag)
+                if gene_name != gene:
+                    text_kwargs = {"fontstyle": "italic"}
+
+            except KeyError:
+                gene_name = gene
+
             texts.append(
                 ax.text(
                     x[gene],
                     ica_data.M.loc[gene, imodulon],
-                    ica_data.gene_table.loc[gene, "gene_name"],
+                    gene_name,
                     fontsize=12,
+                    **text_kwargs,
                 )
             )
 
@@ -922,6 +936,7 @@ def compare_gene_weights(
 
     if use_org1_names:
         gene_table = gene_table1
+        gene_table["locus_tag"] = gene_table.index
     else:
         gene_table = gene_table2
 
@@ -996,9 +1011,13 @@ def compare_gene_weights(
         for gene in component_genes:
             ax.scatter(M1.loc[gene, imodulon1], M2.loc[gene, imodulon2], color="r")
 
-            # Add labels
+            # Add labels (italicized if gene name is known)
+            text_kwargs = {"fontstyle": "normal"}
             try:
                 gene_name = gene_table.loc[gene, "gene_name"]
+                if gene_name != gene_table.loc[gene, "locus_tag"]:
+                    text_kwargs = {"fontstyle": "italic"}
+
             except KeyError:
                 gene_name = gene
 
@@ -1008,6 +1027,7 @@ def compare_gene_weights(
                     M2.loc[gene, imodulon2],
                     gene_name,
                     fontsize=12,
+                    **text_kwargs,
                 )
             )
 
