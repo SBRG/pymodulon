@@ -633,9 +633,9 @@ def scatterplot(
             colors.update({"": "tab:blue"})
     except AttributeError:
 
-        groups = [item for item in data["group"].unique() if item not in ["hidden", ""]]
+        groups = [item for item in data["group"].unique() if item != "hidden"]
         if colors is None:
-            colorlist = plt.rcParams["axes.prop_cycle"].by_key()["color"][1:]
+            colorlist = plt.rcParams["axes.prop_cycle"].by_key()["color"]
         elif isinstance(colors, str):
             colorlist = [colors] * len(groups)
         else:
@@ -646,7 +646,7 @@ def scatterplot(
             colorlist = colorlist * (len(groups) // len(colorlist) + 1)
 
         colors = dict(zip(groups, colorlist))
-        colors.update({"hidden": "gray", "": "tab:blue"})
+        colors.update({"hidden": "gray"})
 
     for name, group in data.groupby("group"):
         kwargs = scatter_kwargs.copy()
