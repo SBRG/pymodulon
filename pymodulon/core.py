@@ -130,7 +130,11 @@ class IcaData(object):
                     # again if the user uploads a new TRN
             else:
                 self.recompute_thresholds(self.dagostino_cutoff)
-
+        
+        #######################
+        # initiate motif_info #
+        #######################
+        self.motif_info = {}
     @property
     def M(self):
         """ Get M matrix """
