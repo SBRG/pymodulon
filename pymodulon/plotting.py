@@ -9,10 +9,13 @@ import pandas as pd
 import seaborn as sns
 from adjustText import adjust_text
 from matplotlib.patches import Rectangle
+from scipy import sparse
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
 from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
+from sklearn.preprocessing import OneHotEncoder
+from sklearn.tree import DecisionTreeRegressor
 
 from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
@@ -1692,6 +1695,157 @@ def cluster_activities(
             returns.append(dimca_return)
 
     return returns
+
+
+####################
+# Metadata Boxplot #
+####################
+
+
+def metadata_boxplot(
+    ica_data: IcaData,
+    imodulon: Union[str, int],
+    n_boxes: int = 3,
+    strip_conc: bool = True,
+    ignore_cols: Optional[List] = None,
+    use_cols: Optional[List] = None,
+    return_results: bool = False,
+):
+    """
+    Uses a decision tree regressor to automatically cluster iModulon activities
+    using metadata. Displays results as a decision tree.
+    Parameters
+    ----------
+    ica_data: IcaData
+        IcaData object containing your data
+    imodulon: Union[str,int]
+        Name of iModulon
+    n_boxes: int
+        Number of boxes to create
+    strip_conc: bool
+        Remove concentrations from metadata (e.g. "glucose(2g/L)" would be
+        interpreted as just "glucose")
+    ignore_cols: Optional[List]
+        List of columns to ignore. If None, only "project" and "condition" are ignored
+    use_cols: Optional[List]
+        List of columns to use. This supercedes ignore_cols.
+    return_results: bool
+        Return a dataframe describing the classifications
+    Returns
+    -------
+    Ax
+        Boxplot of iModulon activities classified by metadata
+    pd.DataFrame
+        Metadata classifications of the samples
+    """
+    component = ica_data.A.loc[imodulon]
+
+    encoding, features = _encode_metadata(
+        ica_data, ignore_cols=ignore_cols, use_cols=use_cols, strip_conc=strip_conc
+    )
+
+    clf = _train_classifier(component, features, max_leaf_nodes=n_boxes)
+    labels = _get_labels_from_tree(clf, encoding)
+    DF_result = _get_sample_leaves(clf, features, labels, component)
+
+    fig, ax = plt.subplots()
+    sns.boxplot(data=DF_result, x=imodulon, y="category")
+    ax.set_ylabel("")
+    if return_results:
+        return ax, DF_result
+    else:
+        return ax
+
+
+def _encode_metadata(ica_data, use_cols=None, ignore_cols=None, strip_conc=True):
+    # Convert values to strings
+    metadata = ica_data.sample_table.copy()
+    metadata = metadata.astype(str).fillna("")
+
+    # Select columns
+
+    if ignore_cols is None:
+        ignore_cols = []
+
+    if use_cols is not None:
+        metadata = metadata[use_cols]
+    else:
+        metadata.drop(set(ignore_cols) & set(metadata.columns), axis=1, inplace=True)
+
+    # Remove concentrations
+    if strip_conc:
+        metadata = metadata.replace(r"(.*?)\(.*?\)", r"\1", regex=True)
+
+    # One-hot encode features
+    enc = OneHotEncoder()
+    enc.fit(metadata)
+    features = enc.fit_transform(metadata)
+
+    # Get feature information
+    list2struct = []
+    for cat, vals in zip(metadata.columns, enc.categories_):
+        list2struct += [[cat, val] for val in vals]
+    encoding = pd.DataFrame(list2struct, columns=["category", "value"])
+
+    return encoding, features
+
+
+def _train_classifier(component, features, max_leaf_nodes=3):
+    # Run Decision Tree Regressor
+    clf = DecisionTreeRegressor(
+        min_samples_leaf=2, criterion="mae", max_leaf_nodes=max_leaf_nodes
+    )
+    clf.fit(features, component)
+    return clf
+
+
+def _get_labels_from_tree(clf, encoding):
+    # Load tree information
+    children_left = clf.tree_.children_left
+    children_right = clf.tree_.children_right
+    feature_ids = clf.tree_.feature
+
+    # Initialize traversal
+    stack = [(0, "")]  # node_id, label
+    final_labels = [""] * len(feature_ids)
+
+    # Traverse Tree
+    while len(stack) > 0:
+        node_id, label = stack.pop()
+
+        # Add feature split to dataframe
+        feat = feature_ids[node_id]
+
+        # Check for leaf
+        if feat != -2:
+
+            cat, val = encoding.loc[feat].values
+            label_left = f"{label}\n{cat}: NOT {val}"
+            label_right = f"{label}\n{cat}: {val}"
+
+            # Add children to stack
+            stack.append((children_left[node_id], label_left))
+            stack.append((children_right[node_id], label_right))
+
+        else:
+            final_labels[node_id] = label.strip()
+
+    return final_labels
+
+
+def _get_sample_leaves(clf, features, labels, component):
+    # Initialize final dataframe
+    DF_result = pd.DataFrame(component)
+    DF_result["category"] = ""
+
+    # Get decision path
+    node_mat = clf.decision_path(features)
+
+    for i, lab in enumerate(labels):
+        if lab != "":
+            DF_result.iloc[sparse.find(node_mat[:, i])[0], 1] = lab
+
+    return DF_result
 
 
 ####################
