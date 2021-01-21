@@ -934,7 +934,7 @@ def compare_gene_weights(
 
     # Convert gene table
     gene_table1, gene_table2 = _convert_gene_index(
-        ica_data.gene_table, ica_data2.gene_table, ortho_file
+        ica_data.gene_table, ica_data2.gene_table, ortho_file, keep_locus=True
     )
 
     if use_org1_names:

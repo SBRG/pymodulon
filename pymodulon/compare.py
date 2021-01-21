@@ -188,7 +188,10 @@ def _make_dot_graph(
 
 
 def _convert_gene_index(
-    M1: pd.DataFrame, M2: pd.DataFrame, ortho_file: Optional[str] = None
+    M1: pd.DataFrame,
+    M2: pd.DataFrame,
+    ortho_file: Optional[str] = None,
+    keep_locus=False,
 ):
     """
     Reorganizes and renames genes in an M matrix to be consistent with
@@ -202,6 +205,8 @@ def _convert_gene_index(
         M matrix from the second organism
     ortho_file : str
         Path to orthology file between organisms
+    keep_locus : bool
+        If True, keep old locus tags as a column
 
     Returns
     -------
@@ -221,9 +226,12 @@ def _convert_gene_index(
         M2_new = M2.loc[DF_orth.subject]
 
         # Reset index of M2 to conform with M1
-        M2_new.index.name = "locus_tag"
-        M2_new.reset_index(inplace=True)
-        M2_new.index = [subject2gene[idx] for idx in M2_new.locus_tag]
+        if keep_locus:
+            M2_new.index.name = "locus_tag"
+            M2_new.reset_index(inplace=True)
+            M2_new.index = [subject2gene[idx] for idx in M2_new.locus_tag]
+        else:
+            M2_new.index = [subject2gene[idx] for idx in M2_new.index]
 
     if len(M1_new) == 0 or len(M2_new) == 0:
         raise ValueError(
