@@ -1738,15 +1738,17 @@ def metadata_boxplot(
     pd.DataFrame
         Metadata classifications of the samples
     """
-    component = ica_data.A.loc[imodulon]
+    activities = ica_data.A.loc[imodulon]
 
     encoding, features = _encode_metadata(
         ica_data, ignore_cols=ignore_cols, use_cols=use_cols, strip_conc=strip_conc
     )
 
-    clf = _train_classifier(component, features, max_leaf_nodes=n_boxes)
+    clf = _train_classifier(activities, features, max_leaf_nodes=n_boxes)
     labels = _get_labels_from_tree(clf, encoding)
-    DF_result = _get_sample_leaves(clf, features, labels, component)
+    DF_result = _get_sample_leaves(clf, features, labels, activities)
+
+    DF_result = DF_result.sort_values(imodulon, ascending=False)
 
     fig, ax = plt.subplots()
     sns.boxplot(data=DF_result, x=imodulon, y="category")
