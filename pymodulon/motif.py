@@ -10,41 +10,7 @@ import pandas as pd
 from Bio import SeqIO
 from bs4 import BeautifulSoup
 
-from pymodulon.core import IcaData
-
-
-class MotifInfo:
-    def __init__(self, DF_motifs, DF_sites, cmd):
-        self._motifs = DF_motifs
-        self._sites = DF_sites
-        self._cmd = cmd
-
-    def __repr__(self):
-        if len(self.motifs) == 1:
-            motif_str = "motif"
-        else:
-            motif_str = "motifs"
-
-        if len(self.sites) == 1:
-            site_str = "site"
-        else:
-            site_str = "sites"
-        return (
-            f"<MotifInfo with {len(self.motifs)} {motif_str} across "
-            f" {sum(self.sites.site_seq.notnull())} {site_str}>"
-        )
-
-    @property
-    def motifs(self):
-        return self._motifs
-
-    @property
-    def sites(self):
-        return self._sites
-
-    @property
-    def cmd(self):
-        return self._cmd
+from pymodulon.core import IcaData, MotifInfo
 
 
 def _get_upstream_seqs(
@@ -320,9 +286,39 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
     if len(dfs) == 0:
         if verbose:
             print("No motif found with E-value < {0:.1e}".format(evt))
-        return None
+        idx1 = pd.Series([], name="motif")
+        idx2 = pd.MultiIndex.from_tuples([], names=["motif", "operon"])
+        return (
+            pd.DataFrame(
+                columns=[
+                    "e_value",
+                    "sites",
+                    "width",
+                    "consensus",
+                    "motif_name",
+                    "motif_frac",
+                ],
+                index=idx1,
+            ),
+            pd.DataFrame(
+                columns=[
+                    "rel_position",
+                    "pvalue",
+                    "site_seq",
+                    "genes",
+                    "locus_tags",
+                    "start_pos",
+                    "strand",
+                ],
+                index=idx2,
+            ),
+        )
 
     DF_sites = pd.concat({df.index.name: df for df in dfs})
+
+    # Add index labels
+    DF_sites.index.names = ["motif", "operon"]
+    DF_motifs.index.name = "motif"
 
     if verbose:
         if len(DF_motifs) == 1:
@@ -335,7 +331,7 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
         else:
             site_str = "sites"
         print(
-            f"Found {len(DF_motifs)} {motif_str} across"
+            f"Found {len(DF_motifs)} {motif_str} across "
             f"{sum(DF_sites.site_seq.notnull())} {site_str}"
         )
 

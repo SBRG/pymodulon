@@ -39,6 +39,7 @@ class IcaData(object):
         optimize_cutoff: bool = False,
         thresholds: Optional[Union[Dict[ImodName, float], List]] = None,
         threshold_method="dagostino",
+        motif_info=None,
         dataset_table: Optional[dict] = None,
         splash_table: Optional[dict] = None,
         gene_links: Optional[dict] = None,
@@ -202,6 +203,12 @@ class IcaData(object):
         else:
             raise ValueError('Threshold method must either be "dagostino" or "kmeans"')
 
+        ##############
+        # Motif Info #
+        ##############
+
+        self.motif_info = motif_info
+
         ##############################
         # Load iModulonDB Properties #
         ##############################
@@ -249,7 +256,15 @@ class IcaData(object):
             )
 
         # Initialize motif info
-        self.motif_info = {}
+        self._motif_info = {}
+        if motif_info is not None:
+            for key, val in motif_info.items():
+                obj = MotifInfo(
+                    pd.read_json(val["_motifs"], orient="table"),
+                    pd.read_json(val["_sites"], orient="table"),
+                    val["_cmd"],
+                )
+                self._motif_info[key] = obj
 
     @property
     def M(self):
@@ -417,6 +432,15 @@ class IcaData(object):
 
         # mark that our cutoffs are no longer optimized since the TRN
         self._cutoff_optimized = False
+
+    # Motif information
+    @property
+    def motif_info(self):
+        return self._motif_info
+
+    @motif_info.setter
+    def motif_info(self, info):
+        self._motif_info = info
 
     def _update_imodulon_names(self, new_names):
 
@@ -1272,3 +1296,37 @@ class IcaData(object):
                     print("%s has a TF link but is not in the TRN" % tf)
 
         self._tf_links = new_links
+
+
+class MotifInfo:
+    def __init__(self, DF_motifs, DF_sites, cmd):
+        self._motifs = DF_motifs
+        self._sites = DF_sites
+        self._cmd = cmd
+
+    def __repr__(self):
+        if len(self.motifs) == 1:
+            motif_str = "motif"
+        else:
+            motif_str = "motifs"
+
+        if len(self.sites) == 1:
+            site_str = "site"
+        else:
+            site_str = "sites"
+        return (
+            f"<MotifInfo with {len(self.motifs)} {motif_str} across "
+            f"{sum(self.sites.site_seq.notnull())} {site_str}>"
+        )
+
+    @property
+    def motifs(self):
+        return self._motifs
+
+    @property
+    def sites(self):
+        return self._sites
+
+    @property
+    def cmd(self):
+        return self._cmd
