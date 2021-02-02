@@ -30,8 +30,8 @@ class MotifInfo:
         else:
             site_str = "sites"
         return (
-            f"<MotifInfo with {len(self.motifs)} {motif_str} across"
-            f" {len(self.sites)} {site_str}>"
+            f"<MotifInfo with {len(self.motifs)} {motif_str} across "
+            f" {sum(self.sites.site_seq.notnull())} {site_str}>"
         )
 
     @property
@@ -335,7 +335,8 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
         else:
             site_str = "sites"
         print(
-            f"Found {len(DF_motifs)} {motif_str} across" f" {len(DF_sites)} {site_str}"
+            f"Found {len(DF_motifs)} {motif_str} across"
+            f"{sum(DF_sites.site_seq.notnull())} {site_str}"
         )
 
     return DF_motifs, DF_sites
