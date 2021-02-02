@@ -2,6 +2,7 @@ adjusttext>=0.7.3
 biopython>=1.77
 graphviz>=0.14.1
 jupyter>=1.0.0
+lxml>=4.3.0
 matplotlib>=3.2.2
 numpy>=1.19.1
 pandas>=1.0.5
