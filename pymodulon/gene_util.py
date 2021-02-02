@@ -107,7 +107,7 @@ def gff2pandas(gff_file: str):
 
     # Read GFF
     names = [
-        "refseq",
+        "accession",
         "source",
         "feature",
         "start",
