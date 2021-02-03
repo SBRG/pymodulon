@@ -258,14 +258,14 @@ class IcaData(object):
         # Initialize motif info
         self._motif_info = {}
         if motif_info is not None:
-            for key, val in motif_info.items():
-                obj = MotifInfo(
-                    pd.read_json(val["_motifs"], orient="table"),
-                    pd.read_json(val["_sites"], orient="table"),
-                    val["_cmd"],
-                    val["_file"],
-                )
-                self._motif_info[key] = obj
+            for k1, v1 in motif_info.items():
+                params = {}
+                for k2, v2 in v1.items():
+                    try:
+                        params[k2] = pd.read_json(v2, orient="table")
+                    except ValueError:
+                        params[k2] = v2
+                self._motif_info[k1] = MotifInfo(**params)
 
     @property
     def M(self):
@@ -1300,11 +1300,12 @@ class IcaData(object):
 
 
 class MotifInfo:
-    def __init__(self, DF_motifs, DF_sites, cmd, file):
-        self._motifs = DF_motifs
-        self._sites = DF_sites
+    def __init__(self, motifs, sites, cmd, file, matches=None):
+        self._motifs = motifs
+        self._sites = sites
         self._cmd = cmd
         self._file = file
+        self._matches = matches
 
     def __repr__(self):
         if len(self.motifs) == 1:
@@ -1336,3 +1337,11 @@ class MotifInfo:
     @property
     def file(self):
         return self._file
+
+    @property
+    def matches(self):
+        return self._matches
+
+    @matches.setter
+    def matches(self, matches):
+        self._matches = matches

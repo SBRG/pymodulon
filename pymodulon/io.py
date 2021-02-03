@@ -48,9 +48,9 @@ def save_to_json(model: IcaData, fname: str, compress: bool = False):
                 new_v1 = {}
                 for k2, v2 in v1.__dict__.items():
                     try:
-                        new_v1[k2] = v2.to_json(orient="table")
+                        new_v1[k2[1:]] = v2.to_json(orient="table")
                     except AttributeError:
-                        new_v1[k2] = v2
+                        new_v1[k2[1:]] = v2
                 new_val[k1] = new_v1
 
             param_dict[key] = new_val
