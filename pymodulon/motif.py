@@ -10,6 +10,7 @@ import pandas as pd
 from Bio import SeqIO
 from bs4 import BeautifulSoup
 
+import pymodulon.data.meme
 from pymodulon.core import IcaData, MotifInfo
 
 
@@ -222,15 +223,15 @@ def find_motifs(
         subprocess.call(cmd)
 
     # Save results
-    DF_motifs, DF_sites = _parse_meme_output(
-        comp_dir, DF_seqs, verbose=verbose, evt=evt
+    DF_motifs, DF_sites = _parse_meme(comp_dir, DF_seqs, verbose=verbose, evt=evt)
+    result = MotifInfo(
+        DF_motifs, DF_sites, " ".join(cmd), os.path.join(comp_dir, "meme.txt")
     )
-    result = MotifInfo(DF_motifs, DF_sites, " ".join(cmd))
     ica_data.motif_info[imodulon] = result
     return result
 
 
-def _parse_meme_output(directory, DF_seqs, verbose, evt):
+def _parse_meme(directory, DF_seqs, verbose, evt):
     # Read MEME results
     with open(os.path.join(directory, "meme.xml"), "r") as f:
         result_file = BeautifulSoup(f.read(), "lxml")
@@ -240,12 +241,16 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
     dfs = []
     for motif in result_file.find_all("motif"):
 
+        try:
+            idx = motif["alt"]
+        except KeyError:
+            idx = motif["id"]
+
         # Motif statistics
-        DF_motifs.loc[motif["id"], "e_value"] = np.float64(motif["e_value"])
-        DF_motifs.loc[motif["id"], "sites"] = motif["sites"]
-        DF_motifs.loc[motif["id"], "width"] = motif["width"]
-        DF_motifs.loc[motif["id"], "consensus"] = motif["name"]
-        DF_motifs.loc[motif["id"], "motif_name"] = motif["alt"]
+        DF_motifs.loc[idx, "e_value"] = np.float64(motif["e_value"])
+        DF_motifs.loc[idx, "sites"] = motif["sites"]
+        DF_motifs.loc[idx, "width"] = motif["width"]
+        DF_motifs.loc[idx, "consensus"] = motif["name"]
 
         # Map Sequence to name
 
@@ -272,10 +277,10 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
         DF_meme = pd.merge(tmp_df, df_names)
         DF_meme = DF_meme.set_index("operon").sort_index().drop("seq_id", axis=1)
         DF_meme = pd.concat([DF_meme, DF_seqs], axis=1, sort=True)
-        DF_meme.index.name = motif["id"]
+        DF_meme.index.name = idx
 
         # Report number of sequences with motif
-        DF_motifs.loc[motif["id"], "motif_frac"] = np.true_divide(
+        DF_motifs.loc[idx, "motif_frac"] = np.true_divide(
             sum(DF_meme.rel_position.notnull()), len(DF_meme)
         )
 
@@ -338,33 +343,118 @@ def _parse_meme_output(directory, DF_seqs, verbose, evt):
     return DF_motifs, DF_sites
 
 
-# def compare_motifs(motif_file, motif_db, force=False, evt=.001):
-#     motif_file = 'motifs/' + re.sub('/', '_', str(k)) + '/meme.txt'
-#     out_dir = 'motifs/' + re.sub('/', '_', str(k)) + '/tomtom_out/'
-#     if not os.path.isdir(out_dir) or force:
-#         subprocess.call(
-#             ['tomtom', '-oc', out_dir, '-thresh', str(evt), '-incomplete-scores',
-#              '-png', motif_file, motif_db])
-#     DF_tomtom = pd.read_csv(os.path.join(out_dir, 'tomtom.tsv'), sep='\t',
-#                             skipfooter=3, engine='python')
-#
-#     if len(DF_tomtom) > 0:
-#         row = DF_tomtom.iloc[0]
-#         print(row['Target_ID'])
-#         tf_name = row['Target_ID'][:4].strip('_')
-#         lines = 'Motif similar to {} (E-value: {:.2e})'.format(tf_name,
-#         row['E-value'])
-#         files = out_dir + 'align_' + row['Query_ID'] + '_0_-' + row[
-#             'Target_ID'] + '.png'
-#         if not os.path.isfile(files):
-#             files = out_dir + 'align_' + row['Query_ID'] + '_0_+' + row[
-#                 'Target_ID'] + '.png'
-#         with open(out_dir + '/tomtom.xml', 'r') as f:
-#             result_file = BeautifulSoup(f.read(), 'lxml')
-#         motif_names = [motif['alt'] for motif in
-#                        result_file.find('queries').find_all('motif')]
-#         idx = int(result_file.find('matches').query['idx'])
-#
-#         return motif_names[idx], lines, files
-#     else:
-#         return -1, '', ''
+def _parse_tomtom(tomtom_dir):
+    DF_tomtom = pd.read_csv(
+        os.path.join(tomtom_dir, "tomtom.tsv"), sep="\t", skipfooter=3, engine="python"
+    )
+
+    with open(os.path.join(tomtom_dir, "tomtom.xml"), "r") as f:
+        result = BeautifulSoup(f.read(), "lxml")
+
+    # Convert ID to names (for the PRODORIC database)
+    id2name = {}
+    for motif in result.find_all("motif"):
+        try:
+            id2name[motif["id"]] = motif["alt"]
+        except KeyError:
+            id2name[motif["id"]] = motif["id"]
+
+    # Switch to correct name
+    DF_tomtom["motif"] = DF_tomtom["Query_ID"].apply(lambda x: id2name[x])
+    DF_tomtom["target"] = DF_tomtom["Target_ID"].apply(lambda x: id2name[x])
+
+    # Get database names
+    db_names = [db["name"] for db in result.find("target_dbs").find_all("db")]
+
+    id2db = {}
+    for motif in result.find("targets").find_all("motif"):
+        id2db[motif["id"]] = db_names[int(motif["db"])]
+
+    DF_tomtom["database"] = DF_tomtom["Target_ID"].apply(lambda x: id2db[x])
+
+    # Reorder columns
+    DF_tomtom = DF_tomtom[
+        [
+            "motif",
+            "target",
+            "Target_ID",
+            "p-value",
+            "E-value",
+            "q-value",
+            "Overlap",
+            "Optimal_offset",
+            "Orientation",
+            "database",
+        ]
+    ]
+    DF_tomtom.columns = [
+        "motif",
+        "target",
+        "target_id",
+        "pvalue",
+        "Evalue",
+        "qvalue",
+        "overlap",
+        "optimal_offset",
+        "orientation",
+        "database",
+    ]
+    return DF_tomtom
+
+
+def compare_motifs(
+    motif_file: os.PathLike,
+    motif_db: Optional[str] = None,
+    outdir: Optional[os.PathLike] = None,
+    force=False,
+    evt=0.001,
+):
+    # Ensure motif file exists
+    if not os.path.isfile(motif_file):
+        raise FileNotFoundError(f"File does not exist: '{motif_file}'")
+
+    # Get motif DB locations
+    motif_db_dir = pymodulon.data.meme.__path__[0]
+    default_dbs = [
+        "collectf",
+        "dpinteract",
+        "prodoric",
+        "regtransbase",
+        "SwissRegulon_e_coli",
+    ]
+
+    if motif_db is None:
+        motif_db = default_dbs
+        motif_db = [os.path.join(motif_db_dir, db + ".meme") for db in motif_db]
+    elif isinstance(motif_db, str):
+        motif_db = [motif_db]
+
+    for db in motif_db:
+        if db in default_dbs:
+            motif_db = [os.path.join(motif_db_dir, db + ".meme") for db in motif_db]
+        elif not os.path.isfile(db):
+            raise FileNotFoundError(f"File does not exist: '{db}'")
+
+    # Handle output directory
+    if outdir is None:
+        outdir = os.path.join(os.path.dirname(motif_file), "tomtom")
+
+    # Run TOMTOM
+    if not os.path.isdir(outdir) or force:
+        cmd = [
+            "tomtom",
+            "-oc",
+            outdir,
+            "-thresh",
+            str(evt),
+            "-incomplete-scores",
+            "-png",
+            motif_file,
+        ] + motif_db
+        res = subprocess.check_call(cmd)
+        if res != 0:
+            cmd_str = " ".join(cmd)
+            raise RuntimeError(
+                f"TOMTOM failed to execute the following command: " f"{cmd_str}"
+            )
+    return _parse_tomtom(outdir)

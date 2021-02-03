@@ -263,6 +263,7 @@ class IcaData(object):
                     pd.read_json(val["_motifs"], orient="table"),
                     pd.read_json(val["_sites"], orient="table"),
                     val["_cmd"],
+                    val["_file"],
                 )
                 self._motif_info[key] = obj
 
@@ -1299,10 +1300,11 @@ class IcaData(object):
 
 
 class MotifInfo:
-    def __init__(self, DF_motifs, DF_sites, cmd):
+    def __init__(self, DF_motifs, DF_sites, cmd, file):
         self._motifs = DF_motifs
         self._sites = DF_sites
         self._cmd = cmd
+        self._file = file
 
     def __repr__(self):
         if len(self.motifs) == 1:
@@ -1330,3 +1332,7 @@ class MotifInfo:
     @property
     def cmd(self):
         return self._cmd
+
+    @property
+    def file(self):
+        return self._file
