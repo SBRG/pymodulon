@@ -13,7 +13,12 @@ from tqdm.notebook import tqdm
 
 
 def _make_dot_graph(
-    M1: pd.DataFrame, M2: pd.DataFrame, metric: str, cutoff: float, show_all: bool
+    M1: pd.DataFrame,
+    M2: pd.DataFrame,
+    metric: str,
+    cutoff: float,
+    show_all: bool = True,
+    progress: bool = True,
 ):
     """
     Given two M matrices, returns the dot graph and name links of the various
@@ -30,7 +35,9 @@ def _make_dot_graph(
     cutoff : float
         Cut off value for correlation metric
     show_all : bool
-        Show all iModulons regardless of their linkage
+        Show all iModulons regardless of their linkage (default: False)
+    progress : bool
+        Show progress bar (default: False)
 
     Returns
     -------
@@ -72,7 +79,12 @@ def _make_dot_graph(
     # Calculate correlation matrix
     corr = np.zeros((len(m1.columns), len(m2.columns)))
 
-    for i, k1 in tqdm(enumerate(m1.columns), total=len(m1.columns)):
+    if progress:
+        iterator = tqdm(enumerate(m1.columns), total=len(m1.columns))
+    else:
+        iterator = enumerate(m1.columns)
+
+    for i, k1 in iterator:
         for j, k2 in enumerate(m2.columns):
             if metric == "pearson":
                 corr[i, j] = abs(stats.pearsonr(m1[k1], m2[k2])[0])
@@ -249,6 +261,7 @@ def compare_ica(
     cutoff: float = 0.2,
     metric="pearson",
     show_all: bool = False,
+    progress: bool = True,
 ):
     """
     Compares two M matrices between a single organism or across organisms and
@@ -268,6 +281,8 @@ def compare_ica(
         Cut off value for correlation metric
     show_all : bool
         Show all iModulons regardless of their linkage
+    progress : bool
+        Show progress bar (default: False)
 
     Returns
     -------
@@ -278,7 +293,9 @@ def compare_ica(
     """
 
     new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
-    dot, name_links = _make_dot_graph(new_M1, new_M2, metric, cutoff, show_all=show_all)
+    dot, name_links = _make_dot_graph(
+        new_M1, new_M2, metric, cutoff, show_all=show_all, progress=progress
+    )
     return dot, name_links
 
 
