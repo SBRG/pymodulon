@@ -8,8 +8,70 @@ import numpy as np
 import pandas as pd
 from Bio import SeqIO
 from graphviz import Digraph
-from scipy import stats
-from tqdm.notebook import tqdm
+
+
+def _get_orthologous_imodulons(
+    M1: pd.DataFrame, M2: pd.DataFrame, method: Union[str, Callable], cutoff: float
+):
+    """
+    Given two M matrices, returns the dot graph and name links of the various
+    connected ICA components
+
+    Parameters
+    ----------
+    M1 : pd.DataFrame
+        M matrix from the first organism
+    M2 : pd.DataFrame
+        M matrix from the second organism
+    method : str
+        Correlation metric to use (see pd.DataFrame.corr)
+    cutoff : float
+        Cut off value for correlation metric
+
+    Returns
+    -------
+    links
+        Links and distances of connected iModulons
+    """
+
+    # Only keep genes found in both M matrices
+    common = set(M1.index) & set(M2.index)
+
+    if len(common) == 0:
+        raise KeyError("No common genes")
+
+    m1 = M1.reindex(common)
+    m2 = M2.reindex(common)
+
+    # Compute correlation matrix
+    corr = pd.concat([m1, m2], axis=1).corr(method=method).abs()
+    DF_corr = corr.loc[m1.columns, m2.columns]
+
+    # Get positions where correlation is above cutoff
+    loc1, loc2 = np.where(DF_corr > cutoff)
+    links = list(zip(m1.columns[loc1], m2.columns[loc2]))
+
+    return links
+
+    # # Split names in half if necessary for comp1
+    # col_dict1 = {}
+    # for col in m1.columns:
+    #     val = str(col)
+    #     if len(val) > 10:
+    #         col_dict1[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2:]
+    #     else:
+    #         col_dict1[col] = val
+    # m1.columns = [col_dict1[x] for x in m1.columns]
+    #
+    # # Split names in half if necessary for comp2
+    # col_dict2 = {}
+    # for col in m2.columns:
+    #     val = str(col)
+    #     if len(val) > 10:
+    #         col_dict2[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2:]
+    #     else:
+    #         col_dict2[col] = val
+    # m2.columns = [col_dict2[x] for x in m2.columns]
 
 
 def _make_dot_graph(
@@ -46,53 +108,6 @@ def _make_dot_graph(
     links
         Links and distances of connected iModulons
     """
-
-    # Only keep genes found in both S matrices
-    common = set(M1.index) & set(M2.index)
-
-    if len(common) == 0:
-        raise KeyError("No common genes")
-
-    m1 = M1.reindex(common)
-    m2 = M2.reindex(common)
-
-    # Split names in half if necessary for comp1
-    col_dict1 = {}
-    for col in m1.columns:
-        val = str(col)
-        if len(val) > 10:
-            col_dict1[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2 :]
-        else:
-            col_dict1[col] = val
-    m1.columns = [col_dict1[x] for x in m1.columns]
-
-    # Split names in half if necessary for comp2
-    col_dict2 = {}
-    for col in m2.columns:
-        val = str(col)
-        if len(val) > 10:
-            col_dict2[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2 :]
-        else:
-            col_dict2[col] = val
-    m2.columns = [col_dict2[x] for x in m2.columns]
-
-    # Calculate correlation matrix
-    corr = np.zeros((len(m1.columns), len(m2.columns)))
-
-    if progress:
-        iterator = tqdm(enumerate(m1.columns), total=len(m1.columns))
-    else:
-        iterator = enumerate(m1.columns)
-
-    for i, k1 in iterator:
-        for j, k2 in enumerate(m2.columns):
-            if metric == "pearson":
-                corr[i, j] = abs(stats.pearsonr(m1[k1], m2[k2])[0])
-            elif metric == "spearman":
-                corr[i, j] = abs(stats.spearmanr(m1[k1], m2[k2])[0])
-
-    # Only keep genes found in both S matrices
-    DF_corr = pd.DataFrame(corr, index=m1.columns, columns=m2.columns)
 
     # Initialize Graph
     dot = Digraph(
@@ -259,9 +274,9 @@ def compare_ica(
     M2: pd.DataFrame,
     ortho_file: Optional[str] = None,
     cutoff: float = 0.2,
-    metric="pearson",
+    method: Union[str, Callable] = "pearson",
+    plot: bool = True,
     show_all: bool = False,
-    progress: bool = True,
 ):
     """
     Compares two M matrices between a single organism or across organisms and
@@ -275,10 +290,12 @@ def compare_ica(
         M matrix from the second organism
     ortho_file : str
         Path to orthology file between organisms
-    metric : str
-        Correlation metric to use (either "pearson" or "spearman")
+    method : str
+        Correlation metric to use (see pd.DataFrame.corr)
     cutoff : float
         Cut off value for correlation metric
+    plot : bool
+        Create dot plot of matches
     show_all : bool
         Show all iModulons regardless of their linkage
     progress : bool
@@ -286,17 +303,19 @@ def compare_ica(
 
     Returns
     -------
+    matches
+        Links and distances of connected iModulons
     dot
         Dot graph of connected iModulons
-    links
-        Links and distances of connected iModulons
     """
 
     new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
-    dot, name_links = _make_dot_graph(
-        new_M1, new_M2, metric, cutoff, show_all=show_all, progress=progress
-    )
-    return dot, name_links
+    matches = _get_orthologous_imodulons(new_M1, new_M2, method=method, cutoff=cutoff)
+    if plot:
+        dot = _make_dot_graph(matches, show_all=show_all)
+        return matches, dot
+    else:
+        return matches
 
 
 ####################
