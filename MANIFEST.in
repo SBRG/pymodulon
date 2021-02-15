@@ -1,0 +1,21 @@
+include \
+    *.yml \
+    *.yaml \
+    .bumpversion.cfg \
+    .dockerignore
+
+graft docker
+graft docs
+graft notebooks
+graft src
+graft tests
+
+global-exclude \
+    *.bin \
+    *.py[cod] \
+    __pycache__ \
+    .DS_Store \
+
+prune docs/_build
+prune docs/**/.ipynb_checkpoints
+prune notebooks/**/.ipynb_checkpoints

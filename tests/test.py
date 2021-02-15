@@ -10,6 +10,7 @@ from pymodulon.core import IcaData
 from pymodulon.io import load_json_model, save_to_json
 from pymodulon.util import *
 
+
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
 """str: The directory location of where :mod:`pymodulon` is installed."""
 

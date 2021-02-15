@@ -17,6 +17,7 @@ from sklearn.neighbors import BallTree, KDTree
 
 from pymodulon.enrichment import FDR
 
+
 ################
 # Type Aliases #
 ################

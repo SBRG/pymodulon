@@ -17,6 +17,7 @@ from tqdm.notebook import tqdm
 from pymodulon.core import IcaData
 from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
+
 ##################
 # User Functions #
 ##################
