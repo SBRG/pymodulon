@@ -44,43 +44,26 @@ def _get_orthologous_imodulons(
     m2 = M2.reindex(common)
 
     # Compute correlation matrix
-    corr = pd.concat([m1, m2], axis=1).corr(method=method).abs()
+    corr = (
+        pd.concat([m1, m2], axis=1, keys=["df1", "df2"])
+        .corr(method=method)
+        .loc["df1", "df2"]
+        .abs()
+    )
     DF_corr = corr.loc[m1.columns, m2.columns]
 
     # Get positions where correlation is above cutoff
-    loc1, loc2 = np.where(DF_corr > cutoff)
-    links = list(zip(m1.columns[loc1], m2.columns[loc2]))
+    pos = zip(*np.where(DF_corr > cutoff))
+    links = [(m1.columns[i], m2.columns[j], DF_corr.iloc[i, j]) for i, j in pos]
 
     return links
 
-    # # Split names in half if necessary for comp1
-    # col_dict1 = {}
-    # for col in m1.columns:
-    #     val = str(col)
-    #     if len(val) > 10:
-    #         col_dict1[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2:]
-    #     else:
-    #         col_dict1[col] = val
-    # m1.columns = [col_dict1[x] for x in m1.columns]
-    #
-    # # Split names in half if necessary for comp2
-    # col_dict2 = {}
-    # for col in m2.columns:
-    #     val = str(col)
-    #     if len(val) > 10:
-    #         col_dict2[col] = val[: len(val) // 2] + "-\n" + val[len(val) // 2:]
-    #     else:
-    #         col_dict2[col] = val
-    # m2.columns = [col_dict2[x] for x in m2.columns]
-
 
 def _make_dot_graph(
-    M1: pd.DataFrame,
-    M2: pd.DataFrame,
-    metric: str,
-    cutoff: float,
+    links: List,
     show_all: bool = True,
-    progress: bool = True,
+    names1: Optional[Iterable] = None,
+    names2: Optional[Iterable] = None,
 ):
     """
     Given two M matrices, returns the dot graph and name links of the various
@@ -88,18 +71,14 @@ def _make_dot_graph(
 
     Parameters
     ----------
-    M1 : pd.DataFrame
-        M matrix from the first organism
-    M2 : pd.DataFrame
-        M matrix from the second organism
-    metric : str
-        Correlation metric to use (either "pearson" or "spearman")
-    cutoff : float
-        Cut off value for correlation metric
+    links : List
+        Names and distances of connected iModulons
     show_all : bool
         Show all iModulons regardless of their linkage (default: False)
-    progress : bool
-        Show progress bar (default: False)
+    names1 : List
+        List of names in dataset 1 (required if show_all = True)
+    names2 : List
+        List of names in dataset 1 (required if show_all = True)
 
     Returns
     -------
@@ -108,6 +87,32 @@ def _make_dot_graph(
     links
         Links and distances of connected iModulons
     """
+
+    link_names1 = [link[0] for link in links]
+    link_names2 = [link[1] for link in links]
+
+    if not show_all:
+        # Get names of nodes
+        names1 = link_names1
+        names2 = link_names2
+
+    # Split names in half if necessary for dataset1
+    name_dict1 = {}
+    for name in names1:
+        val = str(name)
+        if len(val) > 10:
+            name_dict1[name] = val[: len(val) // 2] + "-\n" + val[len(val) // 2 :]
+        else:
+            name_dict1[name] = val
+
+    # Split names in half if necessary for dataset2
+    name_dict2 = {}
+    for name in names2:
+        val = str(name)
+        if len(val) > 10:
+            name_dict2[name] = val[: len(val) // 2] + "-\n" + val[len(val) // 2 :]
+        else:
+            name_dict2[name] = val
 
     # Initialize Graph
     dot = Digraph(
@@ -123,95 +128,47 @@ def _make_dot_graph(
         format="png",
     )
 
-    # Set up linkage and designate terminal nodes
-    # noinspection PyTypeChecker
-    loc1, loc2 = np.where(DF_corr > cutoff)
-    links = list(zip(m1.columns[loc1], m2.columns[loc2]))
-
     if len(links) == 0:
         warnings.warn("No components shared across runs")
-        return None, None
-    if show_all is True:
-        # Initialize Nodes
-        for k in sorted(m2.columns):
-            if k in m2.columns[loc2]:
-                color = "black"
-                font = "helvetica"
-            else:
-                color = "red"
-                font = "helvetica-bold"
-            dot.node(
-                "data2_" + str(k),
-                label=k,
-                _attributes={"fontcolor": color, "fontname": font},
-            )
+        return dot
 
-        for k in m1.columns:
-            if k in m1.columns[loc1]:
-                color = "black"
-                font = "helvetica"
-            else:
-                color = "red"
-                font = "helvetica-bold"
-            dot.node(
-                "data1_" + str(k),
-                label=k,
-                _attributes={"fontcolor": color, "fontname": font},
-            )
-
-        # Add links between related components
-        for k1, k2 in links:
-            width = DF_corr.loc[k1, k2] * 5
-            dot.edge(
-                "data1_" + str(k1),
-                "data2_" + str(k2),
-                _attributes={"penwidth": "{:.2f}".format(width)},
-            )
-    else:
-        # Initialize Nodes
-        for k in sorted(m2.columns):
-            if k in m2.columns[loc2]:
-                color = "black"
-                font = "helvetica"
-                dot.node(
-                    "data2_" + str(k),
-                    label=k,
-                    _attributes={"fontcolor": color, "fontname": font},
-                )
-
-        for k in m1.columns:
-            if k in m1.columns[loc1]:
-                color = "black"
-                font = "helvetica"
-                dot.node(
-                    "data1_" + str(k),
-                    label=k,
-                    _attributes={"fontcolor": color, "fontname": font},
-                )
-
-        # Add links between related components
-        for k1, k2 in links:
-            if k1 in m1.columns[loc1] and k2 in m2.columns[loc2]:
-                width = DF_corr.loc[k1, k2] * 5
-                dot.edge(
-                    "data1_" + str(k1),
-                    "data2_" + str(k2),
-                    _attributes={"penwidth": "{:.2f}".format(width)},
-                )
-
-    # Reformat names back to normal
-    name1, name2 = list(zip(*links))
-    inv_cols1 = {v: k for k, v in col_dict1.items()}
-    inv_cols2 = {v: k for k, v in col_dict2.items()}
-
-    name_links = list(
-        zip(
-            [inv_cols1[x] for x in name1],
-            [inv_cols2[x] for x in name2],
-            [DF_corr.loc[name1[x]][name2[x]] for x in range(0, len(name1))],
+    # Initialize Nodes
+    for k in sorted(names2):
+        if k in link_names2:
+            color = "black"
+            font = "helvetica"
+        else:
+            color = "red"
+            font = "helvetica-bold"
+        dot.node(
+            "data2_" + str(k),
+            label=name_dict2[k],
+            _attributes={"fontcolor": color, "fontname": font},
         )
-    )
-    return dot, name_links
+
+    for k in sorted(names1):
+        if k in link_names1:
+            color = "black"
+            font = "helvetica"
+        else:
+            color = "red"
+            font = "helvetica-bold"
+        dot.node(
+            "data1_" + str(k),
+            label=name_dict1[k],
+            _attributes={"fontcolor": color, "fontname": font},
+        )
+
+    # Add links between related components
+    for k1, k2, dist in links:
+        width = dist * 5
+        dot.edge(
+            "data1_" + str(k1),
+            "data2_" + str(k2),
+            _attributes={"penwidth": "{:.2f}".format(width)},
+        )
+
+    return dot
 
 
 def _convert_gene_index(
@@ -273,7 +230,7 @@ def compare_ica(
     M1: pd.DataFrame,
     M2: pd.DataFrame,
     ortho_file: Optional[str] = None,
-    cutoff: float = 0.2,
+    cutoff: float = 0.25,
     method: Union[str, Callable] = "pearson",
     plot: bool = True,
     show_all: bool = False,
@@ -298,8 +255,6 @@ def compare_ica(
         Create dot plot of matches
     show_all : bool
         Show all iModulons regardless of their linkage
-    progress : bool
-        Show progress bar (default: False)
 
     Returns
     -------
@@ -310,9 +265,13 @@ def compare_ica(
     """
 
     new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
+    new_M1.columns = new_M1.columns.astype("str")
+    new_M2.columns = new_M2.columns.astype("str")
     matches = _get_orthologous_imodulons(new_M1, new_M2, method=method, cutoff=cutoff)
     if plot:
-        dot = _make_dot_graph(matches, show_all=show_all)
+        dot = _make_dot_graph(
+            matches, show_all=show_all, names1=M1.columns, names2=M2.columns
+        )
         return matches, dot
     else:
         return matches
