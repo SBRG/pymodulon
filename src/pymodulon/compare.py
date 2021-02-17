@@ -2,7 +2,7 @@ import os
 import subprocess
 import warnings
 from glob import glob
-from typing import *
+from typing import Callable, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -60,10 +60,10 @@ def _get_orthologous_imodulons(
 
 
 def _make_dot_graph(
-    links: List,
+    links: Sequence,
     show_all: bool = True,
-    names1: Optional[Iterable] = None,
-    names2: Optional[Iterable] = None,
+    names1: Optional[Sequence] = None,
+    names2: Optional[Sequence] = None,
 ):
     """
     Given two M matrices, returns the dot graph and name links of the various
@@ -71,13 +71,13 @@ def _make_dot_graph(
 
     Parameters
     ----------
-    links : List
+    links : Sequence
         Names and distances of connected iModulons
     show_all : bool
         Show all iModulons regardless of their linkage (default: False)
-    names1 : List
+    names1 : Sequence
         List of names in dataset 1 (required if show_all = True)
-    names2 : List
+    names2 : Sequence
         List of names in dataset 1 (required if show_all = True)
 
     Returns

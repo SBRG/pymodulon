@@ -6,11 +6,10 @@ import os
 import re
 import warnings
 from itertools import combinations
-from typing import List, Optional, Sequence, Set, TypeVar, Union
+from typing import Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
-from matplotlib.axes import Axes
 from scipy import stats
 from scipy.special import digamma
 from sklearn.neighbors import BallTree, KDTree
@@ -21,14 +20,10 @@ from pymodulon.enrichment import FDR
 ################
 # Type Aliases #
 ################
-Ax = TypeVar("Ax", Axes, object)
 Data = Union[pd.DataFrame, os.PathLike]
-SeqSetStr = Union[Sequence[str], Set[str], str]
-ImodName = Union[str, int]
-ImodNameList = Union[ImodName, List[ImodName]]
 
 
-def _check_table(table: Data, name: str, index: Optional[List] = None, index_col=0):
+def _check_table(table: Data, name: str, index: Optional[Sequence] = None, index_col=0):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -68,7 +63,9 @@ def _check_table(table: Data, name: str, index: Optional[List] = None, index_col
         )
 
 
-def _check_table_helper(table: pd.DataFrame, index: Optional[List], name: ImodName):
+def _check_table_helper(
+    table: pd.DataFrame, index: Optional[Sequence], name: Union[int, str]
+):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
 
@@ -129,8 +126,8 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
 
 def dima(
     ica_data,
-    sample1: Union[List, str],
-    sample2: Union[List, str],
+    sample1: Union[Sequence, str],
+    sample2: Union[Sequence, str],
     threshold: float = 5,
     fdr: float = 0.1,
     alternate_A: pd.DataFrame = None,
@@ -139,8 +136,8 @@ def dima(
 
     Args:
         ica_data: IcaData object
-        sample1: List of sample IDs or name of "project:condition"
-        sample2: List of sample IDs or name of "project:condition"
+        sample1: Sequence of sample IDs or name of "project:condition"
+        sample2: Sequence of sample IDs or name of "project:condition"
         threshold: Minimum activity difference to determine DiMAs
         fdr: False Detection Rate
 
@@ -180,12 +177,12 @@ def dima(
     )
 
 
-def _parse_sample(ica_data, sample: Union[List, str]):
+def _parse_sample(ica_data, sample: Union[Sequence, str]):
     """
     Parses sample inputs into a list of sample IDs
     Args:
         ica_data: IcaData object
-        sample: List of sample IDs or "project:condition"
+        sample: Sequence of sample IDs or "project:condition"
 
     Returns: A list of samples
 
@@ -208,18 +205,18 @@ def _parse_sample(ica_data, sample: Union[List, str]):
 
 def explained_variance(
     ica_data,
-    genes: Optional[List] = None,
-    samples: Optional[List] = None,
-    imodulons: Optional[List] = None,
+    genes: Optional[Sequence] = None,
+    samples: Optional[Sequence] = None,
+    imodulons: Optional[Sequence] = None,
 ):
     """
     Computes the fraction of variance explained by iModulons
     Parameters
     ----------
     ica_data: ICA data object
-    genes: List of genes to use (default: all genes)
-    samples: List of samples to use (default: all samples)
-    imodulons: List of iModulons to use (default: all iModulons)
+    genes: Sequence of genes to use (default: all genes)
+    samples: Sequence of samples to use (default: all samples)
+    imodulons: Sequence of iModulons to use (default: all iModulons)
 
     Returns
     -------

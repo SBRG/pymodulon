@@ -1,15 +1,18 @@
 """
 Plotting functions for iModulons
 """
+import warnings
 from collections import Counter
-from typing import Dict, Tuple
+from typing import Dict, Optional, Sequence, Set, Tuple, TypeVar, Union
 
 import matplotlib.pyplot as plt
+import numpy as np
 import pandas as pd
 import seaborn as sns
 from adjustText import adjust_text
+from matplotlib.axes import Axes
 from matplotlib.patches import Rectangle
-from scipy import sparse
+from scipy import sparse, stats
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
@@ -19,22 +22,23 @@ from sklearn.tree import DecisionTreeRegressor
 
 from pymodulon.compare import _convert_gene_index
 from pymodulon.core import IcaData
-from pymodulon.enrichment import *
-from pymodulon.util import *
-from pymodulon.util import _parse_sample
+from pymodulon.enrichment import parse_regulon_str
+from pymodulon.util import _parse_sample, dima, mutual_info_distance
 
 
 #############
 # Bar Plots #
 #############
 
+Ax = TypeVar("Ax", Axes, object)
+
 
 def barplot(
     values: pd.Series,
     sample_table: pd.DataFrame,
     ylabel: str = "",
-    projects: Optional[Union[List, str]] = None,
-    highlight: Optional[Union[List, str]] = None,
+    projects: Optional[Union[Sequence, str]] = None,
+    highlight: Optional[Union[Sequence, str]] = None,
     ax: Optional[Ax] = None,
     legend_kwargs: Optional[Dict] = None,
 ) -> Ax:
@@ -43,7 +47,7 @@ def barplot(
     expression levels or iModulon activities)
 
     Args:
-        values: List of values to plot
+        values: Sequence of values to plot
         sample_table: Sample table from IcaData object
         ylabel: y-axis label
         projects: Project(s) to show
@@ -202,8 +206,8 @@ def barplot(
 def plot_expression(
     ica_data: IcaData,
     gene: str,
-    projects: Union[List, str] = None,
-    highlight: Union[List, str] = None,
+    projects: Union[Sequence, str] = None,
+    highlight: Union[Sequence, str] = None,
     ax: Optional[Ax] = None,
     legend_kwargs: Optional[Dict] = None,
 ) -> Ax:
@@ -236,9 +240,9 @@ def plot_expression(
 
 def plot_activities(
     ica_data: IcaData,
-    imodulon: ImodName,
-    projects: Union[List, str] = None,
-    highlight: Union[List, str] = None,
+    imodulon: Union[int, str],
+    projects: Union[Sequence, str] = None,
+    highlight: Union[Sequence, str] = None,
     ax: Optional[Ax] = None,
     legend_kwargs: Optional[Dict] = None,
 ) -> Ax:
@@ -271,8 +275,8 @@ def plot_activities(
 def plot_metadata(
     ica_data: IcaData,
     column,
-    projects: Union[List, str] = None,
-    highlight: Union[List, str] = None,
+    projects: Union[Sequence, str] = None,
+    highlight: Union[Sequence, str] = None,
     ax: Optional[Ax] = None,
     legend_kwargs: Optional[Dict] = None,
 ) -> Ax:
@@ -307,13 +311,13 @@ def plot_metadata(
 
 def plot_regulon_histogram(
     ica_data: IcaData,
-    imodulon: ImodName,
+    imodulon: Union[int, str],
     regulator: str = None,
     bins: Optional[Union[int, Sequence, str]] = None,
     kind: str = "overlap",
     ax: Optional[Ax] = None,
     hist_label: Tuple[str, str] = ("Not regulated", "Regulon Genes"),
-    color: Union[Sequence[Tuple], Sequence[str]] = ("#aaaaaa", "salmon"),
+    color: Sequence = ("#aaaaaa", "salmon"),
     alpha: float = 0.7,
     ax_font_kwargs: Optional[Dict] = None,
     legend_kwargs: Optional[Dict] = None,
@@ -472,7 +476,7 @@ def scatterplot(
     x: pd.Series,
     y: pd.Series,
     groups: Optional[Dict] = None,
-    colors: Optional[Union[str, List, Dict]] = None,
+    colors: Optional[Union[str, Sequence, Dict]] = None,
     show_labels: Union[bool, str] = "auto",
     adjust_labels: bool = True,
     line45: bool = False,
@@ -708,11 +712,11 @@ def scatterplot(
 
 def plot_gene_weights(
     ica_data: IcaData,
-    imodulon: ImodName,
+    imodulon: Union[int, str],
     xaxis=None,
     xname="",
     by: Optional[str] = "start",
-    ref_cols: Optional[SeqSetStr] = None,
+    ref_cols: Optional[Union[Sequence, Set, str]] = None,
     **kwargs,
 ) -> Ax:
     """
@@ -885,8 +889,8 @@ def plot_gene_weights(
 
 def compare_gene_weights(
     ica_data: IcaData,
-    imodulon1: ImodName,
-    imodulon2: ImodName,
+    imodulon1: Union[int, str],
+    imodulon2: Union[int, str],
     ica_data2: Optional[IcaData] = None,
     ortho_file: str = None,
     use_org1_names: bool = True,
@@ -1167,8 +1171,8 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 
 def plot_dima(
     ica_data: IcaData,
-    sample1: Union[List, str],
-    sample2: Union[List, str],
+    sample1: Union[Sequence, str],
+    sample2: Union[Sequence, str],
     threshold: float = 5,
     fdr: float = 0.1,
     label: bool = True,
@@ -1184,10 +1188,10 @@ def plot_dima(
     ----------
     ica_data : IcaData
         IcaData object
-    sample1 : Union[List,str]
-        List of sample IDs or name of "project:condition"
-    sample2 : Union[List,str]
-        List of sample IDs or name of "project:condition"
+    sample1 : Union[Sequence,str]
+        Sequence of sample IDs or name of "project:condition"
+    sample2 : Union[Sequence,str]
+        Sequence of sample IDs or name of "project:condition"
     threshold : float
         Minimum activity difference to determine DiMAs (default: 5)
     fdr : float
@@ -1303,8 +1307,8 @@ def cluster_activities(
     cluster_names: Union[dict] = None,
     return_clustermap: bool = False,
     # dimca options
-    dimca_sample1: Union[List, str] = None,
-    dimca_sample2: Union[List, str] = None,
+    dimca_sample1: Union[Sequence, str] = None,
+    dimca_sample2: Union[Sequence, str] = None,
     dimca_threshold: float = 5,
     dimca_fdr: float = 0.1,
     dimca_label: bool = True,
@@ -1342,8 +1346,8 @@ def cluster_activities(
             names have been manually assigned via knowledge mapping
         return_clustermap: indicates if the clustermap plot object should be
             returned to allow further customization
-        dimca_sample1: List of sample IDs or name of "project:condition"
-        dimca_sample2: List of sample IDs or name of "project:condition"
+        dimca_sample1: Sequence of sample IDs or name of "project:condition"
+        dimca_sample2: Sequence of sample IDs or name of "project:condition"
         dimca_threshold: Minimum activity difference to determine DiMCAs
         dimca_fdr: False Detection Rate
         dimca_label: Label differentially activated iModulons (default: True)
@@ -1708,8 +1712,8 @@ def metadata_boxplot(
     imodulon: Union[str, int],
     n_boxes: int = 3,
     strip_conc: bool = True,
-    ignore_cols: Optional[List] = None,
-    use_cols: Optional[List] = None,
+    ignore_cols: Optional[Sequence] = None,
+    use_cols: Optional[Sequence] = None,
     return_results: bool = False,
 ):
     """
@@ -1726,10 +1730,10 @@ def metadata_boxplot(
     strip_conc: bool
         Remove concentrations from metadata (e.g. "glucose(2g/L)" would be
         interpreted as just "glucose")
-    ignore_cols: Optional[List]
-        List of columns to ignore. If None, only "project" and "condition" are ignored
-    use_cols: Optional[List]
-        List of columns to use. This supercedes ignore_cols.
+    ignore_cols: Optional[Sequence]
+        Sequence of columns to ignore. If None, only "project" and "condition" are ignored
+    use_cols: Optional[Sequence]
+        Sequence of columns to use. This supercedes ignore_cols.
     return_results: bool
         Return a dataframe describing the classifications
     Returns

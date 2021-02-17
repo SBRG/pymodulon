@@ -247,7 +247,7 @@ def imodulondb_export(
         Path to iModulonDB main hosting folder
     skip_check : bool
         If true, skip compatibility check
-    cat_order : List
+    cat_order : Sequence
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table
     gene_scatter_x : str
@@ -691,16 +691,16 @@ def _tf_combo_string(row: pd.Series):
         return ", ".join(row.index[row][:-1]) + ", and " + row.index[row][-1]
 
 
-def _sort_tf_strings(tfs: List[str], unique_elts: List[str]):
+def _sort_tf_strings(tfs: List[str], unique_elts: List[str]) -> List:
     """
     Sorts TF strings for the legend of the histogram. Helper function for
     imdb_gene_hist_df.
 
     Parameters
     ----------
-    tfs : List[str]
-        List of TFs in the desired order
-    unique_elts : List[str]
+    tfs : Sequence[str]
+        Sequence of TFs in the desired order
+    unique_elts : Sequence[str]
         All combination strings made by _tf_combo_string
 
     Returns
@@ -1210,7 +1210,7 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
 # Regulon Scatter Plot
 
 
-def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]):
+def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]) -> List:
     """
 
     Parameters

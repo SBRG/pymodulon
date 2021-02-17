@@ -4,20 +4,22 @@ Core functions for the IcaData object
 
 import copy
 import re
-from typing import Dict, List, Optional
+from typing import Dict, List, Optional, Sequence, Union
+from warnings import warn
 
+import numpy as np
+import pandas as pd
 from matplotlib import pyplot as plt
 from sklearn.cluster import KMeans
 from tqdm import tqdm_notebook as tqdm
 
-from pymodulon.enrichment import *
-from pymodulon.util import (
-    Data,
-    ImodNameList,
-    _check_dict,
-    _check_table,
-    compute_threshold,
+from pymodulon.enrichment import (
+    compute_annotation_enrichment,
+    compute_regulon_enrichment,
+    compute_trn_enrichment,
+    contingency,
 )
+from pymodulon.util import Data, _check_dict, _check_table, compute_threshold
 
 
 class IcaData(object):
@@ -37,7 +39,7 @@ class IcaData(object):
         trn: Optional[Data] = None,
         dagostino_cutoff: int = 550,
         optimize_cutoff: bool = False,
-        thresholds: Optional[Union[Dict[ImodName, float], List]] = None,
+        thresholds: Optional[Union[Dict, Sequence]] = None,
         threshold_method="dagostino",
         dataset_table: Optional[dict] = None,
         splash_table: Optional[dict] = None,
@@ -160,7 +162,7 @@ class IcaData(object):
         if thresholds is not None:
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warnings.warn(
+                warn(
                     "Using manually input thresholds. D'agostino "
                     "optimization will not be performed"
                 )
@@ -171,7 +173,7 @@ class IcaData(object):
         elif self.trn.empty or threshold_method == "kmeans":
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warnings.warn(
+                warn(
                     "Using Kmeans threshold method. D'agostino "
                     "optimization will not be performed"
                 )
@@ -188,9 +190,7 @@ class IcaData(object):
                         "Thresholds cannot be optimized if no TRN is provided."
                     )
                 else:
-                    warnings.warn(
-                        "Optimizing iModulon thresholds, may take 2-3 minutes..."
-                    )
+                    warn("Optimizing iModulon thresholds, may take 2-3 minutes...")
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
@@ -399,7 +399,7 @@ class IcaData(object):
             # Only include genes that are in S/X matrix
             extra_genes = set(self._trn.gene_id) - set(self.gene_names)
             if len(extra_genes) > 0:
-                warnings.warn(
+                warn(
                     "The following genes are in the TRN but not in "
                     "your M "
                     "matrix: {}".format(extra_genes)
@@ -432,7 +432,7 @@ class IcaData(object):
                     name_series[key] = val + "-1"
                     seen[val] = 2
 
-                warnings.warn(
+                warn(
                     "Duplicate iModulon names detected. iModulon {} will "
                     "be renamed to {}".format(key, name_series[key])
                 )
@@ -448,9 +448,7 @@ class IcaData(object):
         self._m.columns = final_names
         self._imodulon_table.index = final_names
 
-    def rename_imodulons(
-        self, name_dict: Dict[ImodName, ImodName] = None, column=None
-    ) -> None:
+    def rename_imodulons(self, name_dict: Dict = None, column=None) -> None:
         """
         Rename an iModulon.
 
@@ -483,7 +481,7 @@ class IcaData(object):
         self._update_imodulon_names(new_names)
 
     # Show enriched
-    def view_imodulon(self, imodulon: ImodName):
+    def view_imodulon(self, imodulon: Union[int, str]):
         """
         View genes in an iModulon and show relevant information about each gene.
 
@@ -510,7 +508,7 @@ class IcaData(object):
 
         return final_rows
 
-    def find_single_gene_imodulons(self, save: bool = False) -> List[ImodName]:
+    def find_single_gene_imodulons(self, save: bool = False) -> List:
         """
         A simple function that returns the names of all likely single-gene
         iModulons. Checks if the largest iModulon gene weight is more
@@ -575,7 +573,7 @@ class IcaData(object):
 
     def compute_regulon_enrichment(
         self,
-        imodulon: ImodName,
+        imodulon: Union[int, str],
         regulator: str,
         save: bool = False,
         evidence: Union[list, str] = None,
@@ -611,7 +609,7 @@ class IcaData(object):
             if "evidence" in self.trn.columns:
                 trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
             else:
-                warnings.warn(
+                warn(
                     'TRN does not contain an "evidence" column. Ignoring '
                     "evidence argument."
                 )
@@ -634,7 +632,7 @@ class IcaData(object):
 
     def compute_trn_enrichment(
         self,
-        imodulons: Optional[ImodNameList] = None,
+        imodulons: Optional[Union[int, str, Sequence]] = None,
         fdr: float = 1e-5,
         max_regs: int = 1,
         save: bool = False,
@@ -647,7 +645,7 @@ class IcaData(object):
 
         Parameters
         ----------
-        imodulons: Union[List, str, int]
+        imodulons: Union[Sequence, str, int]
             Name of iModulon(s). If none given, compute enrichments for all
             iModulons
         fdr : float
@@ -740,7 +738,7 @@ class IcaData(object):
         self,
         annotation: pd.DataFrame,
         column: str,
-        imodulons: Optional[ImodNameList] = None,
+        imodulons: Optional[Union[int, str, Sequence]] = None,
         fdr: float = 0.1,
     ) -> pd.DataFrame:
         """
@@ -850,7 +848,7 @@ class IcaData(object):
         else:
             raise TypeError("new_thresholds must be list or dict")
 
-    def change_threshold(self, imodulon: ImodName, value):
+    def change_threshold(self, imodulon: Union[int, str], value):
         """
         Set threshold for an iModulon
 
@@ -1080,7 +1078,7 @@ class IcaData(object):
 
         return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
 
-    def name2num(self, gene: Union[List[str], str]) -> Union[List[str], str]:
+    def name2num(self, gene: Union[Sequence[str], str]) -> Union[Sequence[str], str]:
         """
         Convert a gene name to the locus tag
 
@@ -1112,7 +1110,7 @@ class IcaData(object):
             if len(loci) == 0:
                 raise ValueError("Gene does not exist: {}".format(g))
             elif len(loci) > 1:
-                warnings.warn(
+                warn(
                     "Found multiple genes named {}. Only "
                     "reporting first locus tag".format(g)
                 )
@@ -1125,7 +1123,7 @@ class IcaData(object):
         else:
             return final_list
 
-    def num2name(self, gene: Union[List[str], str]) -> Union[List[str], str]:
+    def num2name(self, gene: Union[Sequence[str], str]) -> Union[List[str], str]:
         """
         Get the name of a gene from its locus tag
 

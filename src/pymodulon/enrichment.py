@@ -4,15 +4,12 @@ Contains functions for gene set enrichment analysis
 
 import itertools
 import warnings
-from typing import Set, Union
+from typing import Set
 
 import numpy as np
 import pandas as pd
 from scipy import special, stats
 from statsmodels.stats.multitest import fdrcorrection
-
-
-ImodName = Union[str, int]
 
 
 def contingency(set1: Set, set2: Set, all_genes: Set):
@@ -185,7 +182,7 @@ def compute_regulon_enrichment(
         Complex regulon, where "/" uses genes in any regulon and "+" uses genes in
         all regulons
     all_genes : Set
-        List of all genes
+        Set of all genes
     trn : pd.DataFrame
         Table containing transcriptional regulatory network
 
@@ -320,7 +317,7 @@ def compute_annotation_enrichment(
     gene_set : Set
         Gene set for enrichment (e.g. genes in iModulon)
     all_genes : Set
-        List of all genes
+        Set of all genes
     annotation : pd.DataFrame
         Table containing gene annotations
     column : str
