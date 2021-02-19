@@ -48,24 +48,24 @@ def barplot(
 
     Parameters
     ----------
-    values: pd.Series
-        Sequence of values to plot
-    sample_table: pd.DataFrame
-        Sample table from IcaData object
-    ylabel: str
+    values: ~pandas.Series
+        List of `values` to plot
+    sample_table: ~pandas.DataFrame
+        Sample table from :class:`~pymodulon.core.IcaData` object
+    ylabel: str, optional
         y-axis label
-    projects: Optional[Union[Sequence, str]]
+    projects: list or str, optional
         Project(s) to show
-    highlight: Optional[Union[Sequence, str]]
+    highlight: list or str, optional
         Project(s) to highlight
-    ax: Optional[Ax]
+    ax: Ax, optional
         Matplotlib axis object
-    legend_kwargs: Optional[Dict]
+    legend_kwargs: dict, optional
         Dictionary of arguments for the legend
 
     Returns
     -------
-    Ax:
+    plot: Ax
         A matplotlib axis object
     """
 
@@ -337,7 +337,7 @@ def plot_regulon_histogram(
 
     Parameters
     ----------
-    ica_data: pymodulon.core.IcaData
+    ica_data: IcaData
         IcaData container object
     imodulon: int, str
         The name of the iModulon to plot in regards to. Used to determine
