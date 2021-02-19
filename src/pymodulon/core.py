@@ -56,7 +56,7 @@ class IcaData(object):
             M matrix from ICA
         A : Union[str, pd.DataFrame]
             A matrix from ICA
-        X : Union[str, pd.DataFrame]
+        X : Optional[Union[str, pd.DataFrame]]
             log-TPM expression matrix, centered to reference condition(s)
         log_tpm : Union[str, pd.DataFrame]
             Raw log-TPM expression matrix (without centering)
@@ -286,11 +286,6 @@ class IcaData(object):
         # Set x matrix
         self._x = x
 
-    @X.deleter
-    def X(self):
-        # Delete X matrix
-        del self._x
-
     @property
     def log_tpm(self):
         """ Get log_tpm matrix """
@@ -308,11 +303,6 @@ class IcaData(object):
 
         # Set log-tpm matrix
         self._log_tpm = log_tpm
-
-    @log_tpm.deleter
-    def log_tpm(self):
-        # Delete log-TPM matrix
-        del self._log_tpm
 
     # Gene, sample and iModulon name properties
     @property
@@ -835,16 +825,21 @@ class IcaData(object):
                 "new_threshold has {:d} elements, but should "
                 "have {:d} elements".format(new_thresh_len, imod_names_len)
             )
+
         if isinstance(new_thresholds, dict):
             # fix json peculiarity of saving int dict keys as string
             thresh_copy = new_thresholds.copy()
             for key in thresh_copy.keys():
+                # Could this be replaced with a try/except clause?
                 if isinstance(key, str) and all([char.isdigit() for char in key]):
                     new_thresholds.update({int(key): new_thresholds.pop(key)})
 
             self._thresholds = new_thresholds
+            self._cutoff_optimized = False
+
         elif isinstance(new_thresholds, list):
             self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
+            self._cutoff_optimized = False
         else:
             raise TypeError("new_thresholds must be list or dict")
 
@@ -940,8 +935,8 @@ class IcaData(object):
 
         if not self._cutoff_optimized:
             self._optimize_dagostino_cutoff(progress, plot)
-            self._cutoff_optimized = True
             self._update_thresholds(self.dagostino_cutoff)
+            self._cutoff_optimized = True
         else:
             print(
                 "Cutoff already optimized, and no new TRN data provided. "

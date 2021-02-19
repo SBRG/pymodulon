@@ -11,7 +11,7 @@ import pandas as pd
 from pymodulon.core import IcaData
 
 
-def save_to_json(model: IcaData, fname: str, compress: bool = False):
+def save_to_json(model, fname, compress=False):
     """
     Save model to the json file
 
@@ -19,7 +19,7 @@ def save_to_json(model: IcaData, fname: str, compress: bool = False):
     ----------
     model: IcaData
        ICA model to be saved to json file
-    fname: string
+    fname: str
        Path to json file where the model will be saved
     compress: bool
         Indicates if the JSON file should be compressed into a gzip archive
@@ -53,7 +53,7 @@ def save_to_json(model: IcaData, fname: str, compress: bool = False):
             json.dump(param_dict, fp)
 
 
-def load_json_model(filename: Union[str, TextIO]) -> IcaData:
+def load_json_model(filename):
     """
     Load a ICA model from a file in JSON format.
 

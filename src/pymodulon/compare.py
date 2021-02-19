@@ -171,22 +171,22 @@ def _make_dot_graph(
     return dot
 
 
-def _convert_gene_index(
-    M1: pd.DataFrame,
-    M2: pd.DataFrame,
+def convert_gene_index(
+    df1: pd.DataFrame,
+    df2: pd.DataFrame,
     ortho_file: Optional[str] = None,
     keep_locus=False,
 ):
     """
-    Reorganizes and renames genes in an M matrix to be consistent with
-    another organism
+    Reorganizes and renames genes in a dataframe to be consistent with
+    another object/organism
 
     Parameters
     ----------
-    M1 : pd.DataFrame
-        M matrix from the first organism
-    M2 : pd.DataFrame
-        M matrix from the second organism
+    df1 : pd.DataFrame
+        Dataframe from the first object/organism
+    df2 : pd.DataFrame
+        Dataframe from the second object/organism
     ortho_file : str
         Path to orthology file between organisms
     keep_locus : bool
@@ -199,31 +199,33 @@ def _convert_gene_index(
     """
 
     if ortho_file is None:
-        common_genes = M1.index & M2.index
-        M1_new = M1.loc[common_genes]
-        M2_new = M2.loc[common_genes]
+        common_genes = df1.index.intersection(df2.index)
+        df1_new = df1.loc[common_genes]
+        df2_new = df2.loc[common_genes]
     else:
         DF_orth = pd.read_csv(ortho_file)
-        DF_orth = DF_orth[DF_orth.gene.isin(M1.index) & DF_orth.subject.isin(M2.index)]
+        DF_orth = DF_orth[
+            DF_orth.gene.isin(df1.index) & DF_orth.subject.isin(df2.index)
+        ]
         subject2gene = DF_orth.set_index("subject").gene.to_dict()
-        M1_new = M1.loc[DF_orth.gene]
-        M2_new = M2.loc[DF_orth.subject]
+        df1_new = df1.loc[DF_orth.gene]
+        df2_new = df2.loc[DF_orth.subject]
 
-        # Reset index of M2 to conform with M1
+        # Reset index of df2 to conform with df1
         if keep_locus:
-            M2_new.index.name = "locus_tag"
-            M2_new.reset_index(inplace=True)
-            M2_new.index = [subject2gene[idx] for idx in M2_new.locus_tag]
+            df2_new.index.name = "locus_tag"
+            df2_new.reset_index(inplace=True)
+            df2_new.index = [subject2gene[idx] for idx in df2_new.locus_tag]
         else:
-            M2_new.index = [subject2gene[idx] for idx in M2_new.index]
+            df2_new.index = [subject2gene[idx] for idx in df2_new.index]
 
-    if len(M1_new) == 0 or len(M2_new) == 0:
+    if len(df1_new) == 0 or len(df2_new) == 0:
         raise ValueError(
             "No shared genes. Check that matrix 1 conforms to "
             "the 'gene' column of the BBH file and matrix 2 "
             "conforms to the 'subject' column"
         )
-    return M1_new, M2_new
+    return df1_new, df2_new
 
 
 def compare_ica(
@@ -264,7 +266,7 @@ def compare_ica(
         Dot graph of connected iModulons
     """
 
-    new_M1, new_M2 = _convert_gene_index(M1, M2, ortho_file)
+    new_M1, new_M2 = convert_gene_index(M1, M2, ortho_file)
     new_M1.columns = new_M1.columns.astype("str")
     new_M2.columns = new_M2.columns.astype("str")
     matches = _get_orthologous_imodulons(new_M1, new_M2, method=method, cutoff=cutoff)
@@ -282,7 +284,7 @@ def compare_ica(
 ####################
 
 
-def make_prots(gbk: os.PathLike, out_path: os.PathLike):
+def make_prots(gbk: str, out_path: str):
     """
     Makes protein files for all the genes in the genbank file. Adapted from
     code by Saugat Poudel

@@ -25,10 +25,6 @@ Indices and tables
     :target: https://pypi.org/project/pymodulon/
     :alt: Current PyPi version
 
-.. |LIC| image:: https://img.shields.io/github/license/sbrg/pymodulon?logo=license&style=plastic
-    :target: https://github.com/SBRG/pymodulon/blob/master/LICENSE
-    :alt: MIT License
-
 .. |Black| image:: https://img.shields.io/badge/code%20style-black-000000.svg
     :target: https://github.com/psf/black
     :alt: Black

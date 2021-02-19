@@ -14,10 +14,9 @@ import os
 import sys
 
 
-SRC_PATH = os.path.join(os.path.dirname(os.path.dirname(__file__)), "src")
+BASE_PATH = os.path.dirname(os.path.dirname(__file__))
+SRC_PATH = os.path.join(BASE_PATH, "src")
 sys.path.insert(0, SRC_PATH)
-
-import sphinx_rtd_theme  # noqa: E402
 
 # This import has to be here below inserting SRC path.
 from pymodulon import __version__ as release  # noqa: E402
@@ -34,14 +33,20 @@ extensions = [
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
     "sphinx.ext.napoleon",
+    "sphinx.ext.autodoc.typehints",
+    "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
     "autoapi.extension",
     "sphinx_rtd_theme",
+    "sphinxcontrib.bibtex",
 ]
 
 # Automated documention of Python Code (autoapi)
 autoapi_type = "python"
 autoapi_dirs = [SRC_PATH]
+
+# Move typehints from signature to description
+autodoc_typehints = "description"
 
 # Automated section labeling (autosectionlabel)
 autosectionlabel_prefix_document = True
@@ -61,6 +66,31 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store"]
 pygments_style = "sphinx"
 
 bibtex_bibfiles = ["references.bib"]
+
+# Ensure libraries are loaded for docs
+
+autodoc_mock_imports = [
+    "adjusttext",
+    "biopython",
+    "graphviz",
+    "matplotlib",
+    "numpy",
+    "pandas",
+    "scikit-learn",
+    "scipy",
+    "seaborn",
+    "statsmodels",
+    "tqdm",
+]
+
+# Remove docstrings for undocumented functions
+autodoc_default_flags = [
+    "members",
+    "private-members",
+    "special-members",
+    # 'undoc-members',
+    "show-inheritance",
+]
 
 # -- Project information ------------------------------------------------------
 
@@ -86,24 +116,27 @@ html_theme = "sphinx_rtd_theme"
 html_extra_path = ["robots.txt"]
 
 # -- Options for linkcheck --------------------------------------------------
-# linkcheck_ignore = [
-#     r"^https://doi.org/+",  # Always redirects
-# ]
-
+linkcheck_ignore = [
+    r"^https://doi.org/+",  # Always redirects
+]
 
 # -- NBSphinx -----------------------------------------------------------------
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
-# nbsphinx_execute = "atuo"
-# nbsphinx_execute_arguments = [
-#     "--Application.log_level=CRITICAL",
-# ]
-# nbsphinx_timeout = 180
+nbsphinx_execute = "auto"
+nbsphinx_execute_arguments = [
+    "--Application.log_level=CRITICAL",
+]
+nbsphinx_timeout = 180
 
 # -- Intersphinx --------------------------------------------------------------
 
 # Refer to the Python documentation for other libraries.
-# intersphinx_mapping = {
-#     "http://docs.python.org/": None,
-# }
-# intersphinx_cache_limit = 10  # days to keep the cached inventories
+intersphinx_mapping = {
+    "http://docs.python.org/": None,
+    "https://matplotlib.org/": None,
+    "https://numpy.org/doc/stable/": None,
+    "https://pandas.pydata.org/pandas-docs/stable/": None,
+    "http://docs.scipy.org/doc/scipy/reference": None,
+}
+intersphinx_cache_limit = 10  # days to keep the cached inventories

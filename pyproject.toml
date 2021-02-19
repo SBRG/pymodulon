@@ -18,6 +18,8 @@ build-backend = "setuptools.build_meta"
 [tool.black]
 line-length = 88
 python-version = [
+    "py36",
+    "py37",
     "py38"
 ]
 
@@ -78,8 +80,7 @@ envlist =
     clean,
     lint,
     pypi-description,
-    safety,
-    py3{8},
+    py3{6,7,8},
     docs,
     report
 isolated_build = true
@@ -88,6 +89,8 @@ skip_missing_interpreters = true
 
 [gh-actions]
 python =
+    3.6: py36
+    3.7: py37
     3.8: py38
 
 
@@ -101,8 +104,8 @@ setenv =
     PY_COLORS={env:PY_COLORS:1}
 usedevelop = true
 depends =
-    py3{8}: clean
-    report: py3{8}
+    py3{6,7,8}: clean
+    report: py3{6,7,8}
 
 
 [testenv:clean]
@@ -128,16 +131,7 @@ commands =
     pre-commit run --show-diff-on-failure --all-files
 
 
-[testenv:safety]
-description = Safety check installed dependencies for known security vulnerabilities.
-usedevelop = false
-deps =
-    safety
-commands =
-    safety check --full-report
-
-
-[testenv:py3{8}]
+[testenv:py3{6,7,8}]
 description = Run tests under {basepython}.
 extras = tests
 commands =
@@ -164,7 +158,7 @@ extras = docs
 allowlist_externals=make
 setenv =
     BUILDDIR={env:DOCS_BUILDDIR:{envdir}/docs_build}
-    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color -W'}
+    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color'}
 commands =
     make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs html
     make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs linkcheck

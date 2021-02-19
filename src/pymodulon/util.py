@@ -2,7 +2,6 @@
 General utility functions for the pymodulon package
 """
 import json
-import os
 import re
 import warnings
 from itertools import combinations
@@ -20,7 +19,7 @@ from pymodulon.enrichment import FDR
 ################
 # Type Aliases #
 ################
-Data = Union[pd.DataFrame, os.PathLike]
+Data = Union[pd.DataFrame, str]
 
 
 def _check_table(table: Data, name: str, index: Optional[Sequence] = None, index_col=0):

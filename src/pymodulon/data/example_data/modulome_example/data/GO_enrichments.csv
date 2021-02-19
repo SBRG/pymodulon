@@ -1,0 +1,5 @@
+,imodulon,gene_ontology,pvalue,qvalue,precision,recall,f1score,TP,target_set_size,imodulon_size
+0,ArnRAB,protein binding,1.0627557255973103e-05,0.0002869440459112738,1.0,0.25,0.4,2.0,2.0,8.0
+1,ArnRAB,identical protein binding,0.003484320557482366,0.04703832752601195,1.0,0.125,0.2222222222222222,1.0,1.0,8.0
+2,22,ATP synthesis coupled electron transport,0.00015409958021133605,0.002080344332853037,1.0,0.06896551724137931,0.12903225806451613,2.0,2.0,29.0
+3,22,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor",0.00015409958021133605,0.002080344332853037,1.0,0.06896551724137931,0.12903225806451613,2.0,2.0,29.0

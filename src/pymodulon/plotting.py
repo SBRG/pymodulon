@@ -20,7 +20,7 @@ from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeRegressor
 
-from pymodulon.compare import _convert_gene_index
+from pymodulon.compare import convert_gene_index
 from pymodulon.core import IcaData
 from pymodulon.enrichment import parse_regulon_str
 from pymodulon.util import _parse_sample, dima, mutual_info_distance
@@ -34,29 +34,39 @@ Ax = TypeVar("Ax", Axes, object)
 
 
 def barplot(
-    values: pd.Series,
-    sample_table: pd.DataFrame,
-    ylabel: str = "",
-    projects: Optional[Union[Sequence, str]] = None,
-    highlight: Optional[Union[Sequence, str]] = None,
-    ax: Optional[Ax] = None,
-    legend_kwargs: Optional[Dict] = None,
+    values,
+    sample_table,
+    ylabel="",
+    projects=None,
+    highlight=None,
+    ax=None,
+    legend_kwargs=None,
 ) -> Ax:
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
 
-    Args:
-        values: Sequence of values to plot
-        sample_table: Sample table from IcaData object
-        ylabel: y-axis label
-        projects: Project(s) to show
-        highlight: Project(s) to highlight
-        ax: Matplotlib axis object
-        legend_kwargs: Dictionary of arguments for the legend
+    Parameters
+    ----------
+    values: pd.Series
+        Sequence of values to plot
+    sample_table: pd.DataFrame
+        Sample table from IcaData object
+    ylabel: str
+        y-axis label
+    projects: Optional[Union[Sequence, str]]
+        Project(s) to show
+    highlight: Optional[Union[Sequence, str]]
+        Project(s) to highlight
+    ax: Optional[Ax]
+        Matplotlib axis object
+    legend_kwargs: Optional[Dict]
+        Dictionary of arguments for the legend
 
-    Returns: A matplotlib axis object
-
+    Returns
+    -------
+    Ax:
+        A matplotlib axis object
     """
 
     # Remove extra projects
@@ -932,13 +942,13 @@ def compare_gene_weights(
     if ica_data2 is None:
         ica_data2 = ica_data.copy()
 
-    M1, M2 = _convert_gene_index(ica_data.M, ica_data2.M, ortho_file)
-    bin_M1, bin_M2 = _convert_gene_index(
+    M1, M2 = convert_gene_index(ica_data.M, ica_data2.M, ortho_file)
+    bin_M1, bin_M2 = convert_gene_index(
         ica_data.M_binarized, ica_data2.M_binarized, ortho_file
     )
 
     # Convert gene table
-    gene_table1, gene_table2 = _convert_gene_index(
+    gene_table1, gene_table2 = convert_gene_index(
         ica_data.gene_table, ica_data2.gene_table, ortho_file, keep_locus=True
     )
 
