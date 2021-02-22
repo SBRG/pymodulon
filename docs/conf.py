@@ -65,7 +65,7 @@ exclude_patterns = ["_build", "**.ipynb_checkpoints", "Thumbs.db", ".DS_Store"]
 
 pygments_style = "sphinx"
 
-bibtex_bibfiles = ["references.bib"]
+bibtex_bibfiles = ["zreferences.bib"]
 
 # Ensure libraries are loaded for docs
 
