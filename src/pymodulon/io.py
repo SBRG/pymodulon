@@ -37,9 +37,23 @@ def save_to_json(model, fname, compress=False):
     # serialize pandas DataFrames and change sets to lists
     for key, val in param_dict.items():
         if isinstance(val, pd.DataFrame) or isinstance(val, pd.Series):
-            param_dict.update({key: val.to_json()})
+            param_dict[key] = val.to_json()
         elif isinstance(val, set):
-            param_dict.update({key: list(val)})
+            param_dict[key] = list(val)
+
+        # Encode MotifInfo objects as dictionaries
+        elif key == "motif_info":
+            new_val = {}
+            for k1, v1 in model.motif_info.items():
+                new_v1 = {}
+                for k2, v2 in v1.__dict__.items():
+                    try:
+                        new_v1[k2[1:]] = v2.to_json(orient="table")
+                    except AttributeError:
+                        new_v1[k2[1:]] = v2
+                new_val[k1] = new_v1
+
+            param_dict[key] = new_val
 
     if fname.endswith(".gz") or compress:
         if not fname.endswith(".json.gz"):

@@ -1,37 +1,37 @@
 ,gene_id,gene_ontology
-0,SACI_RS05325,glycerol kinase activity
-1,SACI_RS05325,glycerol metabolic process
-2,SACI_RS05525,maltose alpha-glucosidase activity
-3,SACI_RS05590,protein binding
-4,SACI_RS05600,identical protein binding
-5,SACI_RS05610,protein binding
-6,SACI_RS08005,tRNA (adenine-N1-)-methyltransferase activity
-7,SACI_RS08005,tRNA methylation
-8,SACI_RS09830,glycerol kinase activity
-9,SACI_RS09830,glycerol metabolic process
-10,SACI_RS10085,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor"
-11,SACI_RS10085,ATP synthesis coupled electron transport
-12,SACI_RS10975,cytoplasm
-13,SACI_RS10975,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
-14,SACI_RS10975,flavin adenine dinucleotide binding
-15,SACI_RS10980,cytoplasm
-16,SACI_RS10980,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
-17,SACI_RS10980,"2 iron, 2 sulfur cluster binding"
-18,SACI_RS10985,cytoplasm
-19,SACI_RS10985,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
-20,SACI_RS10985,molybdopterin cofactor binding
-21,SACI_RS02915,"proteasome core complex, alpha-subunit complex"
-22,SACI_RS00265,magnesium ion binding
-23,SACI_RS00265,oxaloacetate metabolic process
-24,SACI_RS00265,phosphoenolpyruvate carboxylase activity
-25,SACI_RS00265,carbon fixation
-26,SACI_RS00925,DNA duplex unwinding
-27,SACI_RS00925,5'-3' DNA helicase activity
-28,SACI_RS00925,"4 iron, 4 sulfur cluster binding"
-29,SACI_RS01090,2-dehydro-3-deoxy-6-phosphogalactonate aldolase activity
-30,SACI_RS01090,2-dehydro-3-deoxy-phosphogluconate aldolase activity
-31,SACI_RS02225,peptide alpha-N-acetyltransferase activity
-32,SACI_RS10090,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor"
-33,SACI_RS10090,ATP synthesis coupled electron transport
-34,SACI_RS00815,"regulation of transcription, DNA-templated"
-35,SACI_RS00815,zinc ion binding
+0,Saci_1117,glycerol kinase activity
+1,Saci_1117,glycerol metabolic process
+2,Saci_1160,maltose alpha-glucosidase activity
+3,Saci_1173,protein binding
+4,Saci_1175,identical protein binding
+5,Saci_1177,protein binding
+6,Saci_1677,tRNA (adenine-N1-)-methyltransferase activity
+7,Saci_1677,tRNA methylation
+8,Saci_2033,glycerol kinase activity
+9,Saci_2033,glycerol metabolic process
+10,Saci_2088,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor"
+11,Saci_2088,ATP synthesis coupled electron transport
+12,Saci_2269,cytoplasm
+13,Saci_2269,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
+14,Saci_2269,flavin adenine dinucleotide binding
+15,Saci_2270,cytoplasm
+16,Saci_2270,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
+17,Saci_2270,"2 iron, 2 sulfur cluster binding"
+18,Saci_2271,cytoplasm
+19,Saci_2271,"oxidoreductase activity, acting on the aldehyde or oxo group of donors"
+20,Saci_2271,molybdopterin cofactor binding
+21,Saci_0613,"proteasome core complex, alpha-subunit complex"
+22,Saci_0059,magnesium ion binding
+23,Saci_0059,oxaloacetate metabolic process
+24,Saci_0059,phosphoenolpyruvate carboxylase activity
+25,Saci_0059,carbon fixation
+26,Saci_0192,DNA duplex unwinding
+27,Saci_0192,5'-3' DNA helicase activity
+28,Saci_0192,"4 iron, 4 sulfur cluster binding"
+29,Saci_0225,2-dehydro-3-deoxy-6-phosphogalactonate aldolase activity
+30,Saci_0225,2-dehydro-3-deoxy-phosphogluconate aldolase activity
+31,Saci_0459,peptide alpha-N-acetyltransferase activity
+32,Saci_2089,"oxidoreductase activity, acting on diphenols and related substances as donors, oxygen as acceptor"
+33,Saci_2089,ATP synthesis coupled electron transport
+34,Saci_0171,"regulation of transcription, DNA-templated"
+35,Saci_0171,zinc ion binding
