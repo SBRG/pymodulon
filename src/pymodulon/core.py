@@ -401,6 +401,15 @@ class IcaData(object):
                 raise ValueError('Null value detected in "gene_id" column ' "of TRN")
 
             # Make sure regulators do not contain / or + characters
+            for reg in self._trn.regulator.unique():
+                if "+" in reg or "/" in reg:
+                    warn(
+                        "The characters '+' and '/' are used for combining "
+                        "regulons and cannot be in regulator names. These "
+                        "characters will be replaced with ';'"
+                    )
+                    break
+
             self._trn.regulator = [
                 re.sub("\\+", ";", re.sub("/", ";", reg)) for reg in self._trn.regulator
             ]
