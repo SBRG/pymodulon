@@ -203,19 +203,22 @@ def _parse_sample(ica_data, sample: Union[Sequence, str]):
 
 
 def explained_variance(
-    ica_data,
-    genes: Optional[Sequence] = None,
-    samples: Optional[Sequence] = None,
-    imodulons: Optional[Sequence] = None,
+    ica_data, genes=None, samples=None, imodulons=None, reference=None
 ):
     """
     Computes the fraction of variance explained by iModulons
     Parameters
     ----------
-    ica_data: ICA data object
-    genes: Sequence of genes to use (default: all genes)
-    samples: Sequence of samples to use (default: all samples)
-    imodulons: Sequence of iModulons to use (default: all iModulons)
+    ica_data: IcaData
+        ICA data object
+    genes: list, optional
+        List of genes to use (default: all genes)
+    samples: list, optional
+        List of samples to use (default: all samples)
+    reference: list, optional
+        List of samples that represent the reference condition for the dataset. If
+        none are provided, uses the dataset-specific reference condition.
+    imodulons: List of iModulons to use (default: all iModulons)
 
     Returns
     -------
@@ -243,13 +246,14 @@ def explained_variance(
     elif isinstance(imodulons, str):
         imodulons = [imodulons]
 
+    if reference is None:
+        centered = ica_data.X
+    else:
+        centered = ica_data.X.subtract(ica_data.X[reference].mean(axis=1), axis=0)
+
     # Account for normalization procedures before ICA (X=SA-x_mean)
-    baseline = pd.DataFrame(
-        np.subtract(ica_data.X, ica_data.X.values.mean(axis=0, keepdims=True)),
-        index=ica_data.M.index,
-        columns=ica_data.A.columns,
-    )
-    baseline = baseline.loc[genes]
+    baseline = centered.subtract(centered, axis=1)
+    baseline = baseline.loc[genes, samples]
 
     # Initialize variables
     base_err = np.linalg.norm(baseline) ** 2
@@ -273,9 +277,9 @@ def explained_variance(
     for k in sorted_mods:
         MA = MA + ma_arrs[k]
         sa_err = np.linalg.norm(MA - baseline) ** 2
-        rec_var.append((1 - sa_err / base_err) * 100)
+        rec_var.append((1 - sa_err / base_err))
 
-    return rec_var[-1]
+    return np.clip(rec_var[-1], 0, 1)
 
 
 def infer_activities(ica_data, data: pd.DataFrame):
