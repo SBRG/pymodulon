@@ -924,7 +924,7 @@ class IcaData(object):
 
     def _kmeans_cluster(self, imodulon):
         data = self.M[imodulon]
-        model = KMeans(n_clusters=3)
+        model = KMeans(n_clusters=3, random_state=1)
         model.fit(abs(data).values.reshape(-1, 1))
 
         df = pd.DataFrame(abs(data))

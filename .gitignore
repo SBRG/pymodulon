@@ -1,6 +1,5 @@
 # Other files
-*.fasta.*
-notebooks/motifs/*
+archive/*
 
 # PyCharm settings
 .idea/

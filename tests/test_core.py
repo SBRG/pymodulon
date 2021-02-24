@@ -5,7 +5,7 @@ from pymodulon.core import IcaData
 
 def test_m_binarized(ecoli_obj):
     binary_m = ecoli_obj.M_binarized
-    assert binary_m.iloc[:, 0].sum() == 8
+    assert binary_m.iloc[:, 0].sum() == 17
 
 
 def test_imodulon_names(ecoli_obj, recwarn):
@@ -60,17 +60,17 @@ def test_gene_names(ecoli_obj):
 def test_rename_imodulons(ecoli_obj, recwarn):
 
     # Check if renaming works for iModulons
-    ecoli_obj.rename_imodulons({0: "YieP"})
-    assert ecoli_obj.imodulon_names[0] == "YieP"
-    assert ecoli_obj.M.columns[0] == "YieP"
-    assert ecoli_obj.A.index[0] == "YieP"
-    assert "YieP" in ecoli_obj.thresholds.keys()
+    ecoli_obj.rename_imodulons({"AllR/AraC/FucR": "all3"})
+    assert ecoli_obj.imodulon_names[0] == "all3"
+    assert ecoli_obj.M.columns[0] == "all3"
+    assert ecoli_obj.A.index[0] == "all3"
+    assert "all3" in ecoli_obj.thresholds.keys()
 
     # Try renaming with duplicate names
-    ecoli_obj.rename_imodulons({10: "test", 11: "test", 12: "test"})
-    assert ecoli_obj.imodulon_names[10] == "test-1"
-    assert ecoli_obj.imodulon_names[11] == "test-2"
-    assert ecoli_obj.imodulon_names[12] == "test-3"
+    ecoli_obj.rename_imodulons({"all3": "test", "ArcA-1": "test", "ArcA-2": "test"})
+    assert ecoli_obj.imodulon_names[0] == "test-1"
+    assert ecoli_obj.imodulon_names[1] == "test-2"
+    assert ecoli_obj.imodulon_names[2] == "test-3"
 
     w = recwarn.pop()
     assert issubclass(w.category, UserWarning)
@@ -83,7 +83,13 @@ def test_rename_imodulons(ecoli_obj, recwarn):
 
 def test_find_single_gene_imodulons(ecoli_obj):
     # check that we can call out single-gene iModulons
-    assert ecoli_obj.find_single_gene_imodulons(save=True) == [4, 29, 42, 46, 90]
+    assert ecoli_obj.find_single_gene_imodulons(save=True) == [
+        "Pyruvate",
+        "fur-KO",
+        "sgrT",
+        "thrA-KO",
+        "ydcI-KO",
+    ]
     assert ecoli_obj.imodulon_table.single_gene.sum() == 5
 
 
@@ -102,7 +108,7 @@ def test_dagostino_cutoff(mini_obj, recwarn):
         dagostino_cutoff=2000,
     )
 
-    assert copy_data.dagostino_cutoff == 500
+    assert copy_data.dagostino_cutoff == 800
     # noinspection PyProtectedMember
     assert copy_data._cutoff_optimized
 
@@ -113,7 +119,7 @@ def test_dagostino_cutoff(mini_obj, recwarn):
 def test_thresholds(mini_obj_opt):
 
     mini_obj_opt.thresholds = list(range(10))
-    assert mini_obj_opt.thresholds == dict(zip(range(10), range(10)))
+    assert list(mini_obj_opt.thresholds.values()) == list(range(10))
     assert not mini_obj_opt._cutoff_optimized
 
     mini_obj_opt.thresholds = list(range(10))
@@ -125,7 +131,7 @@ def test_thresholds(mini_obj_opt):
         thresholds=list(range(10, 20)),
     )
 
-    assert copy_data.thresholds == dict(zip(range(10), range(10, 20)))
+    assert list(copy_data.thresholds.values()) == list(range(10, 20))
     assert not copy_data._cutoff_optimized
 
 
@@ -183,7 +189,7 @@ def test_reoptimize_thresholds(mini_obj, capsys):
     assert not mini_obj._cutoff_optimized
 
     mini_obj.reoptimize_thresholds(progress=False, plot=False)
-    assert mini_obj.dagostino_cutoff == 500
+    assert mini_obj.dagostino_cutoff == 800
     assert mini_obj._cutoff_optimized
 
     mini_obj.reoptimize_thresholds(progress=False, plot=False)
@@ -193,7 +199,7 @@ def test_reoptimize_thresholds(mini_obj, capsys):
 
 def test_compute_regulon_enrichment(ecoli_obj):
     # Single enrichment
-    enrich = ecoli_obj.compute_regulon_enrichment(1, "glpR")
+    enrich = ecoli_obj.compute_regulon_enrichment("GlpR", "glpR")
     assert enrich.pvalue == 0
     assert enrich.precision == enrich.recall == enrich.f1score == 1
     assert enrich.TP == enrich.regulon_size == enrich.imodulon_size == 9
@@ -201,7 +207,7 @@ def test_compute_regulon_enrichment(ecoli_obj):
     assert enrich.name == "glpR"
 
     # Multiple enrichment
-    enrich = ecoli_obj.compute_regulon_enrichment(1, "glpR+crp")
+    enrich = ecoli_obj.compute_regulon_enrichment("GlpR", "glpR+crp")
     assert enrich.pvalue == 0
     assert enrich.precision == enrich.recall == enrich.f1score == 1
     assert enrich.TP == enrich.regulon_size == enrich.imodulon_size == 9
@@ -209,7 +215,7 @@ def test_compute_regulon_enrichment(ecoli_obj):
     assert enrich.name == "glpR+crp"
 
     # Empty enrichment
-    enrich = ecoli_obj.compute_regulon_enrichment(1, "nothing")
+    enrich = ecoli_obj.compute_regulon_enrichment("GlpR", "nothing")
     assert enrich.pvalue == 1
     assert (
         enrich.precision
@@ -221,8 +227,8 @@ def test_compute_regulon_enrichment(ecoli_obj):
     )
 
     # Test save option
-    ecoli_obj.compute_regulon_enrichment(1, "nothing", save=True)
-    enrich = ecoli_obj.imodulon_table.loc[1]
+    ecoli_obj.compute_regulon_enrichment("GlpR", "nothing", save=True)
+    enrich = ecoli_obj.imodulon_table.loc["GlpR"]
 
     assert enrich.pvalue == 1
     assert (
@@ -237,10 +243,10 @@ def test_compute_regulon_enrichment(ecoli_obj):
 
 
 def test_compute_trn_enrichment(ecoli_obj):
-    enrich = ecoli_obj.compute_trn_enrichment(imodulons=1).iloc[0]
+    enrich = ecoli_obj.compute_trn_enrichment(imodulons="GlpR").iloc[0]
 
-    ecoli_obj.compute_trn_enrichment(imodulons=1, save=True)
-    enrich2 = ecoli_obj.imodulon_table.loc[1]
+    ecoli_obj.compute_trn_enrichment(imodulons="GlpR", save=True)
+    enrich2 = ecoli_obj.imodulon_table.loc["GlpR"]
     assert enrich.pvalue == enrich2.pvalue
     assert enrich.precision == enrich2.precision
     assert enrich.recall == enrich2.recall
