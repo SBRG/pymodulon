@@ -5,7 +5,7 @@ from pymodulon.core import IcaData
 
 def test_m_binarized(ecoli_obj):
     binary_m = ecoli_obj.M_binarized
-    assert binary_m.iloc[:, 0].sum() == 17
+    assert binary_m["GlpR"].sum() == 9
 
 
 def test_imodulon_names(ecoli_obj, recwarn):

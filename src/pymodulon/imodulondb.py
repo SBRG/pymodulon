@@ -25,7 +25,7 @@ from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
 def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
     """
-    Checks if model has the correct data and labeling for output to iModulonDB.
+    Checks if data has the correct data and labeling for output to iModulonDB.
     If it fails, it will print what went wrong, and there is an option (write =
     True) to correct issues.
 
@@ -41,7 +41,7 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
     model : IcaData
         IcaData object to check
     inplace : bool
-        Modify the model in-place
+        Modify the data in-place
 
     Returns
     -------
@@ -216,7 +216,7 @@ def imodulondb_compatibility(model: IcaData, inplace: Optional[bool] = False):
         print()
         print(
             "X, the expression matrix, is required for the gene pages. "
-            "Add it to the model!"
+            "Add it to the data!"
         )
 
     if len(major_errors) > 0:
@@ -235,7 +235,7 @@ def imodulondb_export(
     gene_scatter_x: Optional[str] = "start",
 ):
     """
-    Generates the iModulonDB page for the model and exports to the path.
+    Generates the iModulonDB page for the data and exports to the path.
     If certain columns are unavailable but can be filled in automatically,
     they will be.
 
@@ -361,7 +361,7 @@ def imodulondb_main_site_files(
     rewrite_annotations : bool
         Set to False if the gene_table and trn are unchanged
     cat_order : List
-        list of categories in model.imodulon_table.Category, ordered as you want
+        list of categories in data.imodulon_table.Category, ordered as you want
         them to appear on the dataset page
 
     Returns
@@ -496,7 +496,7 @@ def imdb_generate_im_files(
     model: IcaData, path_prefix: Optional[str] = ".", gene_scatter_x="start"
 ):
     """
-    Generates all files for all iModulons in model
+    Generates all files for all iModulons in data
 
     Parameters
     ----------
@@ -870,7 +870,7 @@ def _gene_color_dict(model: IcaData):
         return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
     except (KeyError, AttributeError):
         # previously, this would call the setter using:
-        # model.cog_colors = None
+        # data.cog_colors = None
         cogs = sorted(model.gene_table.COG.unique())
         model.cog_colors = dict(
             zip(
@@ -942,7 +942,7 @@ def imdb_gene_scatter_df(
             res.x = range(len(res.index))
     else:
         raise ValueError("Only 'start' is supported as a gene_scatter_x input.")
-    # res.x = model.X[base_conds].mean(axis=1)
+    # res.x = data.X[base_conds].mean(axis=1)
     res.y = model.M[k]
 
     # add other data
@@ -1386,9 +1386,9 @@ def imdb_imodulon_basics_df(
     k : Union[int,str]
         iModulon name
     reg_venn : pd.DataFrame
-        Output of imdb_regulon_venn_df(model, k)
+        Output of imdb_regulon_venn_df(data, k)
     reg_scatter : pd.DataFrame
-        Output of imdb_regulon_scatter_df(model, k)
+        Output of imdb_regulon_scatter_df(data, k)
 
     Returns
     -------
@@ -1562,9 +1562,9 @@ def imdb_gene_im_table_df(
     g : str
         Gene locus tag
     im_table : pd.DataFrame
-        Pre-cleaned version of model.imodulon_table
+        Pre-cleaned version of data.imodulon_table
     m_bin : pd.DataFrame
-        Boolean transpose version of model.M_binarized
+        Boolean transpose version of data.M_binarized
 
     Returns
     -------

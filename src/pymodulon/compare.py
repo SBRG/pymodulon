@@ -187,7 +187,7 @@ def convert_gene_index(
         Dataframe from the first object/organism
     df2 : pd.DataFrame
         Dataframe from the second object/organism
-    ortho_file : str
+    ortho_file : str or pd.DataFrame
         Path to orthology file between organisms
     keep_locus : bool
         If True, keep old locus tags as a column
@@ -203,7 +203,12 @@ def convert_gene_index(
         df1_new = df1.loc[common_genes]
         df2_new = df2.loc[common_genes]
     else:
-        DF_orth = pd.read_csv(ortho_file)
+
+        try:
+            DF_orth = pd.read_csv(ortho_file)
+        except (ValueError, TypeError):
+            DF_orth = ortho_file
+
         DF_orth = DF_orth[
             DF_orth.gene.isin(df1.index) & DF_orth.subject.isin(df2.index)
         ]

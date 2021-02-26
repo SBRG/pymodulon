@@ -5,23 +5,11 @@ this function to work. """
 
 import pytest
 
+from pymodulon import example_data
 from pymodulon.core import IcaData
-from pymodulon.data import example_data
 
 
-# TODO: Remove excess genes from TRN file
-
-ecoli_data = IcaData(
-    example_data.M,
-    example_data.A,
-    X=example_data.X,
-    gene_table=example_data.gene_table,
-    sample_table=example_data.sample_table,
-    imodulon_table=example_data.imodulon_table,
-    trn=example_data.trn,
-    dagostino_cutoff=750,
-    optimize_cutoff=False,
-)
+ecoli_data = example_data.load_ecoli_data()
 
 # Smaller version of Ecoli data with 10 iModulons
 mini_data = IcaData(

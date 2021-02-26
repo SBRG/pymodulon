@@ -29,6 +29,7 @@ from pymodulon import __version__ as release  # noqa: E402
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    "nbsphinx",
     "sphinx.ext.autodoc",
     "sphinx.ext.autosummary",
     "sphinx.ext.autosectionlabel",
@@ -124,6 +125,7 @@ linkcheck_ignore = [
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "auto"
+nbsphinx_allow_errors = True
 nbsphinx_execute_arguments = [
     "--Application.log_level=CRITICAL",
 ]

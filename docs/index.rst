@@ -23,7 +23,8 @@ information on iModulons, see the `iModulonDB About Page <https://imodulondb
 
 What is PyModulon?
 ------------------
-**PyModulon** contains modules for the analysis, visualization, and dissemination of
+**PyModulon** contains modules for the analysis, visualization, and
+dissemination of
 iModulons. **PyModulon** is designed with `Jupyter <https://jupyter.org/>`_ notebooks
 in mind. In addition, it enables users to easily create their own
 `iModulonDB <https://imodulondb.org/>`_ pages for any analyzed dataset.
@@ -39,7 +40,7 @@ Installation and Setup
 We recommend you install **PyModulon** using ``pip`` within a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_::
 
-    pip install pymodulon
+   pip install pymodulon
 
 The motif module requires installing `MEME <https://meme-suite.org/meme/>`_. We
 recommend that you use the `docker container for MEME <https://hub.docker
@@ -53,27 +54,34 @@ Tutorials
    :maxdepth: 1
    :caption: Tutorials
 
-   tutorials/the_ica_data_object.ipynb
-   tutorials/plotting.ipynb
-   tutorials/compiling_gene_annotations.ipynb
+   tutorials/introduction_to_the_ica_data_object.ipynb
+   tutorials/plotting_functions.ipynb
+   tutorials/inferring_imodulon_activities_for_new_data.ipynb
+   tutorials/gene_enrichment_analysis.ipynb
+   tutorials/searching_for_motifs.ipynb
+   tutorials/imodulon_thresholds.ipynb
+   tutorials/comparing_imodulons.ipynb
+   tutorials/creating_the_gene_table.ipynb
+   tutorials/additional_functions.ipynb
 
 
 API
 ---
 
-For documentation on a specific method or function, search the :ref:`/autoapi/index
-.rst`
+For documentation on a specific method or function,
+search the :ref:`/autoapi/index.rst`
 
 .. toctree::
    :maxdepth: 1
-   :caption: Contents:
+   :caption: Contents
 
-   autoapi/index.rst
+   autoapi/index
 
 .. toctree::
    :maxdepth: 1
-   :caption: Additional Resources:
-   zreferences.rst
+   :caption: Additional Resources
+
+   zreferences
 
 Indices and tables
 ==================

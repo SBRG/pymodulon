@@ -78,7 +78,7 @@ def _check_table_helper(
         )
 
     # Remove extra indices from table
-    table = table.loc[index]
+    table = table.reindex(index)
     return table
 
 
