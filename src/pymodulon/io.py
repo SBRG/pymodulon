@@ -1,37 +1,33 @@
 """
-Functions for reading and writing model into files.
+Functions for reading and writing data into files.
 """
 
 import gzip
 import json
-from typing import TextIO, Union
 
 import pandas as pd
 
 from pymodulon.core import IcaData
 
 
-def save_to_json(model, fname, compress=False):
+def save_to_json(data, fname, compress=False):
     """
-    Save model to the json file
+    Save data to the json file
 
     Parameters
     ----------
-    model: IcaData
-       ICA model to be saved to json file
+    data: IcaData
+       ICA dataset to be saved to json file
     fname: str
-       Path to json file where the model will be saved
+       Path to json file where the data will be saved
     compress: bool
         Indicates if the JSON file should be compressed into a gzip archive
     """
 
-    if model.A is None or model.M is None:
-        raise ValueError("The model must include the M and the A matrix.")
-
-    # only keeps params that are used to initialize the model
+    # only keeps params that are used to initialize the data
     load_params = IcaData.__init__.__code__.co_varnames
     param_dict = {
-        key: getattr(model, key) for key in vars(IcaData) if key in load_params
+        key: getattr(data, key) for key in vars(IcaData) if key in load_params
     }
 
     # serialize pandas DataFrames and change sets to lists
@@ -44,7 +40,7 @@ def save_to_json(model, fname, compress=False):
         # Encode MotifInfo objects as dictionaries
         elif key == "motif_info":
             new_val = {}
-            for k1, v1 in model.motif_info.items():
+            for k1, v1 in data.motif_info.items():
                 new_v1 = {}
                 for k2, v2 in v1.__dict__.items():
                     try:
@@ -54,6 +50,9 @@ def save_to_json(model, fname, compress=False):
                 new_val[k1] = new_v1
 
             param_dict[key] = new_val
+
+    # Add _cutoff_optimized
+    param_dict["_cutoff_optimized"] = data.cutoff_optimized
 
     if fname.endswith(".gz") or compress:
         if not fname.endswith(".json.gz"):
@@ -69,18 +68,18 @@ def save_to_json(model, fname, compress=False):
 
 def load_json_model(filename):
     """
-    Load a ICA model from a file in JSON format.
+    Load ICA data from a file in JSON format.
 
     Parameters
     ----------
-    filename : str or TextIO
+    filename : str or io._io.StringIO
         File path or descriptor that contains the JSON document describing the
-        ICA model.
+        ICA dataset.
 
     Returns
     -------
     IcaData
-        The ICA model as represented in the JSON document.
+        The ICA data as represented in the JSON document.
     """
     if isinstance(filename, str):
         if filename.endswith(".gz"):
@@ -92,10 +91,18 @@ def load_json_model(filename):
     else:
         serial_data = json.load(filename)
 
+    # Add _cutoff_optimized information
+    try:
+        cutoff_optimized = serial_data.pop("_cutoff_optimized")
+    except KeyError:
+        cutoff_optimized = False
+
     # Remove deprecated arguments
-    deprecated_args = ["cog_colors", "_dagostino_cutoff"]
+    deprecated_args = ["cog_colors"]
     for arg in deprecated_args:
         if arg in serial_data.keys():
             serial_data.pop(arg)
 
-    return IcaData(**serial_data)
+    data = IcaData(**serial_data)
+    data._cutoff_optimized = cutoff_optimized
+    return data

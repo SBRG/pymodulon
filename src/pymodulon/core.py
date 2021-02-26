@@ -167,7 +167,8 @@ class IcaData(object):
                     "Using manually input thresholds. D'agostino "
                     "optimization will not be performed"
                 )
-            self._dagostino_cutoff = None
+            # Keep d'agostino cutoff even though cutoff wasn't optimized
+            self._dagostino_cutoff = dagostino_cutoff
             self.thresholds = thresholds
 
         # Use kmeans if TRN is empty, or kmeans is selected
@@ -184,8 +185,8 @@ class IcaData(object):
         # Else use D'agostino method
         elif threshold_method == "dagostino":
             self._dagostino_cutoff = dagostino_cutoff
-            self._cutoff_optimized = False
             if optimize_cutoff:
+                self._cutoff_optimized = False
                 if trn is None:
                     raise ValueError(
                         "Thresholds cannot be optimized if no TRN is provided."
@@ -198,6 +199,7 @@ class IcaData(object):
                     # this optimization; only reasonable to try it
                     # again if the user uploads a new TRN
             else:
+                self._cutoff_optimized = False
                 self.recompute_thresholds(self.dagostino_cutoff)
         # Capture improper threshold methods
         else:
@@ -846,6 +848,10 @@ class IcaData(object):
     @property
     def dagostino_cutoff(self):
         return self._dagostino_cutoff
+
+    @property
+    def cutoff_optimized(self):
+        return self._cutoff_optimized
 
     @property
     def thresholds(self):
