@@ -1,6 +1,6 @@
 """
-Pre-loaded example dataset for PyModulon tutorials. Dataset from Sastry et al. 2019.
-Nature Communications.
+Pre-loaded example dataset for PyModulon tutorials. _E. coli_ dataset from Sastry et al
+2019, and S. aureus dataset is from
 """
 
 from os import path
@@ -26,7 +26,9 @@ trn = pd.read_csv(path.join(_ecoli_dir, "trn.csv"), index_col=None)
 # E coli genome annotations
 ecoli_fasta = path.join(_ecoli_dir, "genome.fasta")
 ecoli_gff = path.join(_ecoli_dir, "genome.gff3")
-ecoli_eggnog = path.join(_ecoli_dir, "eggNOG.annotations")
+ecoli_eggnog = path.join(_ecoli_dir, "eggNOG_annotations.txt")
+ecoli_biocyc = path.join(_ecoli_dir, "biocyc_operon_annotations.txt")
+ecoli_go_example = path.join(_ecoli_dir, "GO_example_annotations.txt")
 
 
 # Load E coli IcaData Object

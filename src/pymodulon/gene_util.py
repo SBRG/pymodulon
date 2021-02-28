@@ -6,11 +6,12 @@ import re
 import urllib
 from io import StringIO
 from typing import Optional
+from warnings import warn
 
 import pandas as pd
 
 
-def cog2str(cog: str) -> str:
+def cog2str(cog):
     """
     Get the full description for a COG category letter
 
@@ -85,76 +86,119 @@ def _get_attr(attributes: str, attr_id: str, ignore: bool = False) -> Optional[s
             raise ValueError("{} not in attributes: {}".format(attr_id, attributes))
 
 
-def gff2pandas(gff_file: str):
+def gff2pandas(gff_file, feature="CDS", index=None):
     """
-    Converts a GFF file to a DataFrame
+    Converts GFF file(s) to a Pandas DataFrame
     Parameters
     ----------
-    gff_file : str
-        Path to GFF file
+    gff_file : str or list
+        Path(s) to GFF file
+    index : str, optional
+        Column or attribute to use as index
+    feature: str or list
+        Name(s) of features to keep
 
     Returns
     -------
-    pd.DataFrame
+    df_gff: pd.DataFrame
         GFF formatted as a DataFrame
     """
 
-    with open(gff_file, "r") as f:
-        lines = f.readlines()
+    # Argument checking
+    if isinstance(gff_file, str):
+        gff_file = [gff_file]
 
-    # Get lines to skip
-    skiprow = sum([line.startswith("#") for line in lines])
+    if isinstance(feature, str):
+        feature = [feature]
 
-    # Read GFF
-    names = [
-        "accession",
-        "source",
-        "feature",
-        "start",
-        "end",
-        "score",
-        "strand",
-        "phase",
-        "attributes",
-    ]
-    DF_gff = pd.read_csv(gff_file, sep="\t", skiprows=skiprow, names=names, header=None)
+    result = []
 
-    # Filter for CDSs
-    DF_cds = DF_gff[DF_gff.feature == "CDS"]
+    for gff in gff_file:
+        with open(gff, "r") as f:
+            lines = f.readlines()
 
-    # Also filter for genes to get old_locus_tag
-    DF_gene = DF_gff[DF_gff.feature == "gene"].reset_index()
-    DF_gene["locus_tag"] = DF_gene.attributes.apply(
-        _get_attr, attr_id="locus_tag", ignore=True
-    )
-    DF_gene["old_locus_tag"] = DF_gene.attributes.apply(
-        _get_attr, attr_id="old_locus_tag", ignore=True
-    )
-    DF_gene = DF_gene[["locus_tag", "old_locus_tag"]]
-    DF_gene = DF_gene[DF_gene.locus_tag.notnull()]
+        # Get lines to skip
+        skiprow = sum([line.startswith("#") for line in lines])
 
-    # Sort by start position
-    DF_cds = DF_cds.sort_values("start")
+        # Read GFF
+        names = [
+            "accession",
+            "source",
+            "feature",
+            "start",
+            "end",
+            "score",
+            "strand",
+            "phase",
+            "attributes",
+        ]
+        DF_gff = pd.read_csv(gff, sep="\t", skiprows=skiprow, names=names, header=None)
 
-    # Extract attribute information
-    DF_cds["locus_tag"] = DF_cds.attributes.apply(_get_attr, attr_id="locus_tag")
+        # Filter for CDSs
+        DF_cds = DF_gff[DF_gff.feature.isin(feature)]
 
-    DF_cds["gene_name"] = DF_cds.attributes.apply(
-        _get_attr, attr_id="gene", ignore=True
-    )
+        # Also filter for genes to get old_locus_tag
+        DF_gene = DF_gff[DF_gff.feature == "gene"].reset_index()
+        DF_gene["locus_tag"] = DF_gene.attributes.apply(
+            _get_attr, attr_id="locus_tag", ignore=True
+        )
+        DF_gene["old_locus_tag"] = DF_gene.attributes.apply(
+            _get_attr, attr_id="old_locus_tag", ignore=True
+        )
+        DF_gene = DF_gene[["locus_tag", "old_locus_tag"]]
+        DF_gene = DF_gene[DF_gene.locus_tag.notnull()]
 
-    DF_cds["gene_product"] = DF_cds.attributes.apply(
-        _get_attr, attr_id="product", ignore=True
-    )
+        # Sort by start position
+        DF_cds = DF_cds.sort_values("start")
 
-    DF_cds["ncbi_protein"] = DF_cds.attributes.apply(
-        _get_attr, attr_id="protein_id", ignore=True
-    )
+        # Extract attribute information
+        DF_cds["locus_tag"] = DF_cds.attributes.apply(_get_attr, attr_id="locus_tag")
 
-    # Merge in old_locus_tag
-    DF_cds = pd.merge(DF_cds, DF_gene, how="left", on="locus_tag", sort=False)
+        DF_cds["gene_name"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="gene", ignore=True
+        )
 
-    return DF_cds
+        DF_cds["gene_product"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="product", ignore=True
+        )
+
+        DF_cds["ncbi_protein"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="protein_id", ignore=True
+        )
+
+        # Merge in old_locus_tag
+        DF_cds = pd.merge(DF_cds, DF_gene, how="left", on="locus_tag", sort=False)
+
+        result.append(DF_cds)
+
+    DF_gff = pd.concat(result)
+
+    if index:
+        if DF_gff[index].duplicated().any():
+            warn("Duplicate {} detected. Dropping duplicates.".format(index))
+            DF_gff = DF_gff.drop_duplicates(index)
+        DF_gff.set_index("locus_tag", drop=True, inplace=True)
+
+    return DF_gff
+
+
+def reformat_biocyc_tu(tu):
+    """
+
+    Parameters
+    ----------
+    tu: str
+        Biocyc-formatted transcription unit (i.e. 'thrL // thrA // thrB // thrC')
+
+    Returns
+    -------
+    formatted_tu : str
+        Semicolon-separated sorted gene list
+    """
+    try:
+        return ";".join(sorted(tu.split(" // ")))
+    except AttributeError:
+        return None
 
 
 ##############
