@@ -10,27 +10,25 @@ from Bio import SeqIO
 from graphviz import Digraph
 
 
-def _get_orthologous_imodulons(
-    M1: pd.DataFrame, M2: pd.DataFrame, method: Union[str, Callable], cutoff: float
-):
+def _get_orthologous_imodulons(M1, M2, method, cutoff):
     """
     Given two M matrices, returns the dot graph and name links of the various
     connected ICA components
 
     Parameters
     ----------
-    M1 : pd.DataFrame
+    M1 : ~pandas.DataFrame
         M matrix from the first organism
-    M2 : pd.DataFrame
+    M2 : ~pandas.DataFrame
         M matrix from the second organism
-    method : str
-        Correlation metric to use (see pd.DataFrame.corr)
+    method : int or str
+        Correlation metric to use (see :meth:`~pandas.DataFrame.corr`)
     cutoff : float
         Cut off value for correlation metric
 
     Returns
     -------
-    links
+    links: list
         Links and distances of connected iModulons
     """
 
@@ -59,32 +57,27 @@ def _get_orthologous_imodulons(
     return links
 
 
-def _make_dot_graph(
-    links: Sequence,
-    show_all: bool = True,
-    names1: Optional[Sequence] = None,
-    names2: Optional[Sequence] = None,
-):
+def _make_dot_graph(links, show_all, names1, names2):
     """
     Given two M matrices, returns the dot graph and name links of the various
     connected ICA components
 
     Parameters
     ----------
-    links : Sequence
+    links : ~typing.Sequence
         Names and distances of connected iModulons
     show_all : bool
         Show all iModulons regardless of their linkage (default: False)
-    names1 : Sequence
+    names1 : ~typing.Sequence, optional
         List of names in dataset 1 (required if show_all = True)
-    names2 : Sequence
+    names2 : ~typing.Sequence
         List of names in dataset 1 (required if show_all = True)
 
     Returns
     -------
-    dot
+    dot: Digraph
         Dot graph of connected iModulons
-    links
+    links: :obj:`list <list>`
         Links and distances of connected iModulons
     """
 
@@ -171,30 +164,27 @@ def _make_dot_graph(
     return dot
 
 
-def convert_gene_index(
-    df1: pd.DataFrame,
-    df2: pd.DataFrame,
-    ortho_file: Optional[str] = None,
-    keep_locus=False,
-):
+def convert_gene_index(df1, df2, ortho_file=None, keep_locus=False):
     """
     Reorganizes and renames genes in a dataframe to be consistent with
     another object/organism
 
     Parameters
     ----------
-    df1 : pd.DataFrame
+    df1 : ~pandas.DataFrame
         Dataframe from the first object/organism
-    df2 : pd.DataFrame
+    df2 : ~pandas.DataFrame
         Dataframe from the second object/organism
-    ortho_file : str or pd.DataFrame
-        Path to orthology file between organisms
+    ortho_file : str or ~pandas.DataFrame, Optional
+        Path to orthology file between organisms (default: None)
     keep_locus : bool
-        If True, keep old locus tags as a column
+        If True, keep old locus tags as a column (default: False)
 
     Returns
     -------
-    pd.DataFrame
+    df1_new: :class:`~pandas.DataFrame`
+        M matrix for organism 1 with indexes translated into orthologs
+    df2_new: :class:`~pandas.DataFrame`
         M matrix for organism 2 with indexes translated into orthologs
     """
 
@@ -234,13 +224,7 @@ def convert_gene_index(
 
 
 def compare_ica(
-    M1: pd.DataFrame,
-    M2: pd.DataFrame,
-    ortho_file: Optional[str] = None,
-    cutoff: float = 0.25,
-    method: Union[str, Callable] = "pearson",
-    plot: bool = True,
-    show_all: bool = False,
+    M1, M2, ortho_file=None, cutoff=0.25, method="pearson", plot=True, show_all=False
 ):
     """
     Compares two M matrices between a single organism or across organisms and
@@ -248,26 +232,26 @@ def compare_ica(
 
     Parameters
     ----------
-    M1 : pd.DataFrame
+    M1 : ~pandas.DataFrame
         M matrix from the first organism
-    M2 : pd.DataFrame
+    M2 : ~pandas.DataFrame
         M matrix from the second organism
-    ortho_file : str
-        Path to orthology file between organisms
-    method : str
-        Correlation metric to use (see pd.DataFrame.corr)
+    ortho_file : str, optional
+        Path to orthology file between organisms (default: None)
     cutoff : float
-        Cut off value for correlation metric
+        Cut off value for correlation metric (default: .25)
+    method : str or ~typing.Callable
+        Correlation metric to use (see :meth:`~pandas.DataFrame.corr)
     plot : bool
-        Create dot plot of matches
+        Create dot plot of matches (default: True)
     show_all : bool
-        Show all iModulons regardless of their linkage
+        Show all iModulons regardless of their linkage (default: False)
 
     Returns
     -------
-    matches
+    matches: :obj:`list`
         Links and distances of connected iModulons
-    dot
+    dot: Digraph
         Dot graph of connected iModulons
     """
 
@@ -289,10 +273,10 @@ def compare_ica(
 ####################
 
 
-def make_prots(gbk: str, out_path: str):
+def make_prots(gbk, out_path):
     """
-    Makes protein files for all the genes in the genbank file. Adapted from
-    code by Saugat Poudel
+    Makes protein files for all the genes in the genbank file
+
     Parameters
     ----------
     gbk : str
@@ -302,7 +286,7 @@ def make_prots(gbk: str, out_path: str):
 
     Returns
     -------
-    None
+    None : None
     """
 
     with open(out_path, "w") as fa:
@@ -317,18 +301,18 @@ def make_prots(gbk: str, out_path: str):
                     fa.write(">{}\n{}\n".format(lt, seq))
 
 
-def make_prot_db(fasta_file: os.PathLike):
+def make_prot_db(fasta_file):
     """
     Creates GenBank Databases from Protein FASTA of an organism
 
     Parameters
     ----------
-    fasta_file : str
+    fasta_file : ~os.PathLike
         Path to protein FASTA file
 
     Returns
     -------
-    None
+    None : None
     """
 
     if (
@@ -365,14 +349,14 @@ def make_prot_db(fasta_file: os.PathLike):
 
 # noinspection PyTypeChecker
 def get_bbh(
-    db1: os.PathLike,
-    db2: os.PathLike,
-    outdir: os.PathLike = "bbh",
-    outname: os.PathLike = None,
-    mincov: float = 0.8,
-    evalue: float = 0.001,
-    threads: int = 1,
-    force: bool = False,
+    db1,
+    db2,
+    outdir="bbh",
+    outname=None,
+    mincov=0.8,
+    evalue=0.001,
+    threads=1,
+    force=False,
     savefiles=True,
 ):
     """
@@ -381,16 +365,17 @@ def get_bbh(
 
     Parameters
     ----------
-    db1 : str
+    db1 : ~os.PathLike
         Path to protein FASTA file for organism 1
-    db2 : str
+    db2 : ~os.PathLike
         Path to protein FASTA file for organism 2
-    outdir : str
+    outdir : ~os.PathLike
         Path to output directory (default: "bbh")
-    outname : str
+    outname : ~os.PathLike
         Name of output CSV file (default: <db1>_vs_<db2>_parsed.csv)
     mincov : float
-        Minimum coverage to call hits in BLAST, must be between 0 and 1 (default: 0.8)
+        Minimum coverage to call hits in BLAST, must be between 0 and 1
+        (default: 0.8)
     evalue : float
         E-value threshold for BlAST hist (default: .001)
     threads : int
@@ -398,11 +383,11 @@ def get_bbh(
     force : bool
         If True, overwrite existing files (default: False)
     savefiles : bool
-        If True, save files to <outdir> (default: True)
+        If True, save files to 'outdir' (default: True)
 
     Returns
     -------
-    pd.DataFrame
+    out: ~pandas.DataFrame
         Table of bi-directional BLAST hits between the two organisms
     """
 
@@ -519,7 +504,7 @@ def _get_gene_lens(file_in):
 
     Returns
     -------
-    pd.DataFrame
+    out : ~pandas.DataFrame
         Table of gene lengths
     """
 
@@ -546,7 +531,7 @@ def _run_blastp(db1, db2, out, evalue, threads, force):
     out : str
         Path for BLASTP output
     evalue : float
-        E-value threshold for BlAST hist=
+        E-value threshold for BlAST hits
     threads : int
         Number of threads to use for BLAST
     force : bool
@@ -590,6 +575,7 @@ def _run_blastp(db1, db2, out, evalue, threads, force):
 
 
 def _all_clear(db1, db2, outdir, mincov):
+    """Checks inputs are acceptable"""
     if not 0 < mincov <= 1:
         print("Coverage must be greater than 0 and less than or equal to 1")
         return None
@@ -610,6 +596,7 @@ def _all_clear(db1, db2, outdir, mincov):
 
 
 def _same_output(df1, df2):
+    """Checks that inputs are the same"""
     df1 = df1.reset_index(drop=True)
     df2 = df2.reset_index(drop=True)
     if all(df1.eq(df2)):

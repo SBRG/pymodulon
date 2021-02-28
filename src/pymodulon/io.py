@@ -16,12 +16,16 @@ def save_to_json(data, fname, compress=False):
 
     Parameters
     ----------
-    data: IcaData
+    data: ~pymodulon.core.IcaData
        ICA dataset to be saved to json file
     fname: str
        Path to json file where the data will be saved
     compress: bool
         Indicates if the JSON file should be compressed into a gzip archive
+
+    Returns
+    -------
+    None: None
     """
 
     # only keeps params that are used to initialize the data
@@ -72,13 +76,13 @@ def load_json_model(filename):
 
     Parameters
     ----------
-    filename : str or io._io.StringIO
+    filename : str or ~io._io.StringIO
         File path or descriptor that contains the JSON document describing the
         ICA dataset.
 
     Returns
     -------
-    IcaData
+    IcaData : ~pymodulon.core.IcaData
         The ICA data as represented in the JSON document.
     """
     if isinstance(filename, str):

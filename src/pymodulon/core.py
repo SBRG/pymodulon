@@ -29,72 +29,81 @@ class IcaData(object):
 
     def __init__(
         self,
-        M: Data,
-        A: Data,
-        X: Optional[Data] = None,
-        log_tpm: Optional[Data] = None,
-        gene_table: Optional[Data] = None,
-        sample_table: Optional[Data] = None,
-        imodulon_table: Optional[Data] = None,
-        trn: Optional[Data] = None,
-        dagostino_cutoff: int = 550,
-        optimize_cutoff: bool = False,
-        thresholds: Optional[Union[Dict, Sequence]] = None,
+        M,
+        A,
+        X=None,
+        log_tpm=None,
+        gene_table=None,
+        sample_table=None,
+        imodulon_table=None,
+        trn=None,
+        dagostino_cutoff=550,
+        optimize_cutoff=False,
+        thresholds=None,
         threshold_method="dagostino",
         motif_info=None,
-        dataset_table: Optional[dict] = None,
-        splash_table: Optional[dict] = None,
-        gene_links: Optional[dict] = None,
-        tf_links: Optional[dict] = None,
-        link_database: Optional[str] = "External Database",
+        dataset_table=None,
+        splash_table=None,
+        gene_links=None,
+        tf_links=None,
+        link_database="External Database",
     ):
         """
         Initialize IcaData object
 
         Parameters
         ----------
-        M : Union[str, pd.DataFrame]
-            M matrix from ICA
-        A : Union[str, pd.DataFrame]
-            A matrix from ICA
-        X : Optional[Union[str, pd.DataFrame]]
-            log-TPM expression matrix, centered to reference condition(s)
-        log_tpm : Union[str, pd.DataFrame]
-            Raw log-TPM expression matrix (without centering)
-        gene_table : Union[str, pd.DataFrame]
-            Table containing genome annotation
-        sample_table : Union[str, pd.DataFrame]
-            Table containing sample metadata
-        imodulon_table : Union[str, pd.DataFrame]
-            Table containing iModulon names, enrichments, and annotations
-        trn : Union[str, pd.DataFrame]
-            Table mapping transcriptional regulators to target genes
+        M : str or ~pandas.DataFrame or ~pymodulon.util.Data
+            :class:`~pymodulon.core.M` matrix from ICA
+        A : str or ~pandas.DataFrame or ~pymodulon.util.Data
+            :class:`~pymodulon.core.A` matrix from ICA
+        X : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+            log-TPM expression matrix, centered to reference condition(s) (
+            default: None)
+        log_tpm : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+            Raw 'log-TPM' expression matrix (without centering) (default: None)
+        gene_table : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+            Table containing genome annotation (default: None)
+        sample_table : str or ~pandas.DataFrame or ~pymodulon.util.Data,
+        optional
+            Table containing sample metadata (default: None)
+        imodulon_table : str or ~pandas.DataFrame or ~pymodulon.util.Data,
+        optional
+            Table containing iModulon names, enrichments, and annotations (
+            default: None)
+        trn : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+            Table mapping transcriptional regulators to target genes (
+            default: None)
         dagostino_cutoff : int
             Cutoff value to use for the D'agostino test for iModulon gene
             thresholds. This option will be ignored if optimize_cutoff is True,
-            if threshold_method is "kmeans", or if custom thresholds are provided.
+            if threshold_method is "kmeans", or if custom thresholds are
+            provided. (default: 550)
         optimize_cutoff : bool
-            If true, optimize the D'agostino cutoff for iModulon thresholds using
-            the TRN (if provided). This option will be ignored if threshold_method
-            is "kmeans" or if custom thresholds are provided.
-        thresholds : dict
-            Dictionary mapping custom thresholds to iModulons
+            If true, optimize the D'agostino cutoff for iModulon threshold using
+            the TRN (if provided). This option will be ignored if
+            threshold_method is "kmeans" or if custom thresholds are
+            provided. (default: False)
+        thresholds : dict or ~typing.Sequence, optional
+            Dictionary mapping custom thresholds to iModulons (default: None)
         threshold_method : str
             Either "dagostino" (default with TRN) or "kmeans" (default if no TRN
             provided)
-        dataset_table : dict
+        dataset_table : dict, optional
             Dictionary of general dataset information for the details box on the
-            dataset page of iModulonDB (default provided)
-        splash_table : dict
+            dataset page of iModulonDB (defaul: None)
+        splash_table : dict, optional
             Dictionary of general information for the splash page
             link to this dataset, as well as folder names for where its data
-            is stored in iModulonDB (default provided)
-        gene_links : dict
-            dictionary of genes to links in an external database
-        tf_links : dict
-            Dictionary of TFs (from the TRN) to links in a database
-        link_database : str
-            Name of the database for the gene_links dictionary
+            is stored in iModulonDB (default: None)
+        gene_links : dict, optional
+            dictionary of genes to links in an external database (default: None)
+        tf_links : dict, optional
+            Dictionary of TFs (from the TRN) to links in a database (default:
+            None)
+        link_database : str, optional
+            Name of the database for the gene_links dictionary (default:
+            "External Database"
         """
 
         #########################
@@ -120,7 +129,7 @@ class IcaData(object):
         if A.columns.duplicated().any():
             raise ValueError("A matrix contains duplicate sample names")
         if M.columns.duplicated().any():
-            raise ValueError("M and A matrices contain duplicate iModulon names")
+            raise ValueError("M and A matrices contain " "duplicate iModulon names")
 
         # Store M and A
         self._m = M
@@ -192,7 +201,7 @@ class IcaData(object):
                         "Thresholds cannot be optimized if no TRN is provided."
                     )
                 else:
-                    warn("Optimizing iModulon thresholds, may take 2-3 minutes...")
+                    warn("Optimizing iModulon thresholds, may take 2-3 " "minutes...")
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
@@ -203,7 +212,9 @@ class IcaData(object):
                 self.recompute_thresholds(self.dagostino_cutoff)
         # Capture improper threshold methods
         else:
-            raise ValueError('Threshold method must either be "dagostino" or "kmeans"')
+            raise ValueError(
+                'Threshold method must either be "dagostino" or ' '"kmeans"'
+            )
 
         ##############
         # Motif Info #
@@ -309,7 +320,7 @@ class IcaData(object):
 
     @property
     def log_tpm(self):
-        """ Get log_tpm matrix """
+        """ Get 'log_tpm' matrix """
         return self._log_tpm
 
     @log_tpm.setter
@@ -318,7 +329,7 @@ class IcaData(object):
 
         # Check that gene and sample names conform to M and A matrices
         if log_tpm.columns.tolist() != self.A.columns.tolist():
-            raise ValueError("log-TPM and A matrices have different sample names")
+            raise ValueError("log-TPM and A matrices have different sample " "names")
         if log_tpm.index.tolist() != self.M.index.tolist():
             raise ValueError("log-TPM and M matrices have different gene names")
 
@@ -348,6 +359,7 @@ class IcaData(object):
     # Gene, sample and iModulon tables
     @property
     def gene_table(self):
+        """ Get gene table"""
         return self._gene_table
 
     @gene_table.setter
@@ -364,6 +376,7 @@ class IcaData(object):
 
     @property
     def sample_table(self):
+        """ Get sample table"""
         return self._sample_table
 
     @sample_table.setter
@@ -380,6 +393,7 @@ class IcaData(object):
 
     @property
     def imodulon_table(self):
+        """ Get table of iModulons"""
         return self._imodulon_table
 
     @imodulon_table.setter
@@ -390,6 +404,7 @@ class IcaData(object):
     # TRN
     @property
     def trn(self):
+        """ Get table with TRN information"""
         return self._trn
 
     @trn.setter
@@ -438,6 +453,7 @@ class IcaData(object):
     # Motif information
     @property
     def motif_info(self):
+        """ Get motif info"""
         return self._motif_info
 
     @motif_info.setter
@@ -445,7 +461,18 @@ class IcaData(object):
         self._motif_info = info
 
     def _update_imodulon_names(self, new_names):
+        """
+        Iterates and updates iModulon names
 
+        Parameters
+        ----------
+        new_names: list
+            New names to update iModulons
+
+        Returns
+        -------
+        None: None
+        """
         name_series = pd.Series(new_names, index=self.imodulon_names)
 
         # Check if new names are duplicates
@@ -477,7 +504,7 @@ class IcaData(object):
         self._m.columns = final_names
         self._imodulon_table.index = final_names
 
-    def rename_imodulons(self, name_dict: Dict = None, column=None) -> None:
+    def rename_imodulons(self, name_dict=None, column=None) -> None:
         """
         Rename an iModulon.
 
@@ -485,13 +512,14 @@ class IcaData(object):
         ----------
         name_dict : dict
             Dictionary mapping old iModulon names to new names
-            (e.g. {old_name:new_name})
+            (e.g. {old_name:new_name}) (default: None)
         column : str
-            Uses a column from the iModulon table to rename iModulons
+            Uses a column from the iModulon table to rename iModulons (
+            default: None)
 
         Returns
         -------
-        None
+        None: None
         """
 
         # Rename using the column parameter if given
@@ -510,18 +538,18 @@ class IcaData(object):
         self._update_imodulon_names(new_names)
 
     # Show enriched
-    def view_imodulon(self, imodulon: Union[int, str]):
+    def view_imodulon(self, imodulon):
         """
         View genes in an iModulon and show relevant information about each gene.
 
         Parameters
         ----------
-        imodulon
+        imodulon : int or str
             Name of iModulon
 
         Returns
         -------
-        pd.DataFrame
+        final_rows: ~pandas.DataFrame
             Table showing iModulon gene information
 
         """
@@ -537,7 +565,7 @@ class IcaData(object):
 
         return final_rows
 
-    def find_single_gene_imodulons(self, save: bool = False) -> List:
+    def find_single_gene_imodulons(self, save) -> List:
         """
         A simple function that returns the names of all likely single-gene
         iModulons. Checks if the largest iModulon gene weight is more
@@ -546,11 +574,11 @@ class IcaData(object):
         Parameters
         ----------
         save : bool
-            If true, save output to imodulon_table
+            If true, save output to imodulon_table (default: False)
 
         Returns
         -------
-        list
+        single_genes_imodulons: list
             List of single-gene iModulons
         """
 
@@ -573,12 +601,12 @@ class IcaData(object):
 
         Parameters
         ----------
-        enrichment : Union[pd.Series, pd.DataFrame]
+        enrichment : ~pandas.Series or ~pandas.DataFrame
             iModulon enrichment
 
         Returns
         -------
-        None
+        None: None
         """
         if isinstance(enrichment, pd.Series):
             enrichment = pd.DataFrame(enrichment)
@@ -601,31 +629,28 @@ class IcaData(object):
         self.imodulon_table = new_table
 
     def compute_regulon_enrichment(
-        self,
-        imodulon: Union[int, str],
-        regulator: str,
-        save: bool = False,
-        evidence: Union[list, str] = None,
+        self, imodulon, regulator, save=False, evidence=None
     ):
         """
-        Compare an iModulon against a regulon. (Note: q-values cannot be computed
-        for single enrichments)
+        Compare an iModulon against a regulon. (Note: q-values cannot be
+        computed for single enrichments)
 
         Parameters
         ----------
-        imodulon : Union[int, str]
-            Name of iModulon
+        imodulon : int or str
+            Name of 'iModulon'
         regulator : str
-            TF name, or complex regulon, where "/" uses genes in any regulon and "+"
-            uses genes in all regulons
+            TF name, or complex regulon, where "/" uses genes in any regulon
+            and "+" uses genes in all regulons
         save : bool
-            If true, save enrichment score to the imodulon_table
-        evidence: Union[list, str]
-            Evidence level of TRN interactions to include during TRN enrichment
+            If true, save enrichment score to the imodulon_table (default: True)
+        evidence: list or str
+            'Evidence' level of TRN interactions to include during TRN
+            enrichment (default: None)
 
         Returns
         -------
-        pd.Series
+        enrich: ~pandas.Series
             Table containing enrichment statistics
         """
 
@@ -661,28 +686,31 @@ class IcaData(object):
 
     def compute_trn_enrichment(
         self,
-        imodulons: Optional[Union[int, str, Sequence]] = None,
-        fdr: float = 1e-5,
-        max_regs: int = 1,
-        save: bool = False,
-        method: str = "both",
-        force: bool = False,
-        evidence: Union[list, str] = None,
+        imodulons=None,
+        fdr=1e-5,
+        max_regs=1,
+        save=False,
+        method="both",
+        force=False,
+        evidence=None,
     ) -> pd.DataFrame:
+
         """
         Compare iModulons against all regulons in the TRN
 
         Parameters
         ----------
-        imodulons: Union[Sequence, str, int]
+        imodulons: ~typing.Sequence or int or str
             Name of iModulon(s). If none given, compute enrichments for all
-            iModulons
+            'iModulons' (default: None)
         fdr : float
             False detection rate (default: 1e-5)
         max_regs : int
-            Maximum number of regulators to include in complex regulon (default: 1)
+            Maximum number of regulators to include in complex regulon (
+            default: 1)
         save : bool
-            Save regulons with highest enrichment scores to the imodulon_table
+            Save regulons with highest enrichment scores to the
+            imodulon_table (default: False)
         method : str
             How to combine multiple regulators  (default: 'both').
             'or' computes enrichment against union of regulons,
@@ -690,12 +718,12 @@ class IcaData(object):
             'both' performs both tests
         force : bool
             If false, prevents computation of >2 regulators (default: False)
-        evidence: Union[list, str]
+        evidence: list or str
             Evidence level of TRN interactions to include during TRN enrichment
 
         Returns
         -------
-        pd.DataFrame
+        df_enriched: ~pandas.DataFrame
             Table of statistically significant enrichments
         """
 
@@ -764,31 +792,27 @@ class IcaData(object):
         return df_enriched
 
     def compute_annotation_enrichment(
-        self,
-        annotation: pd.DataFrame,
-        column: str,
-        imodulons: Optional[Union[int, str, Sequence]] = None,
-        fdr: float = 0.1,
+        self, annotation, column, imodulons=None, fdr=0.1
     ) -> pd.DataFrame:
         """
         Compare iModulons against a gene annotation table
 
         Parameters
         ----------
-        annotation : pd.DataFrame
-            Table containing two columns: the gene locus tag, and its appropriate
-            annotation
+        annotation : ~pandas.DataFrame
+            Table containing two columns: the gene locus tag, and its
+            appropriate annotation
         column : str
             Name of the column containing the annotation
-        imodulons : Union[List, int, str]
+        imodulons : ~typing.List or str or int
             Name of iModulon(s). If none given, compute enrichments for all
-            iModulons
+            iModulons (default: None)
         fdr : float
             False detection rate (default: 0.1)
 
         Returns
         -------
-        pd.DataFrame
+        DF_enriched: pandas.DataFrame
             Table of statistically significant enrichments
         """
 
@@ -847,6 +871,7 @@ class IcaData(object):
 
     @property
     def dagostino_cutoff(self):
+        """ Get D'agostino cutoff"""
         return self._dagostino_cutoff
 
     @property
@@ -886,26 +911,26 @@ class IcaData(object):
         else:
             raise TypeError("new_thresholds must be list or dict")
 
-    def change_threshold(self, imodulon: Union[int, str], value):
+    def change_threshold(self, imodulon, value):
         """
         Set threshold for an iModulon
 
         Parameters
         ----------
-        imodulon : Union[int, str]
+        imodulon : int or str
             Name of iModulon
         value : float
             New threshold
 
         Returns
         -------
-        None
+        None: None
         """
 
         self._thresholds[imodulon] = value
         self._cutoff_optimized = False
 
-    def recompute_thresholds(self, dagostino_cutoff: int):
+    def recompute_thresholds(self, dagostino_cutoff):
         """
         Re-computes iModulon thresholds using a new D'Agostino cutoff
 
@@ -916,7 +941,7 @@ class IcaData(object):
 
         Returns
         -------
-        None
+        None: None
         """
         self._update_thresholds(dagostino_cutoff)
         self._cutoff_optimized = False
@@ -954,7 +979,7 @@ class IcaData(object):
 
         Returns
         -------
-        None
+        None: None
         """
 
         self._thresholds = {k: self._kmeans_cluster(k) for k in self._imodulon_names}
@@ -1089,7 +1114,7 @@ class IcaData(object):
 
         Returns
         -------
-        IcaData
+        IcaData: pandas.IcaData
             Copy of IcaData object
         """
 
@@ -1116,18 +1141,19 @@ class IcaData(object):
 
         return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
 
-    def name2num(self, gene: Union[Sequence[str], str]) -> Union[Sequence[str], str]:
+    def name2num(self, gene) -> Union[Sequence[str], str]:
         """
         Convert a gene name to the locus tag
 
         Parameters
         ----------
-        gene : Union[List[str],str]
+        gene : typing.Sequence or str
             Gene name or list of gene names
 
         Returns
         -------
-        Locus tag or list of locus tags
+        final_list : ~typing.Sequence or str
+            Locus tag or list of locus tags
         """
 
         gene_table = self.gene_table
@@ -1167,12 +1193,13 @@ class IcaData(object):
 
         Parameters
         ----------
-        gene : Union[List[str], str]
+        gene : ~typing.Sequence or str
             Locus tag or list of locus tags
 
         Returns
         -------
-        Gene name or list of gene names
+        result : ~typing.Sequence or str
+            Gene name or list of gene names
         """
 
         result = self.gene_table.loc[gene].gene_name
