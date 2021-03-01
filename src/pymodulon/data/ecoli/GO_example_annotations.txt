@@ -1,0 +1,300 @@
+UniProtKB	P17445	betB		GO:0008802	GO_REF:0000003	IEA	EC:1.2.1.8	F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20191012	UniProt		PR:P17445	betaine-aldehyde dehydrogenase activity
+UniProtKB	P17445	betB		GO:0008802	GO_REF:0000002	IEA	InterPro:IPR011264	F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20191012	InterPro		PR:P17445	betaine-aldehyde dehydrogenase activity
+UniProtKB	P17445	betB		GO:0008802	PMID:2194570	IDA		F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17445	betaine-aldehyde dehydrogenase activity
+UniProtKB	P17445	betB		GO:0008802	PMID:3512525	IDA		F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17445	betaine-aldehyde dehydrogenase activity
+UniProtKB	P17445	betB		GO:0006970	PMID:3512525	IEP		P	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17445	response to osmotic stress
+UniProtKB	P17445	betB		GO:0006970	PMID:3065456	IEP		P	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17445	response to osmotic stress
+UniProtKB	P17445	betB		GO:0004029	PMID:21873635	IBA	PANTHER:PTN000192421|MGI:MGI:1861722|UniProtKB:P17445|SGD:S000005901|UniProtKB:P48644|UniProtKB:P49189|FB:FBgn0012036|RGD:2087|UniProtKB:P08157|UniProtKB:P05091|RGD:620252|SGD:S000000875|UniProtKB:P00352|RGD:68409|RGD:69219	F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20170228	GO_Central			aldehyde dehydrogenase (NAD+) activity
+UniProtKB	P17445	betB		GO:0008802	PMID:21873635	IBA	PANTHER:PTN000193442|UniProtKB:P17445	F	betaine aldehyde dehydrogenase	b0312|ECK0310	protein	NCBITaxon:83333	20170228	GO_Central			betaine-aldehyde dehydrogenase activity
+UniProtKB	P17444	betA		GO:0008802	GO_REF:0000003	IEA	EC:1.2.1.8	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	betaine-aldehyde dehydrogenase activity
+UniProtKB	P17444	betA		GO:0016614	GO_REF:0000002	IEA	InterPro:IPR000172|InterPro:IPR007867|InterPro:IPR012132	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	InterPro		PR:P17444	oxidoreductase activity, acting on CH-OH group of donors
+UniProtKB	P17444	betA		GO:0016491	GO_REF:0000043	IEA	SP_KW:KW-0560	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	oxidoreductase activity
+UniProtKB	P17444	betA		GO:0050660	GO_REF:0000002	IEA	InterPro:IPR000172|InterPro:IPR012132	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	InterPro		PR:P17444	flavin adenine dinucleotide binding
+UniProtKB	P17444	betA		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0039	C	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	plasma membrane
+UniProtKB	P17444	betA		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	plasma membrane
+UniProtKB	P17444	betA		GO:0019285	GO_REF:0000104	IEA	UniRule:UR000100055	P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	glycine betaine biosynthetic process from choline
+UniProtKB	P17444	betA		GO:0019285	GO_REF:0000041	IEA	UniPathway:UPA00529	P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	glycine betaine biosynthetic process from choline
+UniProtKB	P17444	betA		GO:0019285	GO_REF:0000002	IEA	InterPro:IPR011533	P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	InterPro		PR:P17444	glycine betaine biosynthetic process from choline
+UniProtKB	P17444	betA		GO:0019285	PMID:3512526	IMP		P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	glycine betaine biosynthetic process from choline
+UniProtKB	P17444	betA		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	membrane
+UniProtKB	P17444	betA		GO:0016020	PMID:3512525	IDA		C	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	membrane
+UniProtKB	P17444	betA		GO:0008812	GO_REF:0000104	IEA	UniRule:UR000100055	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	choline dehydrogenase activity
+UniProtKB	P17444	betA		GO:0008812	GO_REF:0000003	IEA	EC:1.1.99.1	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	UniProt		PR:P17444	choline dehydrogenase activity
+UniProtKB	P17444	betA		GO:0008812	GO_REF:0000002	IEA	InterPro:IPR011533	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20191012	InterPro		PR:P17444	choline dehydrogenase activity
+UniProtKB	P17444	betA		GO:0008812	PMID:3512525	IDA		F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	choline dehydrogenase activity
+UniProtKB	P17444	betA		GO:0006970	PMID:3512526	IMP		P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	response to osmotic stress
+UniProtKB	P17444	betA		GO:0006970	PMID:3512525	IEP		P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	response to osmotic stress
+UniProtKB	P17444	betA		GO:0006970	PMID:8626294	IEP		P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20101007	EcoCyc		PR:P17444	response to osmotic stress
+UniProtKB	P17444	betA		GO:0019285	PMID:21873635	IBA	PANTHER:PTN001694860|UniProtKB:P17444	P	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20200626	GO_Central			glycine betaine biosynthetic process from choline
+UniProtKB	P17444	betA		GO:0016491	PMID:21873635	IBA	PANTHER:PTN000167771|FB:FBgn0037896|RGD:735166|FB:FBgn0030597|UniProtKB:P17444	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20200626	GO_Central			oxidoreductase activity
+UniProtKB	P17444	betA		GO:0016020	PMID:21873635	IBA	PANTHER:PTN001694860|UniProtKB:P17444	C	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20200626	GO_Central			membrane
+UniProtKB	P17444	betA		GO:0008812	PMID:21873635	IBA	PANTHER:PTN001694860|UniProtKB:P17444	F	choline dehydrogenase	b0311|ECK0309	protein	NCBITaxon:83333	20200626	GO_Central			choline dehydrogenase activity
+UniProtKB	P17443	murG		GO:0050511	PMID:1649817	IDA		F			gene	NCBITaxon:83333	20110815	EcoliWiki			undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0050511	PMID:1649817	IMP		F			gene	NCBITaxon:83333	20110815	EcoliWiki			undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0005515	PMID:17640276	IPI	UniProtKB:P0A9X4	F			gene	NCBITaxon:83333	20180516	EcoCyc		PR:P17443	protein binding
+UniProtKB	P17443	murG		GO:0005515	PMID:24561554	IPI	UniProtKB:P0AGJ5	F			gene	NCBITaxon:83333	20170921	IntAct		PR:P17443	protein binding
+UniProtKB	P17443	murG		GO:0005515	PMID:15690043	IPI	UniProtKB:P0AGJ5	F			gene	NCBITaxon:83333	20170921	IntAct		PR:P17443	protein binding
+UniProtKB	P17443	murG		GO:0005975	GO_REF:0000002	IEA	InterPro:IPR004276	P			gene	NCBITaxon:83333	20191012	InterPro		PR:P17443	carbohydrate metabolic process
+UniProtKB	P17443	murG		GO:0071555	GO_REF:0000043	IEA	SP_KW:KW-0961	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	cell wall organization
+UniProtKB	P17443	murG		GO:0016758	GO_REF:0000002	IEA	InterPro:IPR004276|InterPro:IPR007235	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P17443	transferase activity, transferring hexosyl groups
+UniProtKB	P17443	murG		GO:0016757	GO_REF:0000043	IEA	SP_KW:KW-0328	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	transferase activity, transferring glycosyl groups
+UniProtKB	P17443	murG		GO:0016740	GO_REF:0000043	IEA	SP_KW:KW-0808	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	transferase activity
+UniProtKB	P17443	murG		GO:0030259	GO_REF:0000104	IEA	UniRule:UR000036431	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	lipid glycosylation
+UniProtKB	P17443	murG		GO:0030259	GO_REF:0000002	IEA	InterPro:IPR004276	P			gene	NCBITaxon:83333	20191012	InterPro		PR:P17443	lipid glycosylation
+UniProtKB	P17443	murG		GO:0051991	GO_REF:0000003	IEA	EC:2.4.1.227	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	UDP-N-acetyl-D-glucosamine:N-acetylmuramoyl-L-alanyl-D-glutamyl-meso-2,6-diaminopimelyl-D-alanyl-D-alanine-diphosphoundecaprenol 4-beta-N-acetylglucosaminlytransferase activity
+UniProtKB	P17443	murG		GO:0005886	GO_REF:0000104	IEA	UniRule:UR000036431	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	plasma membrane
+UniProtKB	P17443	murG		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0037	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	plasma membrane
+UniProtKB	P17443	murG		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	plasma membrane
+UniProtKB	P17443	murG		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-0997	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	plasma membrane
+UniProtKB	P17443	murG		GO:0051301	GO_REF:0000043	IEA	SP_KW:KW-0132	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	cell division
+UniProtKB	P17443	murG		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	membrane
+UniProtKB	P17443	murG		GO:0008360	GO_REF:0000043	IEA	SP_KW:KW-0133	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	regulation of cell shape
+UniProtKB	P17443	murG		GO:0050511	GO_REF:0000104	IEA	UniRule:UR000036431	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0050511	GO_REF:0000003	IEA	EC:2.4.1.227	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0050511	GO_REF:0000002	IEA	InterPro:IPR006009	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P17443	undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0050511	PMID:1649817	IMP		F			gene	NCBITaxon:83333	20071022	EcoCyc		PR:P17443	undecaprenyldiphospho-muramoylpentapeptide beta-N-acetylglucosaminyltransferase activity
+UniProtKB	P17443	murG		GO:0009252	GO_REF:0000104	IEA	UniRule:UR000036431	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	peptidoglycan biosynthetic process
+UniProtKB	P17443	murG		GO:0009252	GO_REF:0000041	IEA	UniPathway:UPA00219	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	peptidoglycan biosynthetic process
+UniProtKB	P17443	murG		GO:0009252	GO_REF:0000043	IEA	SP_KW:KW-0573	P			gene	NCBITaxon:83333	20191012	UniProt		PR:P17443	peptidoglycan biosynthetic process
+UniProtKB	P17443	murG		GO:0009252	PMID:1649817	IMP		P			gene	NCBITaxon:83333	20071022	EcoCyc		PR:P17443	peptidoglycan biosynthetic process
+UniProtKB	P00550	mtlA		GO:0034219	GO_REF:0000108	IEA	GO:0090565	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191013	GOC		PR:P00550	carbohydrate transmembrane transport
+UniProtKB	P00550	mtlA		GO:0034219	GO_REF:0000108	IEA	GO:0008982	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191013	GOC		PR:P00550	carbohydrate transmembrane transport
+UniProtKB	P00550	mtlA		GO:0022872	GO_REF:0000002	IEA	InterPro:IPR029503	F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	InterPro		PR:P00550	protein-N(PI)-phosphohistidine-mannitol phosphotransferase system transmembrane transporter activity
+UniProtKB	P00550	mtlA		GO:0015795	PMID:1100608	IGI		P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140506	EcoCyc		PR:P00550	sorbitol transport
+UniProtKB	P00550	mtlA		GO:0090565	PMID:6350293	IDA		F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140415	EcoCyc		PR:P00550	protein-phosphocysteine-mannitol phosphotransferase system transporter activity
+UniProtKB	P00550	mtlA		GO:0090565	PMID:3142516	IDA		F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140415	EcoCyc		PR:P00550	protein-phosphocysteine-mannitol phosphotransferase system transporter activity
+UniProtKB	P00550	mtlA		GO:0005887	PMID:6338009	IDA		C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	integral component of plasma membrane
+UniProtKB	P00550	mtlA		GO:0005887	PMID:1946374	IDA		C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	integral component of plasma membrane
+UniProtKB	P00550	mtlA		GO:0015797	PMID:6350293	IDA		P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	mannitol transport
+UniProtKB	P00550	mtlA		GO:0015797	PMID:2496114	IMP		P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	mannitol transport
+UniProtKB	P00550	mtlA		GO:0016310	GO_REF:0000043	IEA	SP_KW:KW-0418	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	phosphorylation
+UniProtKB	P00550	mtlA		GO:0016301	GO_REF:0000043	IEA	SP_KW:KW-0418	F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	kinase activity
+UniProtKB	P00550	mtlA		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0037	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-0997	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0005886	PMID:17309111	IDA		C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0005886	PMID:15919996	IDA		C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0005886	PMID:15911532	IDA		C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P00550	plasma membrane
+UniProtKB	P00550	mtlA		GO:0016740	GO_REF:0000043	IEA	SP_KW:KW-0808	F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	transferase activity
+UniProtKB	P00550	mtlA		GO:0016021	GO_REF:0000043	IEA	SP_KW:KW-0812	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	integral component of membrane
+UniProtKB	P00550	mtlA		GO:0016021	GO_REF:0000002	IEA	InterPro:IPR004718	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	InterPro		PR:P00550	integral component of membrane
+UniProtKB	P00550	mtlA		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	membrane
+UniProtKB	P00550	mtlA		GO:0016020	GO_REF:0000002	IEA	InterPro:IPR003352	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	InterPro		PR:P00550	membrane
+UniProtKB	P00550	mtlA		GO:0008982	GO_REF:0000002	IEA	InterPro:IPR003352|InterPro:IPR003501|InterPro:IPR004718|InterPro:IPR013011|InterPro:IPR036095	F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	InterPro		PR:P00550	protein-N(PI)-phosphohistidine-sugar phosphotransferase activity
+UniProtKB	P00550	mtlA		GO:0008643	GO_REF:0000043	IEA	SP_KW:KW-0762	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	carbohydrate transport
+UniProtKB	P00550	mtlA		GO:0009401	GO_REF:0000043	IEA	SP_KW:KW-0598	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	UniProt		PR:P00550	phosphoenolpyruvate-dependent sugar phosphotransferase system
+UniProtKB	P00550	mtlA		GO:0009401	GO_REF:0000002	IEA	InterPro:IPR003352|InterPro:IPR003501|InterPro:IPR004718|InterPro:IPR013011|InterPro:IPR029503|InterPro:IPR036095	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20191012	InterPro		PR:P00550	phosphoenolpyruvate-dependent sugar phosphotransferase system
+UniProtKB	P00550	mtlA		GO:0009401	PMID:6350293	IDA		P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	phosphoenolpyruvate-dependent sugar phosphotransferase system
+UniProtKB	P00550	mtlA		GO:0009401	PMID:2496114	IMP		P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20140313	EcoCyc		PR:P00550	phosphoenolpyruvate-dependent sugar phosphotransferase system
+UniProtKB	P00550	mtlA		GO:0090563	PMID:21873635	IBA	PANTHER:PTN001249496|UniProtKB:P00550	F	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20170228	GO_Central			protein-phosphocysteine-sugar phosphotransferase activity
+UniProtKB	P00550	mtlA		GO:0009401	PMID:21873635	IBA	PANTHER:PTN001249496|UniProtKB:P69811|UniProtKB:P00550	P	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20170228	GO_Central			phosphoenolpyruvate-dependent sugar phosphotransferase system
+UniProtKB	P00550	mtlA		GO:0005886	PMID:21873635	IBA	PANTHER:PTN001249496|UniProtKB:P00550|UniProtKB:P69811	C	mannitol-specific PTS enzyme IICBA component	mtlC|b3599|ECK3588	protein	NCBITaxon:83333	20200809	GO_Central			plasma membrane
+UniProtKB	P45551	yhfY		GO:0006355	GO_REF:0000002	IEA	InterPro:IPR011608|InterPro:IPR036634	P	PRD domain-containing protein YhfY	b3382|ECK3369	protein	NCBITaxon:83333	20191012	InterPro		PR:P45551	regulation of transcription, DNA-templated
+UniProtKB	P00547	thrB		GO:0016740	GO_REF:0000043	IEA	SP_KW:KW-0808	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	transferase activity
+UniProtKB	P00547	thrB		GO:0016301	GO_REF:0000043	IEA	SP_KW:KW-0418	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	kinase activity
+UniProtKB	P00547	thrB		GO:0008652	GO_REF:0000043	IEA	SP_KW:KW-0028	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	cellular amino acid biosynthetic process
+UniProtKB	P00547	thrB		GO:0006566	GO_REF:0000002	IEA	InterPro:IPR000870	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	InterPro		PR:P00547	threonine metabolic process
+UniProtKB	P00547	thrB		GO:0005829	PMID:18304323	IDA		C	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P00547	cytosol
+UniProtKB	P00547	thrB		GO:0005829	PMID:15911532	IDA		C	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P00547	cytosol
+UniProtKB	P00547	thrB		GO:0016310	GO_REF:0000043	IEA	SP_KW:KW-0418	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	phosphorylation
+UniProtKB	P00547	thrB		GO:0005524	GO_REF:0000104	IEA	UniRule:UR000084185	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	ATP binding
+UniProtKB	P00547	thrB		GO:0005524	GO_REF:0000043	IEA	SP_KW:KW-0067	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	ATP binding
+UniProtKB	P00547	thrB		GO:0005524	GO_REF:0000002	IEA	InterPro:IPR000870|InterPro:IPR006203|InterPro:IPR006204	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	InterPro		PR:P00547	ATP binding
+UniProtKB	P00547	thrB		GO:0000166	GO_REF:0000043	IEA	SP_KW:KW-0547	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	nucleotide binding
+UniProtKB	P00547	thrB		GO:0004413	GO_REF:0000104	IEA	UniRule:UR000084185	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	homoserine kinase activity
+UniProtKB	P00547	thrB		GO:0004413	GO_REF:0000003	IEA	EC:2.7.1.39	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	homoserine kinase activity
+UniProtKB	P00547	thrB		GO:0004413	GO_REF:0000002	IEA	InterPro:IPR000870	F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	InterPro		PR:P00547	homoserine kinase activity
+UniProtKB	P00547	thrB		GO:0004413	PMID:177283	IDA		F	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20101208	EcoCyc		PR:P00547	homoserine kinase activity
+UniProtKB	P00547	thrB		GO:0009088	GO_REF:0000104	IEA	UniRule:UR000084185	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	threonine biosynthetic process
+UniProtKB	P00547	thrB		GO:0009088	GO_REF:0000041	IEA	UniPathway:UPA00050	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	threonine biosynthetic process
+UniProtKB	P00547	thrB		GO:0009088	GO_REF:0000043	IEA	SP_KW:KW-0791	P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	threonine biosynthetic process
+UniProtKB	P00547	thrB		GO:0009088	PMID:4364333	IMP		P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20101208	EcoCyc		PR:P00547	threonine biosynthetic process
+UniProtKB	P00547	thrB		GO:0009088	PMID:4148765	IMP		P	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20101208	EcoCyc		PR:P00547	threonine biosynthetic process
+UniProtKB	P00547	thrB		GO:0005737	GO_REF:0000104	IEA	UniRule:UR000084185	C	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	cytoplasm
+UniProtKB	P00547	thrB		GO:0005737	GO_REF:0000044	IEA	SP_SL:SL-0086	C	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	cytoplasm
+UniProtKB	P00547	thrB		GO:0005737	GO_REF:0000043	IEA	SP_KW:KW-0963	C	homoserine kinase	b0003|ECK0003	protein	NCBITaxon:83333	20191012	UniProt		PR:P00547	cytoplasm
+UniProtKB	P45549	yhfW		GO:0043094	GO_REF:0000002	IEA	InterPro:IPR010045	P	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	cellular metabolic compound salvage
+UniProtKB	P45549	yhfW		GO:0009117	GO_REF:0000002	IEA	InterPro:IPR010045	P	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	nucleotide metabolic process
+UniProtKB	P45549	yhfW		GO:0008973	GO_REF:0000002	IEA	InterPro:IPR010045|InterPro:IPR024052	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	phosphopentomutase activity
+UniProtKB	P45549	yhfW		GO:0005737	GO_REF:0000002	IEA	InterPro:IPR010045	C	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	cytoplasm
+UniProtKB	P45549	yhfW		GO:0003824	GO_REF:0000002	IEA	InterPro:IPR006124|InterPro:IPR017850	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	catalytic activity
+UniProtKB	P45549	yhfW		GO:0000287	GO_REF:0000002	IEA	InterPro:IPR010045	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	magnesium ion binding
+UniProtKB	P45549	yhfW		GO:0046872	GO_REF:0000043	IEA	SP_KW:KW-0479	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	UniProt		PR:P45549	metal ion binding
+UniProtKB	P45549	yhfW		GO:0046872	GO_REF:0000002	IEA	InterPro:IPR006124	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20191012	InterPro		PR:P45549	metal ion binding
+UniProtKB	P45549	yhfW		GO:0008973	PMID:21873635	IBA	PANTHER:PTN000473768|UniProtKB:P0A6K6	F	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20170228	GO_Central			phosphopentomutase activity
+UniProtKB	P45549	yhfW		GO:0005829	PMID:21873635	IBA	PANTHER:PTN000473768|UniProtKB:P0A6K6	C	putative mutase YhfW	b3380|ECK3367	protein	NCBITaxon:83333	20170228	GO_Central			cytosol
+UniProtKB	P45548	php		GO:0046872	GO_REF:0000043	IEA	SP_KW:KW-0479	F	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20191012	UniProt		PR:P45548	metal ion binding
+UniProtKB	P45548	php		GO:0016788	GO_REF:0000002	IEA	InterPro:IPR017947	F	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20191012	InterPro		PR:P45548	hydrolase activity, acting on ester bonds
+UniProtKB	P45548	php		GO:0009056	GO_REF:0000002	IEA	InterPro:IPR001559|InterPro:IPR017947	P	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20191012	InterPro		PR:P45548	catabolic process
+UniProtKB	P45548	php		GO:0016787	GO_REF:0000043	IEA	SP_KW:KW-0378	F	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20191012	UniProt		PR:P45548	hydrolase activity
+UniProtKB	P45548	php		GO:0008270	GO_REF:0000002	IEA	InterPro:IPR001559|InterPro:IPR017947	F	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20191012	InterPro		PR:P45548	zinc ion binding
+UniProtKB	P45548	php		GO:0008270	PMID:9548740	IDA		F	putative hydrolase	yhfV|b3379|ECK3366	protein	NCBITaxon:83333	20100818	EcoCyc		PR:P45548	zinc ion binding
+UniProtKB	P45546	yhfT		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0039	C	uncharacterized protein YhfT	b3377|ECK3364	protein	NCBITaxon:83333	20191012	UniProt		PR:P45546	plasma membrane
+UniProtKB	P45546	yhfT		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	uncharacterized protein YhfT	b3377|ECK3364	protein	NCBITaxon:83333	20191012	UniProt		PR:P45546	plasma membrane
+UniProtKB	P45546	yhfT		GO:0005886	PMID:15919996	IDA		C	uncharacterized protein YhfT	b3377|ECK3364	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P45546	plasma membrane
+UniProtKB	P45546	yhfT		GO:0016021	GO_REF:0000043	IEA	SP_KW:KW-0812	C	uncharacterized protein YhfT	b3377|ECK3364	protein	NCBITaxon:83333	20191012	UniProt		PR:P45546	integral component of membrane
+UniProtKB	P45546	yhfT		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	uncharacterized protein YhfT	b3377|ECK3364	protein	NCBITaxon:83333	20191012	UniProt		PR:P45546	membrane
+UniProtKB	P45545	yhfS		GO:0030170	GO_REF:0000002	IEA	InterPro:IPR004839	F	putative aminotransferase YhfS	b3376|ECK3363	protein	NCBITaxon:83333	20191012	InterPro		PR:P45545	pyridoxal phosphate binding
+UniProtKB	P45545	yhfS		GO:0009058	GO_REF:0000002	IEA	InterPro:IPR004839	P	putative aminotransferase YhfS	b3376|ECK3363	protein	NCBITaxon:83333	20191012	InterPro		PR:P45545	biosynthetic process
+UniProtKB	P45545	yhfS		GO:0003824	GO_REF:0000002	IEA	InterPro:IPR015421	F	putative aminotransferase YhfS	b3376|ECK3363	protein	NCBITaxon:83333	20191012	InterPro		PR:P45545	catalytic activity
+UniProtKB	P45544	frlR		GO:0005515	PMID:15690043	IPI	UniProtKB:P14294	F	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20170921	IntAct		PR:P45544	protein binding
+UniProtKB	P45544	frlR		GO:0003700	GO_REF:0000002	IEA	InterPro:IPR000524	F	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20191012	InterPro		PR:P45544	DNA-binding transcription factor activity
+UniProtKB	P45544	frlR		GO:0006355	GO_REF:0000002	IEA	InterPro:IPR000524|InterPro:IPR011663	P	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20191012	InterPro		PR:P45544	regulation of transcription, DNA-templated
+UniProtKB	P45544	frlR		GO:0003677	GO_REF:0000043	IEA	SP_KW:KW-0238	F	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20191012	UniProt		PR:P45544	DNA binding
+UniProtKB	P45544	frlR		GO:0003677	GO_REF:0000002	IEA	InterPro:IPR011663	F	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20191012	InterPro		PR:P45544	DNA binding
+UniProtKB	P45544	frlR		GO:0006351	PMID:10734204	ISS	Swiss-Prot:P0ACP5	P	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20110513	EcoCyc		PR:P45544	transcription, DNA-templated
+UniProtKB	P45544	frlR		GO:0006351	PMID:15556475	ISS	Swiss-Prot:P0ACP5	P	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20091020	EcoCyc		PR:P45544	transcription, DNA-templated
+UniProtKB	P45544	frlR		GO:0045892	PMID:21873635	IBA	PANTHER:PTN000746727|UniProtKB:P13669	P	putative DNA-binding transcriptional regulator FrlR	yhfR|b3375|ECK3362	protein	NCBITaxon:83333	20180118	GO_Central			negative regulation of transcription, DNA-templated
+UniProtKB	P45543	frlD		GO:0046835	GO_REF:0000108	IEA	GO:0019200	P	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191013	GOC		PR:P45543	carbohydrate phosphorylation
+UniProtKB	P45543	frlD		GO:0019200	PMID:12147680	IDA		F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20161107	EcoCyc		PR:P45543	carbohydrate kinase activity
+UniProtKB	P45543	frlD		GO:0005515	PMID:24561554	IPI	UniProtKB:P0AG07	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20140512	IntAct		PR:P45543	protein binding
+UniProtKB	P45543	frlD		GO:0005515	PMID:24561554	IPI	UniProtKB:P05704	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20140512	IntAct		PR:P45543	protein binding
+UniProtKB	P45543	frlD		GO:0005515	PMID:15690043	IPI	UniProtKB:P0AG07	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20140512	IntAct		PR:P45543	protein binding
+UniProtKB	P45543	frlD		GO:0016740	GO_REF:0000043	IEA	SP_KW:KW-0808	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	UniProt		PR:P45543	transferase activity
+UniProtKB	P45543	frlD		GO:0016773	GO_REF:0000002	IEA	InterPro:IPR002173	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	InterPro		PR:P45543	phosphotransferase activity, alcohol group as acceptor
+UniProtKB	P45543	frlD		GO:0016310	GO_REF:0000043	IEA	SP_KW:KW-0418	P	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	UniProt		PR:P45543	phosphorylation
+UniProtKB	P45543	frlD		GO:0005524	GO_REF:0000043	IEA	SP_KW:KW-0067	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	UniProt		PR:P45543	ATP binding
+UniProtKB	P45543	frlD		GO:0000166	GO_REF:0000043	IEA	SP_KW:KW-0547	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	UniProt		PR:P45543	nucleotide binding
+UniProtKB	P45543	frlD		GO:0016301	GO_REF:0000043	IEA	SP_KW:KW-0418	F	fructoselysine 6-kinase	yhfQ|b3374|ECK3361	protein	NCBITaxon:83333	20191012	UniProt		PR:P45543	kinase activity
+UniProtKB	P45541	frlC		GO:0046872	GO_REF:0000043	IEA	SP_KW:KW-0479	F	fructoselysine 3-epimerase	b3373|yhfP|yhfO|b3372|b4474|ECK3360	protein	NCBITaxon:83333	20191012	UniProt		PR:P45541	metal ion binding
+UniProtKB	P45541	frlC		GO:0016853	GO_REF:0000043	IEA	SP_KW:KW-0413	F	fructoselysine 3-epimerase	b3373|yhfP|yhfO|b3372|b4474|ECK3360	protein	NCBITaxon:83333	20191012	UniProt		PR:P45541	isomerase activity
+UniProtKB	P45541	frlC		GO:0042802	PMID:14641112	IDA		F	fructoselysine 3-epimerase	b3373|yhfP|yhfO|b3372|b4474|ECK3360	protein	NCBITaxon:83333	20141205	EcoCyc		PR:P45541	identical protein binding
+UniProtKB	P45541	frlC		GO:0016857	PMID:14641112	IDA		F	fructoselysine 3-epimerase	b3373|yhfP|yhfO|b3372|b4474|ECK3360	protein	NCBITaxon:83333	20110601	EcoCyc		PR:P45541	racemase and epimerase activity, acting on carbohydrates and derivatives
+UniProtKB	P45541	frlC		GO:0046348	PMID:14641112	IDA		P	fructoselysine 3-epimerase	b3373|yhfP|yhfO|b3372|b4474|ECK3360	protein	NCBITaxon:83333	20110601	EcoCyc		PR:P45541	amino sugar catabolic process
+UniProtKB	P55734	ygaP		GO:0005887	PMID:15919996	IDA		C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20140715	EcoCyc		PR:P55734	integral component of plasma membrane
+UniProtKB	P55734	ygaP		GO:0005887	PMID:24958726	ISM		C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20140715	EcoCyc		PR:P55734	integral component of plasma membrane
+UniProtKB	P55734	ygaP		GO:0004792	PMID:25204500	IDA		F	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20160807	EcoCyc		PR:P55734	thiosulfate sulfurtransferase activity
+UniProtKB	P55734	ygaP		GO:0004792	PMID:24958726	IDA		F	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20140715	EcoCyc		PR:P55734	thiosulfate sulfurtransferase activity
+UniProtKB	P55734	ygaP		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0037	C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20191012	UniProt		PR:P55734	plasma membrane
+UniProtKB	P55734	ygaP		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20191012	UniProt		PR:P55734	plasma membrane
+UniProtKB	P55734	ygaP		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-0997	C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20191012	UniProt		PR:P55734	plasma membrane
+UniProtKB	P55734	ygaP		GO:0016021	GO_REF:0000043	IEA	SP_KW:KW-0812	C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20191012	UniProt		PR:P55734	integral component of membrane
+UniProtKB	P55734	ygaP		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	thiosulfate sulfurtransferase YgaP	b2668|ECK2662	protein	NCBITaxon:83333	20191012	UniProt		PR:P55734	membrane
+UniProtKB	P45539	frlA		GO:0055085	GO_REF:0000002	IEA	InterPro:IPR002293	P	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	InterPro		PR:P45539	transmembrane transport
+UniProtKB	P45539	frlA		GO:0022857	GO_REF:0000002	IEA	InterPro:IPR002293	F	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	InterPro		PR:P45539	transmembrane transporter activity
+UniProtKB	P45539	frlA		GO:1901281	PMID:14641112	IMP		P	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20161121	EcoCyc		PR:P45539	fructoselysine catabolic process
+UniProtKB	P45539	frlA		GO:1902475	GO_REF:0000108	IEA	GO:0015179	P	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191013	GOC		PR:P45539	L-alpha-amino acid transmembrane transport
+UniProtKB	P45539	frlA		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0037	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	plasma membrane
+UniProtKB	P45539	frlA		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	plasma membrane
+UniProtKB	P45539	frlA		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-0997	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	plasma membrane
+UniProtKB	P45539	frlA		GO:0005886	PMID:15919996	IDA		C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P45539	plasma membrane
+UniProtKB	P45539	frlA		GO:0016021	GO_REF:0000043	IEA	SP_KW:KW-0812	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	integral component of membrane
+UniProtKB	P45539	frlA		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	membrane
+UniProtKB	P45539	frlA		GO:0016020	GO_REF:0000002	IEA	InterPro:IPR002293	C	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	InterPro		PR:P45539	membrane
+UniProtKB	P45539	frlA		GO:0006865	GO_REF:0000043	IEA	SP_KW:KW-0029	P	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20191012	UniProt		PR:P45539	amino acid transport
+UniProtKB	P45539	frlA		GO:0003333	PMID:21873635	IBA	PANTHER:PTN000208507|WB:F52H2.2b|UniProtKB:Q9UHI5|UniProtKB:Q01650|FB:FBgn0028425|SGD:S000001028|RGD:620639|SGD:S000003287|CGD:CAL0000175765|MGI:MGI:1355323|UniProtKB:Q92536|MGI:MGI:1347355|FB:FBgn0002778|WB:WBGene00000002	P	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20200929	GO_Central			amino acid transmembrane transport
+UniProtKB	P45539	frlA		GO:0015179	PMID:21873635	IBA	PANTHER:PTN000208507|SGD:S000001028|MGI:MGI:1355323|SGD:S000003287|UniProtKB:P82251|UniProtKB:A0A3Q1NNN2|MGI:MGI:1298205|UniProtKB:Q9UHI5|UniProtKB:Q01650	F	fructoselysine/psicoselysine transporter	yhfM|b3370|ECK3358	protein	NCBITaxon:83333	20200808	GO_Central			L-amino acid transmembrane transporter activity
+UniProtKB	P45537	yhfK		GO:0005886	GO_REF:0000044	IEA	SP_SL:SL-0039	C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20191012	UniProt		PR:P45537	plasma membrane
+UniProtKB	P45537	yhfK		GO:0005886	GO_REF:0000043	IEA	SP_KW:KW-1003	C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20191012	UniProt		PR:P45537	plasma membrane
+UniProtKB	P45537	yhfK		GO:0005886	PMID:15919996	IDA		C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20140602	EcoCyc		PR:P45537	plasma membrane
+UniProtKB	P45537	yhfK		GO:0016021	GO_REF:0000043	IEA	SP_KW:KW-0812	C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20191012	UniProt		PR:P45537	integral component of membrane
+UniProtKB	P45537	yhfK		GO:0016020	GO_REF:0000043	IEA	SP_KW:KW-0472	C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20191012	UniProt		PR:P45537	membrane
+UniProtKB	P45537	yhfK		GO:0005886	PMID:21873635	IBA	PANTHER:PTN002021271|UniProtKB:P33011|UniProtKB:P45537|UniProtKB:P75870|UniProtKB:P76186|UniProtKB:P32715|UniProtKB:P46481	C	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20170420	GO_Central			plasma membrane
+UniProtKB	P45537	yhfK		GO:0022857	PMID:21873635	IBA	PANTHER:PTN002021271|UniProtKB:P32715	F	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20190111	GO_Central			transmembrane transporter activity
+UniProtKB	P45537	yhfK		GO:0055085	PMID:21873635	IBA	PANTHER:PTN002021271|UniProtKB:P32715	P	putative transporter YhfK	b3358|ECK3346	protein	NCBITaxon:83333	20200809	GO_Central			transmembrane transport
+UniProtKB	P35340	ahpF		GO:0050660	PMID:11243797	ISM	UniProtKB:Q39243	F			gene	NCBITaxon:83333	20110815	EcoliWiki			flavin adenine dinucleotide binding
+UniProtKB	P35340	ahpF		GO:0070402	PMID:11243797	ISM	UniProtKB:Q39243	F			gene	NCBITaxon:83333	20110815	EcoliWiki			NADPH binding
+UniProtKB	P35340	ahpF		GO:0008785	PMID:11717276	IGI	EcoliWiki:ahpC|EcoliWiki:katE|EcoliWiki:katG	F			gene	NCBITaxon:83333	20110815	EcoliWiki			alkyl hydroperoxide reductase activity
+UniProtKB	P35340	ahpF		GO:0022900	GO_REF:0000108	IEA	GO:0009055	P			gene	NCBITaxon:83333	20191013	GOC		PR:P35340	electron transport chain
+UniProtKB	P35340	ahpF		GO:0009321	PMID:25372677	IDA		C			gene	NCBITaxon:83333	20141118	EcoCyc		PR:P35340	alkyl hydroperoxide reductase complex
+UniProtKB	P35340	ahpF		GO:0050660	GO_REF:0000002	IEA	InterPro:IPR012081	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	flavin adenine dinucleotide binding
+UniProtKB	P35340	ahpF		GO:0016491	GO_REF:0000043	IEA	SP_KW:KW-0560	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P35340	oxidoreductase activity
+UniProtKB	P35340	ahpF		GO:0016491	GO_REF:0000002	IEA	InterPro:IPR008255|InterPro:IPR023753	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	oxidoreductase activity
+UniProtKB	P35340	ahpF		GO:0051287	GO_REF:0000002	IEA	InterPro:IPR012081	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	NAD binding
+UniProtKB	P35340	ahpF		GO:0045454	GO_REF:0000002	IEA	InterPro:IPR002109	P			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	cell redox homeostasis
+UniProtKB	P35340	ahpF		GO:0015035	GO_REF:0000002	IEA	InterPro:IPR002109	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	protein disulfide oxidoreductase activity
+UniProtKB	P35340	ahpF		GO:0009055	GO_REF:0000002	IEA	InterPro:IPR002109	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	electron transfer activity
+UniProtKB	P35340	ahpF		GO:0000302	GO_REF:0000002	IEA	InterPro:IPR012081	P			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	response to reactive oxygen species
+UniProtKB	P35340	ahpF		GO:0008785	GO_REF:0000002	IEA	InterPro:IPR012081	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P35340	alkyl hydroperoxide reductase activity
+UniProtKB	P35340	ahpF		GO:0071949	PMID:10666639	IDA		F			gene	NCBITaxon:83333	20120328	EcoCyc		PR:P35340	FAD binding
+UniProtKB	P35340	ahpF		GO:0005829	PMID:18304323	IDA		C			gene	NCBITaxon:83333	20140602	EcoCyc		PR:P35340	cytosol
+UniProtKB	P35340	ahpF		GO:0005829	PMID:17309111	IDA		C			gene	NCBITaxon:83333	20140602	EcoCyc		PR:P35340	cytosol
+UniProtKB	P35340	ahpF		GO:0005829	PMID:15911532	IDA		C			gene	NCBITaxon:83333	20140602	EcoCyc		PR:P35340	cytosol
+UniProtKB	P45532	tusD		GO:0002143	PMID:16387657	IMP		P	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20170208	EcoCyc		PR:P45532	tRNA wobble position uridine thiolation
+UniProtKB	P45532	tusD		GO:1990228	PMID:16472754	IDA		C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20170208	EcoCyc		PR:P45532	sulfurtransferase complex
+UniProtKB	P45532	tusD		GO:0016783	GO_REF:0000104	IEA	UniRule:UR000084195	F	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	sulfurtransferase activity
+UniProtKB	P45532	tusD		GO:0016783	GO_REF:0000002	IEA	InterPro:IPR017463	F	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	InterPro		PR:P45532	sulfurtransferase activity
+UniProtKB	P45532	tusD		GO:0097163	PMID:16387657	IDA		F	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20111003	EcoCyc		PR:P45532	sulfur carrier activity
+UniProtKB	P45532	tusD		GO:0016740	GO_REF:0000043	IEA	SP_KW:KW-0808	F	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	transferase activity
+UniProtKB	P45532	tusD		GO:0008033	GO_REF:0000104	IEA	UniRule:UR000084195	P	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	tRNA processing
+UniProtKB	P45532	tusD		GO:0008033	GO_REF:0000043	IEA	SP_KW:KW-0819	P	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	tRNA processing
+UniProtKB	P45532	tusD		GO:0008033	GO_REF:0000002	IEA	InterPro:IPR017463	P	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	InterPro		PR:P45532	tRNA processing
+UniProtKB	P45532	tusD		GO:0005737	GO_REF:0000104	IEA	UniRule:UR000084195	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	cytoplasm
+UniProtKB	P45532	tusD		GO:0005737	GO_REF:0000044	IEA	SP_SL:SL-0086	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	cytoplasm
+UniProtKB	P45532	tusD		GO:0005737	GO_REF:0000043	IEA	SP_KW:KW-0963	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	UniProt		PR:P45532	cytoplasm
+UniProtKB	P45532	tusD		GO:0005737	GO_REF:0000002	IEA	InterPro:IPR017463	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20191012	InterPro		PR:P45532	cytoplasm
+UniProtKB	P45532	tusD		GO:0002143	PMID:21873635	IBA	PANTHER:PTN002166909|UniProtKB:P45532	P	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20180315	GO_Central			tRNA wobble position uridine thiolation
+UniProtKB	P45532	tusD		GO:0005829	PMID:21873635	IBA	PANTHER:PTN002166889|UniProtKB:P0AB52|UniProtKB:P45532	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20180315	GO_Central			cytosol
+UniProtKB	P45532	tusD		GO:0097163	PMID:21873635	IBA	PANTHER:PTN002166909|UniProtKB:P45532	F	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20180315	GO_Central			sulfur carrier activity
+UniProtKB	P45532	tusD		GO:1990228	PMID:21873635	IBA	PANTHER:PTN002166909|UniProtKB:P45532	C	sulfurtransferase complex subunit TusD	yheN|b3345|ECK3332	protein	NCBITaxon:83333	20180315	GO_Central			sulfurtransferase complex
+UniProtKB	P45531	tusC		GO:0002143	PMID:16387657	IMP		P	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20170208	EcoCyc		PR:P45531	tRNA wobble position uridine thiolation
+UniProtKB	P45531	tusC		GO:1990228	PMID:16472754	IDA		C	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20170208	EcoCyc		PR:P45531	sulfurtransferase complex
+UniProtKB	P45531	tusC		GO:0008033	GO_REF:0000104	IEA	UniRule:UR000036485	P	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20191012	UniProt		PR:P45531	tRNA processing
+UniProtKB	P45531	tusC		GO:0008033	GO_REF:0000043	IEA	SP_KW:KW-0819	P	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20191012	UniProt		PR:P45531	tRNA processing
+UniProtKB	P45531	tusC		GO:0005737	GO_REF:0000104	IEA	UniRule:UR000036485	C	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20191012	UniProt		PR:P45531	cytoplasm
+UniProtKB	P45531	tusC		GO:0005737	GO_REF:0000044	IEA	SP_SL:SL-0086	C	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20191012	UniProt		PR:P45531	cytoplasm
+UniProtKB	P45531	tusC		GO:0005737	GO_REF:0000043	IEA	SP_KW:KW-0963	C	sulfurtransferase complex subunit TusC	yheM|b3344|ECK3331	protein	NCBITaxon:83333	20191012	UniProt		PR:P45531	cytoplasm
+UniProtKB	P45530	tusB		GO:1990228	PMID:16472754	IDA		C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20170208	EcoCyc		PR:P45530	sulfurtransferase complex
+UniProtKB	P45530	tusB		GO:0008033	GO_REF:0000104	IEA	UniRule:UR000038432	P	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	UniProt		PR:P45530	tRNA processing
+UniProtKB	P45530	tusB		GO:0008033	GO_REF:0000043	IEA	SP_KW:KW-0819	P	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	UniProt		PR:P45530	tRNA processing
+UniProtKB	P45530	tusB		GO:0002143	GO_REF:0000002	IEA	InterPro:IPR007215|InterPro:IPR023526	P	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	InterPro		PR:P45530	tRNA wobble position uridine thiolation
+UniProtKB	P45530	tusB		GO:0002143	PMID:16387657	IMP		P	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20120510	EcoCyc		PR:P45530	tRNA wobble position uridine thiolation
+UniProtKB	P45530	tusB		GO:0005737	GO_REF:0000104	IEA	UniRule:UR000038432	C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	UniProt		PR:P45530	cytoplasm
+UniProtKB	P45530	tusB		GO:0005737	GO_REF:0000044	IEA	SP_SL:SL-0086	C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	UniProt		PR:P45530	cytoplasm
+UniProtKB	P45530	tusB		GO:0005737	GO_REF:0000043	IEA	SP_KW:KW-0963	C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	UniProt		PR:P45530	cytoplasm
+UniProtKB	P45530	tusB		GO:0005737	GO_REF:0000002	IEA	InterPro:IPR007215|InterPro:IPR023526	C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20191012	InterPro		PR:P45530	cytoplasm
+UniProtKB	P45530	tusB		GO:1990228	PMID:21873635	IBA	PANTHER:PTN002206503|UniProtKB:P45530	C	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20170906	GO_Central			sulfurtransferase complex
+UniProtKB	P45530	tusB		GO:0002143	PMID:21873635	IBA	PANTHER:PTN002206503|UniProtKB:P45530	P	sulfurtransferase complex subunit TusB	yheL|b3343|ECK3330	protein	NCBITaxon:83333	20170906	GO_Central			tRNA wobble position uridine thiolation
+UniProtKB	P17411	chbF		GO:0103047	GO_REF:0000003	IEA	EC:3.2.1.86	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	methyl beta-D-glucoside 6-phosphate glucohydrolase activity
+UniProtKB	P17411	chbF		GO:0003824	GO_REF:0000002	IEA	InterPro:IPR015955	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	InterPro		PR:P17411	catalytic activity
+UniProtKB	P17411	chbF		GO:0016798	GO_REF:0000043	IEA	SP_KW:KW-0326	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	hydrolase activity, acting on glycosyl bonds
+UniProtKB	P17411	chbF		GO:0016787	GO_REF:0000043	IEA	SP_KW:KW-0378	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	hydrolase activity
+UniProtKB	P17411	chbF		GO:0008152	GO_REF:0000043	IEA	SP_KW:KW-0326	P	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	metabolic process
+UniProtKB	P17411	chbF		GO:0004553	GO_REF:0000002	IEA	InterPro:IPR001088|InterPro:IPR019802|InterPro:IPR022616	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	InterPro		PR:P17411	hydrolase activity, hydrolyzing O-glycosyl compounds
+UniProtKB	P17411	chbF		GO:0005975	GO_REF:0000043	IEA	SP_KW:KW-0119	P	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	carbohydrate metabolic process
+UniProtKB	P17411	chbF		GO:0005975	GO_REF:0000002	IEA	InterPro:IPR001088|InterPro:IPR015955|InterPro:IPR019802	P	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	InterPro		PR:P17411	carbohydrate metabolic process
+UniProtKB	P17411	chbF		GO:0016616	GO_REF:0000002	IEA	InterPro:IPR015955	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	InterPro		PR:P17411	oxidoreductase activity, acting on the CH-OH group of donors, NAD or NADP as acceptor
+UniProtKB	P17411	chbF		GO:0052777	PMID:9405618	IGI		P	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20120809	EcoCyc		PR:P17411	diacetylchitobiose catabolic process
+UniProtKB	P17411	chbF		GO:0042802	PMID:10572139	IDA		F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20120809	EcoCyc		PR:P17411	identical protein binding
+UniProtKB	P17411	chbF		GO:0046872	GO_REF:0000043	IEA	SP_KW:KW-0479	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	metal ion binding
+UniProtKB	P17411	chbF		GO:0008706	GO_REF:0000003	IEA	EC:3.2.1.86	F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20191012	UniProt		PR:P17411	6-phospho-beta-glucosidase activity
+UniProtKB	P17411	chbF		GO:0008706	PMID:10572139	IDA		F	monoacetylchitobiose-6-phosphate hydrolase	ydjD|celF|b1734|ECK1732	protein	NCBITaxon:83333	20120809	EcoCyc		PR:P17411	6-phospho-beta-glucosidase activity
+UniProtKB	P17410	chbR		GO:0001046	PMID:15066032	IDA		F	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20161121	EcoCyc		PR:P17410	core promoter sequence-specific DNA binding
+UniProtKB	P17410	chbR		GO:0043565	GO_REF:0000002	IEA	InterPro:IPR018060|InterPro:IPR018062	F	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20191012	InterPro		PR:P17410	sequence-specific DNA binding
+UniProtKB	P17410	chbR		GO:0006355	GO_REF:0000002	IEA	InterPro:IPR018060|InterPro:IPR018062|InterPro:IPR020449	P	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20191012	InterPro		PR:P17410	regulation of transcription, DNA-templated
+UniProtKB	P17410	chbR		GO:0003677	GO_REF:0000043	IEA	SP_KW:KW-0238	F	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20191012	UniProt		PR:P17410	DNA binding
+UniProtKB	P17410	chbR		GO:0003677	GO_REF:0000002	IEA	InterPro:IPR009057	F	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20191012	InterPro		PR:P17410	DNA binding
+UniProtKB	P17410	chbR		GO:0003700	GO_REF:0000002	IEA	InterPro:IPR018060|InterPro:IPR018062|InterPro:IPR020449	F	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20191012	InterPro		PR:P17410	DNA-binding transcription factor activity
+UniProtKB	P17410	chbR		GO:0045892	PMID:2179048	IMP		P	DNA-binding transcriptional dual regulator ChbR	celD|b1735|ECK1733	protein	NCBITaxon:83333	20120406	EcoCyc		PR:P17410	negative regulation of transcription, DNA-templated
+UniProtKB	P45527	ubiU		GO:0032150	PMID:31289180	IMP		P	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20190729	EcoCyc		PR:P45527	ubiquinone biosynthetic process from chorismate
+UniProtKB	P45527	ubiU		GO:0051539	PMID:31289180	IDA		F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20190729	EcoCyc		PR:P45527	4 iron, 4 sulfur cluster binding
+UniProtKB	P45527	ubiU		GO:0016787	GO_REF:0000043	IEA	SP_KW:KW-0378	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20191012	UniProt		PR:P45527	hydrolase activity
+UniProtKB	P45527	ubiU		GO:0008233	GO_REF:0000043	IEA	SP_KW:KW-0645	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20191012	UniProt		PR:P45527	peptidase activity
+UniProtKB	P45527	ubiU		GO:0008233	GO_REF:0000002	IEA	InterPro:IPR001539	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20191012	InterPro		PR:P45527	peptidase activity
+UniProtKB	P45527	ubiU		GO:0006508	GO_REF:0000043	IEA	SP_KW:KW-0645	P	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20191012	UniProt		PR:P45527	proteolysis
+UniProtKB	P45527	ubiU		GO:0006508	GO_REF:0000002	IEA	InterPro:IPR001539	P	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20191012	InterPro		PR:P45527	proteolysis
+UniProtKB	P45527	ubiU		GO:0005515	PMID:31289180	IPI	UniProtKB:P45475	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20190729	EcoCyc		PR:P45527	protein binding
+UniProtKB	P45527	ubiU		GO:0005515	PMID:16606699	IPI	UniProtKB:P0A6F5	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20120903	IntAct		PR:P45527	protein binding
+UniProtKB	P45527	ubiU		GO:0005515	PMID:15690043	IPI	UniProtKB:P0A6F5	F	ubiquinone biosynthesis protein UbiU	yhbU|b3158|ECK3146	protein	NCBITaxon:83333	20071004	IntAct		PR:P45527	protein binding
+UniProtKB	P45524	yheT		GO:0050526	PMID:10091664	ISM	InterPro:IPR010127	F			gene	NCBITaxon:83333	20090203	EcoliWiki			poly(3-hydroxybutyrate) depolymerase activity
+UniProtKB	P45524	yheT		GO:0052689	GO_REF:0000043	IEA	SP_KW:KW-0719	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P45524	carboxylic ester hydrolase activity
+UniProtKB	P45524	yheT		GO:0016787	GO_REF:0000043	IEA	SP_KW:KW-0378	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P45524	hydrolase activity
+UniProtKB	P45524	yheT		GO:0051793	PMID:21873635	IBA	PANTHER:PTN000082647|SGD:S000000381|SGD:S000006016	P			gene	NCBITaxon:83333	20170228	GO_Central			medium-chain fatty acid catabolic process
+UniProtKB	P45524	yheT		GO:0051792	PMID:21873635	IBA	PANTHER:PTN000082647|SGD:S000000381|SGD:S000006016|SGD:S000004823	P			gene	NCBITaxon:83333	20170228	GO_Central			medium-chain fatty acid biosynthetic process
+UniProtKB	P45524	yheT		GO:0047372	PMID:21873635	IBA	PANTHER:PTN000082644|SGD:S000004823|UniProtKB:P08910	F			gene	NCBITaxon:83333	20200313	GO_Central			acylglycerol lipase activity
+UniProtKB	P45524	yheT		GO:0034338	PMID:21873635	IBA	PANTHER:PTN000082644|UniProtKB:P08910|SGD:S000000381|SGD:S000006016	F			gene	NCBITaxon:83333	20200313	GO_Central			short-chain carboxylesterase activity
+UniProtKB	P45524	yheT		GO:0044255	PMID:21873635	IBA	PANTHER:PTN000082644|SGD:S000000381|UniProtKB:P08910|MGI:MGI:2147183|UniProtKB:Q8WU67|SGD:S000006016|SGD:S000004823	P			gene	NCBITaxon:83333	20200807	GO_Central			cellular lipid metabolic process
+UniProtKB	P45524	yheT		GO:0008126	PMID:21873635	IBA	PANTHER:PTN000082647|UniProtKB:P08910	F			gene	NCBITaxon:83333	20200313	GO_Central			acetylesterase activity
+UniProtKB	P45523	fkpA		GO:0005515	PMID:18554332	IPI	UniProtKB:P05820	F			gene	NCBITaxon:83333	20100621	EcoliWiki			protein binding
+UniProtKB	P45523	fkpA		GO:0042026	PMID:18554332	IDA		P			gene	NCBITaxon:83333	20100413	EcoliWiki			protein refolding
+UniProtKB	P45523	fkpA		GO:0000413	GO_REF:0000108	IEA	GO:0003755	P			gene	NCBITaxon:83333	20191013	GOC		PR:P45523	protein peptidyl-prolyl isomerization
+UniProtKB	P45523	fkpA		GO:0006457	GO_REF:0000002	IEA	InterPro:IPR000774|InterPro:IPR036944	P			gene	NCBITaxon:83333	20191012	InterPro		PR:P45523	protein folding
+UniProtKB	P45523	fkpA		GO:0030288	PMID:24140104	IDA		C			gene	NCBITaxon:83333	20140602	EcoCyc		PR:P45523	outer membrane-bounded periplasmic space
+UniProtKB	P45523	fkpA		GO:0030288	PMID:15911532	IDA		C			gene	NCBITaxon:83333	20140602	EcoCyc		PR:P45523	outer membrane-bounded periplasmic space
+UniProtKB	P45523	fkpA		GO:0005515	PMID:21697552	IPI	UniProtKB:P02358	F			gene	NCBITaxon:83333	20140604	EcoCyc		PR:P45523	protein binding
+UniProtKB	P45523	fkpA		GO:0042597	GO_REF:0000044	IEA	SP_SL:SL-0200	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P45523	periplasmic space
+UniProtKB	P45523	fkpA		GO:0042597	GO_REF:0000043	IEA	SP_KW:KW-0574	C			gene	NCBITaxon:83333	20191012	UniProt		PR:P45523	periplasmic space
+UniProtKB	P45523	fkpA		GO:0016853	GO_REF:0000043	IEA	SP_KW:KW-0413	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P45523	isomerase activity
+UniProtKB	P45523	fkpA		GO:0003755	GO_REF:0000043	IEA	SP_KW:KW-0697	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P45523	peptidyl-prolyl cis-trans isomerase activity
+UniProtKB	P45523	fkpA		GO:0003755	GO_REF:0000003	IEA	EC:5.2.1.8	F			gene	NCBITaxon:83333	20191012	UniProt		PR:P45523	peptidyl-prolyl cis-trans isomerase activity
+UniProtKB	P45523	fkpA		GO:0003755	GO_REF:0000002	IEA	InterPro:IPR001179	F			gene	NCBITaxon:83333	20191012	InterPro		PR:P45523	peptidyl-prolyl cis-trans isomerase activity
