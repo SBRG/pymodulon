@@ -19,7 +19,7 @@ from pymodulon.enrichment import (
     compute_trn_enrichment,
     contingency,
 )
-from pymodulon.util import Data, _check_dict, _check_table, compute_threshold
+from pymodulon.util import _check_dict, _check_table, compute_threshold
 
 
 class IcaData(object):
@@ -53,25 +53,25 @@ class IcaData(object):
 
         Parameters
         ----------
-        M : str or ~pandas.DataFrame or ~pymodulon.util.Data
+        M : str or ~pandas.DataFrame or str or ~pandas.DataFrame
             :class:`~pymodulon.core.M` matrix from ICA
-        A : str or ~pandas.DataFrame or ~pymodulon.util.Data
+        A : str or ~pandas.DataFrame or str or ~pandas.DataFrame
             :class:`~pymodulon.core.A` matrix from ICA
-        X : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+        X : str or ~pandas.DataFrame or str or ~pandas.DataFrame, optional
             log-TPM expression matrix, centered to reference condition(s) (
             default: None)
-        log_tpm : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+        log_tpm : str or ~pandas.DataFrame or str or ~pandas.DataFrame, optional
             Raw 'log-TPM' expression matrix (without centering) (default: None)
-        gene_table : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+        gene_table : str or ~pandas.DataFrame or str or ~pandas.DataFrame, optional
             Table containing genome annotation (default: None)
-        sample_table : str or ~pandas.DataFrame or ~pymodulon.util.Data,
+        sample_table : str or ~pandas.DataFrame or str or ~pandas.DataFrame,
         optional
             Table containing sample metadata (default: None)
-        imodulon_table : str or ~pandas.DataFrame or ~pymodulon.util.Data,
+        imodulon_table : str or ~pandas.DataFrame or str or ~pandas.DataFrame,
         optional
             Table containing iModulon names, enrichments, and annotations (
             default: None)
-        trn : str or ~pandas.DataFrame or ~pymodulon.util.Data, optional
+        trn : str or ~pandas.DataFrame or str or ~pandas.DataFrame, optional
             Table mapping transcriptional regulators to target genes (
             default: None)
         dagostino_cutoff : int
@@ -700,7 +700,7 @@ class IcaData(object):
 
         Parameters
         ----------
-        imodulons: ~typing.Sequence or int or str
+        imodulons: int or str
             Name of iModulon(s). If none given, compute enrichments for all
             'iModulons' (default: None)
         fdr : float
@@ -804,7 +804,7 @@ class IcaData(object):
             appropriate annotation
         column : str
             Name of the column containing the annotation
-        imodulons : ~typing.List or str or int
+        imodulons : list or str or int
             Name of iModulon(s). If none given, compute enrichments for all
             iModulons (default: None)
         fdr : float
@@ -812,7 +812,7 @@ class IcaData(object):
 
         Returns
         -------
-        DF_enriched: pandas.DataFrame
+        DF_enriched: ~pandas.DataFrame
             Table of statistically significant enrichments
         """
 
@@ -1114,7 +1114,7 @@ class IcaData(object):
 
         Returns
         -------
-        IcaData: pandas.IcaData
+        IcaData: ~pymodulon.core.IcaData
             Copy of IcaData object
         """
 
@@ -1147,12 +1147,12 @@ class IcaData(object):
 
         Parameters
         ----------
-        gene : typing.Sequence or str
+        gene : list or str
             Gene name or list of gene names
 
         Returns
         -------
-        final_list : ~typing.Sequence or str
+        final_list : list or str
             Locus tag or list of locus tags
         """
 
@@ -1193,12 +1193,12 @@ class IcaData(object):
 
         Parameters
         ----------
-        gene : ~typing.Sequence or str
+        gene : list or str
             Locus tag or list of locus tags
 
         Returns
         -------
-        result : ~typing.Sequence or str
+        result : list or str
             Gene name or list of gene names
         """
 
@@ -1275,7 +1275,8 @@ class IcaData(object):
             "dataset_folder": "new_dataset",
         }
         for k, v in default_splash_table.items():
-            if k not in new_splash:  # use what is provided, default for what isn't
+            if k not in new_splash:  # use what is provided, default for
+                # what isn't
                 self._splash_table[k] = v
 
     @property

@@ -22,7 +22,8 @@ def _get_orthologous_imodulons(M1, M2, method, cutoff):
     M2 : ~pandas.DataFrame
         M matrix from the second organism
     method : int or str
-        Correlation metric to use (see :meth:`~pandas.DataFrame.corr`)
+        Correlation metric to use out of {‘pearson’, ‘kendall’, ‘spearman’}
+        or callable
     cutoff : float
         Cut off value for correlation metric
 
@@ -64,20 +65,20 @@ def _make_dot_graph(links, show_all, names1, names2):
 
     Parameters
     ----------
-    links : ~typing.Sequence
+    links : list
         Names and distances of connected iModulons
     show_all : bool
         Show all iModulons regardless of their linkage (default: False)
-    names1 : ~typing.Sequence, optional
+    names1 : list, optional
         List of names in dataset 1 (required if show_all = True)
-    names2 : ~typing.Sequence
+    names2 : list
         List of names in dataset 1 (required if show_all = True)
 
     Returns
     -------
     dot: Digraph
         Dot graph of connected iModulons
-    links: :obj:`list <list>`
+    links: list
         Links and distances of connected iModulons
     """
 
@@ -241,7 +242,8 @@ def compare_ica(
     cutoff : float
         Cut off value for correlation metric (default: .25)
     method : str or ~typing.Callable
-        Correlation metric to use (see :meth:`~pandas.DataFrame.corr)
+        Correlation metric to use out of {‘pearson’, ‘kendall’, ‘spearman’}
+        or callable
     plot : bool
         Create dot plot of matches (default: True)
     show_all : bool
@@ -249,7 +251,7 @@ def compare_ica(
 
     Returns
     -------
-    matches: :obj:`list`
+    matches: list
         Links and distances of connected iModulons
     dot: Digraph
         Dot graph of connected iModulons
@@ -307,7 +309,7 @@ def make_prot_db(fasta_file):
 
     Parameters
     ----------
-    fasta_file : ~os.PathLike
+    fasta_file : str
         Path to protein FASTA file
 
     Returns
@@ -365,13 +367,13 @@ def get_bbh(
 
     Parameters
     ----------
-    db1 : ~os.PathLike
+    db1 : str
         Path to protein FASTA file for organism 1
-    db2 : ~os.PathLike
+    db2 : str
         Path to protein FASTA file for organism 2
-    outdir : ~os.PathLike
+    outdir : str
         Path to output directory (default: "bbh")
-    outname : ~os.PathLike
+    outname : str
         Name of output CSV file (default: <db1>_vs_<db2>_parsed.csv)
     mincov : float
         Minimum coverage to call hits in BLAST, must be between 0 and 1

@@ -19,10 +19,9 @@ from pymodulon.enrichment import FDR
 ################
 # Type Aliases #
 ################
-Data = Union[pd.DataFrame, str]
 
 
-def _check_table(table: Data, name: str, index: Optional[Sequence] = None, index_col=0):
+def _check_table(table, name, index=None, index_col=0):
     # Set as empty dataframe if not input given
     if table is None:
         return pd.DataFrame(index=index)
@@ -62,9 +61,7 @@ def _check_table(table: Data, name: str, index: Optional[Sequence] = None, index
         )
 
 
-def _check_table_helper(
-    table: pd.DataFrame, index: Optional[Sequence], name: Union[int, str]
-):
+def _check_table_helper(table, index, name):
     if table.shape == (0, 0):
         return pd.DataFrame(index=index)
 
@@ -82,7 +79,7 @@ def _check_table_helper(
     return table
 
 
-def _check_dict(table: str, index_col: Optional[int] = 0):
+def _check_dict(table, index_col):
     try:
         table = json.loads(table.replace("'", '"'))
     except ValueError:
@@ -92,14 +89,23 @@ def _check_dict(table: str, index_col: Optional[int] = 0):
     return table
 
 
-def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
+def compute_threshold(ic, dagostino_cutoff):
     """
     Computes D'agostino-test-based threshold for a component of an M matrix
-    :param ic: Pandas Series containing an independent component
-    :param dagostino_cutoff: Minimum D'agostino test statistic value
-        to determine threshold
-    :return: iModulon threshold
+
+    Parameters
+    ----------
+    ic: ~pandas.Series
+        Pandas Series containing an independent component
+    dagostino_cutoff: float
+        Minimum D'agostino test statistic value to determine threshold
+
+    Returns
+    -------
+    iModulon threshold: list
+        List of thresholds for each iModulon
     """
+
     i = 0
 
     # Sort genes based on absolute value
@@ -123,24 +129,29 @@ def compute_threshold(ic: pd.Series, dagostino_cutoff: float):
         return np.mean([ordered_genes.iloc[i], ordered_genes.iloc[i - 1]])
 
 
-def dima(
-    ica_data,
-    sample1: Union[Sequence, str],
-    sample2: Union[Sequence, str],
-    threshold: float = 5,
-    fdr: float = 0.1,
-    alternate_A: pd.DataFrame = None,
-):
+def dima(ica_data, sample1, sample2, threshold=5, fdr=0.1, alternate_A=None):
     """
+    Creates DIMA table of differentially expressed iModulons
 
-    Args:
-        ica_data: IcaData object
-        sample1: Sequence of sample IDs or name of "project:condition"
-        sample2: Sequence of sample IDs or name of "project:condition"
-        threshold: Minimum activity difference to determine DiMAs
-        fdr: False Detection Rate
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` data object
+    sample1: str
+        Sequence of sample IDs or name of "project:condition"
+    sample2: str
+        Sequence of sample IDs or name of "project:condition"
+    threshold: float
+        Minimum activity difference to determine DiMAs (default = 5)
+    fdr: float
+        False Detection Rate (default = .1)
+    alternate_A: ~pandas.DataFrame
+        Alternate A to use (default = None)
 
-    Returns:
+    Returns
+    -------
+    results: DataFrame
+        Table of differentially expressed iModulons
 
     """
 
@@ -176,16 +187,23 @@ def dima(
     )
 
 
-def _parse_sample(ica_data, sample: Union[Sequence, str]):
+def _parse_sample(ica_data, sample):
     """
     Parses sample inputs into a list of sample IDs
-    Args:
-        ica_data: IcaData object
-        sample: Sequence of sample IDs or "project:condition"
 
-    Returns: A list of samples
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` data object
+    sample: list
+        Sequence of sample IDs or "project:condition"
 
+    Returns
+    -------
+    samples: list
+        A list of `samples`
     """
+
     sample_table = ica_data.sample_table
     if isinstance(sample, str):
         proj, cond = re.search("(.*):(.*)", sample).groups()
@@ -207,24 +225,29 @@ def explained_variance(
 ):
     """
     Computes the fraction of variance explained by iModulons
+
     Parameters
     ----------
-    ica_data: IcaData
-        ICA data object
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` data object
     genes: list, optional
         List of genes to use (default: all genes)
     samples: list, optional
         List of samples to use (default: all samples)
-    reference: list, optional
-        List of samples that represent the reference condition for the dataset. If
-        none are provided, uses the dataset-specific reference condition.
-    imodulons: List of iModulons to use (default: all iModulons)
+    imodulons: list, optional
+        List of iModulons to use (default: all iModulons)
+    reference:list, optional
+        List of samples that represent the reference condition for the
+        set. If none are provided, uses the dataset-specific reference
+        condition.
 
     Returns
     -------
-    Fraction of variance explained by selected iModulons for selected
-    genes/samples
+    list
+        Fraction of variance explained by selected iModulons for selected
+        genes/samples
     """
+
     # Check inputs
     if genes is None:
         genes = ica_data.X.index
@@ -282,17 +305,21 @@ def explained_variance(
     return np.clip(rec_var[-1], 0, 1)
 
 
-def infer_activities(ica_data, data: pd.DataFrame):
+def infer_activities(ica_data, data):
     """
     Infer iModulon activities for external data
+
     Parameters
     ----------
-    ica_data: ICA data object
-    data: External expression profiles (must be centered to a reference)
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` data object
+    data: ~pandas.DataFrame
+        External expression profiles (must be centered to a reference)
 
     Returns
     -------
-    Inferred activities for the expression profiles
+    ~pandas.DataFrame
+        Inferred activities for the expression profiles
     """
 
     shared_genes = ica_data.M.index & data.index
@@ -313,9 +340,9 @@ def mutual_info_distance(x, y):
         return 1 - mi(x, y) / h
 
 
-# the following code is taken from the NPEET package; it cannot be installed via pip,
-# so the necessary functions are copied here; the package appears to be un-maintained,
-# so updates are not very likely; this is the GitHub page:
+# the following code is taken from the NPEET package; it cannot be installed
+# via pip, so the necessary functions are copied here; the package appears to
+# be un-maintained, so updates are not very likely; this is the GitHub page:
 # https://github.com/gregversteeg/NPEET
 
 
@@ -376,7 +403,7 @@ def entropy(x, k=3, base=2):
 
 
 def add_noise(x, intens=1e-10):
-    # small noise to break degeneracy, see doc.
+    """Small noise to break degeneracy, see doc."""
     return x + intens * np.random.random_sample(x.shape)
 
 
@@ -391,8 +418,8 @@ def query_neighbors(tree, x, k):
 
 
 def avgdigamma(points, dvec):
-    # This part finds number of neighbors in some radius in the marginal space
-    # returns expectation value of <psi(nx)>
+    """This part finds number of neighbors in some radius in the marginal space
+    returns expectation value of <psi(nx)>"""
     tree = build_tree(points)
     dvec = dvec - 1e-15
     num_points = count_neighbors(tree, points, dvec)
@@ -408,7 +435,8 @@ def lnc_correction(tree, points, k, alpha):
         knn_points = points[knn]
         # Substract mean of k-nearest neighbor points
         knn_points = knn_points - knn_points[0]
-        # Calculate covariance matrix of k-nearest neighbor points, obtain eigen vectors
+        # Calculate covariance matrix of k-nearest neighbor points, obtain
+        # eigen vectors
         covr = knn_points.T @ knn_points / k
         _, v = np.linalg.eig(covr)
         # Calculate PCA-bounding box using eigen vectors
