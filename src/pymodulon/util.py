@@ -252,7 +252,7 @@ def explained_variance(
         centered = ica_data.X.subtract(ica_data.X[reference].mean(axis=1), axis=0)
 
     # Account for normalization procedures before ICA (X=SA-x_mean)
-    baseline = centered.subtract(centered, axis=1)
+    baseline = centered.subtract(centered.mean(axis=0), axis=1)
     baseline = baseline.loc[genes, samples]
 
     # Initialize variables
