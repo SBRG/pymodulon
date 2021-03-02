@@ -5,7 +5,6 @@ import json
 import re
 import warnings
 from itertools import combinations
-from typing import Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -79,7 +78,7 @@ def _check_table_helper(table, index, name):
     return table
 
 
-def _check_dict(table, index_col):
+def _check_dict(table, index_col=0):
     try:
         table = json.loads(table.replace("'", '"'))
     except ValueError:
@@ -97,7 +96,7 @@ def compute_threshold(ic, dagostino_cutoff):
     ----------
     ic: ~pandas.Series
         Pandas Series containing an independent component
-    dagostino_cutoff: float
+    dagostino_cutoff: int
         Minimum D'agostino test statistic value to determine threshold
 
     Returns
@@ -236,7 +235,7 @@ def explained_variance(
         List of samples to use (default: all samples)
     imodulons: list, optional
         List of iModulons to use (default: all iModulons)
-    reference:list, optional
+    reference: list, optional
         List of samples that represent the reference condition for the
         set. If none are provided, uses the dataset-specific reference
         condition.
@@ -318,7 +317,7 @@ def infer_activities(ica_data, data):
 
     Returns
     -------
-    ~pandas.DataFrame
+    new_activities: ~pandas.DataFrame
         Inferred activities for the expression profiles
     """
 

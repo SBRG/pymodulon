@@ -2,7 +2,6 @@ import os
 import subprocess
 import warnings
 from glob import glob
-from typing import Callable, Optional, Sequence, Union
 
 import numpy as np
 import pandas as pd
@@ -22,8 +21,8 @@ def _get_orthologous_imodulons(M1, M2, method, cutoff):
     M2 : ~pandas.DataFrame
         M matrix from the second organism
     method : int or str
-        Correlation metric to use out of {‘pearson’, ‘kendall’, ‘spearman’}
-        or callable
+        Correlation metric to use from {‘pearson’, ‘kendall’, ‘spearman’}
+        or callable (see :meth:`~pandas.DataFrame.corr`)
     cutoff : float
         Cut off value for correlation metric
 
@@ -60,8 +59,8 @@ def _get_orthologous_imodulons(M1, M2, method, cutoff):
 
 def _make_dot_graph(links, show_all, names1, names2):
     """
-    Given two M matrices, returns the dot graph and name links of the various
-    connected ICA components
+    Given a set of links between M matrices, generates a dot graph of the various
+    connected iModulons
 
     Parameters
     ----------
@@ -69,17 +68,15 @@ def _make_dot_graph(links, show_all, names1, names2):
         Names and distances of connected iModulons
     show_all : bool
         Show all iModulons regardless of their linkage (default: False)
-    names1 : list, optional
-        List of names in dataset 1 (required if show_all = True)
+    names1 : list
+        List of names in dataset 1
     names2 : list
-        List of names in dataset 1 (required if show_all = True)
+        List of names in dataset 2
 
     Returns
     -------
     dot: Digraph
         Dot graph of connected iModulons
-    links: list
-        Links and distances of connected iModulons
     """
 
     link_names1 = [link[0] for link in links]
@@ -176,16 +173,16 @@ def convert_gene_index(df1, df2, ortho_file=None, keep_locus=False):
         Dataframe from the first object/organism
     df2 : ~pandas.DataFrame
         Dataframe from the second object/organism
-    ortho_file : str or ~pandas.DataFrame, Optional
+    ortho_file : str or ~pandas.DataFrame, optional
         Path to orthology file between organisms (default: None)
     keep_locus : bool
         If True, keep old locus tags as a column (default: False)
 
     Returns
     -------
-    df1_new: :class:`~pandas.DataFrame`
+    df1_new: ~pandas.DataFrame
         M matrix for organism 1 with indexes translated into orthologs
-    df2_new: :class:`~pandas.DataFrame`
+    df2_new: ~pandas.DataFrame
         M matrix for organism 2 with indexes translated into orthologs
     """
 
@@ -242,8 +239,8 @@ def compare_ica(
     cutoff : float
         Cut off value for correlation metric (default: .25)
     method : str or ~typing.Callable
-        Correlation metric to use out of {‘pearson’, ‘kendall’, ‘spearman’}
-        or callable
+        Correlation metric to use from {‘pearson’, ‘kendall’, ‘spearman’}
+        or callable (see :meth:`~pandas.DataFrame.corr`)
     plot : bool
         Create dot plot of matches (default: True)
     show_all : bool

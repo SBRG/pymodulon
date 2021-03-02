@@ -10,15 +10,15 @@ import pandas as pd
 from pymodulon.core import IcaData
 
 
-def save_to_json(data, fname, compress=False):
+def save_to_json(data, filename, compress=False):
     """
-    Save data to the json file
+    Save :class:`~pymodulon.core.IcaData` object to a json file
 
     Parameters
     ----------
     data: ~pymodulon.core.IcaData
        ICA dataset to be saved to json file
-    fname: str
+    filename: str
        Path to json file where the data will be saved
     compress: bool
         Indicates if the JSON file should be compressed into a gzip archive
@@ -58,21 +58,21 @@ def save_to_json(data, fname, compress=False):
     # Add _cutoff_optimized
     param_dict["_cutoff_optimized"] = data.cutoff_optimized
 
-    if fname.endswith(".gz") or compress:
-        if not fname.endswith(".json.gz"):
-            fname += ".json.gz"
-        with gzip.open(fname, "wt", encoding="ascii") as zipfile:
+    if filename.endswith(".gz") or compress:
+        if not filename.endswith(".json.gz"):
+            filename += ".json.gz"
+        with gzip.open(filename, "wt", encoding="ascii") as zipfile:
             json.dump(param_dict, zipfile)
     else:
-        if not fname.endswith(".json"):
-            fname += ".json"
-        with open(fname, "w") as fp:
+        if not filename.endswith(".json"):
+            filename += ".json"
+        with open(filename, "w") as fp:
             json.dump(param_dict, fp)
 
 
 def load_json_model(filename):
     """
-    Load ICA data from a file in JSON format.
+    Load :class:`~pymodulon.core.IcaData` object from a file in JSON format.
 
     Parameters
     ----------
@@ -83,7 +83,8 @@ def load_json_model(filename):
     Returns
     -------
     IcaData : ~pymodulon.core.IcaData
-        The ICA data as represented in the JSON document.
+        The :class:`~pymodulon.core.IcaData` object as represented in the JSON
+        document.
     """
     if isinstance(filename, str):
         if filename.endswith(".gz"):
