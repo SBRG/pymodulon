@@ -12,12 +12,18 @@ most common analytical tool used to analyze these datasets, but often result in
 large sets of differentially genes, many of which have little to no functional
 annotation. Recent studies of large transcriptomic datasets have introduced
 Independent Component Analysis (ICA) as a scalable alternative that produces
-easily-interpretable results (see :cite:`Sastry2019`). When applied to a gene
+easily-interpretable results (see :cite:`Sastry2019`).
+
+When applied to a gene
 expression dataset, ICA extracts **i**\ndependently **modul**\ated groups of genes,
 called **iModulons**. In bacteria, iModulons recapitulate known regulation with
-remarkable accuracy, and often encode complete metabolic pathways [cite]. In
+remarkable accuracy, and often encode complete metabolic pathways [cite].
+
+In
 addition, ICA simultaneously computes iModulon activities, which represents the
-effect of the associated transcriptional regulator on gene expression. For more
+effect of the associated transcriptional regulator on gene expression.
+
+For more
 information on iModulons, see the `iModulonDB About Page <https://imodulondb
 .org/about.html>`_.
 
@@ -46,9 +52,6 @@ The motif module requires installing `MEME <https://meme-suite.org/meme/>`_. We
 recommend that you use the `docker container for MEME <https://hub.docker
 .com/r/memesuite/memesuite>`_.
 
-Tutorials
----------
-
 .. toctree::
    :numbered:
    :maxdepth: 1
@@ -64,6 +67,16 @@ Tutorials
    tutorials/creating_the_gene_table.ipynb
    tutorials/additional_functions.ipynb
 
+.. toctree::
+   :numbered:
+   :maxdepth: 1
+   :caption: Example Workflow
+
+   example_workflow/mining_public_expression_databases.rst
+   example_workflow/quality_control.ipynb
+   example_workflow/running_ICA.rst
+   example_workflow/characterizing_iModulons.ipynb
+   example_workflow/creating_an_iModulonDB_page.ipynb
 
 API
 ---
