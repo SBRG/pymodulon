@@ -55,6 +55,17 @@ recommend that you use the `docker container for MEME <https://hub.docker
 .. toctree::
    :numbered:
    :maxdepth: 1
+   :caption: Example Workflow
+
+   example_workflow/mining_public_expression_databases.rst
+   example_workflow/quality_control.ipynb
+   example_workflow/running_ICA.rst
+   example_workflow/characterizing_iModulons.ipynb
+   example_workflow/creating_an_iModulonDB_page.ipynb
+
+.. toctree::
+   :numbered:
+   :maxdepth: 1
    :caption: Tutorials
 
    tutorials/introduction_to_the_ica_data_object.ipynb
@@ -79,7 +90,7 @@ recommend that you use the `docker container for MEME <https://hub.docker
    example_workflow/creating_an_iModulonDB_page.ipynb
 
 API
----
+===
 
 For documentation on a specific method or function,
 search the :ref:`/autoapi/index.rst`
