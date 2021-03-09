@@ -41,7 +41,7 @@ def cog2str(cog):
         "L": "Replication, recombination and repair",
         "M": "Cell wall/membrane/envelope biogenesis",
         "N": "Cell motility",
-        "O": "Post-translational modification, protein turnover," "and " "chaperones",
+        "O": "Post-translational modification, protein turnover, and chaperones",
         "P": "Inorganic ion transport and metabolism",
         "Q": "Secondary metabolites biosynthesis, transport, and catabolism",
         "R": "General function prediction only",
