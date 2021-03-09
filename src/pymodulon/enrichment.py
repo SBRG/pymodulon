@@ -12,17 +12,17 @@ from scipy import special, stats
 from statsmodels.stats.multitest import fdrcorrection
 
 
-def contingency(set1: Set, set2: Set, all_genes: Set):
+def contingency(set1, set2, all_genes):
     """
     Creates contingency table for gene enrichment
 
     Parameters
     ----------
-    set1 : Set
+    set1 : set
         Set of genes (e.g. regulon)
-    set2 : Set
-        Set of genes (e.g. iModulon)
-    all_genes : Set
+    set2 : set
+        Set of list (e.g. iModulon)
+    all_genes : set
         Set of all genes
 
     Returns
@@ -51,14 +51,14 @@ def compute_enrichment(gene_set, target_genes, all_genes, label=None):
 
     Parameters
     ----------
-    gene_set : Set
+    gene_set : list
         Gene set for enrichment (e.g. genes in iModulon)
-    target_genes : Set
+    target_genes : list
         Genes to be enriched against (e.g. genes in regulon or
             GO term)
-    all_genes : Set
+    all_genes : list
         Set of all genes
-    label : str
+    label : list
         Label for target_genes (e.g. regulator name or GO term)
 
     Returns
@@ -97,13 +97,13 @@ def compute_enrichment(gene_set, target_genes, all_genes, label=None):
     )
 
 
-def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
+def FDR(p_values, fdr, total=None):
     """
     Runs false detection correction for a table of statistics
 
     Parameters
     ----------
-    p_values : pd.DataFrame
+    p_values : ~pandas.DataFrame
         DataFrame with a 'pvalue' column
     fdr : float
         False detection rate
@@ -112,7 +112,7 @@ def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
 
     Returns
     -------
-    pd.DataFrame
+    ~pandas.DataFrame
         Table containing entries that passed multiple hypothesis correction
     """
 
@@ -129,21 +129,21 @@ def FDR(p_values: pd.DataFrame, fdr: float, total: int = None):
     return result.sort_values("qvalue")
 
 
-def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
+def parse_regulon_str(regulon_str, trn):
     """
     Converts a complex regulon (regulon_str) into a list of genes
 
     Parameters
     ----------
     regulon_str : str
-        Complex regulon, where "/" uses genes in any regulon and "+" uses genes in
-        all regulons
-    trn : pd.DataFrame
+        Complex regulon, where "/" uses genes in any regulon and "+" uses
+        genes in all regulons
+    trn : ~pandas.DataFrame
         Table containing transcriptional regulatory network
 
     Returns
     -------
-    Set
+    reg_genes : set
         Set of genes regulated by regulon_str
     """
 
@@ -168,27 +168,25 @@ def parse_regulon_str(regulon_str: str, trn: pd.DataFrame) -> set:
     return reg_genes
 
 
-def compute_regulon_enrichment(
-    gene_set: Set, regulon_str: str, all_genes: Set, trn: pd.DataFrame
-):
+def compute_regulon_enrichment(gene_set, regulon_str, all_genes, trn):
     """
     Computes enrichment statistics for a gene_set in a regulon
 
     Parameters
     ----------
-    gene_set : Set
+    gene_set : set
         Gene set for enrichment (e.g. genes in iModulon)
     regulon_str : str
-        Complex regulon, where "/" uses genes in any regulon and "+" uses genes in
-        all regulons
-    all_genes : Set
+        Complex regulon, where "/" uses genes in any regulon and "+" uses
+        genes in all regulons
+    all_genes : set
         Set of all genes
-    trn : pd.DataFrame
+    trn : ~pandas.DataFrame
         Table containing transcriptional regulatory network
 
     Returns
     -------
-    pd.DataFrame
+    result : ~pandas.DataFrame
         Table containing statistically significant enrichments
     """
 
@@ -209,40 +207,34 @@ def compute_regulon_enrichment(
 
 
 def compute_trn_enrichment(
-    gene_set: Set,
-    all_genes: Set,
-    trn: pd.DataFrame,
-    max_regs: int = 1,
-    fdr: float = 0.01,
-    method: str = "both",
-    force: bool = False,
+    gene_set, all_genes, trn, max_regs=1, fdr=0.01, method="both", force=False
 ):
     """
     Compare a gene set against an entire TRN
 
     Parameters
     ----------
-    gene_set : Set
+    gene_set : set
         Gene set for enrichment (e.g. genes in iModulon)
-    all_genes : Set
+    all_genes : set
         Set of all genes
-    trn : pd.DataFrame
+    trn : ~pandas.DataFrame
         Table containing transcriptional regulatory network
     max_regs : int
         Maximum number of regulators to include in complex regulon (default: 1)
     fdr : float
-        False detection rate
+        False detection rate (default = .01)
     method : str
         How to combine complex regulons. (default: 'both')
         "or" computes enrichment against union of regulons
         "and" computes enrichment against intersection of regulons
         "both" performs both tests
     force : bool
-        Allows computation of >2 regulators
+        Allows computation of >2 regulators (default = False)
 
     Returns
     -------
-    pd.DataFrame
+    ~pandas.DataFrame
         Table containing statistically significant enrichments
     """
 
@@ -302,23 +294,17 @@ def compute_trn_enrichment(
     return FDR(df_enrich, fdr=fdr, total=total)
 
 
-def compute_annotation_enrichment(
-    gene_set: Set,
-    all_genes: Set,
-    annotation: pd.DataFrame,
-    column: str,
-    fdr: float = 0.01,
-):
+def compute_annotation_enrichment(gene_set, all_genes, annotation, column, fdr=0.01):
     """
     Compare a gene set against a dataframe of gene annotations
 
     Parameters
     ----------
-    gene_set : Set
+    gene_set : set
         Gene set for enrichment (e.g. genes in iModulon)
-    all_genes : Set
+    all_genes : set
         Set of all genes
-    annotation : pd.DataFrame
+    annotation : ~pandas.DataFrame
         Table containing gene annotations
     column : str
         Name of column in the annotation DataFrame (default: 'annotation')
@@ -327,7 +313,7 @@ def compute_annotation_enrichment(
 
     Returns
     -------
-    pd.DataFrame
+    pandas.DataFrame
        Table containing statistically significant enrichments
     """
 

@@ -41,7 +41,7 @@ def cog2str(cog):
         "L": "Replication, recombination and repair",
         "M": "Cell wall/membrane/envelope biogenesis",
         "N": "Cell motility",
-        "O": "Post-translational modification, protein turnover," "and chaperones",
+        "O": "Post-translational modification, protein turnover," "and " "chaperones",
         "P": "Inorganic ion transport and metabolism",
         "Q": "Secondary metabolites biosynthesis, transport, and catabolism",
         "R": "General function prediction only",
@@ -58,7 +58,7 @@ def cog2str(cog):
     return cog_dict[cog]
 
 
-def _get_attr(attributes: str, attr_id: str, ignore: bool = False) -> Optional[str]:
+def _get_attr(attributes, attr_id, ignore=False):
     """
     Helper function for parsing GFF annotations
 
@@ -69,11 +69,11 @@ def _get_attr(attributes: str, attr_id: str, ignore: bool = False) -> Optional[s
     attr_id : str
         Attribute ID
     ignore : bool
-        If true, ignore errors if ID is not in attributes
+        If true, ignore errors if ID is not in attributes (default: False)
 
     Returns
     -------
-    str
+    str, optional
         Value of attribute
     """
 
@@ -93,14 +93,14 @@ def gff2pandas(gff_file, feature="CDS", index=None):
     ----------
     gff_file : str or list
         Path(s) to GFF file
+    feature: str or list
+        Name(s) of features to keep (default = "CDS")
     index : str, optional
         Column or attribute to use as index
-    feature: str or list
-        Name(s) of features to keep
 
     Returns
     -------
-    df_gff: pd.DataFrame
+    df_gff: ~pandas.DataFrame
         GFF formatted as a DataFrame
     """
 
@@ -188,7 +188,8 @@ def reformat_biocyc_tu(tu):
     Parameters
     ----------
     tu: str
-        Biocyc-formatted transcription unit (i.e. 'thrL // thrA // thrB // thrC')
+        Biocyc-formatted transcription unit (i.e. 'thrL // thrA // thrB //
+        thrC')
 
     Returns
     -------
@@ -219,7 +220,7 @@ def uniprot_id_mapping(
 
     Parameters
     ----------
-    prot_list : List
+    prot_list : list
         List of proteins to be mapped
     input_id : str
         ID type for the mapping input (default: "ACC+ID")
@@ -232,9 +233,10 @@ def uniprot_id_mapping(
 
     Returns
     -------
-    pd.DataFrame
-        Table containing two columns, one listing the inputs, and one listing the
-        mapped outputs. Column names are defined by input_name and output_name.
+    mapping : ~pandas.DataFrame
+        Table containing two columns, one listing the inputs, and one listing
+        the mapped outputs. Column names are defined by input_name and
+        output_name.
 
     """
 

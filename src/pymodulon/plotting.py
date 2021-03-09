@@ -30,8 +30,6 @@ from pymodulon.util import _parse_sample, dima, mutual_info_distance
 # Bar Plots #
 #############
 
-Ax = TypeVar("Ax", Axes, object)
-
 
 def barplot(
     values,
@@ -41,7 +39,7 @@ def barplot(
     highlight=None,
     ax=None,
     legend_kwargs=None,
-) -> Ax:
+):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
     expression levels or iModulon activities)
@@ -55,17 +53,17 @@ def barplot(
     ylabel: str, optional
         y-axis label
     projects: list or str, optional
-        Project(s) to show
+        Project(s) to show (default = None)
     highlight: list or str, optional
-        Project(s) to highlight
+        Project(s) to highlight (default = None)
     ax: Ax, optional
-        Matplotlib axis object
+        Matplotlib axis object (default = None)
     legend_kwargs: dict, optional
-        Dictionary of arguments for the legend
+        Dictionary of arguments for the legend (default = None)
 
     Returns
     -------
-    plot: Ax
+    plot: ~matplotlib.axes
         A matplotlib axis object
     """
 
@@ -214,26 +212,31 @@ def barplot(
 
 
 def plot_expression(
-    ica_data: IcaData,
-    gene: str,
-    projects: Union[Sequence, str] = None,
-    highlight: Union[Sequence, str] = None,
-    ax: Optional[Ax] = None,
-    legend_kwargs: Optional[Dict] = None,
-) -> Ax:
+    ica_data, gene, projects=None, highlight=None, ax=None, legend_kwargs=None
+):
     """
-    Creates a barplot showing an gene's expression across the compendium
-    Args:
-        ica_data: IcaData Object
-        gene: Gene locus tag or name
-        projects: Name(s) of projects to show (default: show all)
-        highlight: Name(s) of projects to highlight (default: None)
-        ax: Matplotlib axis object
-        legend_kwargs: Dictionary of arguments to be passed to legend
 
-    Returns: A matplotlib axis object
+    Parameters
+    ----------
+    ica_data: :class:`~pymodulon.core.IcaData`
+        ICA Data object
+    gene: str
+        Gene locus tag or name
+    projects: list or str, optional
+        Name(s) of projects to show (default = None)
+    highlight: list or str. optional
+        Name(s) of projects to highlight (default = None)
+    ax: ~matplotlib.axes, optional
+        Matplotlib axis object
+    legend_kwargs: dict, optional
+        Dictionary of arguments to be passed to legend
 
+    Returns
+    -------
+    barplot : ~matplotlib.axes
+        A matplotlib axis object
     """
+
     # Check that gene exists
     if gene in ica_data.X.index:
         values = ica_data.X.loc[gene]
@@ -249,26 +252,32 @@ def plot_expression(
 
 
 def plot_activities(
-    ica_data: IcaData,
-    imodulon: Union[int, str],
-    projects: Union[Sequence, str] = None,
-    highlight: Union[Sequence, str] = None,
-    ax: Optional[Ax] = None,
-    legend_kwargs: Optional[Dict] = None,
-) -> Ax:
+    ica_data, imodulon, projects=None, highlight=None, ax=None, legend_kwargs=None
+):
     """
-    Creates a barplot showing an iModulon's activity across the compendium
-    Args:
-        ica_data: IcaData Object
-        imodulon: iModulon name
-        projects: Name(s) of projects to show (default: show all)
-        highlight: Name(s) of projects to highlight (default: None)
-        ax: Matplotlib axis object
-        legend_kwargs: Dictionary of arguments to be passed to legend
 
-    Returns: A matplotlib axis object
+    Parameters
+    ----------
+    ica_data: :class:`~pymodulon.core.IcaData`
+        IcaData Object
+    imodulon: int or str
+        iModulon name
+    projects: list or str, optional
+        Name(s) of projects to show (default = None)
+    highlight: list or str, optional
+        Name(s) of projects to highlight (default = None)
+    ax: ~matplotlib.axes, optional
+        Matplotlib axis object (default = None)
+    legend_kwargs: dict, optional
+        Dictionary of arguments to be passed to legend (default = None)
+
+    Returns
+    -------
+    barplot: ~matplotlib.axes
+        A matplotlib axis object
 
     """
+
     # Check that iModulon exists
     if imodulon in ica_data.A.index:
         values = ica_data.A.loc[imodulon]
@@ -283,26 +292,36 @@ def plot_activities(
 
 
 def plot_metadata(
-    ica_data: IcaData,
+    ica_data,
     column,
-    projects: Union[Sequence, str] = None,
-    highlight: Union[Sequence, str] = None,
-    ax: Optional[Ax] = None,
-    legend_kwargs: Optional[Dict] = None,
-) -> Ax:
+    projects=None,
+    highlight=None,
+    ax=None,
+    legend_kwargs=None,
+):
     """
-    Creates a barplot for values in the sample table
 
-    Args:
-        ica_data: IcaData Object
-        column: Column name to plot
-        projects: Name(s) of projects to show (default: show all)
-        highlight: Name(s) of projects to highlight (default: None)
-        ax: Matplotlib axis object
-        legend_kwargs: Dictionary of arguments to be passed to legend
+    Parameters
+    ----------
+    ica_data: :class:`~pymodulon.core.IcaData`
+        IcaData Object
+    column:
+        Column name to plot
+    projects: list or str, optional
+        Name(s) of projects to show (default = None)
+    highlight: list or str, optional
+        Name(s) of projects to highlight (default = None)
+    ax: ~matplotlib.axes
+        Matplotlib axis object (default = None)
+    legend_kwargs: dict
+        Dictionary of arguments to be passed to legend (default = None)
 
-    Returns: A matplotlib axis object
+    Returns
+    -------
+    barplot: ~matplotlib.axes
+        A matplotlib axis object
     """
+
     # Check that column exists
     if column in ica_data.sample_table.columns:
         # Make sure the column is filled with numbers
@@ -320,54 +339,59 @@ def plot_metadata(
 
 
 def plot_regulon_histogram(
-    ica_data: IcaData,
-    imodulon: Union[int, str],
-    regulator: str = None,
-    bins: Optional[Union[int, Sequence, str]] = None,
-    kind: str = "overlap",
-    ax: Optional[Ax] = None,
-    hist_label: Tuple[str, str] = ("Not regulated", "Regulon Genes"),
-    color: Sequence = ("#aaaaaa", "salmon"),
-    alpha: float = 0.7,
-    ax_font_kwargs: Optional[Dict] = None,
-    legend_kwargs: Optional[Dict] = None,
-) -> Ax:
+    ica_data,
+    imodulon,
+    regulator,
+    bins=None,
+    kind="overlap",
+    ax=None,
+    hist_label=("Not regulated", "Regulon Genes"),
+    color=("#aaaaaa", "salmon"),
+    alpha=0.7,
+    ax_font_kwargs=None,
+    legend_kwargs=None,
+):
     """
     Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
 
     Parameters
     ----------
-    ica_data: IcaData
+    ica_data: :class:`~pymodulon.core.IcaData`
         IcaData container object
     imodulon: int, str
         The name of the iModulon to plot in regards to. Used to determine
         gene weights
-    regulator: str
+    regulator: str, optional
         Name of regulator to compare enrichment against. Determines which
-        genes are in the regulon and which are not.
-    bins: int, Sequence, str
+        genes are in the regulon and which are not. (default = None)
+    bins: int or list or str, optional
         The bins to use when generating the histogram. Passed on to
-        `ax.hist()`
-    kind: 'overlap', 'side'
+        `ax.hist()` (default = None)
+    kind: str, optional
         Whether to plot an overlapping or side-by-side comparison histogram
-    ax: matplotlib.axes instance
+        to use from {'overlap', 'side'} (default = 'overlap')
+    ax: ~matplotlib.axes, optional
         The axes instance on which to generate the scatter-plot. If None is
-        provided, generates a new figure and axes instance to use
-    hist_label: Tuple[str, str]
+        provided, generates a new figure and axes instance to use (default =
+        None)
+    hist_label: tuple(str,str), optional
         The label to use when plotting the regulon and non-regulon genes.
         Takes into a tuple of 2 values (first for non-regulon genes,
-        second for regulon genes). Passed on to `ax.hist()`
-    color: Sequence of tuples and/or str
+        second for regulon genes). Passed on to `ax.hist()` (default = ("Not
+        regulated", "Regulon Genes"))
+    color: list, optional
         The colors to use for regulon and non-regulon genes. Takes a
         Sequence of 2 values (first for non-regulon genes, second for
-        regulon genes). Passed on to `ax.hist()`
-    alpha: float
+        regulon genes). Passed on to `ax.hist()` (default = ("#aaaaaa",
+        "salmon"))
+    alpha: float, optional
         Sets the opacity of the histogram (0 = transparent, 1 = opaque).
-        Passed on to `ax.hist()`
-    ax_font_kwargs: dict
-        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
-    legend_kwargs: dict
-        kwargs that are passed onto `ax.legend()`
+        Passed on to `ax.hist()` (default = .7)
+    ax_font_kwargs: dict, optional
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()` (
+        default = None)
+    legend_kwargs: dict, optional
+        kwargs that are passed onto `ax.legend()` (default = None)
 
     Returns
     -------
@@ -483,25 +507,25 @@ def plot_regulon_histogram(
 
 
 def scatterplot(
-    x: pd.Series,
-    y: pd.Series,
-    groups: Optional[Dict] = None,
-    colors: Optional[Union[str, Sequence, Dict]] = None,
-    show_labels: Union[bool, str] = "auto",
-    adjust_labels: bool = True,
-    line45: bool = False,
-    line45_margin: float = 0,
-    fit_line: bool = False,
-    fit_metric: str = "pearson",
-    xlabel: str = "",
-    ylabel: str = "",
-    ax: Optional[Ax] = None,
-    legend: bool = True,
-    ax_font_kwargs: Optional[Dict] = None,
-    scatter_kwargs: Optional[Dict] = None,
-    label_font_kwargs: Optional[Dict] = None,
-    legend_kwargs: Optional[Dict] = None,
-) -> Ax:
+    x,
+    y,
+    groups=None,
+    colors=None,
+    show_labels="auto",
+    adjust_labels=True,
+    line45=False,
+    line45_margin=0,
+    fit_line=False,
+    fit_metric="pearson",
+    xlabel="",
+    ylabel="",
+    ax=None,
+    legend=True,
+    ax_font_kwargs=None,
+    scatter_kwargs=None,
+    label_font_kwargs=None,
+    legend_kwargs=None,
+):
     """
     Generates a scatter-plot of the data given, with options for coloring by
     group, adding labels, adding lines, and generating correlation or
@@ -509,52 +533,56 @@ def scatterplot(
 
     Parameters
     ----------
-    x: pd.Series
+    x: ~pandas.Series
         The data to be plotted on the x-axis
-    y: pd.Series
+    y: ~pandas.Series
         The data to be plotted on the x-axis
-    groups: dict
-        A mapping of data-points that form groups in the data
-    colors: str, list, or dict
-        Color of points, list of colors to use for different groups, or dictionary
-        mapping groups to colors
-    show_labels: bool, str
-        An option that toggles whether data-points are given labels
+    groups: dict, optional
+        A mapping of data-points that form groups in the data (default = None)
+    colors: str or list or dict, optional
+        Color of points, list of colors to use for different groups,
+        or dictionary mapping groups to colors (default = None)
+    show_labels: bool or str, optional
+        An option that toggles whether data-points are given labels (default
+        = 'auto')
     adjust_labels: bool
         An option that ensures labels on data are sufficiently spread out
-        and readable
+        and readable  (default = True)
     line45: bool
         An option to add a 45 degree line to the scatter-plot, useful
-        for comparison with R^2 values
+        for comparison with R^2 values (default = False)
     line45_margin: float
         An option that adds margins around the 45 degree line. The larger
-        this number, the larger the margin (distance from line45)
+        this number, the larger the margin (distance from line45) (default = 0)
     fit_line: bool
-        An option to add a line of best fit on the scatter-plot
+        An option to add a line of best fit on the scatter-plot (default =
+        False)
     fit_metric: str
         The metric to use for finding the line of best fit. Options include
-        pearson-r, spearman-r, or r^2
+        pearson-r, spearman-r, or r^2 (default = "pearson)
     xlabel: str
-        The label to use for the x-axis of the plot
+        The label to use for the x-axis of the plot (default = "")
     ylabel: str
-        The label to use for the y-axis of the plot
-    ax: matplotlib.axes instance
+        The label to use for the y-axis of the plot (default = "")
+    ax: ~matplotlib.axes, optional
         The axes instance on which to generate the scatter-plot. If None is
-        provided, generates a new figure and axes instance to use
+        provided, generates a new figure and axes instance to use (default =
+        None)
     legend: bool
         An option on whether to show the legend (default: True)
-    ax_font_kwargs: dict
-        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()`
-    scatter_kwargs: dict
-        kwargs that are passed onto `ax.scatter()`
-    label_font_kwargs: dict
-        kwargs that are passed onto `ax.text()`
-    legend_kwargs: dict
-        kwargs that are passed onto `ax.legend()`
+    ax_font_kwargs: dict, optional
+        kwargs that are passed onto `ax.set_xlabel()` and `ax.set_ylabel()` (
+        default = None)
+    scatter_kwargs: dict, optional
+        kwargs that are passed onto `ax.scatter()` (default = None)
+    label_font_kwargs: dict, optional
+        kwargs that are passed onto `ax.text()` (default = None)
+    legend_kwargs: dict, optional
+        kwargs that are passed onto `ax.legend()` (default = None)
 
     Returns
     -------
-    ax: matplotlib.axes instance
+    ax: ~matplotlib.axes
         Returns the axes instance on which the scatter-plot is generated
     """
 
@@ -721,14 +749,8 @@ def scatterplot(
 
 
 def plot_gene_weights(
-    ica_data: IcaData,
-    imodulon: Union[int, str],
-    xaxis=None,
-    xname="",
-    by: Optional[str] = "start",
-    ref_cols: Optional[Union[Sequence, Set, str]] = None,
-    **kwargs,
-) -> Ax:
+    ica_data, imodulon, xaxis=None, xname="", by="start", ref_cols=None, **kwargs
+):
     """
     Generates a scatter-plot, with gene weights on the y-axis, and either
     the mean expression, gene length, or gene start site on the x-axis.
@@ -737,27 +759,31 @@ def plot_gene_weights(
 
     Parameters
     ----------
-    ica_data: pymodulon.core.IcaData
+    ica_data: :class:`~pymodulon.core.IcaData`
         IcaData container object
-    imodulon: int, str
+    imodulon: int or str
         The name of the iModulon to plot
     xaxis:
-        Experimental parameter. See `_set_axis()` for further details.
-    xname:
-        Experimental parameter. See `_set_axis()` for further details.
-    by: 'log-tpm-norm', 'length', 'start'
-        Gene property to plot on the x-axis. log-tpm-norm plots mean
+        Experimental parameter. See `_set_axis()` for further details. (
+        default = None)
+    xname: str
+        Experimental parameter. See `_set_axis()` for further details. (
+        default = "")
+    by: str, optional
+        Gene property to plot on the x-axis out of
+        {'log-tpm-norm', 'length', 'start'}. log-tpm-norm plots mean
         expression, length plots gene length, and start plots gene start
-        position
-    ref_cols: Sequence, set, or str
+        position (default = 'start')
+    ref_cols: list or set or str, optional
         A str or list of str values to use for normalizing the log-tpm data.
-        Only used if 'log-tpm-norm' is given for the `by` parameter.
+        Only used if 'log-tpm-norm' is given for the `by` parameter. (default =
+        None)
     **kwargs: dict
         keyword arguments passed onto `scatterplot()`
 
     Returns
     -------
-    ax: matplotlib.axes instance
+    ax: ~matplotlib.axes
         Returns the axes instance on which the scatter-plot is generated
     """
     # Check that iModulon exists
@@ -816,7 +842,8 @@ def plot_gene_weights(
         mod_cogs = ica_data.gene_table.loc[component_genes].COG
         hidden_cogs = pd.Series("hidden", index=other_genes)
         all_cogs = pd.concat([mod_cogs, hidden_cogs])
-        # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
+        # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(
+        # mod_cogs.unique())}
         kwargs.update({"groups": all_cogs, "colors": ica_data.cog_colors})
 
     # Scatter Plot
@@ -898,14 +925,14 @@ def plot_gene_weights(
 
 
 def compare_gene_weights(
-    ica_data: IcaData,
-    imodulon1: Union[int, str],
-    imodulon2: Union[int, str],
-    ica_data2: Optional[IcaData] = None,
-    ortho_file: str = None,
-    use_org1_names: bool = True,
+    ica_data,
+    imodulon1,
+    imodulon2,
+    ica_data2=None,
+    ortho_file=None,
+    use_org1_names=True,
     **kwargs,
-) -> Ax:
+):
     """
     Compare gene weights between 2 iModulons. The result is shown as a
     scatter-plot. Also shows the D'Agostino cutoff for both iModulons,
@@ -914,30 +941,27 @@ def compare_gene_weights(
 
     Parameters
     ----------
-    ica_data: pymodulon.core.IcaData
+    ica_data: :class:`~pymodulon.core.IcaData`
         IcaData container object
-    imodulon1: int, str
+    imodulon1: int or str
         The name of the iModulon to plot on the x-axis
-    imodulon2: int, str
+    imodulon2: int or str
         The name of the iModulon to plot on the y-axis
-    ica_data2: pymodulon.core.IcaData
+    ica_data2: :class:`~pymodulon.core.IcaData`, optional
         IcaData object of second iModulon (if comparing iModulons across
-        objects)
-    ortho_file: os.PathLike
-        Path to orthology file between organisms
+        objects) (default = None)
+    ortho_file: str
+        Path to orthology file between organisms (default = None)
     use_org1_names: bool
         If true, use gene names from first organism. If false, use gene names
-        from second organism (default: True)
+        from second organism (default = True)
     **kwargs: dict
         keyword arguments passed onto `scatterplot()`
 
     Returns
     -------
-    ax: matplotlib.axes instance
+    ax: ~matplotlib.axes
         Returns the axes instance on which the scatter-plot is generated
-
-    Args:
-        use_org1_names:
     """
     if ica_data2 is None:
         ica_data2 = ica_data.copy()
@@ -1089,14 +1113,14 @@ def compare_gene_weights(
     return ax
 
 
-def compare_expression(ica_data: IcaData, gene1: str, gene2: str, **kwargs) -> Ax:
+def compare_expression(ica_data, gene1, gene2, **kwargs):
     """
     Compares Gene Expression values between two genes. The result is shown
     as a scatter-plot.
 
     Parameters
     ----------
-    ica_data: pymodulon.core.IcaData
+    ica_data: :class:`~pymodulon.core.IcaData`
         IcaData container object
     gene1: str
         Gene to plot on the x-axis
@@ -1107,7 +1131,7 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str, **kwargs) -> A
 
     Returns
     -------
-    ax: matplotlib.axes instance
+    ax: ~matplotlib.axes
         Returns the axes instance on which the scatter-plot is generated
     """
 
@@ -1140,25 +1164,25 @@ def compare_expression(ica_data: IcaData, gene1: str, gene2: str, **kwargs) -> A
     return ax
 
 
-def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
+def compare_activities(ica_data, imodulon1, imodulon2, **kwargs):
     """
     Compare activities between two iModulons.  The result is shown as a
     scatter-plot.
 
     Parameters
     ----------
-    ica_data: pymodulon.core.IcaData
+    ica_data: :class:`~pymodulon.core.IcaData`
         IcaData container object
-    imodulon1: int, str
+    imodulon1: int or str
         The name of the iModulon to plot on the x-axis
-    imodulon2: int, str
+    imodulon2: int or str
         The name of the iModulon to plot on the y-axis
     **kwargs: dict
         keyword arguments passed onto `scatterplot()`
 
     Returns
     -------
-    ax: matplotlib.axes instance
+    ax: ~matplotlib.axes
         Returns the axes instance on which the scatter-plot is generated
     """
 
@@ -1180,27 +1204,27 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs) -> Ax:
 
 
 def plot_dima(
-    ica_data: IcaData,
-    sample1: Union[Sequence, str],
-    sample2: Union[Sequence, str],
-    threshold: float = 5,
-    fdr: float = 0.1,
-    label: bool = True,
-    adjust: bool = True,
-    table: bool = False,
-    alternate_A: pd.DataFrame = None,
+    ica_data,
+    sample1,
+    sample2,
+    threshold=5,
+    fdr=0.1,
+    label=True,
+    adjust=True,
+    table=False,
+    alternate_A=None,
     **kwargs,
-) -> Ax:
+):
     """
     Plots a DiMA plot between two projects or two sets of samples
 
     Parameters
     ----------
-    ica_data : IcaData
+    ica_data : :class:`~pymodulon.core.IcaData`
         IcaData object
-    sample1 : Union[Sequence,str]
+    sample1 : list or str
         Sequence of sample IDs or name of "project:condition"
-    sample2 : Union[Sequence,str]
+    sample2 : list or str
         Sequence of sample IDs or name of "project:condition"
     threshold : float
         Minimum activity difference to determine DiMAs (default: 5)
@@ -1212,12 +1236,14 @@ def plot_dima(
         Automatically adjust labels (default: True)
     table : bool
         Return differential iModulon activity table (default: False)
+    alternate_A : ~pandas.DataFrame
+        Alternate A matrix to use (default = None)
     **kwargs : dict
         Additional arguments for scatterplot
 
     Returns
     -------
-    Ax
+    ax : ~matplotlib.axes
         DiMA plot
     """
 
@@ -1307,69 +1333,93 @@ def plot_dima(
 
 
 def cluster_activities(
-    ica_data: IcaData,
-    correlation_method: str = "spearman",
-    distance_threshold: Union[float] = None,
-    show_thresholding: bool = False,
-    show_clustermap: bool = True,
-    show_best_clusters: bool = False,
-    n_best_clusters: Union[str, int] = "above_average",
-    cluster_names: Union[dict] = None,
-    return_clustermap: bool = False,
-    # dimca options
-    dimca_sample1: Union[Sequence, str] = None,
-    dimca_sample2: Union[Sequence, str] = None,
-    dimca_threshold: float = 5,
-    dimca_fdr: float = 0.1,
-    dimca_label: bool = True,
-    dimca_adjust: bool = True,
-    dimca_table: bool = False,
+    ica_data,
+    correlation_method="spearman",
+    distance_threshold=None,
+    show_thresholding=False,
+    show_clustermap=True,
+    show_best_clusters=False,
+    n_best_clusters="above_average",
+    cluster_names=None,
+    return_clustermap=False,
+    dimca_sample1=None,
+    dimca_sample2=None,
+    dimca_threshold=5,
+    dimca_fdr=0.1,
+    dimca_label=True,
+    dimca_adjust=True,
+    dimca_table=False,
     **dimca_kwargs,
 ):
     """
     Uses agglomerative (hierarchical) clustering to group iModulons based on
     correlation between their activities and displays the resulting cluster map
-    and best clusters
-    Returns the cluster object to enable downstream analyses
+    and best clusters. Returns the cluster object to enable downstream
+    analyses
 
-    Args:
-        ica_data: IcaData object that contains your data
-        correlation_method: the correlation method to use for computing
-            correlations between iModulon activities. Default is
-            "spearman". Supported alternatives are "pearson" and "mutual_info"
-        distance_threshold: a specific distance threshold (between 0 and 1) to
-            use for defining flat clusters from the hierarchical cluster
-            relationship. Larger values yield fewer clusters. Defaults to None,
-            which will initiate automatic selection of optimal threshold based
-            on maximization of silhouette score across iModulons
-        show_thresholding: indicates if a plot showing automatic thresholding
-            via silhouette scoring should be displayed
-        show_clustermap: indicates if a clustermap should be displayed
-        show_best_clusters: indicates if the best individual clusters should be
-            displayed below the clustermap
-        n_best_clusters: the number of best clusters to show. Defaults to
-            'above_average', where the clusters with silhouette score above the
-            mean will be displayed.
-        cluster_names: a dictionary mapping best cluster indices to names to
-            display above their individual subplots; this option should be used
-            once the clustering has been performed at least once and cluster
-            names have been manually assigned via knowledge mapping
-        return_clustermap: indicates if the clustermap plot object should be
-            returned to allow further customization
-        dimca_sample1: Sequence of sample IDs or name of "project:condition"
-        dimca_sample2: Sequence of sample IDs or name of "project:condition"
-        dimca_threshold: Minimum activity difference to determine DiMCAs
-        dimca_fdr: False Detection Rate
-        dimca_label: Label differentially activated iModulons (default: True)
-        dimca_adjust: Automatically adjust labels (default: True)
-        dimca_table: Return differential iModulon cluster activity table
-        **dimca_kwargs: Additional arguments for DiMCA scatterplot
+    Parameters
+    ----------
+    ica_data: :class:`~pymodulon.core.IcaData`
+        IcaData object that contains your data
+    correlation_method: str
+        the correlation method to use for computing correlations between
+        iModulon activities. Default is "spearman". Supported
+        alternatives are "pearson" and "mutual_info" distance_threshold:
+        a specific distance threshold (between 0 and 1) to use for
+        defining flat clusters from the hierarchical cluster
+        relationship. Larger values yield fewer clusters. Defaults to
+        None, which will initiate automatic selection of optimal
+        threshold based on maximization of silhouette score across
+        iModulons (default = "spearman")
+    show_thresholding: bool
+        indicates if a plot showing automatic thresholding via silhouette
+        scoring should be displayed (default = False)
+    show_clustermap: bool
+        indicates if a clustermap should be displayed (default = True)
+    show_best_clusters: bool
+        indicates if the best individual clusters should be displayed
+        below the clustermap (default = False)
+    n_best_clusters: str or int
+        the number of best clusters to show. Defaults to 'above_average',
+        where the clusters with silhouette score above the mean will be
+        displayed. (default = 'above_average)
+    cluster_names: dict
+        A dictionary mapping best cluster indices to names to
+        display above their individual subplots; this option should be used
+        once the clustering has been performed at least once and cluster
+        names have been manually assigned via knowledge mapping (default
+        = None)
+    return_clustermap: bool
+        indicates if the clustermap plot object should be returned to
+        allow further customization (default = False)
+    dimca_sample1: list or str
+        Sequence of sample IDs or name of "project:condition" (default =
+        None)
+    dimca_sample2: list or str
+        Sequence of sample IDs or name of "project:condition" (default =
+        None)
+    dimca_threshold: float
+        Minimum activity difference to determine DiMCAs (default = 5)
+    dimca_fdr: float
+        False Detection Rate (default = .1)
+    dimca_label: bool
+        Label differentially activated iModulons (default = True)
+    dimca_adjust: bool
+        Automatically adjust labels (default = True)
+    dimca_table: bool
+        Return differential iModulon cluster activity table (default =
+        False)
+    **dimca_kwargs: dict
+        Additional arguments for DiMCA scatterplot
 
-    Returns: cluster_obj; optionally can return up to four arguments; if
-    return_clustermap is True, returns the seaborn ClusterGrid instance. If a
-    DIMCA is requested, returns the DIMCA axes (and optionally the dimca table
-    if requested). The order is always:
-        [cluster_obj, clustermap, dimca_ax, dimca_table]
+    Returns
+    -------
+    cluster_obj:
+        optionally can return up to four arguments; if return_clustermap is
+        True, returns the seaborn ClusterGrid instance. If a DIMCA is
+        requested, returns the DIMCA axes (and optionally the dimca table if
+        requested). The order is always: [cluster_obj, clustermap, dimca_ax,
+        dimca_table]
 
     """
 
@@ -1640,7 +1690,9 @@ def cluster_activities(
                     )
                     cluster_title = f"{cluster_name} ({cluster_score:.2f})"
                 else:
-                    cluster_title = f"Cluster {cluster_lab} " f"({cluster_score:.2f})"
+                    cluster_title = (
+                        f"Cluster {cluster_lab} " f"(" f"{cluster_score:.2f})"
+                    )
                 ax.set_title(cluster_title, fontsize=16)
                 ax.set_yticks(np.arange(0.5, cluster_mtrx.shape[0] + 0.5, 1))
                 ax.set_yticklabels(cluster_mtrx.index)
@@ -1741,7 +1793,8 @@ def metadata_boxplot(
         Remove concentrations from metadata (e.g. "glucose(2g/L)" would be
         interpreted as just "glucose")
     ignore_cols: Optional[Sequence]
-        Sequence of columns to ignore. If None, only "project" and "condition" are ignored
+        Sequence of columns to ignore. If None, only "project" and
+        "condition" are ignored
     use_cols: Optional[Sequence]
         Sequence of columns to use. This supercedes ignore_cols.
     return_results: bool

@@ -88,7 +88,7 @@ class IcaData(object):
             provided)
         dataset_table : dict, optional
             Dictionary of general dataset information for the details box on the
-            dataset page of iModulonDB (defaul: None)
+            dataset page of iModulonDB (default: None)
         splash_table : dict, optional
             Dictionary of general information for the splash page
             link to this dataset, as well as folder names for where its data
