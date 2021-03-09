@@ -1,6 +1,5 @@
 """
-Pre-loaded example dataset for PyModulon tutorials. _E. coli_ dataset from Sastry et al
-2019, and S. aureus dataset is from
+Pre-loaded example dataset for PyModulon tutorials.
 """
 
 from os import path
@@ -33,16 +32,50 @@ ecoli_go_example = path.join(_ecoli_dir, "GO_example_annotations.txt")
 
 # Load E coli IcaData Object
 def load_ecoli_data():
+    """
+    Load *Escherichia coli* :class:`~pymodulon.core.IcaData` object from
+    :cite:`Sastry2019`
+
+    Returns
+    -------
+    ecoli_data: ~pymodulon.core.IcaData
+        *E. coli* :class:`~pymodulon.core.IcaData` object
+    """
     return load_json_model(path.join(_data_dir, "objects", "ecoli_data.json"))
 
 
 def load_staph_data():
+    """
+    Load *Staphylococcus aureus* :class:`~pymodulon.core.IcaData` object from
+    :cite:`Poudel2020`
+
+    Returns
+    -------
+    staph_data: ~pymodulon.core.IcaData
+        *S. aureus* :class:`~pymodulon.core.IcaData` object
+    """
     return load_json_model(path.join(_data_dir, "objects", "staph_data.json"))
 
 
 def load_example_bbh():
+    """
+    Load an example bi-directional blast best hit (BBH) file
+
+    Returns
+    -------
+    example_bbh: ~pandas.DataFrame
+        Example BBH file
+    """
     return pd.read_csv(path.join(_data_dir, "bbh", "example_bbh.csv"), index_col=0)
 
 
 def load_example_tpm():
+    """
+    Load an example expression dataset in units log-TPM
+
+    Returns
+    -------
+    example_tpm: ~pandas.DataFrame
+        Example expression dataset
+    """
     return pd.read_csv(path.join(_data_dir, "ecoli", "example_tpm.csv"), index_col=0)
