@@ -159,7 +159,7 @@ extras = docs
 allowlist_externals=make
 setenv =
     BUILDDIR={env:DOCS_BUILDDIR:{envdir}/docs_build}
-    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color'}
+    SPHINXOPTS={env:DOCS_SPHINXOPTS:'--color -W'}
 commands =
     make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs html
     make SPHINXOPTS={env:SPHINXOPTS} BUILDDIR={env:BUILDDIR} -C docs linkcheck
