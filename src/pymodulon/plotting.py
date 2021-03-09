@@ -1208,7 +1208,8 @@ def plot_dima(
     ax: ~matplotlib.axes.Axes
         :class:`~matplotlib.axes.Axes` containing the scatterplot
 
-    df_diff
+    df_diff: ~pandas.DataFrame, optional
+        Table reporting differentially activated iModulons
 
     """
 
@@ -1318,11 +1319,8 @@ def cluster_activities(
     **dimca_kwargs,
 ):
     """
-        Uses agglomerative (hierarchical) clustering to group iModulons based on
-    correlation between their activities and displays the resulting cluster map
-    and best clusters
-    Returns the cluster object to enable downstream analyses
-
+    Cluster all iModulon activity profiles using hierarchical clustering and display
+    the results using :func:`seaborn.clustermap`
 
     Parameters
     ----------
@@ -1371,13 +1369,14 @@ def cluster_activities(
 
     Returns
     -------
-    ax: ~matplotlib.axes.Axes
-        :class:`~matplotlib.axes.Axes` containing the clusterplot
-    cluster_obj; optionally can return up to four arguments; if
-    return_clustermap is True, returns the seaborn ClusterGrid instance. If a
-    DIMCA is requested, returns the DIMCA axes (and optionally the dimca table
-    if requested). The order is always:
-        [cluster_obj, clustermap, dimca_ax, dimca_table]
+    clusters: ~sklearn.cluster.AgglomerativeClustering
+        :class:`sklearn.cluster.AgglomerativeClustering` of activity matrix
+    cg: ~seaborn.matrix.ClusterGrid, optional
+        :class:`~seaborn.matrix.ClusterGrid` containing the clusterplot
+    dimca_ax: ~matplotlib.axes.Axes, optional
+        :class:`~matplotlib.axes.Axes` containing the DiMCA scatterplot
+    dimca_table: ~pandas.DataFrame, optional
+        Table of differentially activated iModulon clusters
     """
 
     # compute distance matrix; distance metric defined as 1 - correlation to

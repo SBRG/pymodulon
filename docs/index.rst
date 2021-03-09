@@ -12,7 +12,7 @@ most common analytical tool used to analyze these datasets, but often result in
 large sets of differentially genes, many of which have little to no functional
 annotation. Recent studies of large transcriptomic datasets have introduced
 Independent Component Analysis (ICA) as a scalable alternative that produces
-easily-interpretable results (see :cite:`Sastry2019`).
+easily-interpretable results :cite:`Sastry2019`.
 
 When applied to a gene
 expression dataset, ICA extracts **i**\ndependently **modul**\ated groups of genes,
@@ -52,6 +52,7 @@ The motif module requires installing `MEME <https://meme-suite.org/meme/>`_. We
 recommend that you use the `docker container for MEME <https://hub.docker
 .com/r/memesuite/memesuite>`_.
 
+
 .. toctree::
    :numbered:
    :maxdepth: 1
@@ -62,6 +63,7 @@ recommend that you use the `docker container for MEME <https://hub.docker
    example_workflow/running_ICA.rst
    example_workflow/characterizing_iModulons.ipynb
    example_workflow/creating_an_iModulonDB_page.ipynb
+
 
 .. toctree::
    :numbered:
@@ -78,33 +80,12 @@ recommend that you use the `docker container for MEME <https://hub.docker
    tutorials/creating_the_gene_table.ipynb
    tutorials/additional_functions.ipynb
 
-.. toctree::
-   :numbered:
-   :maxdepth: 1
-   :caption: Example Workflow
-
-   example_workflow/mining_public_expression_databases.rst
-   example_workflow/quality_control.ipynb
-   example_workflow/running_ICA.rst
-   example_workflow/characterizing_iModulons.ipynb
-   example_workflow/creating_an_iModulonDB_page.ipynb
-
-API
-===
-
-For documentation on a specific method or function,
-search the :ref:`/autoapi/index.rst`
-
-.. toctree::
-   :maxdepth: 1
-   :caption: Contents
-
-   autoapi/index
 
 .. toctree::
    :maxdepth: 1
    :caption: Additional Resources
 
+   autoapi/index
    zreferences
 
 Indices and tables

@@ -136,10 +136,10 @@ def dima(ica_data, sample1, sample2, threshold=5, fdr=0.1, alternate_A=None):
     ----------
     ica_data: ~pymodulon.core.IcaData
         :class:`~pymodulon.core.IcaData` data object
-    sample1: str
-        Sequence of sample IDs or name of "project:condition"
-    sample2: str
-        Sequence of sample IDs or name of "project:condition"
+    sample1: str or list
+        List of sample IDs or name of "project:condition"
+    sample2: str or list
+        List of sample IDs or name of "project:condition"
     threshold: float
         Minimum activity difference to determine DiMAs (default = 5)
     fdr: float
