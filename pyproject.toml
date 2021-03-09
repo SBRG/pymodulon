@@ -134,6 +134,7 @@ commands =
 [testenv:py3{6,7,8}]
 description = Run tests under {basepython}.
 extras = tests
+deps = pytest
 commands =
     pytest {posargs: --cov --cov-report=term-missing --cov-append -vv}
 

@@ -136,7 +136,7 @@ nbsphinx_timeout = 180
 # Refer to the Python documentation for other libraries.
 intersphinx_mapping = {
     "http://docs.python.org/": None,
-    "https://matplotlib.org/": None,
+    "https://matplotlib.org/stable/": None,
     "https://numpy.org/doc/stable/": None,
     "https://pandas.pydata.org/pandas-docs/stable/": None,
     "http://docs.scipy.org/doc/scipy/reference": None,
