@@ -3,8 +3,8 @@ Core functions for the IcaData object
 """
 
 import copy
+import logging
 import re
-from warnings import warn
 
 import numpy as np
 import pandas as pd
@@ -169,7 +169,7 @@ class IcaData(object):
         if thresholds is not None:
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warn(
+                logging.warning(
                     "Using manually input thresholds. D'agostino "
                     "optimization will not be performed"
                 )
@@ -181,7 +181,7 @@ class IcaData(object):
         elif self.trn.empty or threshold_method == "kmeans":
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
-                warn(
+                logging.warning(
                     "Using Kmeans threshold method. D'agostino "
                     "optimization will not be performed"
                 )
@@ -198,7 +198,9 @@ class IcaData(object):
                         "Thresholds cannot be optimized if no TRN is provided."
                     )
                 else:
-                    warn("Optimizing iModulon thresholds, may take 2-3 " "minutes...")
+                    logging.warning(
+                        "Optimizing iModulon thresholds, may take 2-3 " "minutes..."
+                    )
                     # this function sets self.dagostino_cutoff internally
                     self.reoptimize_thresholds(progress=False, plot=False)
                     # also sets an attribute to tell us if we've done
@@ -417,7 +419,7 @@ class IcaData(object):
             # Make sure regulators do not contain / or + characters
             for reg in self._trn.regulator.unique():
                 if "+" in reg or "/" in reg:
-                    warn(
+                    logging.warning(
                         "The characters '+' and '/' are used for combining "
                         "regulons and cannot be in regulator names. These "
                         "characters will be replaced with ';'"
@@ -431,7 +433,7 @@ class IcaData(object):
             # Only include genes that are in S/X matrix
             extra_genes = set(self._trn.gene_id) - set(self.gene_names)
             if len(extra_genes) > 0:
-                warn(
+                logging.warning(
                     "The following genes are in the TRN but not in "
                     "your M "
                     "matrix: {}".format(extra_genes)
@@ -485,7 +487,7 @@ class IcaData(object):
                     name_series[key] = val + "-1"
                     seen[val] = 2
 
-                warn(
+                logging.warning(
                     "Duplicate iModulon names detected. iModulon {} will "
                     "be renamed to {}".format(key, name_series[key])
                 )
@@ -562,7 +564,7 @@ class IcaData(object):
 
         return final_rows
 
-    def find_single_gene_imodulons(self, save):
+    def find_single_gene_imodulons(self, save=False):
         """
         A simple function that returns the names of all likely single-gene
         iModulons. Checks if the largest iModulon gene weight is more
@@ -659,7 +661,7 @@ class IcaData(object):
             if "evidence" in self.trn.columns:
                 trn_to_use = self.trn[self.trn["evidence"].isin(evidences_to_use)]
             else:
-                warn(
+                logging.warning(
                     'TRN does not contain an "evidence" column. Ignoring '
                     "evidence argument."
                 )
@@ -1170,7 +1172,7 @@ class IcaData(object):
             if len(loci) == 0:
                 raise ValueError("Gene does not exist: {}".format(g))
             elif len(loci) > 1:
-                warn(
+                logging.warning(
                     "Found multiple genes named {}. Only "
                     "reporting first locus tag".format(g)
                 )

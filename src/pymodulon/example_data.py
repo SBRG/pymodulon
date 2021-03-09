@@ -69,7 +69,7 @@ def load_example_bbh():
     return pd.read_csv(path.join(_data_dir, "bbh", "example_bbh.csv"), index_col=0)
 
 
-def load_example_tpm():
+def load_example_log_tpm():
     """
     Load an example expression dataset in units log-TPM
 

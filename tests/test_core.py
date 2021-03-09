@@ -1,6 +1,11 @@
+import logging
+
 import numpy as np
 
 from pymodulon.core import IcaData
+
+
+LOGGER = logging.getLogger(__name__)
 
 
 def test_m_binarized(ecoli_obj):
@@ -8,7 +13,7 @@ def test_m_binarized(ecoli_obj):
     assert binary_m["GlpR"].sum() == 9
 
 
-def test_imodulon_names(ecoli_obj, recwarn):
+def test_imodulon_names(ecoli_obj, caplog):
     # Ensure that iModulon names are consistent
     imodulon_list = ecoli_obj.imodulon_names
     assert (
@@ -18,13 +23,12 @@ def test_imodulon_names(ecoli_obj, recwarn):
     )
 
     # Test imodulon_names setter
-    ecoli_obj.imodulon_names = ["test"] * 92
+    with caplog.at_level(logging.WARNING):
+        ecoli_obj.imodulon_names = ["test"] * 92
+
     assert ecoli_obj.imodulon_names[0] == "test-1"
     assert ecoli_obj.imodulon_names[71] == "test-72"
-
-    w = recwarn.pop(UserWarning)
-    assert issubclass(w.category, UserWarning)
-    assert str(w.message).startswith("Duplicate iModulon names detected.")
+    assert "Duplicate iModulon names detected" in caplog.text
 
 
 def test_sample_names(ecoli_obj):
@@ -57,8 +61,7 @@ def test_gene_names(ecoli_obj):
 #     assert not mini_obj_opt._cutoff_optimized
 
 
-def test_rename_imodulons(ecoli_obj, recwarn):
-
+def test_rename_imodulons(ecoli_obj, caplog):
     # Check if renaming works for iModulons
     ecoli_obj.rename_imodulons({"AllR/AraC/FucR": "all3"})
     assert ecoli_obj.imodulon_names[0] == "all3"
@@ -67,14 +70,14 @@ def test_rename_imodulons(ecoli_obj, recwarn):
     assert "all3" in ecoli_obj.thresholds.keys()
 
     # Try renaming with duplicate names
-    ecoli_obj.rename_imodulons({"all3": "test", "ArcA-1": "test", "ArcA-2": "test"})
+    with caplog.at_level(logging.WARNING):
+        ecoli_obj.rename_imodulons({"all3": "test", "ArcA-1": "test", "ArcA-2": "test"})
+
     assert ecoli_obj.imodulon_names[0] == "test-1"
     assert ecoli_obj.imodulon_names[1] == "test-2"
     assert ecoli_obj.imodulon_names[2] == "test-3"
 
-    w = recwarn.pop()
-    assert issubclass(w.category, UserWarning)
-    assert str(w.message).startswith("Duplicate iModulon names detected.")
+    assert "Duplicate iModulon names detected" in caplog.text
 
 
 # def test_view_imodulon():
@@ -93,31 +96,29 @@ def test_find_single_gene_imodulons(ecoli_obj):
     assert ecoli_obj.imodulon_table.single_gene.sum() == 5
 
 
-def test_dagostino_cutoff(mini_obj, recwarn):
-
+def test_dagostino_cutoff(mini_obj, caplog):
     assert mini_obj.dagostino_cutoff == 2000
     assert not mini_obj._cutoff_optimized
 
-    copy_data = IcaData(
-        mini_obj.M,
-        mini_obj.A,
-        gene_table=mini_obj.gene_table,
-        imodulon_table=mini_obj.imodulon_table,
-        trn=mini_obj.trn,
-        optimize_cutoff=True,
-        dagostino_cutoff=2000,
-    )
+    with caplog.at_level(logging.WARNING):
+        copy_data = IcaData(
+            mini_obj.M,
+            mini_obj.A,
+            gene_table=mini_obj.gene_table,
+            imodulon_table=mini_obj.imodulon_table,
+            trn=mini_obj.trn,
+            optimize_cutoff=True,
+            dagostino_cutoff=2000,
+        )
 
     assert copy_data.dagostino_cutoff == 800
     # noinspection PyProtectedMember
     assert copy_data._cutoff_optimized
 
-    w = recwarn.pop()
-    assert str(w.message).startswith("Optimizing iModulon thresholds")
+    assert "Optimizing iModulon thresholds" in caplog.text
 
 
 def test_thresholds(mini_obj_opt):
-
     mini_obj_opt.thresholds = list(range(10))
     assert list(mini_obj_opt.thresholds.values()) == list(range(10))
     assert not mini_obj_opt._cutoff_optimized
@@ -140,7 +141,6 @@ def test_thresholds(mini_obj_opt):
 
 
 def test_recompute_thresholds(mini_obj_opt):
-
     assert mini_obj_opt._cutoff_optimized
 
     mini_obj_opt.recompute_thresholds(1000)
@@ -149,7 +149,6 @@ def test_recompute_thresholds(mini_obj_opt):
 
 
 def test_compute_kmeans_thresholds(mini_obj):
-
     # Make sure thresholds are different when two threshold methods are used
     ica_data1 = IcaData(
         mini_obj.M,
@@ -184,7 +183,6 @@ def test_compute_kmeans_thresholds(mini_obj):
 
 
 def test_reoptimize_thresholds(mini_obj, capsys):
-
     assert mini_obj.dagostino_cutoff == 2000
     assert not mini_obj._cutoff_optimized
 

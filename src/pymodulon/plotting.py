@@ -1,6 +1,7 @@
 """
 Plotting functions for iModulons
 """
+import logging
 import warnings
 from collections import Counter
 
@@ -188,7 +189,7 @@ def barplot(
             ax.legend(**kwargs)
 
     else:
-        warnings.warn('Missing "project" and "condition" columns in sample ' "table.")
+        logging.warning('Missing "project" and "condition" columns in sample ' "table.")
         ax.bar(range(len(values)), values, width=1, align="edge")
         nbars = len(values)
 

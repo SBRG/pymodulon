@@ -3,8 +3,7 @@ Contains functions for gene set enrichment analysis
 """
 
 import itertools
-import warnings
-from typing import Set
+import logging
 
 import numpy as np
 import pandas as pd
@@ -193,7 +192,7 @@ def compute_regulon_enrichment(gene_set, regulon_str, all_genes, trn):
     regulon = parse_regulon_str(regulon_str, trn)
     # Remove genes in regulon that are not in all_genes
     if len(regulon - set(all_genes)) > 0:
-        warnings.warn(
+        logging.warning(
             "Some genes are in the regulon but not in all_genes. "
             "These genes are removed before enrichment analysis.",
             category=UserWarning,

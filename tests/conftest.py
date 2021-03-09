@@ -23,15 +23,14 @@ mini_data = IcaData(
 )
 
 # Capture expected UserWarning here
-with pytest.warns(UserWarning) as record:
-    mini_data_opt = IcaData(
-        ecoli_data.M.iloc[:, :10],
-        ecoli_data.A.iloc[:10, :],
-        gene_table=ecoli_data.gene_table,
-        imodulon_table=ecoli_data.imodulon_table[:10],
-        trn=ecoli_data.trn,
-        optimize_cutoff=True,
-    )
+mini_data_opt = IcaData(
+    ecoli_data.M.iloc[:, :10],
+    ecoli_data.A.iloc[:10, :],
+    gene_table=ecoli_data.gene_table,
+    imodulon_table=ecoli_data.imodulon_table[:10],
+    trn=ecoli_data.trn,
+    optimize_cutoff=True,
+)
 
 
 @pytest.fixture()

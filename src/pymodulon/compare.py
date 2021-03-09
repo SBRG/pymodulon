@@ -1,6 +1,6 @@
+import logging
 import os
 import subprocess
-import warnings
 from glob import glob
 
 import numpy as np
@@ -120,7 +120,7 @@ def _make_dot_graph(links, show_all, names1, names2):
     )
 
     if len(links) == 0:
-        warnings.warn("No components shared across runs")
+        logging.warning("No components shared across runs")
         return dot
 
     # Initialize Nodes

@@ -2,11 +2,10 @@
 Utility functions for gene annotation
 """
 
+import logging
 import re
 import urllib
 from io import StringIO
-from typing import Optional
-from warnings import warn
 
 import pandas as pd
 
@@ -175,7 +174,7 @@ def gff2pandas(gff_file, feature="CDS", index=None):
 
     if index:
         if DF_gff[index].duplicated().any():
-            warn("Duplicate {} detected. Dropping duplicates.".format(index))
+            logging.warning("Duplicate {} detected. Dropping duplicates.".format(index))
             DF_gff = DF_gff.drop_duplicates(index)
         DF_gff.set_index("locus_tag", drop=True, inplace=True)
 

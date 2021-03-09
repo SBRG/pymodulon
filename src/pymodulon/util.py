@@ -2,8 +2,8 @@
 General utility functions for the pymodulon package
 """
 import json
+import logging
 import re
-import warnings
 from itertools import combinations
 
 import numpy as np
@@ -67,7 +67,7 @@ def _check_table_helper(table, index, name):
     # Check if all indices are in table
     missing_index = list(set(index) - set(table.index))
     if len(missing_index) > 0:
-        warnings.warn(
+        logging.warning(
             "Some {} are missing from the {} table: {}".format(
                 name, name, missing_index
             )
