@@ -1,4 +1,4 @@
-pymodulon - Python package for analyzing and visualizing iModulons
+**PyModulon** - Python package for analyzing and visualizing iModulons
 ==================================================================
 
 |PyPI|
@@ -10,8 +10,8 @@ To learn about iModulons, how they are computed, and what they can tell you, see
 Installation
 ~~~~~~~~~~~~
 
-Since pymodulon is currently under development, the recommended method to
-install **pymodulon** is to use the editable ``pip`` installation. It is
+Since **PyModulon** is currently under development, the recommended method to
+install **PyModulon** is to use the editable ``pip`` installation. It is
 recommended to do this inside a `virtual environment
 <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or in a `conda
 environment <https://docs.conda.io/en/latest/>`_. This is because we require
@@ -37,11 +37,11 @@ Then install with ``pip`` using the ``-e`` flag::
 This method of installation will automatically update your
 package each time you pull from this repository.
 
-To update your code, run the following from your local pymodulon folder::
+To update your code, run the following from your local **PyModulon** folder::
 
 	git pull
 
-.. The recommended method is to install **pymodulon** is to use ``pip`` to
+.. The recommended method is to install **PyModulon** is to use ``pip`` to
 .. `install pymodulon from PyPI <https://pypi.python.org/pypi/pymodulon>`_. It is
 .. recommended to do this inside a `virtual environment
 .. <http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_)::
@@ -50,6 +50,10 @@ To update your code, run the following from your local pymodulon folder::
 
 .. in the ``pymodulon`` source directory. For additional information, please refer to the
 .. the `detailed installation instructions <INSTALL.rst>`_.
+
+Documentation
+-------------
+The documentation for **PyModulon** can be found `here <http://pymodulon.readthedocs.io/>`_.
 
 Development
 -----------
