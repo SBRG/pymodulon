@@ -126,7 +126,7 @@ linkcheck_ignore = [
 
 # Execute notebooks before conversion: 'always', 'never', 'auto' (default)
 nbsphinx_execute = "always"
-nbsphinx_allow_errors = False
+nbsphinx_allow_errors = True
 nbsphinx_execute_arguments = [
     "--Application.log_level=CRITICAL",
 ]
