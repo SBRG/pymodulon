@@ -1,6 +1,5 @@
 # Other files
 archive/*
-docs/tutorials/tmp/*
 
 # PyCharm settings
 .idea/
