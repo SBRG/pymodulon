@@ -29,9 +29,6 @@ def test_compute_enrichment():
     res2 = compute_enrichment(test_gene_set2, test_target_set, test_all_genes)
     res3 = compute_enrichment(test_gene_set3, test_target_set, test_all_genes)
     res4 = compute_enrichment(test_gene_set4, test_target_set, test_all_genes)
-    print(res1)
-    print(res2)
-    print(res3)
 
     # assert statements
     assert (
@@ -85,8 +82,8 @@ def test_compute_trn_enrichment():
     test_gene_set1 = set(test_all_genes_list[0:5])  # complete overlap with reg_1
     test_gene_set2 = set(test_all_genes_list[10:13])  # no overlap/matches with TRN
     test_gene_set3 = set(test_all_genes_list[1:5])  # some overlap with reg_1
-    test_gene_set4 = set(test_all_genes_list[0])  # gene1 with max_regs=2
-    test_gene_set5 = set(test_all_genes_list[5])  # gene6 & gene7 with max_regs>2
+    test_gene_set4 = set(test_all_genes_list[0:1])  # gene1 with max_regs=2
+    test_gene_set5 = set(test_all_genes_list[5:6])  # gene6 & gene7 with max_regs>2
 
     test_trn = pd.DataFrame(
         [
@@ -118,43 +115,43 @@ def test_compute_trn_enrichment():
 
     assert (
         res1.index == "reg_1"
-        and res1.pvalue == 0
-        and res1.precision == 1
-        and res1.recall == 1
-        and res1.f1score == 1
-        and res1.TP == 5
-        and res1.regulon_size == 5
-        and res1.gene_set_size == 5
-        and res1.n_regs == 1
-        and res1.qvalue == 0
+        and res1.pvalue[0] == 0
+        and res1.precision[0] == 1.0
+        and res1.recall[0] == 1.0
+        and res1.f1score[0] == 1.0
+        and res1.TP[0] == 5.0
+        and res1.regulon_size[0] == 5.0
+        and res1.gene_set_size[0] == 5.0
+        and res1.n_regs[0] == 1.0
+        and res1.qvalue[0] == 0.0
     )
 
     assert res2.empty
 
     assert (
         res3.index == "reg_1"
-        and 0 <= res3.pvalue <= 1
-        and 0 <= res3.precision <= 1
-        and res3.recall == 1
-        and 0 <= res3.f1score <= 1
-        and res3.TP == 4
-        and res3.regulon_size == 5
-        and res3.gene_set_size == 4
-        and res3.n_regs == 1
-        and 0 <= res3.qvalue <= 1
+        and 0 <= res3.pvalue[0] <= 1
+        and 0 <= res3.precision[0] <= 1
+        and res3.recall[0] == 1
+        and 0 <= res3.f1score[0] <= 1
+        and res3.TP[0] == 4
+        and res3.regulon_size[0] == 5
+        and res3.gene_set_size[0] == 4
+        and res3.n_regs[0] == 1
+        and 0 <= res3.qvalue[0] <= 1
     )
 
     assert (
-        res4.index == "reg_1_reg2"
-        and res4.pvalue == 0
-        and res4.precision == 1
-        and res4.recall == 1
-        and res4.f1score == 1
-        and res4.TP == 1
-        and res4.regulon_size == 1
-        and res4.gene_set_size == 1
-        and res4.n_regs == 2
-        and res4.qvalue == 0
+        res4.index == "reg_1+reg_2"
+        and res4.pvalue[0] == 0
+        and res4.precision[0] == 1
+        and res4.recall[0] == 1
+        and res4.f1score[0] == 1
+        and res4.TP[0] == 1
+        and res4.regulon_size[0] == 1
+        and res4.gene_set_size[0] == 1
+        and res4.n_regs[0] == 2
+        and res4.qvalue[0] == 0
     )
 
     assert res5.shape == (4, 9)
@@ -203,14 +200,14 @@ def test_compute_annotation_enrichment():
 
     assert (
         res1.index == "annot_1"
-        and res1.pvalue == 0
-        and res1.precision == 1
-        and res1.recall == 1
-        and res1.f1score == 1
-        and res1.TP == 5
-        and res1.target_set_size == 1
-        and res1.gene_set_size == 1
-        and res1.qvalue == 0
+        and res1.pvalue[0] == 0
+        and res1.precision[0] == 1
+        and res1.recall[0] == 1
+        and res1.f1score[0] == 1
+        and res1.TP[0] == 5
+        and res1.target_set_size[0] == 5
+        and res1.gene_set_size[0] == 5
+        and res1.qvalue[0] == 0
     )
 
     assert res2.empty
@@ -219,12 +216,12 @@ def test_compute_annotation_enrichment():
 
     assert (
         res4.index == "annot_4"
-        and res4.pvalue == 0
-        and res4.precision == 1
-        and res4.recall == 1
-        and res4.f1score == 1
-        and res4.TP == 2
-        and res4.target_set_size == 2
-        and res4.gene_set_size == 2
-        and res4.qvalue == 0
+        and res4.pvalue[0] == 0
+        and res4.precision[0] == 1
+        and res4.recall[0] == 1
+        and res4.f1score[0] == 1
+        and res4.TP[0] == 2
+        and res4.target_set_size[0] == 2
+        and res4.gene_set_size[0] == 2
+        and res4.qvalue[0] == 0
     )
