@@ -24,7 +24,8 @@ To create the conda environment::
 
 (Optional) Install other dependencies::
 
-	conda install -c anaconda graphviz meme blast
+	conda install -c anaconda graphviz
+	conda install -c bioconda meme blast
 
 Next, download the github repository::
 
