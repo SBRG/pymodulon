@@ -324,7 +324,7 @@ class IcaData(object):
 
     @log_tpm.setter
     def log_tpm(self, lt_matrix):
-        log_tpm = _check_table(lt_matrix, "X")
+        log_tpm = _check_table(lt_matrix, "log-TPM")
 
         # Check that gene and sample names conform to M and A matrices
         if log_tpm.columns.tolist() != self.A.columns.tolist():
