@@ -290,17 +290,19 @@ def make_prots(gbk, out_path):
 
     with open(out_path, "w") as fa:
         for refseq in SeqIO.parse(gbk, "genbank"):
+            recorded = []
             for feats in [f for f in refseq.features if f.type == "CDS"]:
                 lt = feats.qualifiers["locus_tag"][0]
+                if lt in recorded: #clear the duplicates
+                    continue
                 try:
                     seq = feats.qualifiers["translation"][0]
                 except KeyError:
-                    seq = feats.extract(refseq.seq).translate()
-
+                    continue
                 fa.write(">{}\n{}\n".format(lt, seq))
+                recorded.append(lt)
 
-
-def make_prot_db(fasta_file):
+def make_prot_db(fasta_file, outname=None):
     """
     Creates GenBank Databases from Protein FASTA of an organism
 
@@ -308,7 +310,8 @@ def make_prot_db(fasta_file):
     ----------
     fasta_file : str
         Path to protein FASTA file
-
+    outname : str
+        Name of BLAST database to be created. If None, it uses fasta_file name
     Returns
     -------
     None : None
@@ -322,7 +325,11 @@ def make_prot_db(fasta_file):
         print("BLAST DB files already exist")
         return None
 
+
     cmd_line = ["makeblastdb", "-in", fasta_file, "-parse_seqids", "-dbtype", "prot"]
+
+    if outname:
+        cmd_line.extend(["-out", outname])
 
     print("running makeblastdb with following command line...")
     print(" ".join(cmd_line))
@@ -342,9 +349,6 @@ def make_prot_db(fasta_file):
     return None
 
 
-# TODO: some genbanks put alternate start codon such as TTG as methionine while
-# others label it as leucine.
-# need to check and fix this.
 
 # noinspection PyTypeChecker
 def get_bbh(

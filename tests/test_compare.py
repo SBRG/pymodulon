@@ -1,10 +1,8 @@
 import pymodulon.compare as cmp
 from pymodulon.core import IcaData
 from pymodulon.example_data import load_example_bbh, load_staph_data
-import os
-import shutil
 import pytest
-
+import os
 
 
 @pytest.fixture
@@ -45,23 +43,31 @@ def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
     assert (org_table1.index == org_table2.index).all()
     assert (org_table1.index == orgM1.index).all()
 
+# TODO: figure out how to silence this warning, this isnt working
+@pytest.mark.filterwarnings("ignore:BiopythonWarning")
 def test_make_prots_faout(tmp_path):
     gbk = '../src/pymodulon/data/ecoli/genome.gb'
     fa_out = tmp_path / 'test.fa'
     fa_out.touch()
-
     cmp.make_prots(gbk, fa_out)
 
     with open(fa_out) as fa:
         line = fa.readline().strip()
         assert line == '>b0001'
 
-    # def test_compare_ica():
-    #     S2 = pd.read_csv("data/mtb_S.csv", index_col=0)
-    #     S1 = pd.read_csv("data/ecoli_S.csv", index_col=0)
-    #     ortho_dir = (
-    #         "/home/sbrg/Desktop/modulome/data/organism_compare/"
-    #         "bbh_csv/eColi_full_protein_vs"
-    #         "_mTuberculosis_full_protein_parsed.csv"
-    #     )
-    #     dot, links = compare_ica(S1, S2, ortho_file=ortho_dir)
+def test_make_prots_db(tmp_path):
+    fa = '../src/pymodulon/data/ecoli/proteins.faa'
+    db_out = tmp_path / 'test_db.fa'
+    cmp.make_prot_db(fa)
+    assert(os.path.isfile(db_out))
+
+
+# def test_compare_ica():
+#     S2 = pd.read_csv("data/mtb_S.csv", index_col=0)
+#     S1 = pd.read_csv("data/ecoli_S.csv", index_col=0)
+#     ortho_dir = (
+#         "/home/sbrg/Desktop/modulome/data/organism_compare/"
+#         "bbh_csv/eColi_full_protein_vs"
+#         "_mTuberculosis_full_protein_parsed.csv"
+#     )
+#     dot, links = compare_ica(S1, S2, ortho_file=ortho_dir)
