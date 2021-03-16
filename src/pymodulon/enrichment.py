@@ -18,9 +18,9 @@ def contingency(set1, set2, all_genes):
     Parameters
     ----------
     set1 : set
-        Set of genes (e.g. regulon)
+        Set of genes (e.g. iModulon)
     set2 : set
-        Set of list (e.g. iModulon)
+        Set of genes (e.g. regulon)
     all_genes : set
         Set of all genes
 
@@ -38,9 +38,9 @@ def contingency(set1, set2, all_genes):
         raise ValueError("Gene sets contain genes not in all_genes")
 
     tp = len(set1 & set2)
-    fp = len(set2 - set1)
+    fp = len(set1 - set2)
     tn = len(all_genes - set1 - set2)
-    fn = len(set1 - set2)
+    fn = len(set2 - set1)
     return np.array([[tp, fp], [fn, tn]])
 
 
