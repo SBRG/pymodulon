@@ -58,8 +58,9 @@ def test_make_prots_faout(tmp_path):
 def test_make_prots_db(tmp_path):
     fa = '../src/pymodulon/data/ecoli/proteins.faa'
     db_out = tmp_path / 'test_db.fa'
-    cmp.make_prot_db(fa)
-    assert(os.path.isfile(db_out))
+    cmp.make_prot_db(fa, str(db_out))
+    db_test = tmp_path / 'test_db.fa.pin'
+    assert(os.path.isfile(db_test))
 
 
 # def test_compare_ica():
