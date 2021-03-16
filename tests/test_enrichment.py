@@ -1,9 +1,5 @@
-import os
-
 import pandas as pd
-import pytest
 
-import pymodulon
 from pymodulon.enrichment import (
     compute_annotation_enrichment,
     compute_enrichment,
