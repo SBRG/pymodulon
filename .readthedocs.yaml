@@ -9,7 +9,7 @@ version: 2
 sphinx:
    builder: html
    configuration: docs/conf.py
-   
+
 formats:
   - htmlzip
 
