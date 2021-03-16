@@ -296,8 +296,8 @@ def make_prots(gbk, out_path):
                     seq = feats.qualifiers["translation"][0]
                 except KeyError:
                     seq = feats.extract(refseq.seq).translate()
-                if seq:
-                    fa.write(">{}\n{}\n".format(lt, seq))
+
+                fa.write(">{}\n{}\n".format(lt, seq))
 
 
 def make_prot_db(fasta_file):
