@@ -9,9 +9,11 @@ import os
 def staph_obj():
     return load_staph_data()
 
+
 @pytest.fixture
 def example_bbh():
     return load_example_bbh()
+
 
 def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
     ten_genes = IcaData(
@@ -43,6 +45,7 @@ def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
     assert (org_table1.index == org_table2.index).all()
     assert (org_table1.index == orgM1.index).all()
 
+
 # TODO: figure out how to silence this warning, this isnt working
 @pytest.mark.filterwarnings("ignore:BiopythonWarning")
 def test_make_prots_faout(tmp_path):
@@ -55,13 +58,32 @@ def test_make_prots_faout(tmp_path):
         line = fa.readline().strip()
         assert line == '>b0001'
 
-def test_make_prots_db(tmp_path):
-    fa = '../src/pymodulon/data/ecoli/proteins.faa'
-    db_out = tmp_path / 'test_db.fa'
-    cmp.make_prot_db(fa, str(db_out))
-    db_test = tmp_path / 'test_db.fa.pin'
-    assert(os.path.isfile(db_test))
 
+# create single and multi-file params for test_make_prots_db
+
+single_file = {'fasta_file': '../src/pymodulon/data/ecoli/proteins.faa',
+               'outname': 'test_db.fa'}
+multi_file = {'fasta_file': ['../src/pymodulon/data/ecoli/proteins.faa',
+                             '../src/pymodulon/data/ecoli/truncated_proteins.faa'],
+              'outname': 'test_db.fa',
+              'combined': 'combined.fa'}
+
+make_prots_test = [(single_file, 'test_db.fa.pin'),
+                   (multi_file, 'test_db.fa.pin')]
+
+
+@pytest.mark.parametrize("arg, expected", make_prots_test)
+def test_make_prots_db(tmp_path, arg, expected):
+    # update tmp_dirs for outputs
+    arg['outname'] = str(tmp_path / arg['outname'])
+    expected = tmp_path / expected
+    try:
+        arg['combined'] = str(tmp_path / arg['combined'])
+    except KeyError:
+        pass
+
+    cmp.make_prot_db(**arg)
+    assert (os.path.isfile(expected))
 
 # def test_compare_ica():
 #     S2 = pd.read_csv("data/mtb_S.csv", index_col=0)

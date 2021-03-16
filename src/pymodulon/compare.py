@@ -303,20 +303,30 @@ def make_prots(gbk, out_path):
                 fa.write(">{}\n{}\n".format(lt, seq))
                 recorded.update(lt)
 
-def make_prot_db(fasta_file, outname=None):
+def make_prot_db(fasta_file, outname=None, combined='combined.fa'):
     """
     Creates GenBank Databases from Protein FASTA of an organism
 
     Parameters
     ----------
-    fasta_file : str
-        Path to protein FASTA file
+    fasta_file : str or list
+        Path to protein FASTA file or list of paths to protein fasta files
     outname : str
         Name of BLAST database to be created. If None, it uses fasta_file name
+    combined : str
+        Path to combined fasta file; only used if multiple fasta files are passed
     Returns
     -------
     None : None
     """
+
+    # if a list of fasta is passed, combine them
+    if type(fasta_file) == list:
+        cat_cmd = ['cat']
+        cat_cmd.extend(fasta_file)
+        with open(combined, 'w') as out:
+            subprocess.call(cat_cmd, stdout=out)
+        fasta_file = combined
 
     if (
         os.path.isfile(fasta_file + ".phr")
@@ -325,7 +335,6 @@ def make_prot_db(fasta_file, outname=None):
     ):
         print("BLAST DB files already exist")
         return None
-
 
     cmd_line = ["makeblastdb", "-in", fasta_file, "-parse_seqids", "-dbtype", "prot"]
 
@@ -346,7 +355,7 @@ def make_prot_db(fasta_file, outname=None):
         )
         status = subprocess.run(cmd_line, capture_output=True)
         print(status)
-        # raise err
+
     return None
 
 
