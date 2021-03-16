@@ -290,7 +290,7 @@ def make_prots(gbk, out_path):
 
     with open(out_path, "w") as fa:
         for refseq in SeqIO.parse(gbk, "genbank"):
-            recorded = []
+            recorded = set()
             for feats in [f for f in refseq.features if f.type == "CDS"]:
                 lt = feats.qualifiers["locus_tag"][0]
                 if lt in recorded: #clear the duplicates
@@ -299,8 +299,9 @@ def make_prots(gbk, out_path):
                     seq = feats.qualifiers["translation"][0]
                 except KeyError:
                     continue
+
                 fa.write(">{}\n{}\n".format(lt, seq))
-                recorded.append(lt)
+                recorded.update(lt)
 
 def make_prot_db(fasta_file, outname=None):
     """
