@@ -293,7 +293,7 @@ def make_prots(gbk, out_path):
             recorded = set()
             for feats in [f for f in refseq.features if f.type == "CDS"]:
                 lt = feats.qualifiers["locus_tag"][0]
-                if lt in recorded: #clear the duplicates
+                if lt in recorded:  # clear the duplicates
                     continue
                 try:
                     seq = feats.qualifiers["translation"][0]
@@ -303,7 +303,8 @@ def make_prots(gbk, out_path):
                 fa.write(">{}\n{}\n".format(lt, seq))
                 recorded.update(lt)
 
-def make_prot_db(fasta_file, outname=None, combined='combined.fa'):
+
+def make_prot_db(fasta_file, outname=None, combined="combined.fa"):
     """
     Creates GenBank Databases from Protein FASTA of an organism
 
@@ -322,9 +323,9 @@ def make_prot_db(fasta_file, outname=None, combined='combined.fa'):
 
     # if a list of fasta is passed, combine them
     if type(fasta_file) == list:
-        cat_cmd = ['cat']
+        cat_cmd = ["cat"]
         cat_cmd.extend(fasta_file)
-        with open(combined, 'w') as out:
+        with open(combined, "w") as out:
             subprocess.call(cat_cmd, stdout=out)
         fasta_file = combined
 
@@ -357,7 +358,6 @@ def make_prot_db(fasta_file, outname=None, combined='combined.fa'):
         print(status)
 
     return None
-
 
 
 # noinspection PyTypeChecker
