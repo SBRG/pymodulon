@@ -52,7 +52,7 @@ def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
 # TODO: figure out how to silence this warning, this isnt working
 @pytest.mark.filterwarnings("ignore:BiopythonWarning")
 def test_make_prots_faout(tmp_path):
-    gbk = "../src/pymodulon/data/ecoli/genome.gb"
+    gbk = os.path.join("tests", "data", "genome.gb")
     fa_out = tmp_path / "test.fa"
     fa_out.touch()
     cmp.make_prots(gbk, fa_out)
@@ -65,13 +65,13 @@ def test_make_prots_faout(tmp_path):
 # create single and multi-file params for test_make_prots_db
 
 single_file = {
-    "fasta_file": "../src/pymodulon/data/ecoli/proteins.faa",
+    "fasta_file": os.path.join("tests", "data", "proteins.faa"),
     "outname": "test_db.fa",
 }
 multi_file = {
     "fasta_file": [
-        "../src/pymodulon/data/ecoli/proteins.faa",
-        "../src/pymodulon/data/ecoli/truncated_proteins.faa",
+        os.path.join("tests", "data", "proteins.faa"),
+        os.path.join("tests", "data", "truncated_proteins.faa"),
     ],
     "outname": "test_db.fa",
     "combined": "combined.fa",
