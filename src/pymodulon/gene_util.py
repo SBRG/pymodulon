@@ -172,6 +172,7 @@ def gff2pandas(gff_file, feature="CDS", index=None):
 
     DF_gff = pd.concat(result)
 
+    # Only drop duplicate indices if an attribute is set as the index
     if index:
         if DF_gff[index].duplicated().any():
             logging.warning("Duplicate {} detected. Dropping duplicates.".format(index))
