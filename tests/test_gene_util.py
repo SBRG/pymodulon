@@ -1,3 +1,4 @@
+import logging
 import os
 import urllib.request
 from os.path import abspath, dirname, isfile, join
@@ -13,6 +14,8 @@ from pymodulon.gene_util import (
     uniprot_id_mapping,
 )
 
+
+LOGGER = logging.getLogger(__name__)
 
 PYMOD_DIR = abspath(join(dirname(abspath(__file__)), ".."))
 """str: The directory location of where :mod:`pymodulon` is installed."""
@@ -62,11 +65,8 @@ def test_get_attr():
 
 def test_reformat_biocyc_tu():
     test_input = "thrA // thrB // thrC // thrL"
-    test_input2 = "thrA . thrB . thrC . thrL"
     res1 = reformat_biocyc_tu(test_input)
     assert res1 == "thrA;thrB;thrC;thrL"
-    with pytest.raises(AttributeError, match=None):
-        reformat_biocyc_tu(test_input2)
 
 
 def test_uniprot_id_mapping():
@@ -94,17 +94,17 @@ def test_uniprot_id_mapping():
     )
 
 
-def test_gff2pandas():
-    test_file_dir = join(TEST_DATA_DIR, "test_genome_dup.gff3")
+def test_gff2pandas(caplog):
+    test_file_dir = join(TEST_DATA_DIR, "test_genome.gff3")
     res1 = gff2pandas(test_file_dir, feature="CDS", index=None)
     res2 = gff2pandas(
         test_file_dir, feature="CDS", index="locus_tag"
     )  # skips duplicated indicies
     assert (
         res1.shape == (6, 14)
-        and res2.shape == (3, 14)
+        and "Duplicate locus_tag detected. Dropping duplicates." in caplog.text
+        and res2.shape == (3, 13)
         and res2.iloc[0].gene_name == "thrL"
-        and res2.iloc[0].locus_tag == "b0001"
         and res2.iloc[0].gene_product == "thr operon leader peptide"
         and res2.iloc[0].ncbi_protein == "NP_414542.1"
         and res2.iloc[0].old_locus_tag is None
