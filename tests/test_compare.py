@@ -50,7 +50,6 @@ def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
     assert (org_table1.index == orgM1.index).all()
 
 
-# TODO: figure out how to silence this warning, this isnt working
 @pytest.mark.filterwarnings("ignore:BiopythonWarning")
 def test_make_prots_faout(tmp_path):
     gbk = os.path.join("tests", "data", "genome.gb")
