@@ -5,6 +5,7 @@ import pytest
 import pymodulon.compare as cmp
 from pymodulon.core import IcaData
 from pymodulon.example_data import load_example_bbh, load_staph_data
+from Bio import SeqIO
 
 
 @pytest.fixture
@@ -61,6 +62,10 @@ def test_make_prots_faout(tmp_path):
         line = fa.readline().strip()
         assert line == ">b0001"
 
+    rsid = []
+    for refseq in SeqIO.parse(fa_out, 'fasta'):
+        rsid.append(refseq.id)
+    assert len(rsid) == len(set(rsid))
 
 # create single and multi-file params for test_make_prots_db
 

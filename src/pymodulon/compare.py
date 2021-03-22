@@ -301,7 +301,7 @@ def make_prots(gbk, out_path):
                     continue
 
                 fa.write(">{}\n{}\n".format(lt, seq))
-                recorded.update(lt)
+                recorded.add(lt)
 
 
 def make_prot_db(fasta_file, outname=None, combined="combined.fa"):
