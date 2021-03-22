@@ -39,9 +39,9 @@ def test_compute_enrichment():
 
     assert (
         0 <= res2.pvalue <= 1
-        and res2.precision == 1
-        and res2.recall <= 1
-        and res2.f1score <= 1
+        and 0 <= res2.precision <= 1
+        and res2.recall == 1
+        and 0 <= res2.f1score <= 1
         and res2.TP == 3
         and res2.target_set_size == 3
         and res2.gene_set_size == 5
@@ -49,8 +49,8 @@ def test_compute_enrichment():
 
     assert (
         0 <= res3.pvalue <= 1
-        and 0 <= res3.precision <= 1
-        and res3.recall == 1
+        and res3.precision == 1
+        and 0 <= res3.recall <= 1
         and 0 <= res3.f1score <= 1
         and res3.TP == 1
         and res3.target_set_size == 3
@@ -127,8 +127,8 @@ def test_compute_trn_enrichment():
     assert (
         res3.index == "reg_1"
         and 0 <= res3.pvalue[0] <= 1
-        and 0 <= res3.precision[0] <= 1
-        and res3.recall[0] == 1
+        and res3.precision[0] == 1
+        and 0 <= res3.recall[0] <= 1
         and 0 <= res3.f1score[0] <= 1
         and res3.TP[0] == 4
         and res3.regulon_size[0] == 5
