@@ -1,7 +1,7 @@
 Mining public expression databases
 ==================================
 
-We have provided a docker container `here<https://hub.docker.com/repository/docker/avsastry/get-all-rnaseq>`_ that finds all publicly available RNA-seq data for a given organism and collates the metadata into a single file. `Docker <https://docs.docker.com/get-docker/>`_ must be installed to run the following commands.
+We have provided a docker container `here <https://hub.docker.com/repository/docker/avsastry/get-all-rnaseq>`_ that finds all publicly available RNA-seq data for a given organism and collates the metadata into a single file. `Docker <https://docs.docker.com/get-docker/>`_ must be installed to run the following commands.
 
 For example, the following code finds all RNA-seq data for *Bacillus subtilis* and saves the data to ``Bacillus_subtilis.tsv``
 
