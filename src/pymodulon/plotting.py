@@ -1329,7 +1329,7 @@ def cluster_activities(
         :class:`~pymodulon.core.IcaData` object
     correlation_method: 'pearson', 'spearman', 'kendall', 'mutual_info' or callable
         Method for computing correlations between iModulon activities. See
-        :meth:`~pandas.DataFrame.corr` Default is 'spearman'.
+        :meth:`pandas.DataFrame.corr` Default is 'spearman'.
     distance_threshold: float, optional
         A distance from 0 to 1 to define flat clusters from the hierarchical
         clustering. Larger values yield fewer clusters. If None, automatic selection

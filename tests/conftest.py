@@ -11,6 +11,9 @@ from pymodulon.core import IcaData
 
 ecoli_data = example_data.load_ecoli_data()
 
+# Add an iModulon with a number as its name
+ecoli_data.rename_imodulons({"CdaR": 2})
+
 # Smaller version of Ecoli data with 10 iModulons
 mini_data = IcaData(
     ecoli_data.M.iloc[:, :10],
