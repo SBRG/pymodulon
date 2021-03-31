@@ -1,6 +1,7 @@
 import os
 
 import pytest
+from Bio import SeqIO
 
 import pymodulon.compare as cmp
 from pymodulon.core import IcaData
@@ -49,7 +50,6 @@ def test_convert_gene_index(staph_obj, example_bbh, ecoli_obj):
     assert (org_table1.index == orgM1.index).all()
 
 
-# TODO: figure out how to silence this warning, this isnt working
 @pytest.mark.filterwarnings("ignore:BiopythonWarning")
 def test_make_prots_faout(tmp_path):
     gbk = os.path.join("tests", "data", "genome.gb")
@@ -60,6 +60,11 @@ def test_make_prots_faout(tmp_path):
     with open(fa_out) as fa:
         line = fa.readline().strip()
         assert line == ">b0001"
+
+    rsid = []
+    for refseq in SeqIO.parse(fa_out, "fasta"):
+        rsid.append(refseq.id)
+    assert len(rsid) == len(set(rsid))
 
 
 # create single and multi-file params for test_make_prots_db
