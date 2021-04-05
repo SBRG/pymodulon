@@ -15,13 +15,14 @@ from scipy import sparse, stats
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA
 from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeRegressor
 
 from pymodulon.compare import convert_gene_index
 from pymodulon.enrichment import parse_regulon_str
-from pymodulon.util import _parse_sample, dima, mutual_info_distance
+from pymodulon.util import _parse_sample, dima, explained_variance, mutual_info_distance
 
 
 #############
@@ -1297,6 +1298,63 @@ def plot_dima(
 
     else:
         return ax
+
+
+###############
+# Other plots #
+###############
+
+
+def plot_explained_variance(ica_data, pc=True, ax=None):
+    """
+    Plots the cumulative explained variance for independent components and,
+    optionally, principal components
+
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` object
+    pc: bool
+        If True, plot cumulative explained variance of independent components
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+
+    Returns
+    -------
+    ax: ~matplotlib.axes.Axes
+        :class:`~matplotlib.axes.Axes` containing the line plot
+    """
+
+    # Get IC explained variance
+    ic_var = []
+    for imodulon in ica_data.imodulon_names:
+        ic_var.append(explained_variance(ica_data, imodulons=imodulon))
+    ic_var = np.insert(np.cumsum(sorted(ic_var, reverse=True)), 0, 0)
+
+    if not ax:
+        fig, ax = plt.subplots()
+
+    ax.plot(range(len(ic_var)), ic_var, label="Independent Components")
+
+    if pc:
+        # Get PC explained variance
+        pca = PCA().fit(ica_data.X.T)
+        pc_var = np.insert(np.cumsum(pca.explained_variance_ratio_), 0, 0)
+
+        # Only keep number of PCs as ICs
+        pc_var = pc_var[: len(ic_var)]
+
+        # Plot PCs
+        ax.plot(range(len(ic_var)), pc_var, label="Principal Components")
+
+    ax.legend()
+
+    ax.set_xlabel("Components")
+    ax.set_ylabel("Cumulative Explained Varaince")
+    ax.set_ylim([0, 1])
+    ax.set_xlim([0, len(ic_var)])
+
+    return ax
 
 
 def cluster_activities(

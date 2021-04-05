@@ -242,7 +242,7 @@ def explained_variance(
 
     Returns
     -------
-    list
+    float
         Fraction of variance explained by selected iModulons for selected
         genes/samples
     """
