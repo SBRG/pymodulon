@@ -492,9 +492,13 @@ class IcaData(object):
                     "be renamed to {}".format(key, name_series[key])
                 )
 
-        # Update thresholds
+        # Update thresholds and motif info
         for old_name, new_name in name_series.items():
             self._thresholds[new_name] = self._thresholds.pop(old_name)
+            try:
+                self._motif_info[new_name] = self._motif_info.pop(old_name)
+            except KeyError:
+                pass
 
         # Update iModulon names
         final_names = name_series.values.tolist()

@@ -65,7 +65,7 @@ def _get_upstream_seqs(
             list2struct.append([name, genes, ids, start_pos, "+", str(seq.seq)])
             seq_records.append(seq)
         elif all(group.strand == "-"):
-            pos = max(group.stop)
+            pos = max(group.end)
             start_pos = max(0, pos - downstream)
             sequence = genome[start_pos : pos + upstream]
             seq = SeqIO.SeqRecord(seq=sequence, id=name)
@@ -170,12 +170,17 @@ def find_motifs(
 
     n_seqs = len(DF_seqs)
 
+    if n_seqs < 2:
+        if verbose:
+            print("Less than two sequences found for iModulon: {}".format(imodulon))
+        return None
+
     # Handle options
     if verbose:
         print("Finding motifs for {:d} sequences".format(n_seqs))
 
     def full_path(name):
-        return os.path.join(outdir, re.sub("/", "_", name))
+        return os.path.join(outdir, re.sub("/| ", "_", name))
 
     if palindrome:
         comp_dir = full_path("{}_pal".format(imodulon))
@@ -219,15 +224,25 @@ def find_motifs(
         # Write sequence to file
         SeqIO.write(seq_records, fasta, "fasta")
 
+        # print MEME command
+        if verbose:
+            print("Running command:", " ".join(cmd))
+
         # Run MEME
         subprocess.call(cmd)
 
     # Save results
     DF_motifs, DF_sites = _parse_meme(comp_dir, DF_seqs, verbose=verbose, evt=evt)
-    result = MotifInfo(
-        DF_motifs, DF_sites, " ".join(cmd), os.path.join(comp_dir, "meme.txt")
-    )
-    ica_data.motif_info[imodulon] = result
+
+    if DF_motifs.empty:
+        return None
+    else:
+        result = MotifInfo(
+            DF_motifs, DF_sites, " ".join(cmd), os.path.join(comp_dir, "meme.txt")
+        )
+
+        ica_data.motif_info[imodulon] = result
+
     return result
 
 
@@ -404,10 +419,11 @@ def _parse_tomtom(tomtom_dir):
 
 def compare_motifs(
     motif_info: Optional[MotifInfo] = None,
-    motif_file: Optional[os.PathLike] = None,
+    motif_file: Optional[str] = None,
     motif_db: Optional[str] = None,
-    outdir: Optional[os.PathLike] = None,
+    outdir: Optional[str] = None,
     force=False,
+    verbose=True,
     evt=0.001,
 ):
     """
@@ -426,6 +442,8 @@ def compare_motifs(
         Output directory for TOMTOM comparisons
     force: bool
         Force execution of TOMTOM even if output already exists (default: False)
+    verbose: bool
+        Show steps in verbose output (default: True)
     evt: float
         E-value threshold (default: 0.001)
 
@@ -481,6 +499,10 @@ def compare_motifs(
             "-png",
             motif_file,
         ] + motif_db
+
+        if verbose:
+            print("Running command:", " ".join(cmd))
+
         res = subprocess.check_call(cmd)
         if res != 0:
             cmd_str = " ".join(cmd)
