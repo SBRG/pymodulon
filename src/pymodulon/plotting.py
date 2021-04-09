@@ -1007,7 +1007,7 @@ def compare_gene_weights(
     # Add labels on data-points
     component_genes_x = bin_M1[bin_M1[imodulon1] == 1].index
     component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
-    component_genes = component_genes_x & component_genes_y
+    component_genes = component_genes_x.intersection(component_genes_y)
     texts = []
     expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
