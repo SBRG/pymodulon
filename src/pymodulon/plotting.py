@@ -38,6 +38,8 @@ def barplot(
     highlight=None,
     ax=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -206,6 +208,18 @@ def barplot(
 
     # X-axis
     ax.hlines(0, xmin, xmax, color="k")
+
+    # Save figure
+    if savefig:
+        if savefig_kwargs:
+            fname = savefig_kwargs.get('fname')
+            if fname is None:
+                savefig_kwargs['fname'] = './plot.svg'
+
+        else:
+            savefig_kwargs = {'fname': './plot.svg'}
+
+        plt.savefig(**savefig_kwargs)
 
     return ax
 
@@ -516,6 +530,8 @@ def scatterplot(
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -727,6 +743,18 @@ def scatterplot(
 
     if legend or fit_line:
         ax.legend(**legend_kwargs)
+
+    # Save figure
+    if savefig:
+        if savefig_kwargs:
+            fname = savefig_kwargs.get('fname')
+            if fname is None:
+                savefig_kwargs['fname'] = './plot.svg'
+
+        else:
+            savefig_kwargs = {'fname': './plot.svg'}
+
+        plt.savefig(**savefig_kwargs)
 
     return ax
 
