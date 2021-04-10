@@ -84,7 +84,6 @@ def barplot(
         fig, ax = plt.subplots(figsize=figsize)
     else:
         fig = plt.gcf()
-        ax = plt.gca()
 
     # Get ymin and max
     ymin = values.min()
@@ -584,7 +583,6 @@ def scatterplot(
         fig, ax = plt.subplots()
     else:
         fig = plt.gcf()
-        ax = plt.gca()
 
     if show_labels == "auto":
         show_labels = len(x) <= 20
