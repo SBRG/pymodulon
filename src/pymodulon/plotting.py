@@ -38,6 +38,8 @@ def barplot(
     highlight=None,
     ax=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -80,6 +82,8 @@ def barplot(
     if ax is None:
         figsize = (len(values) / 15 + 0.5, 2)
         fig, ax = plt.subplots(figsize=figsize)
+    else:
+        fig = ax.figure
 
     # Get ymin and max
     ymin = values.min()
@@ -206,6 +210,10 @@ def barplot(
 
     # X-axis
     ax.hlines(0, xmin, xmax, color="k")
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig_kwargs)
 
     return ax
 
@@ -516,6 +524,8 @@ def scatterplot(
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -571,6 +581,8 @@ def scatterplot(
 
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
 
     if show_labels == "auto":
         show_labels = len(x) <= 20
@@ -727,6 +739,10 @@ def scatterplot(
 
     if legend or fit_line:
         ax.legend(**legend_kwargs)
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig_kwargs)
 
     return ax
 
@@ -1007,7 +1023,7 @@ def compare_gene_weights(
     # Add labels on data-points
     component_genes_x = bin_M1[bin_M1[imodulon1] == 1].index
     component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
-    component_genes = component_genes_x & component_genes_y
+    component_genes = component_genes_x.intersection(component_genes_y)
     texts = []
     expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
@@ -2093,6 +2109,18 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
     return np.arange(xmin, xmax + width, width)
 
+
+def _save_figures(fig, savefig_kwargs):
+    '''Check for savefig_kwargs, then save current figure instance'''
+
+    # Check for savefig_kwargs
+    if savefig_kwargs:
+            savefig_kwargs['fname'] = savefig_kwargs.get('fname', './plot.svg')
+    else:
+        savefig_kwargs = {'fname': './plot.svg'}
+
+    # Plot current figure instance using savefig_kwargs
+    fig.savefig(**savefig_kwargs)
 
 ##########################
 # Experimental Functions #
