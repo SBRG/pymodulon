@@ -543,7 +543,7 @@ def scatterplot(
         Show 45-degreen lines offset by a margin
     fit_line: bool
         Draw a line of best fit on the scatterplot
-    fit_metric: 'pearson', 'spearman' or 'r2'
+    fit_metric: 'pearson', 'spearman', 'r2', or None
         Metric to report in legend for line of best fit
     xlabel: str
         X-axis label
@@ -1942,6 +1942,9 @@ def _get_sample_leaves(clf, features, labels, component):
 
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
+    if metric is None:
+        return
+
     if metric == "r2":
         params, r2 = _get_fit(x, y)
         label = "$R^2_{{adj}}$ = {:.2f}".format(r2)
