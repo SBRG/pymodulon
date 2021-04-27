@@ -3,9 +3,95 @@ import logging
 import numpy as np
 
 from pymodulon.core import IcaData
+from pymodulon.io import load_json_model, save_to_json
 
 
 LOGGER = logging.getLogger(__name__)
+
+
+def test_init_thresholds(ecoli_obj, mini_obj_opt, caplog, tmp_path):
+    # Test all threshold initialization options
+    M = mini_obj_opt.M
+    A = mini_obj_opt.A
+
+    # Reduce TRN size
+    trn = ecoli_obj.trn.iloc[:10].copy()
+
+    # Define custom thresholds
+    thresh_list = list(np.arange(1, 2, 0.1))
+    thresh_dict = dict(zip(M.columns, thresh_list))
+
+    thresholds_opts = [None, thresh_dict]
+    threshold_method_opts = ["kmeans", "dagostino"]
+    trn_opts = [None, trn]
+    optimize_cutoff_opts = [True, False]
+    dagostino_cutoff_opts = [None, 600]
+
+    for opt1 in thresholds_opts:
+        for opt2 in threshold_method_opts:
+            for opt3 in trn_opts:
+                for opt4 in optimize_cutoff_opts:
+                    for opt5 in dagostino_cutoff_opts:
+
+                        caplog.clear()
+
+                        obj1 = IcaData(
+                            M,
+                            A,
+                            thresholds=opt1,
+                            threshold_method=opt2,
+                            trn=opt3,
+                            optimize_cutoff=opt4,
+                            dagostino_cutoff=opt5,
+                        )
+
+                        fname = str(tmp_path / "test_data.json")
+                        save_to_json(obj1, fname)
+                        obj2 = load_json_model(fname)
+
+                        for obj in [obj1, obj2]:
+                            if opt1 is not None:
+                                assert obj.thresholds == thresh_dict
+                                assert obj.dagostino_cutoff is None
+                                assert not obj.cutoff_optimized
+
+                                if opt4:  # optimize_cutoff == True
+                                    assert (
+                                        "Using manually input thresholds."
+                                        in caplog.text
+                                    )
+                                else:
+                                    assert caplog.text == ""
+
+                            # opt1 == None
+                            elif opt2 == "kmeans" or opt3 is None:
+                                assert obj.dagostino_cutoff is None
+                                assert not obj.cutoff_optimized
+                                if opt4:  # optimize_cutoff == True
+                                    assert (
+                                        "Using Kmeans threshold method." in caplog.text
+                                    )
+                                else:
+                                    assert caplog.text == ""
+
+                            # opt2 == 'dagostino'
+                            # opt3 == trn
+                            elif opt4:
+                                assert obj.cutoff_optimized
+                                assert obj.dagostino_cutoff is not None
+                                assert "Optimizing iModulon thresholds" in caplog.text
+                            # opt4 == False
+                            elif opt5 is None:
+                                assert not obj.cutoff_optimized
+                                assert obj.dagostino_cutoff == 550
+                                assert (
+                                    "Using the default dagostino_cutoff" in caplog.text
+                                )
+                            elif opt5 == 600:
+                                assert not obj.cutoff_optimized
+                                assert obj.dagostino_cutoff == 600
+                            else:
+                                raise ValueError("Missing test case!")
 
 
 def test_m_binarized(ecoli_obj):
@@ -54,11 +140,11 @@ def test_gene_names(ecoli_obj):
     assert ecoli_obj.gene_names[0] == "b0002"
 
 
-# def test_trn(mini_obj_opt):
-#     assert mini_obj_opt._cutoff_optimized
-#     mini_obj_opt.trn = trn
-#     # TODO: Test that extra genes are removed
-#     assert not mini_obj_opt._cutoff_optimized
+def test_trn(mini_obj_opt, ecoli_obj):
+    assert mini_obj_opt._cutoff_optimized
+    mini_obj_opt.trn = ecoli_obj.trn
+    # TODO: Test that extra genes are removed
+    assert not mini_obj_opt._cutoff_optimized
 
 
 def test_rename_imodulons(ecoli_obj, caplog):
@@ -96,44 +182,11 @@ def test_find_single_gene_imodulons(ecoli_obj):
     assert ecoli_obj.imodulon_table.single_gene.sum() == 5
 
 
-def test_dagostino_cutoff(mini_obj, caplog):
-    assert mini_obj.dagostino_cutoff == 2000
-    assert not mini_obj._cutoff_optimized
-
-    with caplog.at_level(logging.WARNING):
-        copy_data = IcaData(
-            mini_obj.M,
-            mini_obj.A,
-            gene_table=mini_obj.gene_table,
-            imodulon_table=mini_obj.imodulon_table,
-            trn=mini_obj.trn,
-            optimize_cutoff=True,
-            dagostino_cutoff=2000,
-        )
-
-    assert copy_data.dagostino_cutoff == 800
-    # noinspection PyProtectedMember
-    assert copy_data._cutoff_optimized
-
-    assert "Optimizing iModulon thresholds" in caplog.text
-
-
-def test_thresholds(mini_obj_opt):
-    mini_obj_opt.thresholds = list(range(10))
+def test_thresholds(mini_obj_opt, ecoli_obj):
+    # Test changing thresholds
+    mini_obj_opt.thresholds = dict(zip(mini_obj_opt.imodulon_names, list(range(10))))
     assert list(mini_obj_opt.thresholds.values()) == list(range(10))
     assert not mini_obj_opt._cutoff_optimized
-
-    mini_obj_opt.thresholds = list(range(10))
-
-    copy_data = IcaData(
-        mini_obj_opt.M,
-        mini_obj_opt.A,
-        optimize_cutoff=False,
-        thresholds=list(range(10, 20)),
-    )
-
-    assert list(copy_data.thresholds.values()) == list(range(10, 20))
-    assert not copy_data._cutoff_optimized
 
 
 # def test_change_threshold():
