@@ -168,6 +168,7 @@ class IcaData(object):
         self.trn = trn
 
         # Initialize thresholds either with or without optimization
+        self._cutoff_optimized = False
         if thresholds is not None:
             # Throw a warning if user was expecting d'agostino optimization
             if optimize_cutoff:
@@ -177,7 +178,6 @@ class IcaData(object):
                 )
             self.thresholds = thresholds
             self._dagostino_cutoff = None
-            self._cutoff_optimized = False
 
         # Use kmeans if TRN is empty, or kmeans is selected
         elif self.trn.empty or threshold_method == "kmeans":
@@ -189,21 +189,10 @@ class IcaData(object):
                 )
             self.compute_kmeans_thresholds()
             self._dagostino_cutoff = None
-            self._cutoff_optimized = False
 
         # Else use D'agostino method
         elif threshold_method == "dagostino":
-            if dagostino_cutoff is None:
-                logging.warning(
-                    "Using the default dagostino_cutoff of 550. This may "
-                    "not be optimal for your dataset. Use "
-                    "ica_data.reoptimize_thresholds() to find the optimal "
-                    "threshold."
-                )
-                dagostino_cutoff = 550
-            self._dagostino_cutoff = dagostino_cutoff
             if optimize_cutoff:
-                self._cutoff_optimized = False
                 logging.warning(
                     "Optimizing iModulon thresholds, may take 2-3 minutes..."
                 )
@@ -212,9 +201,18 @@ class IcaData(object):
                 # also sets an attribute to tell us if we've done
                 # this optimization; only reasonable to try it
                 # again if the user uploads a new TRN
-            else:
+            elif dagostino_cutoff is None:
+                logging.warning(
+                    "Using the default dagostino_cutoff of 550. This may "
+                    "not be optimal for your dataset. Use "
+                    "ica_data.reoptimize_thresholds() to find the optimal "
+                    "threshold."
+                )
+                self._dagostino_cutoff = 550
                 self.recompute_thresholds(self.dagostino_cutoff)
-                self._cutoff_optimized = False
+            else:
+                self._dagostino_cutoff = dagostino_cutoff
+                self.recompute_thresholds(self.dagostino_cutoff)
         # Capture improper threshold methods
         else:
             raise ValueError('Threshold method must either be "dagostino" or "kmeans"')

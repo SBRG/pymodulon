@@ -56,10 +56,11 @@ def test_init_thresholds(ecoli_obj, mini_obj_opt, caplog, tmp_path):
                                 assert not obj.cutoff_optimized
 
                                 if opt4:  # optimize_cutoff == True
-                                    assert (
-                                        "Using manually input thresholds."
-                                        in caplog.text
-                                    )
+                                    assert caplog.messages == [
+                                        "Using manually input thresholds. "
+                                        "D'agostino optimization will not be "
+                                        "performed."
+                                    ]
                                 else:
                                     assert caplog.text == ""
 
@@ -68,9 +69,11 @@ def test_init_thresholds(ecoli_obj, mini_obj_opt, caplog, tmp_path):
                                 assert obj.dagostino_cutoff is None
                                 assert not obj.cutoff_optimized
                                 if opt4:  # optimize_cutoff == True
-                                    assert (
-                                        "Using Kmeans threshold method." in caplog.text
-                                    )
+                                    assert caplog.messages == [
+                                        "Using Kmeans threshold "
+                                        "method. D'agostino optimization will not "
+                                        "be performed."
+                                    ]
                                 else:
                                     assert caplog.text == ""
 
@@ -79,14 +82,21 @@ def test_init_thresholds(ecoli_obj, mini_obj_opt, caplog, tmp_path):
                             elif opt4:
                                 assert obj.cutoff_optimized
                                 assert obj.dagostino_cutoff is not None
-                                assert "Optimizing iModulon thresholds" in caplog.text
+                                assert caplog.messages == [
+                                    "Optimizing iModulon thresholds, may take "
+                                    "2-3 minutes..."
+                                ]
                             # opt4 == False
                             elif opt5 is None:
                                 assert not obj.cutoff_optimized
                                 assert obj.dagostino_cutoff == 550
-                                assert (
-                                    "Using the default dagostino_cutoff" in caplog.text
-                                )
+                                assert caplog.messages == [
+                                    "Using the default "
+                                    "dagostino_cutoff of 550. This may not be "
+                                    "optimal for your dataset. Use "
+                                    "ica_data.reoptimize_thresholds() to find the "
+                                    "optimal threshold."
+                                ]
                             elif opt5 == 600:
                                 assert not obj.cutoff_optimized
                                 assert obj.dagostino_cutoff == 600
