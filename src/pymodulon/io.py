@@ -57,6 +57,7 @@ def save_to_json(data, filename, compress=False):
 
     # Add _cutoff_optimized
     param_dict["_cutoff_optimized"] = data.cutoff_optimized
+    param_dict["_dagostino_cutoff"] = data.dagostino_cutoff
 
     if filename.endswith(".gz") or compress:
         if not filename.endswith(".json.gz"):
@@ -96,11 +97,16 @@ def load_json_model(filename):
     else:
         serial_data = json.load(filename)
 
-    # Add _cutoff_optimized information
+    # Add cutoff information
     try:
         cutoff_optimized = serial_data.pop("_cutoff_optimized")
     except KeyError:
         cutoff_optimized = False
+
+    try:
+        dagostino_cutoff = serial_data.pop("_dagostino_cutoff")
+    except KeyError:
+        dagostino_cutoff = None
 
     # Remove deprecated arguments
     deprecated_args = ["cog_colors"]
@@ -110,4 +116,5 @@ def load_json_model(filename):
 
     data = IcaData(**serial_data)
     data._cutoff_optimized = cutoff_optimized
+    data._dagostino_cutoff = dagostino_cutoff
     return data

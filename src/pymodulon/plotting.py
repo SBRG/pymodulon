@@ -39,7 +39,7 @@ def barplot(
     ax=None,
     legend_kwargs=None,
     savefig=False,
-    savefig_kwargs=None
+    savefig_kwargs=None,
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -525,7 +525,7 @@ def scatterplot(
     label_font_kwargs=None,
     legend_kwargs=None,
     savefig=False,
-    savefig_kwargs=None
+    savefig_kwargs=None,
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -553,7 +553,7 @@ def scatterplot(
         Show 45-degreen lines offset by a margin
     fit_line: bool
         Draw a line of best fit on the scatterplot
-    fit_metric: 'pearson', 'spearman' or 'r2'
+    fit_metric: 'pearson', 'spearman', 'r2', or None
         Metric to report in legend for line of best fit
     xlabel: str
         X-axis label
@@ -1958,6 +1958,9 @@ def _get_sample_leaves(clf, features, labels, component):
 
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
+    if metric is None:
+        return
+
     if metric == "r2":
         params, r2 = _get_fit(x, y)
         label = "$R^2_{{adj}}$ = {:.2f}".format(r2)
@@ -2108,16 +2111,17 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
 
 def _save_figures(fig, savefig_kwargs):
-    '''Check for savefig_kwargs, then save current figure instance'''
+    """Check for savefig_kwargs, then save current figure instance"""
 
     # Check for savefig_kwargs
     if savefig_kwargs:
-            savefig_kwargs['fname'] = savefig_kwargs.get('fname', './plot.svg')
+        savefig_kwargs["fname"] = savefig_kwargs.get("fname", "./plot.svg")
     else:
-        savefig_kwargs = {'fname': './plot.svg'}
+        savefig_kwargs = {"fname": "./plot.svg"}
 
     # Plot current figure instance using savefig_kwargs
     fig.savefig(**savefig_kwargs)
+
 
 ##########################
 # Experimental Functions #

@@ -36,7 +36,7 @@ class IcaData(object):
         sample_table=None,
         imodulon_table=None,
         trn=None,
-        dagostino_cutoff=550,
+        dagostino_cutoff=None,
         optimize_cutoff=False,
         thresholds=None,
         threshold_method="dagostino",
@@ -71,18 +71,20 @@ class IcaData(object):
         trn : str or ~pandas.DataFrame, optional
             Table mapping transcriptional regulators to target genes (
             default: None)
-        dagostino_cutoff : int
+        dagostino_cutoff : int, optional
             Cutoff value to use for the D'agostino test for iModulon gene
             thresholds. This option will be ignored if optimize_cutoff is True,
             if threshold_method is "kmeans", or if custom thresholds are
-            provided. (default: 550)
+            provided.
         optimize_cutoff : bool
             If true, optimize the D'agostino cutoff for iModulon threshold using
             the TRN (if provided). This option will be ignored if
             threshold_method is "kmeans" or if custom thresholds are
             provided. (default: False)
-        thresholds : dict or list, optional
-            Dictionary mapping custom thresholds to iModulons (default: None)
+        thresholds : dict, optional
+            Dictionary mapping custom thresholds to iModulons (default: None). If
+            numerical thresholds are supplied, this supercedes all related options (
+            i.e. `threshold_method`, `optimize_cutoff`, `dagostino_cutoff`).
         threshold_method : str
             Either "dagostino" (default with TRN) or "kmeans" (default if no TRN
             provided)
@@ -171,11 +173,11 @@ class IcaData(object):
             if optimize_cutoff:
                 logging.warning(
                     "Using manually input thresholds. D'agostino "
-                    "optimization will not be performed"
+                    "optimization will not be performed."
                 )
-            # Keep d'agostino cutoff even though cutoff wasn't optimized
-            self._dagostino_cutoff = dagostino_cutoff
             self.thresholds = thresholds
+            self._dagostino_cutoff = None
+            self._cutoff_optimized = False
 
         # Use kmeans if TRN is empty, or kmeans is selected
         elif self.trn.empty or threshold_method == "kmeans":
@@ -183,37 +185,39 @@ class IcaData(object):
             if optimize_cutoff:
                 logging.warning(
                     "Using Kmeans threshold method. D'agostino "
-                    "optimization will not be performed"
+                    "optimization will not be performed."
                 )
             self.compute_kmeans_thresholds()
             self._dagostino_cutoff = None
+            self._cutoff_optimized = False
 
         # Else use D'agostino method
         elif threshold_method == "dagostino":
+            if dagostino_cutoff is None:
+                logging.warning(
+                    "Using the default dagostino_cutoff of 550. This may "
+                    "not be optimal for your dataset. Use "
+                    "ica_data.reoptimize_thresholds() to find the optimal "
+                    "threshold."
+                )
+                dagostino_cutoff = 550
             self._dagostino_cutoff = dagostino_cutoff
             if optimize_cutoff:
                 self._cutoff_optimized = False
-                if trn is None:
-                    raise ValueError(
-                        "Thresholds cannot be optimized if no TRN is provided."
-                    )
-                else:
-                    logging.warning(
-                        "Optimizing iModulon thresholds, may take 2-3 " "minutes..."
-                    )
-                    # this function sets self.dagostino_cutoff internally
-                    self.reoptimize_thresholds(progress=False, plot=False)
-                    # also sets an attribute to tell us if we've done
-                    # this optimization; only reasonable to try it
-                    # again if the user uploads a new TRN
+                logging.warning(
+                    "Optimizing iModulon thresholds, may take 2-3 minutes..."
+                )
+                # this function sets self.dagostino_cutoff internally
+                self.reoptimize_thresholds(progress=False, plot=False)
+                # also sets an attribute to tell us if we've done
+                # this optimization; only reasonable to try it
+                # again if the user uploads a new TRN
             else:
-                self._cutoff_optimized = False
                 self.recompute_thresholds(self.dagostino_cutoff)
+                self._cutoff_optimized = False
         # Capture improper threshold methods
         else:
-            raise ValueError(
-                'Threshold method must either be "dagostino" or ' '"kmeans"'
-            )
+            raise ValueError('Threshold method must either be "dagostino" or "kmeans"')
 
         ##############
         # Motif Info #
@@ -281,12 +285,12 @@ class IcaData(object):
 
     @property
     def M(self):
-        """ Get M matrix """
+        """Get M matrix"""
         return self._m
 
     @property
     def M_binarized(self):
-        """ Get binarized version of M matrix based on current thresholds """
+        """Get binarized version of M matrix based on current thresholds"""
         m_binarized = pd.DataFrame().reindex_like(self.M)
         m_binarized[:] = 0
         for imodulon in m_binarized.columns:
@@ -296,12 +300,12 @@ class IcaData(object):
 
     @property
     def A(self):
-        """ Get A matrix """
+        """Get A matrix"""
         return self._a
 
     @property
     def X(self):
-        """ Get X matrix """
+        """Get X matrix"""
         return self._x
 
     @X.setter
@@ -319,7 +323,7 @@ class IcaData(object):
 
     @property
     def log_tpm(self):
-        """ Get 'log_tpm' matrix """
+        """Get 'log_tpm' matrix"""
         return self._log_tpm
 
     @log_tpm.setter
@@ -338,7 +342,7 @@ class IcaData(object):
     # Gene, sample and iModulon name properties
     @property
     def imodulon_names(self):
-        """ Get iModulon names """
+        """Get iModulon names"""
         return self._imodulon_table.index.tolist()
 
     @imodulon_names.setter
@@ -347,18 +351,18 @@ class IcaData(object):
 
     @property
     def sample_names(self):
-        """ Get sample names """
+        """Get sample names"""
         return self._sample_table.index.tolist()
 
     @property
     def gene_names(self):
-        """ Get gene names """
+        """Get gene names"""
         return self._gene_table.index.tolist()
 
     # Gene, sample and iModulon tables
     @property
     def gene_table(self):
-        """ Get gene table"""
+        """Get gene table"""
         return self._gene_table
 
     @gene_table.setter
@@ -375,7 +379,7 @@ class IcaData(object):
 
     @property
     def sample_table(self):
-        """ Get sample table"""
+        """Get sample table"""
         return self._sample_table
 
     @sample_table.setter
@@ -392,7 +396,7 @@ class IcaData(object):
 
     @property
     def imodulon_table(self):
-        """ Get table of iModulons"""
+        """Get table of iModulons"""
         return self._imodulon_table
 
     @imodulon_table.setter
@@ -403,7 +407,7 @@ class IcaData(object):
     # TRN
     @property
     def trn(self):
-        """ Get table with TRN information"""
+        """Get table with TRN information"""
         return self._trn
 
     @trn.setter
@@ -452,7 +456,7 @@ class IcaData(object):
     # Motif information
     @property
     def motif_info(self):
-        """ Get motif info"""
+        """Get motif info"""
         return self._motif_info
 
     @motif_info.setter
@@ -873,7 +877,7 @@ class IcaData(object):
 
     @property
     def dagostino_cutoff(self):
-        """ Get D'agostino cutoff"""
+        """Get D'agostino cutoff"""
         return self._dagostino_cutoff
 
     @property
@@ -882,12 +886,12 @@ class IcaData(object):
 
     @property
     def thresholds(self):
-        """ Get thresholds """
+        """Get thresholds"""
         return self._thresholds
 
     @thresholds.setter
     def thresholds(self, new_thresholds):
-        """ Set thresholds """
+        """Set thresholds"""
         new_thresh_len = len(new_thresholds)
         imod_names_len = len(self._imodulon_names)
         if new_thresh_len != imod_names_len:
@@ -896,22 +900,15 @@ class IcaData(object):
                 "have {:d} elements".format(new_thresh_len, imod_names_len)
             )
 
-        if isinstance(new_thresholds, dict):
-            # fix json peculiarity of saving int dict keys as string
-            thresh_copy = new_thresholds.copy()
-            for key in thresh_copy.keys():
-                # Could this be replaced with a try/except clause?
-                if isinstance(key, str) and all([char.isdigit() for char in key]):
-                    new_thresholds.update({int(key): new_thresholds.pop(key)})
+        # fix json peculiarity of saving int dict keys as string
+        thresh_copy = new_thresholds.copy()
+        for key in thresh_copy.keys():
+            # Could this be replaced with a try/except clause?
+            if isinstance(key, str) and all([char.isdigit() for char in key]):
+                new_thresholds.update({int(key): new_thresholds.pop(key)})
 
-            self._thresholds = new_thresholds
-            self._cutoff_optimized = False
-
-        elif isinstance(new_thresholds, list):
-            self._thresholds = dict(zip(self._imodulon_names, new_thresholds))
-            self._cutoff_optimized = False
-        else:
-            raise TypeError("new_thresholds must be list or dict")
+        self._thresholds = new_thresholds
+        self._cutoff_optimized = False
 
     def change_threshold(self, imodulon, value):
         """
@@ -955,37 +952,6 @@ class IcaData(object):
         }
         self._dagostino_cutoff = dagostino_cutoff
 
-    def _kmeans_cluster(self, imodulon):
-        data = self.M[imodulon]
-        model = KMeans(n_clusters=3, random_state=1)
-        model.fit(abs(data).values.reshape(-1, 1))
-
-        df = pd.DataFrame(abs(data))
-        df["cluster"] = model.labels_
-
-        # Get top two clusters
-        counts = df.cluster.value_counts().sort_values(ascending=True)
-        idx1 = counts.index[0]
-        idx2 = counts.index[1]
-        clust1 = df[df.cluster == idx1]
-        clust2 = df[df.cluster == idx2]
-
-        # Get midpoint between lowest iModulon gene and highest insignificant
-        # gene
-        threshold = np.mean([clust1[imodulon].min(), clust2[imodulon].max()])
-        return threshold
-
-    def compute_kmeans_thresholds(self):
-        """
-        Computes iModulon thresholds using K-means clustering
-
-        Returns
-        -------
-        None: None
-        """
-
-        self._thresholds = {k: self._kmeans_cluster(k) for k in self._imodulon_names}
-
     def reoptimize_thresholds(self, progress=True, plot=True):
         """
         Re-optimizes the D'Agostino statistic cutoff for defining iModulon
@@ -1003,9 +969,16 @@ class IcaData(object):
             New D'agostino cutoff
         """
 
+        if self.trn.empty:
+            raise ValueError(
+                "D'agostino cutoff cannot be optimized if no TRN is "
+                "provided. Use ica_data.compute_kmeans_thresholds() "
+                "instead."
+            )
+
         if not self._cutoff_optimized:
-            self._optimize_dagostino_cutoff(progress, plot)
-            self._update_thresholds(self.dagostino_cutoff)
+            new_cutoff = self._optimize_dagostino_cutoff(progress, plot)
+            self._update_thresholds(new_cutoff)
             self._cutoff_optimized = True
         else:
             print(
@@ -1056,7 +1029,7 @@ class IcaData(object):
 
         # perform a sensitivity analysis to determine threshold effects
         # on precision/recall overall
-        cutoffs_to_try = np.arange(300, 2000, 50)
+        cutoffs_to_try = np.arange(50, 2000, 50)
         f1_scores = []
 
         if progress:
@@ -1097,9 +1070,8 @@ class IcaData(object):
             # Get mean of F1 score for this potential cutoff
             f1_scores.append(np.mean(cutoff_f1_scores))
 
-        # extract the best cutoff and set it as the cutoff to use
+        # extract the best cutoff
         best_cutoff = cutoffs_to_try[np.argmax(f1_scores)]
-        self._dagostino_cutoff = int(best_cutoff)
 
         if plot:
             fig, ax = plt.subplots(figsize=(4, 4))
@@ -1108,7 +1080,38 @@ class IcaData(object):
             ax.plot(cutoffs_to_try, f1_scores)
             ax.scatter([best_cutoff], [max(f1_scores)], color="r")
 
-        return best_cutoff
+        return int(best_cutoff)
+
+    def _kmeans_cluster(self, imodulon):
+        data = self.M[imodulon]
+        model = KMeans(n_clusters=3, random_state=1)
+        model.fit(abs(data).values.reshape(-1, 1))
+
+        df = pd.DataFrame(abs(data))
+        df["cluster"] = model.labels_
+
+        # Get top two clusters
+        counts = df.cluster.value_counts().sort_values(ascending=True)
+        idx1 = counts.index[0]
+        idx2 = counts.index[1]
+        clust1 = df[df.cluster == idx1]
+        clust2 = df[df.cluster == idx2]
+
+        # Get midpoint between lowest iModulon gene and highest insignificant
+        # gene
+        threshold = np.mean([clust1[imodulon].min(), clust2[imodulon].max()])
+        return threshold
+
+    def compute_kmeans_thresholds(self):
+        """
+        Computes iModulon thresholds using K-means clustering
+
+        Returns
+        -------
+        None: None
+        """
+
+        self._thresholds = {k: self._kmeans_cluster(k) for k in self._imodulon_names}
 
     def copy(self):
         """
