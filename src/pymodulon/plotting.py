@@ -39,7 +39,7 @@ def barplot(
     ax=None,
     legend_kwargs=None,
     savefig=False,
-    savefig_kwargs=None
+    savefig_kwargs=None,
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -525,7 +525,7 @@ def scatterplot(
     label_font_kwargs=None,
     legend_kwargs=None,
     savefig=False,
-    savefig_kwargs=None
+    savefig_kwargs=None,
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -2111,16 +2111,17 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
 
 def _save_figures(fig, savefig_kwargs):
-    '''Check for savefig_kwargs, then save current figure instance'''
+    """Check for savefig_kwargs, then save current figure instance"""
 
     # Check for savefig_kwargs
     if savefig_kwargs:
-            savefig_kwargs['fname'] = savefig_kwargs.get('fname', './plot.svg')
+        savefig_kwargs["fname"] = savefig_kwargs.get("fname", "./plot.svg")
     else:
-        savefig_kwargs = {'fname': './plot.svg'}
+        savefig_kwargs = {"fname": "./plot.svg"}
 
     # Plot current figure instance using savefig_kwargs
     fig.savefig(**savefig_kwargs)
+
 
 ##########################
 # Experimental Functions #

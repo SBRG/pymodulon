@@ -1029,7 +1029,7 @@ class IcaData(object):
 
         # perform a sensitivity analysis to determine threshold effects
         # on precision/recall overall
-        cutoffs_to_try = np.arange(300, 2000, 50)
+        cutoffs_to_try = np.arange(50, 2000, 50)
         f1_scores = []
 
         if progress:
