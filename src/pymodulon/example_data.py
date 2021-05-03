@@ -41,7 +41,7 @@ def load_ecoli_data():
     ecoli_data: ~pymodulon.core.IcaData
         *E. coli* :class:`~pymodulon.core.IcaData` object
     """
-    return load_json_model(path.join(_data_dir, "objects", "ecoli_data.json"))
+    return load_json_model(path.join(_data_dir, "objects", "ecoli_data.json.gz"))
 
 
 def load_staph_data():
@@ -54,7 +54,20 @@ def load_staph_data():
     staph_data: ~pymodulon.core.IcaData
         *S. aureus* :class:`~pymodulon.core.IcaData` object
     """
-    return load_json_model(path.join(_data_dir, "objects", "staph_data.json"))
+    return load_json_model(path.join(_data_dir, "objects", "staph_data.json.gz"))
+
+
+def load_bsub_data():
+    """
+    Load *Bacillus subtilis* :class:`~pymodulon.core.IcaData` object from
+    :cite:`Rychel19`
+
+    Returns
+    -------
+    bsub_data: ~pymodulon.core.IcaData
+        *B. subtilis* :class:`~pymodulon.core.IcaData` object
+    """
+    return load_json_model(path.join(_data_dir, "objects", "bsub_data.json.gz"))
 
 
 def load_example_bbh():
