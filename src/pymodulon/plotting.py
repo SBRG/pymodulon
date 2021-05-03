@@ -219,7 +219,14 @@ def barplot(
 
 
 def plot_expression(
-    ica_data, gene, projects=None, highlight=None, ax=None, legend_kwargs=None
+    ica_data,
+    gene,
+    projects=None,
+    highlight=None,
+    ax=None,
+    legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Creates a barplot showing an gene's expression across the compendium
@@ -255,12 +262,27 @@ def plot_expression(
         label = "${}$ Expression".format(gene)
 
     return barplot(
-        values, ica_data.sample_table, label, projects, highlight, ax, legend_kwargs
+        values,
+        ica_data.sample_table,
+        label,
+        projects,
+        highlight,
+        ax,
+        legend_kwargs,
+        savefig=savefig,
+        savefig_kwargs=savefig_kwargs,
     )
 
 
 def plot_activities(
-    ica_data, imodulon, projects=None, highlight=None, ax=None, legend_kwargs=None
+    ica_data,
+    imodulon,
+    projects=None,
+    highlight=None,
+    ax=None,
+    legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Creates a barplot showing an iModulon's activity across the compendium
@@ -295,12 +317,27 @@ def plot_activities(
     label = "{} iModulon\nActivity".format(imodulon)
 
     return barplot(
-        values, ica_data.sample_table, label, projects, highlight, ax, legend_kwargs
+        values,
+        ica_data.sample_table,
+        label,
+        projects,
+        highlight,
+        ax,
+        legend_kwargs,
+        savefig=savefig,
+        savefig_kwargs=savefig_kwargs,
     )
 
 
 def plot_metadata(
-    ica_data, column, projects=None, highlight=None, ax=None, legend_kwargs=None
+    ica_data,
+    column,
+    projects=None,
+    highlight=None,
+    ax=None,
+    legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Creates a barplot for values in the sample table
@@ -339,7 +376,17 @@ def plot_metadata(
     else:
         raise ValueError("Column not in sample table: {}".format(column))
 
-    return barplot(values, table, column, projects, highlight, ax, legend_kwargs)
+    return barplot(
+        values,
+        table,
+        column,
+        projects,
+        highlight,
+        ax,
+        legend_kwargs,
+        savefig=savefig,
+        savefig_kwargs=savefig_kwargs,
+    )
 
 
 def plot_regulon_histogram(
@@ -354,6 +401,8 @@ def plot_regulon_histogram(
     alpha=0.7,
     ax_font_kwargs=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
@@ -404,6 +453,8 @@ def plot_regulon_histogram(
     # If ax is None, create ax on which to generate histogram
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
 
     # If bins is None, generate optimal number of bins
     if bins is None:
@@ -496,6 +547,10 @@ def plot_regulon_histogram(
 
     # Add legend
     ax.legend(**legend_kwargs)
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig_kwargs)
 
     return ax
 

@@ -60,7 +60,7 @@ def load_staph_data():
 def load_bsub_data():
     """
     Load *Bacillus subtilis* :class:`~pymodulon.core.IcaData` object from
-    :cite:`Rychel19`
+    :cite:`Rychel2020a`
 
     Returns
     -------
