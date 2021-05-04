@@ -15,13 +15,14 @@ from scipy import sparse, stats
 from scipy.optimize import OptimizeWarning, curve_fit
 from sklearn.base import clone
 from sklearn.cluster import AgglomerativeClustering
+from sklearn.decomposition import PCA
 from sklearn.metrics import r2_score, silhouette_samples, silhouette_score
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.tree import DecisionTreeRegressor
 
 from pymodulon.compare import convert_gene_index
 from pymodulon.enrichment import parse_regulon_str
-from pymodulon.util import _parse_sample, dima, mutual_info_distance
+from pymodulon.util import _parse_sample, dima, explained_variance, mutual_info_distance
 
 
 #############
@@ -37,6 +38,8 @@ def barplot(
     highlight=None,
     ax=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -79,6 +82,8 @@ def barplot(
     if ax is None:
         figsize = (len(values) / 15 + 0.5, 2)
         fig, ax = plt.subplots(figsize=figsize)
+    else:
+        fig = ax.figure
 
     # Get ymin and max
     ymin = values.min()
@@ -205,6 +210,10 @@ def barplot(
 
     # X-axis
     ax.hlines(0, xmin, xmax, color="k")
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig_kwargs)
 
     return ax
 
@@ -515,6 +524,8 @@ def scatterplot(
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -542,7 +553,7 @@ def scatterplot(
         Show 45-degreen lines offset by a margin
     fit_line: bool
         Draw a line of best fit on the scatterplot
-    fit_metric: 'pearson', 'spearman' or 'r2'
+    fit_metric: 'pearson', 'spearman', 'r2', or None
         Metric to report in legend for line of best fit
     xlabel: str
         X-axis label
@@ -570,6 +581,8 @@ def scatterplot(
 
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
 
     if show_labels == "auto":
         show_labels = len(x) <= 20
@@ -726,6 +739,10 @@ def scatterplot(
 
     if legend or fit_line:
         ax.legend(**legend_kwargs)
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig_kwargs)
 
     return ax
 
@@ -1006,7 +1023,7 @@ def compare_gene_weights(
     # Add labels on data-points
     component_genes_x = bin_M1[bin_M1[imodulon1] == 1].index
     component_genes_y = bin_M2[bin_M2[imodulon2] == 1].index
-    component_genes = component_genes_x & component_genes_y
+    component_genes = component_genes_x.intersection(component_genes_y)
     texts = []
     expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
 
@@ -1299,6 +1316,63 @@ def plot_dima(
         return ax
 
 
+###############
+# Other plots #
+###############
+
+
+def plot_explained_variance(ica_data, pc=True, ax=None):
+    """
+    Plots the cumulative explained variance for independent components and,
+    optionally, principal components
+
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` object
+    pc: bool
+        If True, plot cumulative explained variance of independent components
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+
+    Returns
+    -------
+    ax: ~matplotlib.axes.Axes
+        :class:`~matplotlib.axes.Axes` containing the line plot
+    """
+
+    # Get IC explained variance
+    ic_var = []
+    for imodulon in ica_data.imodulon_names:
+        ic_var.append(explained_variance(ica_data, imodulons=imodulon))
+    ic_var = np.insert(np.cumsum(sorted(ic_var, reverse=True)), 0, 0)
+
+    if not ax:
+        fig, ax = plt.subplots()
+
+    ax.plot(range(len(ic_var)), ic_var, label="Independent Components")
+
+    if pc:
+        # Get PC explained variance
+        pca = PCA().fit(ica_data.X.T)
+        pc_var = np.insert(np.cumsum(pca.explained_variance_ratio_), 0, 0)
+
+        # Only keep number of PCs as ICs
+        pc_var = pc_var[: len(ic_var)]
+
+        # Plot PCs
+        ax.plot(range(len(ic_var)), pc_var, label="Principal Components")
+
+    ax.legend()
+
+    ax.set_xlabel("Components")
+    ax.set_ylabel("Cumulative Explained Varaince")
+    ax.set_ylim([0, 1])
+    ax.set_xlim([0, len(ic_var)])
+
+    return ax
+
+
 def cluster_activities(
     ica_data,
     correlation_method="spearman",
@@ -1329,7 +1403,7 @@ def cluster_activities(
         :class:`~pymodulon.core.IcaData` object
     correlation_method: 'pearson', 'spearman', 'kendall', 'mutual_info' or callable
         Method for computing correlations between iModulon activities. See
-        :meth:`~pandas.DataFrame.corr` Default is 'spearman'.
+        :meth:`pandas.DataFrame.corr` Default is 'spearman'.
     distance_threshold: float, optional
         A distance from 0 to 1 to define flat clusters from the hierarchical
         clustering. Larger values yield fewer clusters. If None, automatic selection
@@ -1884,6 +1958,9 @@ def _get_sample_leaves(clf, features, labels, component):
 
 def _fit_line(x, y, ax, metric):
     # Get line parameters and metric of correlation/regression
+    if metric is None:
+        return
+
     if metric == "r2":
         params, r2 = _get_fit(x, y)
         label = "$R^2_{{adj}}$ = {:.2f}".format(r2)
@@ -2031,6 +2108,19 @@ def _mod_freedman_diaconis(ica_data, imodulon):
         xmax = thresh + width
 
     return np.arange(xmin, xmax + width, width)
+
+
+def _save_figures(fig, savefig_kwargs):
+    """Check for savefig_kwargs, then save current figure instance"""
+
+    # Check for savefig_kwargs
+    if savefig_kwargs:
+        savefig_kwargs["fname"] = savefig_kwargs.get("fname", "./plot.svg")
+    else:
+        savefig_kwargs = {"fname": "./plot.svg"}
+
+    # Plot current figure instance using savefig_kwargs
+    fig.savefig(**savefig_kwargs)
 
 
 ##########################

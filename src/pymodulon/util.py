@@ -223,17 +223,17 @@ def explained_variance(
     ica_data, genes=None, samples=None, imodulons=None, reference=None
 ):
     """
-    Computes the fraction of variance explained by iModulons
+    Computes the fraction of variance explained by iModulons (from 0 to 1)
 
     Parameters
     ----------
     ica_data: ~pymodulon.core.IcaData
         :class:`~pymodulon.core.IcaData` data object
-    genes: list, optional
+    genes: str or list, optional
         List of genes to use (default: all genes)
-    samples: list, optional
+    samples: str or list, optional
         List of samples to use (default: all samples)
-    imodulons: list, optional
+    imodulons: int or str or list, optional
         List of iModulons to use (default: all iModulons)
     reference: list, optional
         List of samples that represent the reference condition for the
@@ -242,7 +242,7 @@ def explained_variance(
 
     Returns
     -------
-    list
+    float
         Fraction of variance explained by selected iModulons for selected
         genes/samples
     """
@@ -265,7 +265,7 @@ def explained_variance(
 
     if imodulons is None:
         imodulons = ica_data.M.columns
-    elif isinstance(imodulons, str):
+    elif isinstance(imodulons, str) or isinstance(imodulons, int):
         imodulons = [imodulons]
 
     if reference is None:

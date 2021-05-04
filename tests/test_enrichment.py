@@ -60,8 +60,8 @@ def test_compute_enrichment():
     assert (
         res4.pvalue == 1
         and res4.precision == 0
-        and res4.recall <= 0
-        and res4.f1score <= 0
+        and res4.recall == 0
+        and res4.f1score == 0
         and res4.TP == 0
         and res4.target_set_size == 3
         and res4.gene_set_size == 2

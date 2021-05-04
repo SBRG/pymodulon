@@ -1,4 +1,4 @@
-,start,stop,strand,gene_name,length,operon,COG,accession
+,start,end,strand,gene_name,length,operon,COG,accession
 b0001,189,255,+,thrL,66,thrLABC,No COG Annotation,NC_000913.3
 b0002,336,2799,+,thrA,2463,thrLABC,Amino acid transport and metabolism,NC_000913.3
 b0003,2800,3733,+,thrB,933,thrLABC,Amino acid transport and metabolism,NC_000913.3

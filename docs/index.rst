@@ -52,18 +52,10 @@ The motif module requires installing `MEME <https://meme-suite.org/meme/>`_. We
 recommend that you use the `docker container for MEME <https://hub.docker
 .com/r/memesuite/memesuite>`_.
 
+Example Workflow
+----------------
 
-.. toctree::
-   :numbered:
-   :maxdepth: 1
-   :caption: Example Workflow
-
-   example_workflow/mining_public_expression_databases.rst
-   example_workflow/quality_control.ipynb
-   example_workflow/running_ICA.rst
-   example_workflow/characterizing_iModulons.ipynb
-   example_workflow/creating_an_iModulonDB_page.ipynb
-
+We have provided an example workflow `here <https://github.com/avsastry/modulome-workflow>`_ illustrating how to compile and process all publicly available RNA-seq data for *Bacillus subtilis*, and subsequently compute and characterize its iModulons. This tutorial was designed to be easily applied to any other bacteria.
 
 .. toctree::
    :numbered:

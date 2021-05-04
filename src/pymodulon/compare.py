@@ -82,10 +82,13 @@ def _make_dot_graph(links, show_all, names1, names2):
     link_names1 = [link[0] for link in links]
     link_names2 = [link[1] for link in links]
 
-    if not show_all:
+    if show_all:
+        names1 = [str(i) for i in names1]
+        names2 = [str(i) for i in names2]
+    else:
         # Get names of nodes
-        names1 = link_names1
-        names2 = link_names2
+        names1 = [str(i) for i in link_names1]
+        names2 = [str(i) for i in link_names2]
 
     # Split names in half if necessary for dataset1
     name_dict1 = {}
@@ -255,8 +258,6 @@ def compare_ica(
     """
 
     new_M1, new_M2 = convert_gene_index(M1, M2, ortho_file)
-    new_M1.columns = new_M1.columns.astype("str")
-    new_M2.columns = new_M2.columns.astype("str")
     matches = _get_orthologous_imodulons(new_M1, new_M2, method=method, cutoff=cutoff)
     if plot:
         dot = _make_dot_graph(
