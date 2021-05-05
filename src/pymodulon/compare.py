@@ -273,7 +273,7 @@ def compare_ica(
 ####################
 
 
-def make_prots(gbk, out_path):
+def make_prots(gbk, out_path, lt_key='locus_tag'):
     """
     Makes protein files for all the genes in the genbank file
 
@@ -283,22 +283,26 @@ def make_prots(gbk, out_path):
         Path to input genbank file
     out_path : str
         Path to the output FASTA file
+    lt_key: str
+        Key to search for locus_tag. Should be either 'locus_tag' or 'old_locus_tag'
 
     Returns
     -------
     None : None
     """
+    if lt_key not in ['locus_tag', 'old_locus_tag']:
+        raise ValueError('lt_key must either be \'locus_tag\' or \'old_locus_tag\'')
 
     with open(out_path, "w") as fa:
         for refseq in SeqIO.parse(gbk, "genbank"):
             recorded = set()
             for feats in [f for f in refseq.features if f.type == "CDS"]:
-                lt = feats.qualifiers["locus_tag"][0]
-                if lt in recorded:  # clear the duplicates
-                    continue
                 try:
+                    lt = feats.qualifiers[lt_key][0]
                     seq = feats.qualifiers["translation"][0]
-                except KeyError:
+                except KeyError:  # newly annotated genes do not have old_locus_tags
+                    continue
+                if lt in recorded:  # clear the duplicates
                     continue
 
                 fa.write(">{}\n{}\n".format(lt, seq))
