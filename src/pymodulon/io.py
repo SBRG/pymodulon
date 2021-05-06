@@ -36,8 +36,15 @@ def save_to_json(data, filename, compress=False):
 
     # serialize pandas DataFrames and change sets to lists
     for key, val in param_dict.items():
-        if isinstance(val, pd.DataFrame) or isinstance(val, pd.Series):
+        if isinstance(val, pd.DataFrame):
+            # Replace string NaN with empty string
+            str_cols = val.select_dtypes(object).columns
+            val[str_cols] = val[str_cols].fillna("")
             param_dict[key] = val.astype(str).to_json()
+        elif isinstance(val, pd.Series):
+            if val.dtype == object:
+                newval = val.fillna("")
+            param_dict[key] = newval.astype(str).to_json()
         elif isinstance(val, set):
             param_dict[key] = list(val)
 

@@ -50,6 +50,9 @@ def _check_table(table, name, index=None, index_col=0):
             newrows.append(row)
     table.index = newrows
 
+    # Replace empty strings with None
+    table = table.replace("", np.nan)
+
     if isinstance(table, pd.DataFrame):
         # dont run _check_table_helper if no index is passed
         return table if index is None else _check_table_helper(table, index, name)
