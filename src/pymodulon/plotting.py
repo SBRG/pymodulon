@@ -866,6 +866,7 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
     show_labels_pgw = kwargs.pop("show_labels", "auto")
     adjust_labels_pgw = kwargs.pop("adjust_labels", True)
     legend_kwargs_pgw = kwargs.pop("legend_kwargs", {})
+    label_font_kwargs_pgw = kwargs.pop("label_font_kwargs", {})
 
     kwargs["show_labels"] = kwargs["adjust_labels"] = False
 
@@ -920,23 +921,30 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
         for gene in component_genes:
 
             # Add labels
-            text_kwargs = {"fontstyle": "normal"}
+            text_kwargs = label_font_kwargs_pgw.copy()
+
+            if "fontstyle" not in text_kwargs:
+                text_kwargs.update({"fontstyle": "normal"})
+
+            # Italicize gene if there is a defined name (not locus tag)
             try:
                 gene_name = ica_data.gene_table.loc[gene, "gene_name"]
 
-                # Italicize gene if there is a specific name (not locus tag)
                 if gene_name != gene:
-                    text_kwargs = {"fontstyle": "italic"}
+                    text_kwargs.update({"fontstyle": "italic"})
 
             except KeyError:
                 gene_name = gene
+
+            # Set default fontsize
+            if "fontsize" not in text_kwargs:
+                text_kwargs.update({"fontsize": 12})
 
             texts.append(
                 ax.text(
                     x[gene],
                     ica_data.M.loc[gene, imodulon],
                     gene_name,
-                    fontsize=12,
                     **text_kwargs,
                 )
             )
