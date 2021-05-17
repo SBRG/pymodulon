@@ -743,7 +743,7 @@ def scatterplot(
 
     for name, group in data.groupby("group"):
         kwargs = scatter_kwargs.copy()
-        kwargs["c"] = colors[name]
+        kwargs["color"] = colors[name]
         # Override defaults for hidden points
         if name == "hidden":
             kwargs.update({"alpha": 0.7, "linewidth": 0, "label": None})
@@ -1042,6 +1042,7 @@ def compare_gene_weights(
     adjust_labels_cgw = kwargs.pop("adjust_labels", True)
     legend_cgw = kwargs.pop("legend", False)
     legend_kwargs_cgw = kwargs.pop("legend_kwargs", {})
+    label_font_kwargs_cgw = kwargs.pop("label_font_kwargs", {})
 
     kwargs["show_labels"] = kwargs["adjust_labels"] = kwargs["legend"] = False
     kwargs["legend_kwargs"] = None
@@ -1101,22 +1102,30 @@ def compare_gene_weights(
         for gene in component_genes:
             ax.scatter(M1.loc[gene, imodulon1], M2.loc[gene, imodulon2], color="r")
 
-            # Add labels (italicized if gene name is known)
-            text_kwargs = {"fontstyle": "normal"}
+            # Add labels
+            text_kwargs = label_font_kwargs_cgw.copy()
+
+            if "fontstyle" not in text_kwargs:
+                text_kwargs.update({"fontstyle": "normal"})
+
+            # Italicize gene if there is a defined name (not locus tag)
             try:
                 gene_name = gene_table.loc[gene, "gene_name"]
                 if gene_name != gene_table.loc[gene, "locus_tag"]:
-                    text_kwargs = {"fontstyle": "italic"}
+                    text_kwargs.update({"fontstyle": "italic"})
 
             except KeyError:
                 gene_name = gene
+
+            # Set default fontsize
+            if "fontsize" not in text_kwargs:
+                text_kwargs.update({"fontsize": 12})
 
             texts.append(
                 ax.text(
                     M1.loc[gene, imodulon1],
                     M2.loc[gene, imodulon2],
                     gene_name,
-                    fontsize=12,
                     **text_kwargs,
                 )
             )
