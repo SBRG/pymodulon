@@ -6,7 +6,7 @@ default_language_version:
 exclude: 'tests/data/.*|src/pymodulon/data/.*'
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v3.4.0
+      rev: v4.0.1
       hooks:
       - id: check-added-large-files
         args: ['--maxkb=100000']
