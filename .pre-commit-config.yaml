@@ -3,7 +3,7 @@
 minimum_pre_commit_version: '2.9.0'
 default_language_version:
     python: python3
-exclude: 'tests/data/.*|src/pymodulon/data/.*'
+exclude: 'tests/data/.*|src/pymodulon/data/.*|.bumpversion.cfg'
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.0.1
