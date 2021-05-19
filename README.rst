@@ -22,6 +22,9 @@
     :target: https://github.com/psf/black
     :alt: Black code style
 
+.. image:: https://anaconda.org/avsastry/pymodulon/badges/installer/conda.svg       :target: https://conda.anaconda.org/avsastry
+    :alt: Conda installation
+
 What is an iModulon?
 ~~~~~~~~~~~~~~~~~~~~
 To learn about iModulons, how they are computed, and what they can tell you, see our `about page <https://imodulondb.org/about.html>`_.
