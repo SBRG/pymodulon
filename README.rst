@@ -22,7 +22,8 @@
     :target: https://github.com/psf/black
     :alt: Black code style
 
-.. image:: https://anaconda.org/avsastry/pymodulon/badges/installer/conda.svg       :target: https://conda.anaconda.org/avsastry
+.. image:: https://anaconda.org/avsastry/pymodulon/badges/installer/conda.svg       
+    :target: https://conda.anaconda.org/avsastry
     :alt: Conda installation
 
 What is an iModulon?
@@ -32,17 +33,13 @@ To learn about iModulons, how they are computed, and what they can tell you, see
 Installation
 ~~~~~~~~~~~~
 
-You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows:
+You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows::
 
-```bash
-pip install pymodulon
-```
+        pip install pymodulon
 
-Alternatively, you can install using `Conda <http://anaconda.org/>`_:
+Alternatively, you can install using `Conda <http://anaconda.org/>`_::
 
-```bash
-conda install -c conda-forge pymodulon
-```
+        conda install -c avsastry -c conda-forge pymodulon
 
 We recommend installing through a conda environment::
 
