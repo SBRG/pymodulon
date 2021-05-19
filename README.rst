@@ -1,7 +1,26 @@
+======================================================================
 **PyModulon** - Python package for analyzing and visualizing iModulons
 ======================================================================
 
-|PyPI|
+.. image:: https://img.shields.io/pypi/v/pymodulon
+    :target: https://pypi.org/project/pymodulon
+    :alt: PyPI
+
+.. image:: https://img.shields.io/pypi/pyversions/pymodulon
+    :target: https://pypi.org/project/pymodulon
+    :alt: PyPI - Python Version
+
+.. image:: https://img.shields.io/github/license/sbrg/pymodulon
+    :target: https://opensource.org/licenses/MIT
+    :alt: MIT License
+
+.. image:: https://img.shields.io/readthedocs/pymodulon
+    :target: https://pymodulon.readthedocs.io/en/latest/
+    :alt: Documentation Status
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+    :target: https://github.com/psf/black
+    :alt: Black code style
 
 What is an iModulon?
 ~~~~~~~~~~~~~~~~~~~~
@@ -69,6 +88,3 @@ If you use organism-specific datasets in your work, please cite these datasets:
 * *Escherichia coli*: `Sastry et al. Nature Communications. 2019. <https://www.nature.com/articles/s41467-019-13483-w>`_
 * *Bacillus subtilis*: `Rychel et al. Nature Communications. 2020.  <https://www.nature.com/articles/s41467-020-20153-9>`_
 * *Staphylococcus aureus*: `Poudel et al. PNAS. 2020. <https://www.pnas.org/content/117/29/17228.abstract>`_
-
-.. |PyPI| image:: https://badge.fury.io/py/pymodulon.svg
-    :target: https://pypi.python.org/pypi/pymodulon
