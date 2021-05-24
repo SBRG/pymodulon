@@ -200,6 +200,9 @@ def test_cluster_activities(ecoli_obj):
 
 def test_metadata_boxplot(ecoli_obj, tmp_path):
     metadata_boxplot(ecoli_obj, "EvgA")
+    metadata_boxplot(
+        ecoli_obj, "EvgA", samples=ecoli_obj.sample_names[:20], show_points="swarm"
+    )
 
     fig, ax = plt.subplots()
     fname = os.path.join(tmp_path, "metadata_boxplot.svg")
@@ -210,5 +213,6 @@ def test_metadata_boxplot(ecoli_obj, tmp_path):
         strip_conc=False,
         ax=ax,
         savefig=fname,
+        show_points=False,
     )
     assert os.path.exists(fname)

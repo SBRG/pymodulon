@@ -1913,13 +1913,18 @@ def cluster_activities(
 def metadata_boxplot(
     ica_data,
     imodulon,
+    show_points=True,
     n_boxes=3,
+    samples=None,
     strip_conc=True,
     ignore_cols=None,
     use_cols=None,
     return_results=False,
     ax=None,
     savefig=False,
+    box_kwargs=None,
+    strip_kwargs=None,
+    swarm_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -1930,10 +1935,16 @@ def metadata_boxplot(
     ----------
     ica_data: ~pymodulon.core.IcaData
         :class:`~pymodulon.core.IcaData` object
-    imodulon : int or str
+    imodulon: int or str
         `iModulon` name
+    show_points: bool or str (default: True)
+        Overlay individual points on top of the boxplot. By default, this uses
+        :func:`seaborn.stripplot`. `show_points='swarm'` will use
+        :func`seaborn.swarmplot`.
     n_boxes: int
         Number of boxes to create
+    samples: list, optional
+        Subset of samples to analyze
     strip_conc: bool
         Remove concentrations from metadata (e.g. "glucose(2g/L)" would be
         interpreted as just "glucose")
@@ -1948,6 +1959,12 @@ def metadata_boxplot(
         Axes object to plot on, otherwise use current Axes
     savefig: str or bool, optional
         Save figure to provided path
+    box_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.boxplot`
+    strip_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.stripplot`
+    swarm_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.swarmplot`
     savefig_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
@@ -1958,10 +1975,35 @@ def metadata_boxplot(
     df_classes: ~pd.DataFrame
         Metadata classifications of the samples
     """
-    activities = ica_data.A.loc[imodulon]
+
+    if not ax:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
+    if show_points is True:
+        show_points = "strip"
+
+    if box_kwargs is None:
+        box_kwargs = {}
+
+    if strip_kwargs is None:
+        strip_kwargs = {}
+
+    if swarm_kwargs is None:
+        swarm_kwargs = {}
+
+    if samples is None:
+        samples = ica_data.sample_names
+
+    activities = ica_data.A.loc[imodulon, samples]
 
     encoding, features = _encode_metadata(
-        ica_data, ignore_cols=ignore_cols, use_cols=use_cols, strip_conc=strip_conc
+        ica_data,
+        samples=samples,
+        ignore_cols=ignore_cols,
+        use_cols=use_cols,
+        strip_conc=strip_conc,
     )
 
     clf = _train_classifier(activities, features, max_leaf_nodes=n_boxes)
@@ -1970,12 +2012,31 @@ def metadata_boxplot(
 
     df_classes = df_classes.sort_values(imodulon, ascending=False)
 
-    if not ax:
-        fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
+    # If using either a stripplot or swarmplot, hide fliers
+    if show_points in ["strip", "swarm"]:
+        box_kwargs.update({"fliersize": 0})
 
-    sns.boxplot(data=df_classes, x=imodulon, y="category")
+    sns.boxplot(data=df_classes, x=imodulon, y="category", **box_kwargs)
+
+    if show_points == "strip":
+        color_mdbp = strip_kwargs.pop("color", "k")
+        jitter_mdbp = strip_kwargs.pop("color", 0.3)
+
+        sns.stripplot(
+            data=df_classes,
+            x=imodulon,
+            y="category",
+            color=color_mdbp,
+            jitter=jitter_mdbp,
+            **strip_kwargs,
+        )
+
+    elif show_points == "swarm":
+        color_mdbp = swarm_kwargs.pop("color", "k")
+        sns.swarmplot(
+            data=df_classes, x=imodulon, y="category", color=color_mdbp, **swarm_kwargs
+        )
+
     ax.set_ylabel("")
 
     # Save Figure
@@ -1988,9 +2049,11 @@ def metadata_boxplot(
         return ax
 
 
-def _encode_metadata(ica_data, use_cols=None, ignore_cols=None, strip_conc=True):
+def _encode_metadata(
+    ica_data, samples, use_cols=None, ignore_cols=None, strip_conc=True
+):
     # Convert values to strings
-    metadata = ica_data.sample_table.copy()
+    metadata = ica_data.sample_table.loc[samples].copy()
     metadata = metadata.astype(str).fillna("")
 
     # Select columns
