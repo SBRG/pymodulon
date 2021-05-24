@@ -1493,6 +1493,7 @@ def compare_imodulons_vs_regulons(
     ylabel=None,
     vline=0.6,
     hline=0.6,
+    alpha=0.8,
     ax=None,
     savefig=False,
     scatter_kwargs=None,
@@ -1523,9 +1524,11 @@ def compare_imodulons_vs_regulons(
     ylabel: str, optional
         Custom y-axis label (default: "# shared genes/iModulon size")
     vline: float, optional (default: 0.6)
-        Draw a dashed vertical line
+        Draw a dashed vertical line. If None, do not draw line.
     hline: float, optional (default: 0.6)
-        Draw a dashed horizontal line
+        Draw a dashed horizontal line. If None, do not draw line.
+    alpha: float (default: 0.8)
+        Transparancy for data points
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
     savefig: str or bool, optional
@@ -1613,6 +1616,7 @@ def compare_imodulons_vs_regulons(
             size_ivr = scatter_kwargs.pop("s", group[size_column])
 
         edgecolor_ivr = scatter_kwargs.pop("edgecolor", "k")
+        alpha_ivr = scatter_kwargs.pop("alpha", alpha)
 
         ax.scatter(
             group.recall,
@@ -1620,6 +1624,7 @@ def compare_imodulons_vs_regulons(
             s=size_ivr * scale,
             edgecolor=edgecolor_ivr,
             label=cat,
+            alpha=alpha_ivr,
             **scatter_kwargs,
         )
 
