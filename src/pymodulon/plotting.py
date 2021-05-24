@@ -199,7 +199,7 @@ def barplot(
             ax.legend(**kwargs)
 
     else:
-        logging.warning('Missing "project" and "condition" columns in sample ' "table.")
+        logging.warning("Missing `project` and `condition` columns in `sample_table.`")
         ax.bar(range(len(values)), values, width=1, align="edge")
         nbars = len(values)
 
@@ -504,10 +504,10 @@ def plot_regulon_histogram(
         df_top_enrich = df_enriched.sort_values(
             ["imodulon", "qvalue", "n_regs"]
         ).drop_duplicates("imodulon")
-        reg = df_top_enrich.set_index("imodulon").loc[imodulon, "regulator"]
-        if not isinstance(reg, str):
-            if pd.isna(reg):
-                reg = None
+        try:
+            reg = df_top_enrich.set_index("imodulon").loc[imodulon, "regulator"]
+        except KeyError:
+            reg = None
 
     # Use regulator value to find regulon genes
     if reg is not None:
@@ -843,7 +843,7 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
         Values on custom x-axis
     xname: str, optional
         Name of x-axis if using custom x-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
     Returns
     -------
@@ -1028,7 +1028,7 @@ def compare_gene_weights(
     use_org1_names: bool
         If true, use gene names from first organism. If false, use gene names
         from second organism (default: True)
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1207,7 +1207,7 @@ def compare_expression(ica_data, gene1, gene2, **kwargs):
         Gene to plot on the x-axis
     gene2: str
         Gene to plot on the y-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1257,7 +1257,7 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs):
         Name of the iModulon to plot on the x-axis
     imodulon2: int or str
         Name of the iModulon to plot on the y-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1315,7 +1315,7 @@ def plot_dima(
         Automatically adjust labels (default: True)
     table: bool
         Return differential iModulon activity table (default: False)
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -2171,7 +2171,7 @@ def _get_fit(x, y):
 
 
 def _broken_line(x, A, B, C):
-    y = np.zeros(len(x), dtype=np.float)
+    y = np.zeros(len(x), dtype=float)
     y += (A * x + B) * (x >= C)
     y += (A * C + B) * (x < C)
     return y
@@ -2240,14 +2240,14 @@ def _mod_freedman_diaconis(ica_data, imodulon):
 
 def _save_figures(fig, filename, savefig_kwargs):
     """Helper function for saving figures as files"""
-    if not isinstance(filename, bool):
-        savefig_kwargs["fname"] = filename
 
-    # Check for savefig_kwargs
-    if savefig_kwargs:
-        savefig_kwargs["fname"] = savefig_kwargs.get("fname", "./plot.svg")
-    else:
-        savefig_kwargs = {"fname": "./plot.svg"}
+    if savefig_kwargs is None:
+        savefig_kwargs = {}
+
+    if isinstance(filename, str):
+        savefig_kwargs["fname"] = filename
+    elif "fname" not in savefig_kwargs.keys():
+        savefig_kwargs["fname"] = "./plot.svg"
 
     # Plot current figure instance using savefig_kwargs
     fig.savefig(**savefig_kwargs)
