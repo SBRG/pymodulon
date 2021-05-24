@@ -37,8 +37,8 @@ def barplot(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -59,8 +59,13 @@ def barplot(
         Project(s) to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
+
 
     Returns
     -------
@@ -213,7 +218,7 @@ def barplot(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -224,8 +229,8 @@ def plot_expression(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -243,8 +248,12 @@ def plot_expression(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -262,14 +271,14 @@ def plot_expression(
         label = "${}$ Expression".format(gene)
 
     return barplot(
-        values,
-        ica_data.sample_table,
-        label,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=ica_data.sample_table,
+        ylabel=label,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -280,8 +289,8 @@ def plot_activities(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -299,8 +308,12 @@ def plot_activities(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -317,14 +330,14 @@ def plot_activities(
     label = "{} iModulon\nActivity".format(imodulon)
 
     return barplot(
-        values,
-        ica_data.sample_table,
-        label,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=ica_data.sample_table,
+        ylabel=label,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -335,8 +348,8 @@ def plot_metadata(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -354,8 +367,12 @@ def plot_metadata(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -377,14 +394,14 @@ def plot_metadata(
         raise ValueError("Column not in sample table: {}".format(column))
 
     return barplot(
-        values,
-        table,
-        column,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=table,
+        ylabel=column,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -399,9 +416,9 @@ def plot_regulon_histogram(
     hist_label=("Not regulated", "Regulon Genes"),
     color=("#aaaaaa", "salmon"),
     alpha=0.7,
+    savefig=False,
     ax_font_kwargs=None,
     legend_kwargs=None,
-    savefig=False,
     savefig_kwargs=None,
 ):
     """
@@ -435,10 +452,14 @@ def plot_regulon_histogram(
     alpha: float, optional
         Sets the opacity of the histogram (0 = transparent, 1 = opaque).
         Passed on to :func:`matplotlib.pyplot.hist`
+    savefig: str or bool, optional
+        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axes labels
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -550,7 +571,7 @@ def plot_regulon_histogram(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -575,11 +596,11 @@ def scatterplot(
     ylabel="",
     ax=None,
     legend=True,
+    savefig=False,
     ax_font_kwargs=None,
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
-    savefig=False,
     savefig_kwargs=None,
 ):
     """
@@ -618,6 +639,8 @@ def scatterplot(
         Axes object to plot on, otherwise use current Axes
     legend: bool
         Show legend
+    savefig: str or bool, optional
+        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axis labels
     scatter_kwargs: dict, optional
@@ -627,6 +650,8 @@ def scatterplot(
         :func:`matplotlib.pyplot.text`
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -797,7 +822,7 @@ def scatterplot(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -1393,7 +1418,9 @@ def plot_dima(
 ###############
 
 
-def plot_explained_variance(ica_data, pc=True, ax=None):
+def plot_explained_variance(
+    ica_data, pc=True, ax=None, savefig=False, savefig_kwargs=None
+):
     """
     Plots the cumulative explained variance for independent components and,
     optionally, principal components
@@ -1406,6 +1433,10 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
         If True, plot cumulative explained variance of independent components
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1421,6 +1452,8 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
 
     if not ax:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
 
     ax.plot(range(len(ic_var)), ic_var, label="Independent Components")
 
@@ -1442,9 +1475,14 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
     ax.set_ylim([0, 1])
     ax.set_xlim([0, len(ic_var)])
 
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
     return ax
 
 
+# TODO: Figure out savefig for this plot
 def cluster_activities(
     ica_data,
     correlation_method="spearman",
@@ -1463,7 +1501,7 @@ def cluster_activities(
     dimca_label=True,
     dimca_adjust=True,
     dimca_table=False,
-    **dimca_kwargs,
+    **dima_kwargs,
 ):
     """
     Cluster all iModulon activity profiles using hierarchical clustering and display
@@ -1511,7 +1549,7 @@ def cluster_activities(
         Auto-adjust DiMCA cluster labels (default: True)
     dimca_table: bool
         Return DiMCA table (default: False)
-    **dimca_kwargs: dict, optional
+    **dima_kwargs: dict, optional
         Additional keyword arguments passed to :func:`pymodulon.plotting.dima`
 
     Returns
@@ -1844,7 +1882,7 @@ def cluster_activities(
         cluster_A_df = cluster_A_df.append(ica_data.A.loc[list(singleton_ims)])
 
         # add to kwargs
-        dimca_kwargs["alternate_A"] = cluster_A_df
+        dima_kwargs["alternate_A"] = cluster_A_df
 
         # now we can pretty much proceed as normal with DIMCA; just have a
         # different activity matrix, but the procedure is the same from here
@@ -1857,7 +1895,7 @@ def cluster_activities(
             label=dimca_label,
             adjust=dimca_adjust,
             table=dimca_table,
-            **dimca_kwargs,
+            **dima_kwargs,
         )
         if dimca_table:
             returns += dimca_return
@@ -1880,6 +1918,9 @@ def metadata_boxplot(
     ignore_cols=None,
     use_cols=None,
     return_results=False,
+    ax=None,
+    savefig=False,
+    savefig_kwargs=None,
 ):
     """
     Uses a decision tree regressor to automatically cluster iModulon activities
@@ -1903,6 +1944,12 @@ def metadata_boxplot(
         List of columns to use. This supercedes ignore_cols.
     return_results: bool
         Return a dataframe describing the classifications
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1923,9 +1970,18 @@ def metadata_boxplot(
 
     df_classes = df_classes.sort_values(imodulon, ascending=False)
 
-    fig, ax = plt.subplots()
+    if not ax:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
     sns.boxplot(data=df_classes, x=imodulon, y="category")
     ax.set_ylabel("")
+
+    # Save Figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
     if return_results:
         return ax, df_classes
     else:
@@ -2182,8 +2238,10 @@ def _mod_freedman_diaconis(ica_data, imodulon):
     return np.arange(xmin, xmax + width, width)
 
 
-def _save_figures(fig, savefig_kwargs):
-    """Check for savefig_kwargs, then save current figure instance"""
+def _save_figures(fig, filename, savefig_kwargs):
+    """Helper function for saving figures as files"""
+    if not isinstance(filename, bool):
+        savefig_kwargs["fname"] = filename
 
     # Check for savefig_kwargs
     if savefig_kwargs:
