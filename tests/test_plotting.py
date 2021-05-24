@@ -12,6 +12,7 @@ from pymodulon.plotting import (
     compare_activities,
     compare_expression,
     compare_gene_weights,
+    compare_imodulons_vs_regulons,
     metadata_boxplot,
     plot_activities,
     plot_dima,
@@ -214,5 +215,30 @@ def test_metadata_boxplot(ecoli_obj, tmp_path):
         ax=ax,
         savefig=fname,
         show_points=False,
+    )
+    assert os.path.exists(fname)
+
+
+def test_compare_imodulons_vs_regulons(ecoli_obj, tmp_path):
+    compare_imodulons_vs_regulons(ecoli_obj)
+
+    fname = os.path.join(tmp_path, "compare_imodulons_vs_regulons.pdf")
+    fig, ax = plt.subplots()
+    compare_imodulons_vs_regulons(
+        ecoli_obj,
+        imodulons=ecoli_obj.imodulon_names[:10],
+        cat_column="Category",
+        size_column="n_genes",
+        scale=2,
+        reg_only=False,
+        xlabel="Recall",
+        ylabel="Precision",
+        vline=None,
+        hline=None,
+        ax=ax,
+        savefig=fname,
+        scatter_kwargs={"s": 10, "edgecolor": "white"},
+        ax_font_kwargs={"fontsize": 10},
+        legend_kwargs={"bbox_to_anchor": (1, 0)},
     )
     assert os.path.exists(fname)

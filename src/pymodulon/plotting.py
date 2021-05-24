@@ -1417,7 +1417,7 @@ def plot_dima(
 # Other plots #
 ###############
 
-
+# TODO: Add kind=bar to plot top explained variance
 def plot_explained_variance(
     ica_data, pc=True, ax=None, savefig=False, savefig_kwargs=None
 ):
@@ -1444,16 +1444,16 @@ def plot_explained_variance(
         :class:`~matplotlib.axes.Axes` containing the line plot
     """
 
+    if not ax:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
     # Get IC explained variance
     ic_var = []
     for imodulon in ica_data.imodulon_names:
         ic_var.append(explained_variance(ica_data, imodulons=imodulon))
     ic_var = np.insert(np.cumsum(sorted(ic_var, reverse=True)), 0, 0)
-
-    if not ax:
-        fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
 
     ax.plot(range(len(ic_var)), ic_var, label="Independent Components")
 
@@ -1481,6 +1481,190 @@ def plot_explained_variance(
 
     return ax
 
+
+def compare_imodulons_vs_regulons(
+    ica_data,
+    imodulons=None,
+    cat_column=None,
+    size_column=None,
+    scale=1,
+    reg_only=True,
+    xlabel=None,
+    ylabel=None,
+    vline=0.6,
+    hline=0.6,
+    ax=None,
+    savefig=False,
+    scatter_kwargs=None,
+    ax_font_kwargs=None,
+    legend_kwargs=None,
+    savefig_kwargs=None,
+):
+    """
+    Compare the overlaps between iModulons and their linked regulons
+
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` object
+    imodulons: list, optional
+        List of iModulons to plot
+    cat_column: str, optional
+        Column in the `imodulon_table` that stores the category of each iModulon
+    size_column: str, optional
+        Column in the `imodulon_table` that stores the size of each iModulon
+    scale: float, optional (default: 1)
+        Value used to scale the size of each point
+    reg_only: bool (default: True)
+        Only plot iModulons with an entry in the `regulator` column of the
+        `imodulon_table`
+    xlabel: str, optional
+        Custom x-axis label (default: "# shared genes/Regulon size")
+    ylabel: str, optional
+        Custom y-axis label (default: "# shared genes/iModulon size")
+    vline: float, optional (default: 0.6)
+        Draw a dashed vertical line
+    hline: float, optional (default: 0.6)
+        Draw a dashed horizontal line
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    scatter_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.scatter`
+    ax_font_kwargs: dict, optional
+        Additional keyword arguments for axes labels
+    legend_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
+
+    Returns
+    -------
+    ax: ~matplotlib.axes.Axes
+        :class:`~matplotlib.axes.Axes` containing the line plot
+    """
+
+    # Set up axis
+    if not ax:
+        fig, ax = plt.subplots(figsize=(5, 5))
+    else:
+        fig = ax.figure
+
+    # Handle kwargs
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
+    if ax_font_kwargs is None:
+        ax_font_kwargs = {}
+    if legend_kwargs is None:
+        legend_kwargs = {}
+
+    # Set axes labels
+    if xlabel is None:
+        xlabel = "$\\frac{\\mathrm{\\#\\;shared\\;genes}}{\\mathrm{Regulon\\;size}}$"
+        xlabelscale = 2
+    else:
+        xlabelscale = 1
+
+    if ylabel is None:
+        ylabel = "$\\frac{\\mathrm{\\#\\;shared\\;genes}}{\\mathrm{iModulon\\;size}}$"
+        ylabelscale = 2
+    else:
+        ylabelscale = 1
+
+    # Select iModulons
+    if imodulons is None:
+        imodulon_table = ica_data.imodulon_table
+        if reg_only:
+            imodulon_table = imodulon_table[imodulon_table.regulator.notnull()]
+    else:
+        imodulon_table = ica_data.imodulon_table.loc[imodulons]
+
+    # Select category column
+    reg_table = imodulon_table.copy()
+    if cat_column is None:
+        reg_table["_category"] = "iModulons"
+        cat_column = "_category"
+
+    # Make sure all necessary columns exist
+    if reg_table.recall.isnull().any():
+        logging.warning(
+            "Some iModulons have missing `recall` entries in the "
+            "`imodulon_table` "
+            "and will not be shown"
+        )
+    if reg_table.precision.isnull().any():
+        logging.warning(
+            "Some iModulons have missing `precision` entries in the "
+            "`imodulon_table` and will not be shown"
+        )
+    if size_column is not None and reg_table[size_column].isnull().any():
+        logging.warning(
+            "Some iModulons have missing {} entries in the "
+            "`imodulon_table`".format(size_column)
+        )
+
+    for cat, group in reg_table.groupby(cat_column):
+
+        # Set point sizes
+        if size_column is None:
+            size_ivr = scatter_kwargs.pop("s", plt.rcParams["lines.markersize"])
+        else:
+            size_ivr = scatter_kwargs.pop("s", group[size_column])
+
+        edgecolor_ivr = scatter_kwargs.pop("edgecolor", "k")
+
+        ax.scatter(
+            group.recall,
+            group.precision,
+            s=size_ivr * scale,
+            edgecolor=edgecolor_ivr,
+            label=cat,
+            **scatter_kwargs,
+        )
+
+    # Set plot boundaries
+    xmin, xmax = ax.get_xlim()
+    xmin = min(xmin, 0)
+    xmax = max(xmax, 1)
+    ax.set_xlim((xmin, xmax))
+
+    ymin, ymax = ax.get_ylim()
+    ymin = min(ymin, 0)
+    ymax = max(ymax, 1)
+    ax.set_ylim((ymin, ymax))
+
+    # Add dashed lines
+    if hline:
+        ax.hlines(hline, xmin, xmax, linestyles="dashed", colors="gray", zorder=0)
+    if vline:
+        ax.vlines(vline, xmin, xmax, linestyles="dashed", colors="gray", zorder=0)
+
+    # Set axis labels
+    xlabel_size = ax_font_kwargs.pop(
+        "fontsize", plt.rcParams["font.size"] * xlabelscale
+    )
+    ax.set_xlabel(xlabel, fontsize=xlabel_size, **ax_font_kwargs)
+
+    ylabel_size = ax_font_kwargs.pop(
+        "fontsize", plt.rcParams["font.size"] * ylabelscale
+    )
+    ax.set_ylabel(ylabel, fontsize=ylabel_size, **ax_font_kwargs)
+
+    # Set legend
+    bbox_to_anchor_ivr = legend_kwargs.pop("bbox_to_anchor", (1, 1))
+    ax.legend(bbox_to_anchor=bbox_to_anchor_ivr, **legend_kwargs)
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
+    return ax
+
+
+######################
+# Cluster Activities #
+######################
 
 # TODO: Figure out savefig for this plot
 def cluster_activities(
