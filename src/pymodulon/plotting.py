@@ -1641,14 +1641,11 @@ def compare_imodulons_vs_regulons(
         ax.vlines(vline, xmin, xmax, linestyles="dashed", colors="gray", zorder=0)
 
     # Set axis labels
-    xlabel_size = ax_font_kwargs.pop(
-        "fontsize", plt.rcParams["font.size"] * xlabelscale
-    )
+    label_size = ax_font_kwargs.pop("fontsize", plt.rcParams["font.size"])
+    xlabel_size = label_size * xlabelscale
     ax.set_xlabel(xlabel, fontsize=xlabel_size, **ax_font_kwargs)
 
-    ylabel_size = ax_font_kwargs.pop(
-        "fontsize", plt.rcParams["font.size"] * ylabelscale
-    )
+    ylabel_size = label_size * ylabelscale
     ax.set_ylabel(ylabel, fontsize=ylabel_size, **ax_font_kwargs)
 
     # Set legend
