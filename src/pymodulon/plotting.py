@@ -1561,27 +1561,26 @@ def compare_imodulons_vs_regulons(
 
     # Set axes labels
     if xlabel is None:
-        xlabel = "$\\frac{\\mathrm{\\#\\;shared\\;genes}}{\\mathrm{Regulon\\;size}}$"
+        xlabel = "$\\frac{\\mathrm{\\#\\;Shared\\;Genes}}{\\mathrm{Regulon\\;Size}}$"
         xlabelscale = 2
     else:
         xlabelscale = 1
 
     if ylabel is None:
-        ylabel = "$\\frac{\\mathrm{\\#\\;shared\\;genes}}{\\mathrm{iModulon\\;size}}$"
+        ylabel = "$\\frac{\\mathrm{\\#\\;Shared\\;Genes}}{\\mathrm{iModulon\\;Size}}$"
         ylabelscale = 2
     else:
         ylabelscale = 1
 
     # Select iModulons
     if imodulons is None:
-        imodulon_table = ica_data.imodulon_table
+        reg_table = ica_data.imodulon_table.copy()
         if reg_only:
-            imodulon_table = imodulon_table[imodulon_table.regulator.notnull()]
+            reg_table = imodulon_table[imodulon_table.regulator.notnull()]
     else:
-        imodulon_table = ica_data.imodulon_table.loc[imodulons]
+        reg_table = ica_data.imodulon_table.loc[imodulons]
 
     # Select category column
-    reg_table = imodulon_table.copy()
     if cat_column is None:
         reg_table["_category"] = "iModulons"
         cat_column = "_category"
