@@ -5,6 +5,7 @@ Functions for writing a directory for iModulonDB webpages
 import os
 import re
 import sys
+import logging
 from itertools import chain
 from typing import List, Optional, Set, Union
 from zipfile import ZipFile
@@ -23,70 +24,205 @@ from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 ##################
 
 
-def imodulondb_compatibility(model, inplace=False):
+def imodulondb_compatibility(model, inplace = False, tfcomplex_to_gene = {}):
     """
-    Checks if data has the correct data and labeling for output to iModulonDB.
-    If it fails, it will print what went wrong, and there is an option (write =
-    True) to correct issues.
-
-    'inplace = True' will assume default values for everything that is needed
-    EXCEPT for the project and condition columns in the sample_table,
-    which must be filled in as part of metadata curation. If these columns
-    are missing, alternatives that would work with the code are described in
-    print statements, but these are not recommended because metadata curation
-    is an important prerequisite to iModulon analysis.
-
+    Checks for all issues and missing information prior to exporting to iModulonDB.
+    If inplace = True, modifies the model (not recommended for main model variables).
+    
     Parameters
     ----------
-    model : :class:`~pymodulon.core.IcaData`
+    model: :class:`~pymodulon.core.IcaData`
         IcaData object to check
-    inplace : bool, optional
-        Modify the data in-place (default = False)
-
+    inplace: bool, optional
+        If true, modifies the model to prepare for export.
+        Not recommended for use with your main model variable. 
+    tfcomplex_to_gene: dict, optional
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
+    
     Returns
     -------
-    bool
-        Whether the iModulon object is compatible with iModulonDB
+    table_issues: pd.DataFrame
+        Each row corresponds to an issue with one of the main class elements.
+        Columns:
+            - Table: which table or other variable the issue is in
+            - Missing Column: the column of the Table with the issue 
+                (must match exactly)
+            - Solution: Unless "CRITICAL" is in this cell, the site behavior
+                if the issue remained is described here.
+    tf_issues: pd.DataFrame
+        Each row corresponds to a regulator that is used in the imodulon_table.
+        Columns:
+            - in_trn: whether the regulator is in the model.trn. Regulators not
+                in the TRN will be ignored in the site's histograms and gene tables.
+            - has_link: whether the regulator has a link in tf_links. If not, no 
+                link to external regulator databases will be shown.
+            - has_gene: whether the regulator can be matched to a gene in the model.
+                If this is false, then there will be no regulator scatter plot on the 
+                site. You can link TF complexes to one of their genes using the 
+                tfcomplex_to_gene input.
+    missing_g_links: pd.Series
+        The genes on this list don't have links in the gene_links. Their gene pages 
+        for these genes will not display links.
+    missing_DOIs: pd.Series
+        The samples listed here don't have DOIs in the sample_table. Clicking on their
+        associated bars in the activity plots will not link to relevant papers.
     """
 
-    major_errors = []
+    table_issues = pd.DataFrame(columns = ['Table', 'Missing Column', 'Solution'])
 
-    # imodulon table index
+    # Check for X
+    if model.X is None:
+        table_issues = table_issues.append({'Table':'X',
+                            'Missing Column': 'all',
+                            'Solution': "CRITICAL. Add the expression matrix"
+                                        " so that gene pages can be generated."},
+                             ignore_index = True)
+        logging.warning("Critical issue: No X matrix")
+
+    # Check for updated splash table
+    default_splash_table = {
+                "organism_name": "New Organism",
+                "dataset_name": "New Dataset",
+                "organism_folder": "new_org",
+                "dataset_folder": "new_dataset"}
+    for k, v in default_splash_table.items():
+        if model.splash_table[k] == v:
+            table_issues = table_issues.append({'Table':'Splash',
+                                'Missing Column':k,
+                                'Solution':'The default, \"%s\", will be used.'%(v)},
+                                ignore_index = True)
+
+    # check for updated dataset table
+    default_dataset_table = {"Title": "New Dataset",
+                        "Organism": "New Organism",
+                        "Strain": "Unknown Strain"}
+    for k, v in default_dataset_table.items():
+        if model.dataset_table[k] == v:
+            table_issues = table_issues.append({'Table':'Dataset',
+                                'Missing Column':k,
+                                'Solution':'The default, \"%s\", will be used.'%(v)},
+                                ignore_index = True)
+    if not('Publication' in model.dataset_table.keys()):
+        table_issues = table_issues.append({'Table':'Dataset',
+            'Missing Column':'Publication',
+            'Solution':'No publication link will be shown on the dataset page.'},
+            ignore_index = True)
+
+    # check the link database
+    if model.link_database == "External Database":
+        table_issues = table_issues.append({'Table':'Link_database',
+                            'Missing Column':'N/A',
+                            'Solution':"The default, \"External Database\","
+                                " will be used if there are any gene links."},
+                            ignore_index = True)
+
+    # Check the gene table
+    gene_table_cols = {
+            "gene_name":"Locus tags (gene_table.index) will be used.",
+            "gene_product":"Locus tags (gene_table.index) will be used.",
+            "COG":"COG info will not display & the gene scatter plot will"
+                    " not have color.",
+            "start":"The x axis of the scatter plot will be a numerical"
+                    " value instead of a genome location.",
+            "operon":"Operon info will not display.",
+            "regulator":"Regulator info will not display. If you have a"
+                    " TRN, add it to the model to auto-generate this column."
+    }
+    for col in gene_table_cols.keys():
+        if not (col in model.gene_table.columns):
+
+            table_issues = table_issues.append({'Table':'Gene',
+                            'Missing Column': col, 
+                            'Solution': gene_table_cols[col]},
+                             ignore_index = True)
+
+            if (col in ["gene_name", "gene_product"]) & inplace:
+                    model.gene_table[col] = model.gene_table.index
+
+    # check for missing gene links
+    missing_g_links = []
+    for g in model.M.index:
+        if (not(isinstance(model.gene_links[g], str)) or 
+            model.gene_links[g].strip() == ''):
+            missing_g_links += [g]
+    missing_g_links = pd.Series(missing_g_links, name = 'missing_gene_links')
+
+    # check for errors in the Biological Replicates column of the sample table
+    if inplace & ('Biological Replicates' in model.sample_table.columns):
+        try:
+            imdb_activity_bar_df(model, model.imodulon_table.index[0])
+        except ValueError:
+            logging.warning("Error detected in sample_table['Biological"
+                            " Replicates']. Deleting that column. It will be auto-regenerated."
+                            " You can prevent this from happening in the future"
+                            " using generate_biological_replicates_column(model)")
+            model.sample_table = model.sample_table.drop('Biological Replicates', 1)
+
+    # check the sample table
+    sample_table_cols = {
+        "project":"This is a CRITICAL column defining the largest"
+            " grouping of samples. Vertical bars in the activity plot"
+            " will separate projects.",
+        "condition":"This is an CRITICAL column defining the smallest"
+            " grouping of samples. Biological replicates must have matching"
+            " projects and conditions, and they will appear as single bars"
+            " with averaged activities.",
+        "sample":"The sample_table.index will be used. Each entry must be"
+            " unique. Note that the preferred syntax is \"project__condition__#.\"",
+        "Biological Replicates":"This column will be generated for you.",
+        "DOI":"Clicking on activity plot bars will not link to relevant"
+            " papers for the samples."
+    }
+    for col in sample_table_cols.keys():
+        if not(col in model.sample_table.columns):
+
+            if (col == "sample") & (model.sample_table.index.name == "sample"):
+                continue
+            if col in ["project", "condition"]:
+                logging.warning("Critical issue: No %s column in sample_table."%(col))
+
+            table_issues = table_issues.append({'Table':'Sample',
+                            'Missing Column': col, 
+                            'Solution': sample_table_cols[col]},
+                             ignore_index = True)
+
+            if (col == 'Biological Replicates') & inplace:
+                generate_biological_replicates_column(model)
+
+    # check for missing DOIs
+    if "DOI" in model.sample_table.columns:
+        missing_DOIs = model.sample_table.index[model.sample_table.DOI.isna()].copy()
+        missing_DOIs.name = "missing_DOIs"
+    else:
+        missing_DOIs = model.sample_table.index.copy()
+        missing_DOIs.name = "missing_DOIs"
+
+    # check the iModulon table columns
     try:
         model.imodulon_table.index.astype(int)
         im_idx = "int"
     except TypeError:
         im_idx = "str"
 
-    # imodulon table columns
-    im_table_cols = [
-        "name",
-        "TF",
-        "Regulator",
-        "Function",
-        "Category",
-        "n_genes",
-        "precision",
-        "recall",
-    ]
-    for col in im_table_cols:
-        if not (col in model.imodulon_table.columns):
-            print("iModulon Table is missing a %s column" % col)
-            if col == "TF":
-                print(
-                    (
-                        "Note that TF is used for coding purposes, "
-                        "so it uses '+' and '/' and must match the trn."
-                    )
-                )
-            if col == "Regulator":
-                print(
-                    "Note that Regulator is displayed in the dataset page "
-                    "so it can have spelled out 'and' and 'or' operators."
-                    "If you have a TF column, a Regulator column will be"
-                    "generated for you (but not vice versa)."
-                )
-
+    iM_table_cols = {
+        "name":"imodulon_table.index will be used.",
+        "regulator":"The regulator details will be left blank.",
+        "Function":"The function will be blank in the dataset table and"
+                " \"Uncharacterized\" in the iModulon dashboard",
+        "Category":"The categories will be filled in as \"Uncharacterized\".",
+        "n_genes":"This column will be computed for you.",
+        "precision":"This column will be left blank.",
+        "recall":"This column will be left blank.",
+        "exp_var":"This column will be left blank."
+    }
+    for col in iM_table_cols.keys():
+        if not(col in model.imodulon_table.columns):
+            table_issues = table_issues.append({'Table':'iModulon',
+                            'Missing Column': col, 
+                            'Solution': iM_table_cols[col]},
+                             ignore_index = True)
             if inplace:
                 if col == "name":
                     if im_idx == "int":
@@ -99,140 +235,47 @@ def imodulondb_compatibility(model, inplace=False):
                     model.imodulon_table["n_genes"] = model.M_binarized.sum().astype(
                         int
                     )
-                elif (col == "Regulator") and ("TF" in model.imodulon_table.columns):
-                    for idx, tf in zip(
-                        model.imodulon_table.index, model.imodulon_table.TF
-                    ):
-                        try:
-                            model.imodulon_table.loc[idx, "Regulator"] = (
-                                model.imodulon_table.TF[idx]
-                                .replace("/", " or ")
-                                .replace("+", " and ")
-                            )
-                        except AttributeError:
-                            model.imodulon_table.loc[
-                                idx, "Regulator"
-                            ] = model.imodulon_table.TF[idx]
                 else:
                     model.imodulon_table[col] = np.nan
-    if inplace and (im_idx == "str"):
-        model.rename_imodulons(
-            dict(zip(model.imodulon_names, range(len(model.imodulon_names))))
-        )
-
-    print()
-    # gene table columns
-    gene_table_cols = [
-        "gene_name",
-        "gene_product",
-        "COG",
-        "start",
-        "length",
-        "operon",
-        "regulator",
-    ]
-    for col in gene_table_cols:
-        if not (col in model.gene_table.columns):
-            if col in ["gene_name", "gene_product"]:
-                print("Gene Table is missing the %s column" % col)
-                if inplace:
-                    model.gene_table[col] = model.gene_table.index
-            else:
-                print("Gene Table is missing the optional %s column" % col)
-                if col == "regulator":
-                    print("Add a TRN file to automatically generate this column.")
-
-    print()
-    # sample table columns
-    sample_table_cols = [
-        "sample",
-        "project",
-        "condition",
-        "Biological Replicates",
-        "DOI",
-    ]
-    for col in sample_table_cols:
-        if not (col in model.sample_table.columns):
-            if col == "sample":
-                if not (model.sample_table.index.name == "sample"):
-                    print("Sample Table is missing the optional sample column")
-                    print(
-                        "The 0th column will be used to define the names of "
-                        "samples in the activity bar graph unless you add "
-                        "this column."
+        if inplace:
+            for idx, tf in zip(
+                    model.imodulon_table.index, model.imodulon_table.regulator
+                ):
+                try:
+                    model.imodulon_table.loc[idx, "Regulator"] = (
+                        model.imodulon_table.regulator[idx]
+                        .replace("/", " or ")
+                        .replace("+", " and ")
                     )
-            elif col == "DOI":
-                print("Sample Table is missing the optional DOI column")
-                print(
-                    "If you would like to be able to access papers by clicking"
-                    " the activity bars, add this column and populate it with "
-                    "links."
+                except AttributeError:
+                    model.imodulon_table.loc[
+                        idx, "Regulator"
+                    ] = model.imodulon_table.regulator[idx]
+            if im_idx == "str":
+                model.rename_imodulons(
+                    dict(zip(model.imodulon_names, range(len(model.imodulon_names))))
                 )
-            elif col == "Biological Replicates":
-                print("Sample Table is missing a %s column" % col)
-                if inplace:
-                    try:
-                        for name, group in model.sample_table.groupby(
-                            ["project", "condition"]
-                        ):
-                            model.sample_table.loc[
-                                group.index, "Biological Replicates"
-                            ] = group.shape[0]
-                    except KeyError:
-                        print(
-                            "Unable to write Biological Replicates "
-                            "column (add project & condition columns first)"
-                        )
-            else:
-                print("Sample Table is missing a %s column" % col)
-                print(
-                    "This is an essential column - complete "
-                    "metadata curation and ensure proper naming."
-                )
-                major_errors += [col]
-                if col == "project":
-                    print(
-                        "The project column defines separate groups of "
-                        "conditions,"
-                        " which will have lines between them in activity bar "
-                        "graphs."
-                    )
-                    print(
-                        "You may add a column containing the same project "
-                        "name for all"
-                        " samples if desired, but it is recommended to "
-                        "differentiate"
-                        " them."
-                    )
-                if col == "condition":
-                    print(
-                        "The condition column defines biological replicate "
-                        "conditions."
-                        " You may reuse condition names such as 'control' "
-                        "only if the "
-                        "separate conditions are also in separate projects."
-                    )
-                    print(
-                        "You may add a column containing all unique condition "
-                        "names (e.g. integers) if desired, but it is"
-                        " recommended to curate condition names."
-                    )
 
-    # X
-    if model.X is None:
-        major_errors += ["X"]
-        print()
-        print(
-            "X, the expression matrix, is required for the gene pages. "
-            "Add it to the data!"
-        )
+    # check the TRN
+    cols = ['in_trn', 'has_link', 'has_gene']
+    tf_issues = pd.DataFrame(columns = cols)
+    
+    if 'regulator' in model.imodulon_table.columns:
+        for tf_string in model.imodulon_table.regulator:
+            _, no_trn = parse_tf_string(model, tf_string)
+            _, no_link = tf_with_links(model, tf_string)
+            _, no_gene = get_tfs_to_scatter(model, tf_string, tfcomplex_to_gene)
 
-    if len(major_errors) > 0:
-        out_str = (
-            "ERROR: Cannot export to iModulonDB without "
-            "fixing the following: " + ", ".join(major_errors)
-        )
-        sys.exit(out_str)
+            tfs_to_add = set(no_trn + no_link + no_gene)
+
+            for tf in tfs_to_add:
+                row = dict(zip(cols, [True]*3))
+                for col, tf_set in zip(cols, [no_trn, no_link, no_gene]):
+                    if tf in tf_set:
+                        row[col] = False
+                tf_issues.loc[tf] = row
+    
+    return table_issues, tf_issues, missing_g_links, missing_DOIs
 
 
 def imodulondb_export(
@@ -240,6 +283,7 @@ def imodulondb_export(
     path=".",
     skip_check=False,
     cat_order=None,
+    tfcomplex_to_genename={},
     gene_scatter_x="start",
 ):
     """
@@ -258,6 +302,10 @@ def imodulondb_export(
     cat_order : list, optional
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table (default = None)
+    tfcomplex_to_genename : dict
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
     gene_scatter_x : str
         Option to pass to scatter plot function, determines the X axis
         on iModulon pages. Currently, only "start" is supported. (default =
@@ -275,13 +323,24 @@ def imodulondb_export(
 
     folder = imodulondb_main_site_files(model1, path, cat_order=cat_order)
 
+    print("Done writing main site files. Writing plot files...")
+
     print(
         "Two progress bars will appear below. The second will take "
         "significantly longer than the first."
     )
 
-    imdb_generate_im_files(model1, folder, gene_scatter_x)
+    print("Writing iModulon page files (1/2)")
+
+    imdb_generate_im_files(model1, folder, gene_scatter_x, tfcomplex_to_genename)
+
+    print("Writing Gene page files (2/2)")
+
     imdb_generate_gene_files(model1, folder)
+
+    print("Complete! (Organism = %s; Dataset = %s)"%(
+        model1.splash_table['organism_folder'],
+        model1.splash_table['dataset_folder']))
 
 
 ###############################
@@ -307,7 +366,8 @@ def imdb_iM_table(imodulon_table, cat_order=None):
     """
 
     im_table = imodulon_table[
-        ["name", "Regulator", "Function", "Category", "n_genes", "precision", "recall"]
+        ["name", "Regulator", "Function", "Category", "n_genes", "exp_var", 
+        "precision", "recall"]
     ]
     im_table = im_table.rename(columns={"name": "Name"})
     im_table.index.name = "k"
@@ -477,19 +537,27 @@ def imodulondb_main_site_files(
     gene_df.to_json(main_folder + "/gene_page_files/gene_list.json", orient="records")
 
     # make the html
-    html = '<div class="col-md-4 col-lg-3">\n'
-    html += '\t<a role="button" class="btn btn-primary btn-outline-light ' "btn-block"
-    html += ' d-flex flex-column private_set" href="dataset.html?organism='
+    html =  '<div class="panel">\n'
+    html += '  <div class="panel-header">\n'
+    html += '    <h2 class="mb-0">\n'
+    html += '      <button class="btn btn-link collapsed organism" type="button"'
+    html += ' data-toggle="collapse" data-target="#new_org" aria-expanded="false"'
+    html += ' aria-controls="new_org">\n        <i>'
+    html += model.splash_table["organism_name"]
+    html += '</i>\n      </button>\n    </h2>\n  </div>\n'
+    html += '  <div id="new_org" class="collapse" aria-labelledby="headingThree"'
+    html += ' data-parent="#organismAccordion">\n'
+    html += '    <div class="panel-body">\n'
+    html += '      <ul class="nav navbar-dark flex-column">\n'
+    html += '          <li class="nav-item dataset">\n'
+    html += '              <a class="nav-link active" href="dataset.html?organism='
     html += organism
     html += "&dataset="
     html += dataset
-    html += '">\n\t\t<h2>'
-    html += model.splash_table["large_title"]
-    html += "</h2>\n\t\t<p>"
-    html += model.splash_table["subtitle"]
-    html += '</p>\n\t\t<p class="mt-auto">'
-    html += model.splash_table["author"]
-    html += "</p>\n\t</a>\n</div>"
+    html += '"><i class="fas fa-angle-right pr-2"></i>'
+    html += model.splash_table["dataset_name"]
+    html += '\n              </a>\n          </li>\n'
+    html += '      </ul>\n    </div>\n  </div>\n</div>'
 
     file = open(main_folder + "/html_for_splash.html", "w")
     file.write(html)
@@ -498,7 +566,8 @@ def imodulondb_main_site_files(
     return main_folder
 
 
-def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start"):
+def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start",
+    tfcomplex_to_genename={}):
     """
     Generates all files for all iModulons in data
 
@@ -511,6 +580,10 @@ def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start"):
     gene_scatter_x : str
         Column from the gene table that specificies what to use on the
         X-axis of the gene scatter plot (default = "start")
+    tfcomplex_to_genename : dict
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
 
     Returns
     -------
@@ -548,7 +621,7 @@ def imdb_generate_gene_files(model, path_prefix="."):
 # Gene Table
 
 
-def _parse_tf_string(model, tf_str, print_output=True):
+def parse_tf_string(model, tf_str, verbose=False):
     """
     Returns a list of relevant tfs from a string. Will ignore TFs not in the
     trn file.
@@ -570,23 +643,30 @@ def _parse_tf_string(model, tf_str, print_output=True):
     """
 
     if not (type(tf_str) == str):
-        return []
-    tf_str = tf_str.replace(" ", "").replace("[", "").replace("]", "")
+        return [], []
+    if tf_str == '':
+        return [], []
+
+    tf_str = tf_str.replace("[", "").replace("]", "")
     tfs = re.split("[+/]", tf_str)
 
     # Check if there is an issue, just remove the issues for now.
     bad_tfs = []
     for tf in tfs:
-        if (tf not in model.trn.regulator.unique()) & print_output:
-            print("TF not in TRN:", tf)
-            print(
-                "To remedy this, add rows to the TRN for each gene associated "
-                "with this TF"
-            )
+        tf = tf.strip()
+        if (tf not in model.trn.regulator.unique()):
+            if verbose:
+                print("Regulator not in TRN:", tf)
+                print(
+                    "To remedy this, add rows to the TRN for each gene associated "
+                    "with this regulator. Otherwise, it will be ignored in the gene"
+                    "tables and histograms."
+                )
             bad_tfs += [tf]
-    tfs = list(set(tfs) - set(bad_tfs))
+    tfs = [t.strip() for t in list(set(tfs) - set(bad_tfs))]
+    bad_tfs = list(set(bad_tfs))
 
-    return tfs
+    return tfs, bad_tfs
 
 
 def imdb_gene_table_df(model, k):
@@ -607,12 +687,13 @@ def imdb_gene_table_df(model, k):
 
     # get TFs and large table
     row = model.imodulon_table.loc[k]
-    tfs = _parse_tf_string(model, row.TF, print_output=True)
+    tfs, _ = parse_tf_string(model, row.regulator)
     res = model.view_imodulon(k)
 
     # sort
     columns = []
-    for c in ["gene_weight", "gene_name", "gene_product", "COG", "operon", "regulator"]:
+    for c in ["gene_weight", "gene_name", "gene_product",
+     "COG", "operon", "regulator"]:
         if c in res.columns:
             columns += [c]
     res = res[columns]
@@ -770,10 +851,11 @@ def imdb_gene_hist_df(
 
     # get TFs
     row = model.imodulon_table.loc[k]
-    if not (type(row.TF) == str):
+    if not (type(row.regulator) == str):
         tfs = []
     else:
-        tfs = _parse_tf_string(model, row.TF, print_output=False)
+        tfs, _ = parse_tf_string(model, row.regulator)
+    tfs = list(set(tfs))
 
     # get genes
     DF_gene = _component_DF(model, k, tfs)
@@ -796,9 +878,9 @@ def imdb_gene_hist_df(
     width = (
         2
         * model.thresholds[k]
-        / (np.floor(2 * model.thresholds[k] * bins / (xmax - xmin) - 1))
+        / max((np.floor(2 * model.thresholds[k] * bins / (xmax - xmin) - 1)), 1)
     )
-    xmin = -model.thresholds[k] - width * np.ceil((-model.thresholds[k] - xmin) / width)
+    xmin = -model.thresholds[k] - width * np.ceil((-model.thresholds[k] - xmin)/width)
     xmax = xmin + width * bins
 
     # column headers: bin middles
@@ -979,6 +1061,32 @@ def imdb_gene_scatter_df(model, k, gene_scatter_x="start"):
 
 # Activity Bar Graph
 
+def generate_biological_replicates_column(model):
+    """
+    Generates the "Biological Replicates" column of the sample_table for iModulonDB.
+    
+    Parameters
+    ----------
+    model: :class:`~pymodulon.core.IcaData`
+        IcaData object. Will overwrite the existing column if it exists.
+        
+    Returns
+    -------
+    None: None
+    """
+    
+    try:
+        for name, group in model.sample_table.groupby(
+            ["project", "condition"]
+        ):
+            model.sample_table.loc[
+                group.index, "Biological Replicates"
+            ] = group.shape[0]
+    except KeyError:
+        logging.warning("Unable to write Biological Replicates "
+            "column. Add project & condition columns (required)."
+        )
+
 
 def imdb_activity_bar_df(model, k):
     """
@@ -1105,18 +1213,20 @@ def _get_reg_genes(model: IcaData, tf: str) -> Set:
 
     # other datasets can use this simpler code
     else:
-        tf = tf.replace(" ", "")
+        tf = tf.strip()
         if "+" in tf:
             reg_list = []
             for tfx in tf.split("+"):
+                tfx = tfx.strip()
                 reg_list.append(
                     set(model.trn[model.trn.regulator == tfx].gene_id.unique())
                 )
             reg_genes = set.intersection(*reg_list)
         elif "/" in tf:
             reg_genes = set(
-                model.trn[model.trn.regulator.isin(tf.split("/"))].gene_id.unique()
-            )
+                model.trn[model.trn.regulator.isin(
+                    [t.strip() for t in tf.split("/")])].gene_id.unique()
+                        )
         else:
             reg_genes = set(model.trn[model.trn.regulator == tf].gene_id.unique())
 
@@ -1143,9 +1253,11 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
     """
 
     row = model.imodulon_table.loc[k]
-    tf = row["TF"]
+    tf = row["regulator"]
 
     if not (type(tf) == str):
+        return None
+    if tf.strip() == '':
         return None
 
     # Take care of and/or enrichments
@@ -1222,7 +1334,11 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
 # Regulon Scatter Plot
 
 
-def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]) -> List:
+def get_tfs_to_scatter(
+        model: IcaData, 
+        tf_string: Union[str, float],
+        tfcomplex_to_genename: Optional[dict] = {},
+        verbose: Optional[bool] = False) -> List:
     """
 
     Parameters
@@ -1231,6 +1347,10 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]) -> List:
         IcaData object
     tf_string : str or ~numpy.nan
         String of TFs, or np.nan
+    tfcomplex_to_genename : dict
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
     Returns
     -------
     res: list
@@ -1244,18 +1364,28 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]) -> List:
         "hprR": "yedW",
         "thi-box": "Thi-box",
         "flhD;flhC": "flhD",
-        "rcsA;rcsB": "rcsA",
+        "FlhDC": "flhD",
+        "rcsA;rcsB": "rcsB",
+        "RcsAB": "rcsB",
         "ntrC": "glnG",
         "gutR": "srlR",
+        "IHF": "ihfB",
+        "H-NS": "hns",
+        "GadE-RcsB":"gadE"
     }
+    for k, v in tfcomplex_to_genename.items():
+        rename_tfs[k] = v
+
     res = []
+    bad_res = []
     if type(tf_string) == str:
 
-        tf_string = tf_string.replace(" ", "").replace("[", "").replace("]", "")
+        tf_string = tf_string.replace("[", "").replace("]", "")
 
         tfs = re.split("[+/]", tf_string)
 
         for tf in tfs:
+            tf = tf.strip()
 
             if tf in rename_tfs.keys():
                 tf = rename_tfs[tf]
@@ -1265,18 +1395,22 @@ def _get_tfs_to_scatter(model: IcaData, tf_string: Union[str, float]) -> List:
                 if b_num in model.X.index:
                     res += [tf]
             except ValueError:
-                print("TF has no associated expression profile:", tf)
-                print("If %s is not a gene, this behavior is expected." % tf)
-                print(
-                    "If it is a gene, use consistent naming"
-                    " between the TRN and gene_table."
-                )
+                bad_res += [tf]
+                if verbose:
+                    print("TF has no associated expression profile:", tf)
+                    print("If %s is not a gene, this behavior is expected." % tf)
+                    print(
+                        "If it is a gene, use consistent naming"
+                        " between the TRN and gene_table."
+                    )
 
     res = list(set(res))  # remove duplicates
-    return res
+    bad_res = list(set(bad_res))
+    return res, bad_res
 
 
-def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
+def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int],
+    tfcomplex_to_genename: Optional[dict] = {}):
     """
 
     Parameters
@@ -1285,6 +1419,10 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
         IcaData object
     k : int or str
         iModulon name
+    tfcomplex_to_genename : dict
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
 
     Returns
     -------
@@ -1293,7 +1431,7 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
     """
 
     row = model.imodulon_table.loc[k]
-    tfs = _get_tfs_to_scatter(model, row.TF)
+    tfs, _ = get_tfs_to_scatter(model, row.regulator, tfcomplex_to_genename)
 
     if len(tfs) == 0:
         return None
@@ -1333,7 +1471,7 @@ def imdb_regulon_scatter_df(model: IcaData, k: Union[str, int]):
 
 
 # iModulon Metadata
-def _tf_with_links(model: IcaData, tf_str: Union[str, float]):
+def tf_with_links(model: IcaData, tf_str: Union[str, float]):
     """
     Adds links to the regulator string
     Parameters
@@ -1352,21 +1490,27 @@ def _tf_with_links(model: IcaData, tf_str: Union[str, float]):
     tf_links = model.tf_links
 
     if not (type(tf_str) == str):
-        return tf_str
+        return tf_str, []
+    if tf_str == '':
+        return tf_str, []
+
+    if "[" in tf_str:
+        return tf_with_links_brackets(model, tf_str)
 
     # get a list of transcription factors
     and_or = ""
     if "/" in tf_str:
         and_or = " or "
-        tfs = tf_str.split("/")
+        tfs = [t.strip() for t in tf_str.split("/")]
     elif "+" in tf_str:
         and_or = " and "
-        tfs = tf_str.split("+")
+        tfs = [t.strip() for t in tf_str.split("+")]
     else:
         tfs = [tf_str]
 
     # start building an html string
     tfs_html = []
+    bad_tfs = []
     for tf in tfs:
         if tf in tf_links.keys():
             link = tf_links[tf]
@@ -1375,12 +1519,77 @@ def _tf_with_links(model: IcaData, tf_str: Union[str, float]):
                 tfs_html += [tf_]
             else:  # this tf has no link
                 tfs_html += [tf]
+                bad_tfs += [tf]
         # this tf isn't in the tf_links file
         else:
             tfs_html += [tf]
+            bad_tfs += [tf]
     res = and_or.join(tfs_html)
-    return res
+    return res, bad_tfs
 
+def tf_with_links_brackets(model: IcaData, tf_str: Union[str, float]):
+    """
+    Adds links to the regulator string
+    Used with the complicated bracket system in Bacillus Microarray
+    Parameters
+    ----------
+    model : :class:`~pymodulon.core.IcaData`
+        IcaData object
+    tf_str : str or float
+        Regulator string for a given iModulon, or np.nan
+
+    Returns
+    -------
+    res: str
+        String with links added
+    """
+
+    res = ''
+    bad_tfs = []
+
+    if "/" in tf_str:
+        union = tf_str.split("] / [")
+        union[0] = union[0][1:]
+        union[-1] = union[-1][:-1]
+        brackets = True
+    else:
+        union = [tf_str]
+        brackets = False
+
+    for r in union:
+        if '+' in r:
+            intersection = r.split(' + ')
+            for i in intersection:
+                if i in model.tf_links.keys():
+                    link = model.tf_links[i]
+                    if isinstance(link, str):
+                        res += '<a href="' + link + '" target="_blank">' + i + "</a>"
+                    else:
+                        res += i
+                        bad_tfs += [i]
+                else:
+                    res += i
+                    bad_tfs += [i]
+                res += ' + '
+            res = res[:-3]
+        else:
+            if r in model.tf_links.keys():
+                link = model.tf_links[r]
+                if isinstance(link, str):
+                    res += '<a href="' + link + '" target="_blank">' + r + "</a>"
+                else:
+                    res += r
+                    bad_tfs += [i]
+            else:
+                res += r
+                bad_tfs += [i]
+        res += "] / ["
+    res = res[:-5]
+
+    if brackets:
+        res = '[' + res + ']'
+
+    return res, bad_tfs
 
 def imdb_imodulon_basics_df(
     model,
@@ -1419,15 +1628,15 @@ def imdb_imodulon_basics_df(
             "Category",
             "has_venn",
             "scatter",
-            "has_meme",
+            "exp_var",
             "precision",
             "recall",
         ],
         dtype=float,
     )
     res.loc["name"] = row.loc["name"]
-    res.loc["TF"] = row.TF
-    res.loc["Regulator"] = _tf_with_links(model, row.TF)
+    res.loc["TF"] = row.regulator
+    res.loc["Regulator"], _ = tf_with_links(model, row.regulator)
     res.loc["Function"] = row.Function
     res.loc["Category"] = row.Category
     res.loc["has_venn"] = not (reg_venn is None)
@@ -1435,7 +1644,7 @@ def imdb_imodulon_basics_df(
         res.loc["scatter"] = 0
     else:
         res.loc["scatter"] = reg_scatter.shape[1] - 1
-    res.loc["has_meme"] = False  # memes will be added to the website later.
+    res.loc["exp_var"] = row.exp_var
 
     res.loc["precision"] = row.precision
     res.loc["recall"] = row.recall
@@ -1444,7 +1653,8 @@ def imdb_imodulon_basics_df(
 
 
 # Compute All iModulon Plots
-def make_im_directory(model, k, path_prefix=".", gene_scatter_x="start"):
+def make_im_directory(model, k, path_prefix=".", gene_scatter_x="start",
+    tfcomplex_to_genename={}):
     """
 
     Parameters
@@ -1459,6 +1669,10 @@ def make_im_directory(model, k, path_prefix=".", gene_scatter_x="start"):
     gene_scatter_x : str
         Passed to imdb_gene_scatter_df() to indicate
         the x axis type of that plot (default = "start")
+    tfcomplex_to_genename : dict
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
 
     Returns
     -------
@@ -1471,7 +1685,7 @@ def make_im_directory(model, k, path_prefix=".", gene_scatter_x="start"):
     gene_scatter = imdb_gene_scatter_df(model, k, gene_scatter_x)
     act_bar = imdb_activity_bar_df(model, k)
     reg_venn = imdb_regulon_venn_df(model, k)
-    reg_scatter = imdb_regulon_scatter_df(model, k)
+    reg_scatter = imdb_regulon_scatter_df(model, k, tfcomplex_to_genename)
 
     # generate a basic data df
     res = imdb_imodulon_basics_df(model, k, reg_venn, reg_scatter)

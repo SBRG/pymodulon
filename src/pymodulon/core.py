@@ -236,6 +236,7 @@ class IcaData(object):
 
         # Initialize COG colors
         if "COG" in self.gene_table.columns:
+            self.gene_table.COG = self.gene_table.COG.fillna('No COG category')
             cogs = sorted(self.gene_table.COG.unique())
             self.cog_colors = dict(
                 zip(
@@ -1251,7 +1252,7 @@ class IcaData(object):
             self._dataset_table = _check_dict(new_dst)
         else:
             raise ValueError(
-                "New dataset must be None, a filename, a dictionary, "
+                "New dataset table must be None, a filename, a dictionary, "
                 "or a JSON string"
             )
 
@@ -1271,9 +1272,8 @@ class IcaData(object):
         self._splash_table = new_splash
 
         default_splash_table = {
-            "large_title": "New Dataset",
-            "subtitle": "Unpublished study",
-            "author": "Pymodulon User",
+            "organism_name": "New Organism",
+            "dataset_name": "New Dataset",
             "organism_folder": "new_org",
             "dataset_folder": "new_dataset",
         }
@@ -1329,11 +1329,6 @@ class IcaData(object):
 
         if isinstance(new_links, str):
             new_links = _check_dict(new_links)
-
-        if not self.trn.empty:
-            for tf in new_links.keys():
-                if not (tf in list(self.trn.regulator)):
-                    print("%s has a TF link but is not in the TRN" % tf)
 
         self._tf_links = new_links
 
