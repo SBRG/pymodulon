@@ -37,8 +37,8 @@ def barplot(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -59,8 +59,13 @@ def barplot(
         Project(s) to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
+
 
     Returns
     -------
@@ -194,7 +199,7 @@ def barplot(
             ax.legend(**kwargs)
 
     else:
-        logging.warning('Missing "project" and "condition" columns in sample ' "table.")
+        logging.warning("Missing `project` and `condition` columns in `sample_table.`")
         ax.bar(range(len(values)), values, width=1, align="edge")
         nbars = len(values)
 
@@ -213,7 +218,7 @@ def barplot(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -224,8 +229,8 @@ def plot_expression(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -243,8 +248,12 @@ def plot_expression(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -262,14 +271,14 @@ def plot_expression(
         label = "${}$ Expression".format(gene)
 
     return barplot(
-        values,
-        ica_data.sample_table,
-        label,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=ica_data.sample_table,
+        ylabel=label,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -280,8 +289,8 @@ def plot_activities(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -299,8 +308,12 @@ def plot_activities(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -317,14 +330,14 @@ def plot_activities(
     label = "{} iModulon\nActivity".format(imodulon)
 
     return barplot(
-        values,
-        ica_data.sample_table,
-        label,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=ica_data.sample_table,
+        ylabel=label,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -335,8 +348,8 @@ def plot_metadata(
     projects=None,
     highlight=None,
     ax=None,
-    legend_kwargs=None,
     savefig=False,
+    legend_kwargs=None,
     savefig_kwargs=None,
 ):
     """
@@ -354,8 +367,12 @@ def plot_metadata(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -377,14 +394,14 @@ def plot_metadata(
         raise ValueError("Column not in sample table: {}".format(column))
 
     return barplot(
-        values,
-        table,
-        column,
-        projects,
-        highlight,
-        ax,
-        legend_kwargs,
+        values=values,
+        sample_table=table,
+        ylabel=column,
+        projects=projects,
+        highlight=highlight,
+        ax=ax,
         savefig=savefig,
+        legend_kwargs=legend_kwargs,
         savefig_kwargs=savefig_kwargs,
     )
 
@@ -399,9 +416,9 @@ def plot_regulon_histogram(
     hist_label=("Not regulated", "Regulon Genes"),
     color=("#aaaaaa", "salmon"),
     alpha=0.7,
+    savefig=False,
     ax_font_kwargs=None,
     legend_kwargs=None,
-    savefig=False,
     savefig_kwargs=None,
 ):
     """
@@ -435,10 +452,14 @@ def plot_regulon_histogram(
     alpha: float, optional
         Sets the opacity of the histogram (0 = transparent, 1 = opaque).
         Passed on to :func:`matplotlib.pyplot.hist`
+    savefig: str or bool, optional
+        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axes labels
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -483,10 +504,10 @@ def plot_regulon_histogram(
         df_top_enrich = df_enriched.sort_values(
             ["imodulon", "qvalue", "n_regs"]
         ).drop_duplicates("imodulon")
-        reg = df_top_enrich.set_index("imodulon").loc[imodulon, "regulator"]
-        if not isinstance(reg, str):
-            if pd.isna(reg):
-                reg = None
+        try:
+            reg = df_top_enrich.set_index("imodulon").loc[imodulon, "regulator"]
+        except KeyError:
+            reg = None
 
     # Use regulator value to find regulon genes
     if reg is not None:
@@ -550,7 +571,7 @@ def plot_regulon_histogram(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -575,11 +596,11 @@ def scatterplot(
     ylabel="",
     ax=None,
     legend=True,
+    savefig=False,
     ax_font_kwargs=None,
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
-    savefig=False,
     savefig_kwargs=None,
 ):
     """
@@ -618,6 +639,8 @@ def scatterplot(
         Axes object to plot on, otherwise use current Axes
     legend: bool
         Show legend
+    savefig: str or bool, optional
+        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axis labels
     scatter_kwargs: dict, optional
@@ -627,6 +650,8 @@ def scatterplot(
         :func:`matplotlib.pyplot.text`
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -797,7 +822,7 @@ def scatterplot(
 
     # Save figure
     if savefig:
-        _save_figures(fig, savefig_kwargs)
+        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -818,7 +843,7 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
         Values on custom x-axis
     xname: str, optional
         Name of x-axis if using custom x-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
     Returns
     -------
@@ -1003,7 +1028,7 @@ def compare_gene_weights(
     use_org1_names: bool
         If true, use gene names from first organism. If false, use gene names
         from second organism (default: True)
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1182,7 +1207,7 @@ def compare_expression(ica_data, gene1, gene2, **kwargs):
         Gene to plot on the x-axis
     gene2: str
         Gene to plot on the y-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1232,7 +1257,7 @@ def compare_activities(ica_data, imodulon1, imodulon2, **kwargs):
         Name of the iModulon to plot on the x-axis
     imodulon2: int or str
         Name of the iModulon to plot on the y-axis
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1290,7 +1315,7 @@ def plot_dima(
         Automatically adjust labels (default: True)
     table: bool
         Return differential iModulon activity table (default: False)
-    **kwargs: dict, optional
+    **kwargs:
         Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
 
     Returns
@@ -1392,8 +1417,10 @@ def plot_dima(
 # Other plots #
 ###############
 
-
-def plot_explained_variance(ica_data, pc=True, ax=None):
+# TODO: Add kind=bar to plot top explained variance
+def plot_explained_variance(
+    ica_data, pc=True, ax=None, savefig=False, savefig_kwargs=None
+):
     """
     Plots the cumulative explained variance for independent components and,
     optionally, principal components
@@ -1406,6 +1433,10 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
         If True, plot cumulative explained variance of independent components
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1413,14 +1444,16 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
         :class:`~matplotlib.axes.Axes` containing the line plot
     """
 
+    if not ax:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
     # Get IC explained variance
     ic_var = []
     for imodulon in ica_data.imodulon_names:
         ic_var.append(explained_variance(ica_data, imodulons=imodulon))
     ic_var = np.insert(np.cumsum(sorted(ic_var, reverse=True)), 0, 0)
-
-    if not ax:
-        fig, ax = plt.subplots()
 
     ax.plot(range(len(ic_var)), ic_var, label="Independent Components")
 
@@ -1442,9 +1475,194 @@ def plot_explained_variance(ica_data, pc=True, ax=None):
     ax.set_ylim([0, 1])
     ax.set_xlim([0, len(ic_var)])
 
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
     return ax
 
 
+def compare_imodulons_vs_regulons(
+    ica_data,
+    imodulons=None,
+    cat_column=None,
+    size_column=None,
+    scale=1,
+    reg_only=True,
+    xlabel=None,
+    ylabel=None,
+    vline=0.6,
+    hline=0.6,
+    ax=None,
+    savefig=False,
+    scatter_kwargs=None,
+    ax_font_kwargs=None,
+    legend_kwargs=None,
+    savefig_kwargs=None,
+):
+    """
+    Compare the overlaps between iModulons and their linked regulons
+
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` object
+    imodulons: list, optional
+        List of iModulons to plot
+    cat_column: str, optional
+        Column in the `imodulon_table` that stores the category of each iModulon
+    size_column: str, optional
+        Column in the `imodulon_table` that stores the size of each iModulon
+    scale: float, optional (default: 1)
+        Value used to scale the size of each point
+    reg_only: bool (default: True)
+        Only plot iModulons with an entry in the `regulator` column of the
+        `imodulon_table`
+    xlabel: str, optional
+        Custom x-axis label (default: "# shared genes/Regulon size")
+    ylabel: str, optional
+        Custom y-axis label (default: "# shared genes/iModulon size")
+    vline: float, optional (default: 0.6)
+        Draw a dashed vertical line
+    hline: float, optional (default: 0.6)
+        Draw a dashed horizontal line
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    scatter_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.scatter`
+    ax_font_kwargs: dict, optional
+        Additional keyword arguments for axes labels
+    legend_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
+
+    Returns
+    -------
+    ax: ~matplotlib.axes.Axes
+        :class:`~matplotlib.axes.Axes` containing the line plot
+    """
+
+    # Set up axis
+    if not ax:
+        fig, ax = plt.subplots(figsize=(5, 5))
+    else:
+        fig = ax.figure
+
+    # Handle kwargs
+    if scatter_kwargs is None:
+        scatter_kwargs = {}
+    if ax_font_kwargs is None:
+        ax_font_kwargs = {}
+    if legend_kwargs is None:
+        legend_kwargs = {}
+
+    # Set axes labels
+    if xlabel is None:
+        xlabel = "$\\frac{\\mathrm{\\#\\;Shared\\;Genes}}{\\mathrm{Regulon\\;Size}}$"
+        xlabelscale = 2
+    else:
+        xlabelscale = 1
+
+    if ylabel is None:
+        ylabel = "$\\frac{\\mathrm{\\#\\;Shared\\;Genes}}{\\mathrm{iModulon\\;Size}}$"
+        ylabelscale = 2
+    else:
+        ylabelscale = 1
+
+    # Select iModulons
+    if imodulons is None:
+        reg_table = ica_data.imodulon_table.copy()
+        if reg_only:
+            reg_table = imodulon_table[imodulon_table.regulator.notnull()]
+    else:
+        reg_table = ica_data.imodulon_table.loc[imodulons]
+
+    # Select category column
+    if cat_column is None:
+        reg_table["_category"] = "iModulons"
+        cat_column = "_category"
+
+    # Make sure all necessary columns exist
+    if reg_table.recall.isnull().any():
+        logging.warning(
+            "Some iModulons have missing `recall` entries in the "
+            "`imodulon_table` "
+            "and will not be shown"
+        )
+    if reg_table.precision.isnull().any():
+        logging.warning(
+            "Some iModulons have missing `precision` entries in the "
+            "`imodulon_table` and will not be shown"
+        )
+    if size_column is not None and reg_table[size_column].isnull().any():
+        logging.warning(
+            "Some iModulons have missing {} entries in the "
+            "`imodulon_table`".format(size_column)
+        )
+
+    for cat, group in reg_table.groupby(cat_column):
+
+        # Set point sizes
+        if size_column is None:
+            size_ivr = scatter_kwargs.pop("s", plt.rcParams["lines.markersize"])
+        else:
+            size_ivr = scatter_kwargs.pop("s", group[size_column])
+
+        edgecolor_ivr = scatter_kwargs.pop("edgecolor", "k")
+
+        ax.scatter(
+            group.recall,
+            group.precision,
+            s=size_ivr * scale,
+            edgecolor=edgecolor_ivr,
+            label=cat,
+            **scatter_kwargs,
+        )
+
+    # Set plot boundaries
+    xmin, xmax = ax.get_xlim()
+    xmin = min(xmin, 0)
+    xmax = max(xmax, 1)
+    ax.set_xlim((xmin, xmax))
+
+    ymin, ymax = ax.get_ylim()
+    ymin = min(ymin, 0)
+    ymax = max(ymax, 1)
+    ax.set_ylim((ymin, ymax))
+
+    # Add dashed lines
+    if hline:
+        ax.hlines(hline, xmin, xmax, linestyles="dashed", colors="gray", zorder=0)
+    if vline:
+        ax.vlines(vline, xmin, xmax, linestyles="dashed", colors="gray", zorder=0)
+
+    # Set axis labels
+    label_size = ax_font_kwargs.pop("fontsize", plt.rcParams["font.size"])
+    xlabel_size = label_size * xlabelscale
+    ax.set_xlabel(xlabel, fontsize=xlabel_size, **ax_font_kwargs)
+
+    ylabel_size = label_size * ylabelscale
+    ax.set_ylabel(ylabel, fontsize=ylabel_size, **ax_font_kwargs)
+
+    # Set legend
+    bbox_to_anchor_ivr = legend_kwargs.pop("bbox_to_anchor", (1, 1))
+    ax.legend(bbox_to_anchor=bbox_to_anchor_ivr, **legend_kwargs)
+
+    # Save figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
+    return ax
+
+
+######################
+# Cluster Activities #
+######################
+
+# TODO: Figure out savefig for this plot
 def cluster_activities(
     ica_data,
     correlation_method="spearman",
@@ -1463,7 +1681,7 @@ def cluster_activities(
     dimca_label=True,
     dimca_adjust=True,
     dimca_table=False,
-    **dimca_kwargs,
+    **dima_kwargs,
 ):
     """
     Cluster all iModulon activity profiles using hierarchical clustering and display
@@ -1511,7 +1729,7 @@ def cluster_activities(
         Auto-adjust DiMCA cluster labels (default: True)
     dimca_table: bool
         Return DiMCA table (default: False)
-    **dimca_kwargs: dict, optional
+    **dima_kwargs: dict, optional
         Additional keyword arguments passed to :func:`pymodulon.plotting.dima`
 
     Returns
@@ -1844,7 +2062,7 @@ def cluster_activities(
         cluster_A_df = cluster_A_df.append(ica_data.A.loc[list(singleton_ims)])
 
         # add to kwargs
-        dimca_kwargs["alternate_A"] = cluster_A_df
+        dima_kwargs["alternate_A"] = cluster_A_df
 
         # now we can pretty much proceed as normal with DIMCA; just have a
         # different activity matrix, but the procedure is the same from here
@@ -1857,7 +2075,7 @@ def cluster_activities(
             label=dimca_label,
             adjust=dimca_adjust,
             table=dimca_table,
-            **dimca_kwargs,
+            **dima_kwargs,
         )
         if dimca_table:
             returns += dimca_return
@@ -1875,11 +2093,19 @@ def cluster_activities(
 def metadata_boxplot(
     ica_data,
     imodulon,
+    show_points=True,
     n_boxes=3,
+    samples=None,
     strip_conc=True,
     ignore_cols=None,
     use_cols=None,
     return_results=False,
+    ax=None,
+    savefig=False,
+    box_kwargs=None,
+    strip_kwargs=None,
+    swarm_kwargs=None,
+    savefig_kwargs=None,
 ):
     """
     Uses a decision tree regressor to automatically cluster iModulon activities
@@ -1889,10 +2115,16 @@ def metadata_boxplot(
     ----------
     ica_data: ~pymodulon.core.IcaData
         :class:`~pymodulon.core.IcaData` object
-    imodulon : int or str
+    imodulon: int or str
         `iModulon` name
+    show_points: bool or str (default: True)
+        Overlay individual points on top of the boxplot. By default, this uses
+        :func:`seaborn.stripplot`. `show_points='swarm'` will use
+        :func`seaborn.swarmplot`.
     n_boxes: int
         Number of boxes to create
+    samples: list, optional
+        Subset of samples to analyze
     strip_conc: bool
         Remove concentrations from metadata (e.g. "glucose(2g/L)" would be
         interpreted as just "glucose")
@@ -1903,6 +2135,18 @@ def metadata_boxplot(
         List of columns to use. This supercedes ignore_cols.
     return_results: bool
         Return a dataframe describing the classifications
+    ax: ~matplotlib.axes.Axes, optional
+        Axes object to plot on, otherwise use current Axes
+    savefig: str or bool, optional
+        Save figure to provided path
+    box_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.boxplot`
+    strip_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.stripplot`
+    swarm_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`seaborn.swarmplot`
+    savefig_kwargs: dict, optional
+        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1911,10 +2155,35 @@ def metadata_boxplot(
     df_classes: ~pd.DataFrame
         Metadata classifications of the samples
     """
-    activities = ica_data.A.loc[imodulon]
+
+    if not ax:
+        fig, ax = plt.subplots()
+    else:
+        fig = ax.figure
+
+    if show_points is True:
+        show_points = "strip"
+
+    if box_kwargs is None:
+        box_kwargs = {}
+
+    if strip_kwargs is None:
+        strip_kwargs = {}
+
+    if swarm_kwargs is None:
+        swarm_kwargs = {}
+
+    if samples is None:
+        samples = ica_data.sample_names
+
+    activities = ica_data.A.loc[imodulon, samples]
 
     encoding, features = _encode_metadata(
-        ica_data, ignore_cols=ignore_cols, use_cols=use_cols, strip_conc=strip_conc
+        ica_data,
+        samples=samples,
+        ignore_cols=ignore_cols,
+        use_cols=use_cols,
+        strip_conc=strip_conc,
     )
 
     clf = _train_classifier(activities, features, max_leaf_nodes=n_boxes)
@@ -1923,18 +2192,48 @@ def metadata_boxplot(
 
     df_classes = df_classes.sort_values(imodulon, ascending=False)
 
-    fig, ax = plt.subplots()
-    sns.boxplot(data=df_classes, x=imodulon, y="category")
+    # If using either a stripplot or swarmplot, hide fliers
+    if show_points in ["strip", "swarm"]:
+        box_kwargs.update({"fliersize": 0})
+
+    sns.boxplot(data=df_classes, x=imodulon, y="category", **box_kwargs)
+
+    if show_points == "strip":
+        color_mdbp = strip_kwargs.pop("color", "k")
+        jitter_mdbp = strip_kwargs.pop("color", 0.3)
+
+        sns.stripplot(
+            data=df_classes,
+            x=imodulon,
+            y="category",
+            color=color_mdbp,
+            jitter=jitter_mdbp,
+            **strip_kwargs,
+        )
+
+    elif show_points == "swarm":
+        color_mdbp = swarm_kwargs.pop("color", "k")
+        sns.swarmplot(
+            data=df_classes, x=imodulon, y="category", color=color_mdbp, **swarm_kwargs
+        )
+
     ax.set_ylabel("")
+
+    # Save Figure
+    if savefig:
+        _save_figures(fig, savefig, savefig_kwargs)
+
     if return_results:
         return ax, df_classes
     else:
         return ax
 
 
-def _encode_metadata(ica_data, use_cols=None, ignore_cols=None, strip_conc=True):
+def _encode_metadata(
+    ica_data, samples, use_cols=None, ignore_cols=None, strip_conc=True
+):
     # Convert values to strings
-    metadata = ica_data.sample_table.copy()
+    metadata = ica_data.sample_table.loc[samples].copy()
     metadata = metadata.astype(str).fillna("")
 
     # Select columns
@@ -2115,7 +2414,7 @@ def _get_fit(x, y):
 
 
 def _broken_line(x, A, B, C):
-    y = np.zeros(len(x), dtype=np.float)
+    y = np.zeros(len(x), dtype=float)
     y += (A * x + B) * (x >= C)
     y += (A * C + B) * (x < C)
     return y
@@ -2182,14 +2481,16 @@ def _mod_freedman_diaconis(ica_data, imodulon):
     return np.arange(xmin, xmax + width, width)
 
 
-def _save_figures(fig, savefig_kwargs):
-    """Check for savefig_kwargs, then save current figure instance"""
+def _save_figures(fig, filename, savefig_kwargs):
+    """Helper function for saving figures as files"""
 
-    # Check for savefig_kwargs
-    if savefig_kwargs:
-        savefig_kwargs["fname"] = savefig_kwargs.get("fname", "./plot.svg")
-    else:
-        savefig_kwargs = {"fname": "./plot.svg"}
+    if savefig_kwargs is None:
+        savefig_kwargs = {}
+
+    if isinstance(filename, str):
+        savefig_kwargs["fname"] = filename
+    elif "fname" not in savefig_kwargs.keys():
+        savefig_kwargs["fname"] = "./plot.svg"
 
     # Plot current figure instance using savefig_kwargs
     fig.savefig(**savefig_kwargs)
