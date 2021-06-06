@@ -201,8 +201,6 @@ def find_motifs(
         "-dna",
         "-mod",
         "zoops",
-        "-p",
-        str(cores),
         "-nmotifs",
         str(nmotifs),
         "-evt",
