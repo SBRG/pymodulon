@@ -16,6 +16,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: no-commit-to-branch
     - repo: https://github.com/pre-commit/pygrep-hooks
       rev: v1.8.0
       hooks:
