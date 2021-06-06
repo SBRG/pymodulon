@@ -5,9 +5,7 @@ Functions for writing a directory for iModulonDB webpages
 import logging
 import os
 import re
-import sys
 from itertools import chain
-from typing import List, Optional, Set, Union
 from zipfile import ZipFile
 
 import numpy as np
@@ -15,7 +13,6 @@ import pandas as pd
 from matplotlib.colors import to_hex
 from tqdm.notebook import tqdm
 
-from pymodulon.core import IcaData
 from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
 
@@ -24,7 +21,7 @@ from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 ##################
 
 
-def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
+def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
     """
     Checks for all issues and missing information prior to exporting to iModulonDB.
     If inplace = True, modifies the model (not recommended for main model variables).
@@ -70,6 +67,9 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
         associated bars in the activity plots will not link to relevant papers.
     """
 
+    if tfcomplex_to_gene is None:
+        tfcomplex_to_gene = {}
+
     table_issues = pd.DataFrame(columns=["Table", "Missing Column", "Solution"])
 
     # Check for X
@@ -98,7 +98,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
                 {
                     "Table": "Splash",
                     "Missing Column": k,
-                    "Solution": 'The default, "%s", will be used.' % (v),
+                    "Solution": 'The default, "{}", will be used.'.format(v),
                 },
                 ignore_index=True,
             )
@@ -115,7 +115,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
                 {
                     "Table": "Dataset",
                     "Missing Column": k,
-                    "Solution": 'The default, "%s", will be used.' % (v),
+                    "Solution": 'The default, "{}", will be used.'.format(v),
                 },
                 ignore_index=True,
             )
@@ -212,7 +212,9 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
             if (col == "sample") & (model.sample_table.index.name == "sample"):
                 continue
             if col in ["project", "condition"]:
-                logging.warning("Critical issue: No %s column in sample_table." % (col))
+                logging.warning(
+                    "Critical issue: No {} column in sample_table.".format(col)
+                )
 
             table_issues = table_issues.append(
                 {
@@ -266,7 +268,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene={}):
                 if col == "name":
                     if im_idx == "int":
                         model.imodulon_table["name"] = [
-                            "iModulon %i" % i for i in model.imodulon_table.index
+                            "iModulon {}".format(i) for i in model.imodulon_table.index
                         ]
                     else:
                         model.imodulon_table["name"] = model.imodulon_table.index
@@ -322,7 +324,6 @@ def imodulondb_export(
     path=".",
     skip_check=False,
     cat_order=None,
-    tfcomplex_to_genename={},
     gene_scatter_x="start",
 ):
     """
@@ -341,10 +342,6 @@ def imodulondb_export(
     cat_order : list, optional
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table (default = None)
-    tfcomplex_to_genename : dict
-        dictionary pointing complex TRN entries
-        to matching gene names in the gene table
-        ex: {"FlhDC":"flhD"}
     gene_scatter_x : str
         Option to pass to scatter plot function, determines the X axis
         on iModulon pages. Currently, only "start" is supported. (default =
@@ -354,6 +351,7 @@ def imodulondb_export(
     -------
     None: None
     """
+
     model1 = model.copy()
     if not skip_check:
         imodulondb_compatibility(model1, True)
@@ -371,15 +369,14 @@ def imodulondb_export(
 
     print("Writing iModulon page files (1/2)")
 
-    imdb_generate_im_files(model1, folder, gene_scatter_x, tfcomplex_to_genename)
+    imdb_generate_im_files(model1, folder, gene_scatter_x)
 
     print("Writing Gene page files (2/2)")
 
     imdb_generate_gene_files(model1, folder)
 
     print(
-        "Complete! (Organism = %s; Dataset = %s)"
-        % (
+        "Complete! (Organism = {}; Dataset = {})".format(
             model1.splash_table["organism_folder"],
             model1.splash_table["dataset_folder"],
         )
@@ -399,7 +396,7 @@ def imdb_iM_table(imodulon_table, cat_order=None):
     ----------
     imodulon_table : ~pandas.DataFrame
         Table formatted similar to IcaData.imodulon_table
-    cat_order : list
+    cat_order : list, optional
         List of categories in imodulon_table.Category, ordered as desired
 
     Returns
@@ -425,7 +422,7 @@ def imdb_iM_table(imodulon_table, cat_order=None):
     im_table.Category = im_table.Category.fillna("Uncharacterized")
 
     if cat_order is not None:
-        cat_dict = {cat_order[i]: i for i in range(len(cat_order))}
+        cat_dict = {val: i for i, val in enumerate(cat_order)}
         im_table["category_num"] = [
             cat_dict[im_table.Category[k]] for k in im_table.index
         ]
@@ -452,7 +449,7 @@ def imdb_gene_presence(model):
     -------
     mbin: ~pandas.DataFrame
         Binarized M matrix
-    mbin_list: list
+    mbin_list: ~pandas.DataFrame
         Table mapping genes to iModulons
     """
     mbin = model.M_binarized.astype(bool)
@@ -617,9 +614,7 @@ def imodulondb_main_site_files(
     return main_folder
 
 
-def imdb_generate_im_files(
-    model, path_prefix=".", gene_scatter_x="start", tfcomplex_to_genename={}
-):
+def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start"):
     """
     Generates all files for all iModulons in data
 
@@ -632,16 +627,8 @@ def imdb_generate_im_files(
     gene_scatter_x : str
         Column from the gene table that specificies what to use on the
         X-axis of the gene scatter plot (default = "start")
-    tfcomplex_to_genename : dict
-        dictionary pointing complex TRN entries
-        to matching gene names in the gene table
-        ex: {"FlhDC":"flhD"}
 
-    Returns
-    -------
-    None: None
     """
-
     for k in tqdm(model.imodulon_table.index):
         make_im_directory(model, k, path_prefix, gene_scatter_x)
 
@@ -685,7 +672,7 @@ def parse_tf_string(model, tf_str, verbose=False):
         IcaData object
     tf_str : str
         String of tfs joined by '+' and '/' operators
-    print_output : bool, optional
+    verbose : bool, optional
         Whether or nor to print outputs
 
     Returns
@@ -838,9 +825,9 @@ def _sort_tf_strings(tfs, unique_elts):
 
     Parameters
     ----------
-    tfs : list[str]
+    tfs : list
         Sequence of TFs in the desired order
-    unique_elts : list[str]
+    unique_elts : list
         All combination strings made by _tf_combo_string
 
     Returns
@@ -872,12 +859,7 @@ def _sort_tf_strings(tfs, unique_elts):
     return sorted_elts + unique_elts
 
 
-def imdb_gene_hist_df(
-    model,
-    k: Union[int, str],
-    bins: Optional[int] = 20,
-    tol: Optional[float] = 0.001,
-):
+def imdb_gene_hist_df(model, k, bins=20, tol=0.001):
     """
     Creates the gene histogram for an iModulon
 
@@ -887,9 +869,9 @@ def imdb_gene_hist_df(
         IcaData object
     k : int or str
         iModulon name
-    bins : int, optional
+    bins : int
         Number of bins in the histogram (default = 20)
-    tol : float, optional
+    tol : float
         Distance to threshold for deciding if a bar is in the iModulon
         (default = .001)
 
@@ -1165,7 +1147,12 @@ def imdb_activity_bar_df(model, k):
     # initialize the dataframe
     max_replicates = int(samp_table["Biological Replicates"].max())
     columns = ["A_avg", "A_std", "n"] + list(
-        chain(*[["rep%i_idx" % i, "rep%i_A" % i] for i in range(1, max_replicates + 1)])
+        chain(
+            *[
+                ["rep{}_idx".format(i), "rep{}_A".format(i)]
+                for i in range(1, max_replicates + 1)
+            ]
+        )
     )
     res = pd.DataFrame(columns=columns)
 
@@ -1239,7 +1226,7 @@ def _parse_regulon_string(model, s):
     return res
 
 
-def _get_reg_genes(model: IcaData, tf: str) -> Set:
+def _get_reg_genes(model, tf):
     """
     Finds the set of genes regulated by the boolean combination of regulators
     in a TF
@@ -1286,7 +1273,7 @@ def _get_reg_genes(model: IcaData, tf: str) -> Set:
     return reg_genes
 
 
-def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
+def imdb_regulon_venn_df(model, k):
     """
     Generates a dataframe for the regulon venn diagram of iModulon k. Returns
     None
@@ -1386,12 +1373,7 @@ def imdb_regulon_venn_df(model: IcaData, k: Union[str, int]):
 # Regulon Scatter Plot
 
 
-def get_tfs_to_scatter(
-    model: IcaData,
-    tf_string: Union[str, float],
-    tfcomplex_to_genename: Optional[dict] = {},
-    verbose: Optional[bool] = False,
-) -> List:
+def get_tfs_to_scatter(model, tf_string, tfcomplex_to_genename=None, verbose=False):
     """
 
     Parameters
@@ -1400,10 +1382,13 @@ def get_tfs_to_scatter(
         IcaData object
     tf_string : str or ~numpy.nan
         String of TFs, or np.nan
-    tfcomplex_to_genename : dict
+    tfcomplex_to_genename : dict, optional
         dictionary pointing complex TRN entries
         to matching gene names in the gene table
         ex: {"FlhDC":"flhD"}
+    verbose : bool
+        Show verbose output (default: False)
+
     Returns
     -------
     res: list
@@ -1412,6 +1397,8 @@ def get_tfs_to_scatter(
 
     # hard-coded TF names
     # should just modify TRN/gene info so everything matches but ok
+    if tfcomplex_to_genename is None:
+        tfcomplex_to_genename = {}
     rename_tfs = {
         "csqR": "yihW",
         "hprR": "yedW",
@@ -1451,7 +1438,7 @@ def get_tfs_to_scatter(
                 bad_res += [tf]
                 if verbose:
                     print("TF has no associated expression profile:", tf)
-                    print("If %s is not a gene, this behavior is expected." % tf)
+                    print("If {} is not a gene, this behavior is expected.".format(tf))
                     print(
                         "If it is a gene, use consistent naming"
                         " between the TRN and gene_table."
@@ -1462,9 +1449,7 @@ def get_tfs_to_scatter(
     return res, bad_res
 
 
-def imdb_regulon_scatter_df(
-    model: IcaData, k: Union[str, int], tfcomplex_to_genename: Optional[dict] = {}
-):
+def imdb_regulon_scatter_df(model, k, tfcomplex_to_genename=None):
     """
 
     Parameters
@@ -1473,7 +1458,7 @@ def imdb_regulon_scatter_df(
         IcaData object
     k : int or str
         iModulon name
-    tfcomplex_to_genename : dict
+    tfcomplex_to_genename : dict, optional
         dictionary pointing complex TRN entries
         to matching gene names in the gene table
         ex: {"FlhDC":"flhD"}
@@ -1483,6 +1468,9 @@ def imdb_regulon_scatter_df(
     res: ~pandas.DataFrame
         A dataframe for producing the regulon scatter plots in iModulonDB
     """
+
+    if tfcomplex_to_genename is None:
+        tfcomplex_to_genename = {}
 
     row = model.imodulon_table.loc[k]
     tfs, _ = get_tfs_to_scatter(model, row.regulator, tfcomplex_to_genename)
@@ -1525,7 +1513,7 @@ def imdb_regulon_scatter_df(
 
 
 # iModulon Metadata
-def tf_with_links(model: IcaData, tf_str: Union[str, float]):
+def tf_with_links(model, tf_str):
     """
     Adds links to the regulator string
     Parameters
@@ -1582,7 +1570,7 @@ def tf_with_links(model: IcaData, tf_str: Union[str, float]):
     return res, bad_tfs
 
 
-def tf_with_links_brackets(model: IcaData, tf_str: Union[str, float]):
+def tf_with_links_brackets(model, tf_str):
     """
     Adds links to the regulator string
     Used with the complicated bracket system in Bacillus Microarray
@@ -1710,7 +1698,7 @@ def imdb_imodulon_basics_df(
 
 # Compute All iModulon Plots
 def make_im_directory(
-    model, k, path_prefix=".", gene_scatter_x="start", tfcomplex_to_genename={}
+    model, k, path_prefix=".", gene_scatter_x="start", tfcomplex_to_genename=None
 ):
     """
 
@@ -1726,7 +1714,7 @@ def make_im_directory(
     gene_scatter_x : str
         Passed to imdb_gene_scatter_df() to indicate
         the x axis type of that plot (default = "start")
-    tfcomplex_to_genename : dict
+    tfcomplex_to_genename : dict, optional
         dictionary pointing complex TRN entries
         to matching gene names in the gene table
         ex: {"FlhDC":"flhD"}
@@ -1737,6 +1725,9 @@ def make_im_directory(
     """
 
     # generate the plot files
+    if tfcomplex_to_genename is None:
+        tfcomplex_to_genename = {}
+
     gene_table = imdb_gene_table_df(model, k)
     gene_hist = imdb_gene_hist_df(model, k)
     gene_scatter = imdb_gene_scatter_df(model, k, gene_scatter_x)
@@ -1798,7 +1789,12 @@ def imdb_gene_activity_bar_df(model, gene_id):
     X_gene_id = X_gene_id.rename(dict(zip(X_gene_id.index, samp_table.index)))
     max_replicates = int(samp_table["Biological Replicates"].max())
     columns = ["X_avg", "X_std", "n"] + list(
-        chain(*[["rep%i_idx" % i, "rep%i_X" % i] for i in range(1, max_replicates + 1)])
+        chain(
+            *[
+                ["rep{}_idx".format(i), "rep{}_X".format(i)]
+                for i in range(1, max_replicates + 1)
+            ]
+        )
     )
     res = pd.DataFrame(columns=columns)
 
