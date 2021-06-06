@@ -236,7 +236,7 @@ class IcaData(object):
 
         # Initialize COG colors
         if "COG" in self.gene_table.columns:
-            self.gene_table.COG = self.gene_table.COG.fillna('No COG category')
+            self.gene_table.COG = self.gene_table.COG.fillna("No COG category")
             cogs = sorted(self.gene_table.COG.unique())
             self.cog_colors = dict(
                 zip(

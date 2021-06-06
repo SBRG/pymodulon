@@ -22,10 +22,10 @@
     :target: https://github.com/psf/black
     :alt: Black code style
 
-.. image:: https://anaconda.org/conda-forge/pymodulon/badges/installer/conda.svg   
+.. image:: https://anaconda.org/conda-forge/pymodulon/badges/installer/conda.svg
     :target: https://conda.anaconda.org/conda-forge
     :alt: Conda installation
-    
+
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit

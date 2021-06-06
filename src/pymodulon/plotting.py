@@ -2092,7 +2092,7 @@ def _get_fit(x, y):
                 all_params.append(
                     curve_fit(_broken_line, x, y, p0=[1, 1, c], maxfev=5000)[0]
                 )
-            except (OptimizeWarning, RuntimeError) as e:
+            except (OptimizeWarning, RuntimeError):
                 pass
 
     best_r2 = -np.inf
