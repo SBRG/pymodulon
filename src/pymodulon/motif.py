@@ -93,6 +93,7 @@ def find_motifs(
     verbose: bool = True,
     force: bool = False,
     evt: float = 0.001,
+    parallel: bool = True,
     cores: int = 8,
     minw: int = 6,
     maxw: int = 40,
@@ -127,6 +128,8 @@ def find_motifs(
         Force execution of MEME even if output already exists (default: False)
     evt: float
         E-value threshold (default: 0.001)
+    parallel: bool
+        Toggles the parallel version of MEME. (default: True)
     cores: int
         Number of cores to use (default: 8)
     minw: int
@@ -201,6 +204,8 @@ def find_motifs(
         "-dna",
         "-mod",
         "zoops",
+        "-p",
+        str(cores),
         "-nmotifs",
         str(nmotifs),
         "-evt",
@@ -213,6 +218,11 @@ def find_motifs(
         "-minsites",
         str(minsites),
     ]
+
+    # If parallel is False, only use the single core version of MEME
+    if not parallel:
+        cmd.remove('-p')
+        cmd.remove(str(cores))
 
     if palindrome:
         cmd.append("-pal")
