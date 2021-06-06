@@ -1576,7 +1576,7 @@ def compare_imodulons_vs_regulons(
     if imodulons is None:
         reg_table = ica_data.imodulon_table.copy()
         if reg_only:
-            reg_table = imodulon_table[imodulon_table.regulator.notnull()]
+            reg_table = reg_table[reg_table.regulator.notnull()]
     else:
         reg_table = ica_data.imodulon_table.loc[imodulons]
 
