@@ -41,11 +41,9 @@ class IcaData(object):
         thresholds=None,
         threshold_method="dagostino",
         motif_info=None,
-        dataset_table=None,
-        splash_table=None,
+        imodulondb_table=None,
         gene_links=None,
         tf_links=None,
-        link_database="External Database",
     ):
         """
         Initialize IcaData object
@@ -88,21 +86,14 @@ class IcaData(object):
         threshold_method : str
             Either "dagostino" (default with TRN) or "kmeans" (default if no TRN
             provided)
-        dataset_table : dict, optional
+        imodulondb_table : dict, optional
             Dictionary of general dataset information for the details box on the
-            dataset page of iModulonDB (default: None)
-        splash_table : dict, optional
-            Dictionary of general information for the splash page
-            link to this dataset, as well as folder names for where its data
-            is stored in iModulonDB (default: None)
+            dataset page of iModulonDB and other iModulonDB features (default: None)
         gene_links : dict, optional
             dictionary of genes to links in an external database (default: None)
         tf_links : dict, optional
             Dictionary of TFs (from the TRN) to links in a database (default:
             None)
-        link_database : str, optional
-            Name of the database for the gene_links dictionary (default:
-            "External Database")
         """
 
         #########################
@@ -228,9 +219,7 @@ class IcaData(object):
         ##############################
 
         # initialize links
-        self.dataset_table = dataset_table
-        self.splash_table = splash_table
-        self.link_database = link_database
+        self.imodulondb_table = imodulondb_table
         self.gene_links = gene_links
         self.tf_links = tf_links
 
@@ -1217,81 +1206,34 @@ class IcaData(object):
     #########################
 
     @property
-    def dataset_table(self):
-        return self._dataset_table
+    def imodulondb_table(self):
+        return self._imodulondb_table
 
-    @dataset_table.setter
-    def dataset_table(self, new_dst):
-        if new_dst is None:
-            # count some statistics
-            num_genes = self._m.shape[0]
-            num_samps = self._a.shape[1]
-            num_ims = self._m.shape[1]
-            if ("project" in self.sample_table.columns) and (
-                "condition" in self.sample_table.columns
-            ):
-                num_conds = len(self.sample_table.groupby(["condition", "project"]))
-            else:
-                num_conds = "Unknown"
+    @imodulondb_table.setter
+    def imodulondb_table(self, new_imdb):
 
-            # initialize dataset_table
-            self._dataset_table = pd.Series(
-                {
-                    "Title": "New Dataset",
-                    "Organism": "New Organism",
-                    "Strain": "Unknown Strain",
-                    "Number of Samples": num_samps,
-                    "Number of Unique Conditions": num_conds,
-                    "Number of Genes": num_genes,
-                    "Number of iModulons": num_ims,
-                }
-            )
-        elif isinstance(new_dst, dict):
-            self._dataset_table = new_dst
-        elif isinstance(new_dst, str):
-            self._dataset_table = _check_dict(new_dst)
-        else:
-            raise ValueError(
-                "New dataset table must be None, a filename, a dictionary, "
-                "or a JSON string"
-            )
+        if new_imdb is None:
+            new_imdb = dict()
 
-    @property
-    def splash_table(self):
-        return self._splash_table
+        if isinstance(new_imdb, str):
+            new_imdb = _check_dict(new_imdb)
 
-    @splash_table.setter
-    def splash_table(self, new_splash):
+        self._imodulondb_table = new_imdb
 
-        if new_splash is None:
-            new_splash = dict()
-
-        if isinstance(new_splash, str):
-            new_splash = _check_dict(new_splash)
-
-        self._splash_table = new_splash
-
-        default_splash_table = {
-            "organism_name": "New Organism",
-            "dataset_name": "New Dataset",
-            "organism_folder": "new_org",
+        default_imdb_table = {
+            "organism": "New Organism",
+            "dataset": "New Dataset",
+            "strain": "Unspecified",
+            "publication_name": "Unpublished Study",
+            "publication_link": "",
+            "gene_link_db": "External Database",
+            "organism_folder": "new_organism",
             "dataset_folder": "new_dataset",
         }
-        for k, v in default_splash_table.items():
-            if k not in new_splash:  # use what is provided, default for
+        for k, v in default_imdb_table.items():
+            if k not in new_imdb:  # use what is provided, default for
                 # what isn't
-                self._splash_table[k] = v
-
-    @property
-    def link_database(self):
-        return self._link_database
-
-    @link_database.setter
-    def link_database(self, new_db):
-        if isinstance(new_db, str):
-            self._link_database = new_db
-        else:
-            raise ValueError("link_database must be a string.")
+                self._imodulondb_table[k] = v
 
     @property
     def gene_links(self):
@@ -1331,6 +1273,11 @@ class IcaData(object):
             new_links = _check_dict(new_links)
 
         self._tf_links = new_links
+
+
+##########
+# Motifs #
+##########
 
 
 class MotifInfo:

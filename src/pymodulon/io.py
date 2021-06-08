@@ -116,7 +116,7 @@ def load_json_model(filename):
         dagostino_cutoff = None
 
     # Remove deprecated arguments
-    deprecated_args = ["cog_colors"]
+    deprecated_args = ["cog_colors", "dataset_table", "splash_table", "link_database"]
     for arg in deprecated_args:
         if arg in serial_data.keys():
             serial_data.pop(arg)
