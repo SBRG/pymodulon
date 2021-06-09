@@ -320,9 +320,8 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
 def imodulondb_export(
     model,
     path=".",
-    skip_check=False,
     cat_order=None,
-    gene_scatter_x="start",
+    tfcomplex_to_gene={}
 ):
     """
     Generates the iModulonDB page for the data and exports to the path.
@@ -335,15 +334,13 @@ def imodulondb_export(
         IcaData object to export
     path : str, optional
         Path to iModulonDB main hosting folder (default = ".")
-    skip_check : bool, optional
-        If true, skip compatibility check (default = "False")
     cat_order : list, optional
         List of categories in the imodulon_table, ordered as you would
         like them to appear in the dataset table (default = None)
-    gene_scatter_x : str
-        Option to pass to scatter plot function, determines the X axis
-        on iModulon pages. Currently, only "start" is supported. (default =
-        "start")
+    tfcomplex_to_gene : dict, optional
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
 
     Returns
     -------
@@ -351,8 +348,7 @@ def imodulondb_export(
     """
 
     model1 = model.copy()
-    if not skip_check:
-        imodulondb_compatibility(model1, True)
+    imodulondb_compatibility(model1, True, tfcomplex_to_gene=tfcomplex_to_gene)
 
     print("Writing main site files...")
 
@@ -367,7 +363,7 @@ def imodulondb_export(
 
     print("Writing iModulon page files (1/2)")
 
-    imdb_generate_im_files(model1, folder, gene_scatter_x)
+    imdb_generate_im_files(model1, folder, "start", tfcomplex_to_gene)
 
     print("Writing Gene page files (2/2)")
 
@@ -614,6 +610,7 @@ def imodulondb_main_site_files(
     enrich_df = model.imodulon_table.copy()
     enrich_df["component"] = enrich_df.index
     enrich_df = enrich_df[["component", "name", "regulator", "function"]]
+    enrich_df = enrich_df.rename({"function":"Function"}, axis = 1)
     try:
         enrich_df = enrich_df.sort_values(by="name").fillna(value="N/A")
     except TypeError:
@@ -663,7 +660,8 @@ def imodulondb_main_site_files(
     return main_folder
 
 
-def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start"):
+def imdb_generate_im_files(model, path_prefix=".", 
+    gene_scatter_x="start", tfcomplex_to_gene={}):
     """
     Generates all files for all iModulons in data
 
@@ -676,10 +674,14 @@ def imdb_generate_im_files(model, path_prefix=".", gene_scatter_x="start"):
     gene_scatter_x : str
         Column from the gene table that specificies what to use on the
         X-axis of the gene scatter plot (default = "start")
+    tfcomplex_to_gene : dict, optional
+        dictionary pointing complex TRN entries
+        to matching gene names in the gene table
+        ex: {"FlhDC":"flhD"}
 
     """
     for k in tqdm(model.imodulon_table.index):
-        make_im_directory(model, k, path_prefix, gene_scatter_x)
+        make_im_directory(model, k, path_prefix, gene_scatter_x, tfcomplex_to_gene)
 
 
 def imdb_generate_gene_files(model, path_prefix="."):
@@ -1450,9 +1452,7 @@ def get_tfs_to_scatter(model, tf_string, tfcomplex_to_genename=None, verbose=Fal
         "csqR": "yihW",
         "hprR": "yedW",
         "thi-box": "Thi-box",
-        "flhD;flhC": "flhD",
         "FlhDC": "flhD",
-        "rcsA;rcsB": "rcsB",
         "RcsAB": "rcsB",
         "ntrC": "glnG",
         "gutR": "srlR",
