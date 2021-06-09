@@ -47,7 +47,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
         Columns:
             - Table: which table or other variable the issue is in
             - Missing Column: the column of the Table with the issue
-                (must match exactly)
+                (not case sensitive; capitalization is ignored).
             - Solution: Unless "CRITICAL" is in this cell, the site behavior
                 if the issue remained is described here.
     tf_issues: pd.DataFrame
@@ -274,24 +274,22 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
             model.imodulon_table = model.imodulon_table.rename(
                 {iM_table_lower[col]: col}, axis=1
             )
-        if inplace:
-            if im_idx == "str":
-                model.rename_imodulons(
-                    dict(zip(model.imodulon_names, range(len(model.imodulon_names))))
+    if inplace:
+        if im_idx == "str":
+            model.rename_imodulons(
+                dict(zip(model.imodulon_names, range(len(model.imodulon_names))))
+            )
+        for idx, tf in zip(model.imodulon_table.index, model.imodulon_table.regulator):
+            try:
+                model.imodulon_table.loc[idx, "regulator_readable"] = (
+                    model.imodulon_table.regulator[idx]
+                    .replace("/", " or ")
+                    .replace("+", " and ")
                 )
-            for idx, tf in zip(
-                model.imodulon_table.index, model.imodulon_table.regulator
-            ):
-                try:
-                    model.imodulon_table.loc[idx, "regulator_readable"] = (
-                        model.imodulon_table.regulator[idx]
-                        .replace("/", " or ")
-                        .replace("+", " and ")
-                    )
-                except AttributeError:
-                    model.imodulon_table.loc[
-                        idx, "regulator_readable"
-                    ] = model.imodulon_table.regulator[idx]
+            except AttributeError:
+                model.imodulon_table.loc[
+                    idx, "regulator_readable"
+                ] = model.imodulon_table.regulator[idx]
 
     # check the TRN
     cols = ["in_trn", "has_link", "has_gene"]
@@ -1040,7 +1038,7 @@ def _gene_color_dict(model):
     try:
         gene_cogs = model.gene_table.cog.to_dict()
     except AttributeError:
-        gene_cogs = {k: np.nan for k in model.gene_table.index}
+        return {k: "dodgerblue" for k in model.gene_table.index}
 
     try:
         return {k: model.cog_colors[v] for k, v in gene_cogs.items()}
