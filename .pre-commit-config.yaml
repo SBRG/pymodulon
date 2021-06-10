@@ -4,6 +4,10 @@ minimum_pre_commit_version: '2.9.0'
 default_language_version:
     python: python3
 exclude: 'tests/data/.*|src/pymodulon/data/.*|.bumpversion.cfg'
+
+ci:
+  skip: [no-commit-to-branch]
+
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
       rev: v4.0.1
@@ -16,6 +20,7 @@ repos:
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
+      - id: no-commit-to-branch
     - repo: https://github.com/pre-commit/pygrep-hooks
       rev: v1.8.0
       hooks:
