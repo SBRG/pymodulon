@@ -16,8 +16,6 @@ from tqdm.notebook import tqdm
 from pymodulon.plotting import _broken_line, _get_fit, _solid_line
 
 
-pd.options.mode.chained_assignment = None
-
 ##################
 # User Functions #
 ##################
@@ -153,7 +151,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
             not (isinstance(model.gene_links[g], str))
             or model.gene_links[g].strip() == ""
         ):
-            missing_g_links += [g]
+            missing_g_links.append(g)
     missing_g_links = pd.Series(missing_g_links, name="missing_gene_links")
 
     # check for errors in the n_replicates column of the sample table
@@ -317,7 +315,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
     return table_issues, tf_issues, missing_g_links, missing_DOIs
 
 
-def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene={}):
+def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene=None):
     """
     Generates the iModulonDB page for the data and exports to the path.
     If certain columns are unavailable but can be filled in automatically,
@@ -342,6 +340,8 @@ def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene={}):
     None: None
     """
 
+    if tfcomplex_to_gene is None:
+        tfcomplex_to_gene = {}
     model1 = model.copy()
     imodulondb_compatibility(model1, True, tfcomplex_to_gene=tfcomplex_to_gene)
 
@@ -656,7 +656,7 @@ def imodulondb_main_site_files(
 
 
 def imdb_generate_im_files(
-    model, path_prefix=".", gene_scatter_x="start", tfcomplex_to_gene={}
+    model, path_prefix=".", gene_scatter_x="start", tfcomplex_to_gene=None
 ):
     """
     Generates all files for all iModulons in data
@@ -676,6 +676,8 @@ def imdb_generate_im_files(
         ex: {"FlhDC":"flhD"}
 
     """
+    if tfcomplex_to_gene is None:
+        tfcomplex_to_gene = {}
     for k in tqdm(model.imodulon_table.index):
         make_im_directory(model, k, path_prefix, gene_scatter_x, tfcomplex_to_gene)
 
@@ -748,7 +750,7 @@ def parse_tf_string(model, tf_str, verbose=False):
                     "with this regulator. Otherwise, it will be ignored in the gene"
                     "tables and histograms."
                 )
-            bad_tfs += [tf]
+            bad_tfs.append(tf)
     tfs = [t.strip() for t in list(set(tfs) - set(bad_tfs))]
     bad_tfs = list(set(bad_tfs))
 
@@ -780,7 +782,7 @@ def imdb_gene_table_df(model, k):
     columns = []
     for c in ["gene_weight", "gene_name", "gene_product", "cog", "operon", "regulator"]:
         if c in res.columns:
-            columns += [c]
+            columns.append(c)
     res = res[columns]
     res = res.sort_values("gene_weight", ascending=False)
 
@@ -872,14 +874,14 @@ def _sort_tf_strings(tfs, unique_elts):
 
     Parameters
     ----------
-    tfs : list
+    tfs : list[str]
         Sequence of TFs in the desired order
-    unique_elts : list
+    unique_elts : list[str]
         All combination strings made by _tf_combo_string
 
     Returns
     -------
-    list
+    list[str]
         A sorted list of combination strings that have a consistent ordering
     """
 
@@ -890,7 +892,7 @@ def _sort_tf_strings(tfs, unique_elts):
     # then the individual TFs
     for tf in tfs:
         if tf in unique_elts:
-            sorted_elts += [tf]
+            sorted_elts.append(tf)
             unique_elts.remove(tf)
 
     # then pairs
@@ -899,7 +901,7 @@ def _sort_tf_strings(tfs, unique_elts):
         for j in tfs:
             name = i + " and " + j
             if name in pairs:
-                sorted_elts += [name]
+                sorted_elts.append(name)
                 unique_elts.remove(name)
 
     # then longer combos, which won't be sorted for now
@@ -1231,8 +1233,7 @@ def imdb_activity_bar_df(model, k):
 def _parse_regulon_string(model, s):
     """
     The Bacillus microarray dataset uses [] to create unusually complicated
-    TF strings.
-    This function parses those, as a helper to _get_reg_genes for
+    TF strings. This function parses those, as a helper to _get_reg_genes for
     imdb_regulon_venn_df.
 
     Parameters
@@ -1274,8 +1275,7 @@ def _parse_regulon_string(model, s):
 def _get_reg_genes(model, tf):
     """
     Finds the set of genes regulated by the boolean combination of regulators
-    in a TF
-    string
+    in a TF string
 
     Parameters
     ----------
@@ -1286,7 +1286,7 @@ def _get_reg_genes(model, tf):
 
     Returns
     -------
-    reg_genes: set
+    reg_genes: set[str]
         Set of regulated genes
     """
 
@@ -1321,8 +1321,8 @@ def _get_reg_genes(model, tf):
 def imdb_regulon_venn_df(model, k):
     """
     Generates a dataframe for the regulon venn diagram of iModulon k. Returns
-    None
-    if there is no diagram to draw
+    None if there is no diagram to draw
+
     Parameters
     ----------
     model : :class:`~pymodulon.core.IcaData`
@@ -1476,9 +1476,9 @@ def get_tfs_to_scatter(model, tf_string, tfcomplex_to_genename=None, verbose=Fal
             try:
                 b_num = model.name2num(tf)
                 if b_num in model.X.index:
-                    res += [tf]
+                    res.append(tf)
             except ValueError:
-                bad_res += [tf]
+                bad_res.append(tf)
                 if verbose:
                     print("TF has no associated expression profile:", tf)
                     print("If {} is not a gene, this behavior is expected.".format(tf))
@@ -1559,6 +1559,7 @@ def imdb_regulon_scatter_df(model, k, tfcomplex_to_genename=None):
 def tf_with_links(model, tf_str):
     """
     Adds links to the regulator string
+
     Parameters
     ----------
     model : :class:`~pymodulon.core.IcaData`
@@ -1601,14 +1602,14 @@ def tf_with_links(model, tf_str):
             link = tf_links[tf]
             if type(link) == str:  # this tf has a link
                 tf_ = '<a href="' + link + '" target="_blank">' + tf + "</a>"
-                tfs_html += [tf_]
+                tfs_html.append(tf_)
             else:  # this tf has no link
-                tfs_html += [tf]
-                bad_tfs += [tf]
+                tfs_html.append(tf)
+                bad_tfs.append(tf)
         # this tf isn't in the tf_links file
         else:
-            tfs_html += [tf]
-            bad_tfs += [tf]
+            tfs_html.append(tf)
+            bad_tfs.append(tf)
     res = and_or.join(tfs_html)
     return res, bad_tfs
 
@@ -1617,6 +1618,7 @@ def tf_with_links_brackets(model, tf_str):
     """
     Adds links to the regulator string
     Used with the complicated bracket system in Bacillus Microarray
+
     Parameters
     ----------
     model : :class:`~pymodulon.core.IcaData`
@@ -1652,10 +1654,10 @@ def tf_with_links_brackets(model, tf_str):
                         res += '<a href="' + link + '" target="_blank">' + i + "</a>"
                     else:
                         res += i
-                        bad_tfs += [i]
+                        bad_tfs.append(i)
                 else:
                     res += i
-                    bad_tfs += [i]
+                    bad_tfs.append(i)
                 res += " + "
             res = res[:-3]
         else:
@@ -1665,10 +1667,10 @@ def tf_with_links_brackets(model, tf_str):
                     res += '<a href="' + link + '" target="_blank">' + r + "</a>"
                 else:
                     res += r
-                    bad_tfs += [i]
+                    bad_tfs.append(r)
             else:
                 res += r
-                bad_tfs += [i]
+                bad_tfs.append(r)
         res += "] / ["
     res = res[:-5]
 
