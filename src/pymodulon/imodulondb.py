@@ -317,12 +317,7 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
     return table_issues, tf_issues, missing_g_links, missing_DOIs
 
 
-def imodulondb_export(
-    model,
-    path=".",
-    cat_order=None,
-    tfcomplex_to_gene={}
-):
+def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene={}):
     """
     Generates the iModulonDB page for the data and exports to the path.
     If certain columns are unavailable but can be filled in automatically,
@@ -610,7 +605,7 @@ def imodulondb_main_site_files(
     enrich_df = model.imodulon_table.copy()
     enrich_df["component"] = enrich_df.index
     enrich_df = enrich_df[["component", "name", "regulator", "function"]]
-    enrich_df = enrich_df.rename({"function":"Function"}, axis = 1)
+    enrich_df = enrich_df.rename({"function": "Function"}, axis=1)
     try:
         enrich_df = enrich_df.sort_values(by="name").fillna(value="N/A")
     except TypeError:
@@ -660,8 +655,9 @@ def imodulondb_main_site_files(
     return main_folder
 
 
-def imdb_generate_im_files(model, path_prefix=".", 
-    gene_scatter_x="start", tfcomplex_to_gene={}):
+def imdb_generate_im_files(
+    model, path_prefix=".", gene_scatter_x="start", tfcomplex_to_gene={}
+):
     """
     Generates all files for all iModulons in data
 
