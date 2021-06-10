@@ -37,9 +37,7 @@ def barplot(
     projects=None,
     highlight=None,
     ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -216,10 +214,6 @@ def barplot(
     # X-axis
     ax.hlines(0, xmin, xmax, color="k")
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -229,9 +223,7 @@ def plot_expression(
     projects=None,
     highlight=None,
     ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Creates a barplot showing an gene's expression across the compendium
@@ -277,9 +269,7 @@ def plot_expression(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
-        legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
+        legend_kwargs=legend_kwargs
     )
 
 
@@ -289,9 +279,7 @@ def plot_activities(
     projects=None,
     highlight=None,
     ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Creates a barplot showing an iModulon's activity across the compendium
@@ -336,9 +324,7 @@ def plot_activities(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
-        legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
+        legend_kwargs=legend_kwargs
     )
 
 
@@ -348,9 +334,7 @@ def plot_metadata(
     projects=None,
     highlight=None,
     ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Creates a barplot for values in the sample table
@@ -400,9 +384,7 @@ def plot_metadata(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
-        legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
+        legend_kwargs=legend_kwargs
     )
 
 
@@ -416,10 +398,8 @@ def plot_regulon_histogram(
     hist_label=("Not regulated", "Regulon Genes"),
     color=("#aaaaaa", "salmon"),
     alpha=0.7,
-    savefig=False,
     ax_font_kwargs=None,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
@@ -569,10 +549,6 @@ def plot_regulon_histogram(
     # Add legend
     ax.legend(**legend_kwargs)
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -596,12 +572,10 @@ def scatterplot(
     ylabel="",
     ax=None,
     legend=True,
-    savefig=False,
     ax_font_kwargs=None,
     scatter_kwargs=None,
     label_font_kwargs=None,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -819,10 +793,6 @@ def scatterplot(
 
     if legend or fit_line:
         ax.legend(**legend_kwargs)
-
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -1419,7 +1389,7 @@ def plot_dima(
 
 # TODO: Add kind=bar to plot top explained variance
 def plot_explained_variance(
-    ica_data, pc=True, ax=None, savefig=False, savefig_kwargs=None
+    ica_data, pc=True, ax=None
 ):
     """
     Plots the cumulative explained variance for independent components and,
@@ -1475,10 +1445,6 @@ def plot_explained_variance(
     ax.set_ylim([0, 1])
     ax.set_xlim([0, len(ic_var)])
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -1494,11 +1460,9 @@ def compare_imodulons_vs_regulons(
     vline=0.6,
     hline=0.6,
     ax=None,
-    savefig=False,
     scatter_kwargs=None,
     ax_font_kwargs=None,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    legend_kwargs=None
 ):
     """
     Compare the overlaps between iModulons and their linked regulons
@@ -1650,10 +1614,6 @@ def compare_imodulons_vs_regulons(
     # Set legend
     bbox_to_anchor_ivr = legend_kwargs.pop("bbox_to_anchor", (1, 1))
     ax.legend(bbox_to_anchor=bbox_to_anchor_ivr, **legend_kwargs)
-
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -2101,11 +2061,9 @@ def metadata_boxplot(
     use_cols=None,
     return_results=False,
     ax=None,
-    savefig=False,
     box_kwargs=None,
     strip_kwargs=None,
-    swarm_kwargs=None,
-    savefig_kwargs=None,
+    swarm_kwargs=None
 ):
     """
     Uses a decision tree regressor to automatically cluster iModulon activities
@@ -2218,10 +2176,6 @@ def metadata_boxplot(
         )
 
     ax.set_ylabel("")
-
-    # Save Figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
 
     if return_results:
         return ax, df_classes
@@ -2479,21 +2433,6 @@ def _mod_freedman_diaconis(ica_data, imodulon):
         xmax = thresh + width
 
     return np.arange(xmin, xmax + width, width)
-
-
-def _save_figures(fig, filename, savefig_kwargs):
-    """Helper function for saving figures as files"""
-
-    if savefig_kwargs is None:
-        savefig_kwargs = {}
-
-    if isinstance(filename, str):
-        savefig_kwargs["fname"] = filename
-    elif "fname" not in savefig_kwargs.keys():
-        savefig_kwargs["fname"] = "./plot.svg"
-
-    # Plot current figure instance using savefig_kwargs
-    fig.savefig(**savefig_kwargs)
 
 
 ##########################
