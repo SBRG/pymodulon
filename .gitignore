@@ -1,5 +1,7 @@
 # Other files
 archive/*
+docs/tutorials/e_coli_imdb.json
+docs/iModulonDB
 
 # PyCharm settings
 .idea/
