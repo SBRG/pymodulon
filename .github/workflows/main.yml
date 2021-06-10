@@ -3,7 +3,7 @@ name: CI-CD
 on:
   push:
     tags:
-    - '^v[0-9]+.[0-9]+.[0-9]+$'
+    - '^v[0-9]+.[0-9]+.[0-9]+(?:.dev[0-9])?$'
   workflow_dispatch:
       inputs:
         py-act:
@@ -180,7 +180,8 @@ jobs:
             ${{ env.DOCKER_IMAGE }}
             ${{ env.GHCR }}/${{ env.DOCKER_IMAGE }}
           tag-sha: true
-          tag-match: '[0-9]+.[0-9]+.[0-9]+'  # e.g., v{MAJOR}.{MINOR}.{PATCH}
+          tag-match: '^v[0-9]+.[0-9]+.[0-9]+(?:.dev[0-9])?$'
+          # e.g., v{MAJOR}.{MINOR}.{PATCH}(.dev{})
       -
         name: Set up Docker Buildx
         id: docker-buildx-setupx
