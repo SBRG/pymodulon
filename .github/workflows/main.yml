@@ -208,3 +208,4 @@ jobs:
           context: ./docker
           file: ./docker/Dockerfile
           push: true
+          tags: ${{ steps.docker-meta.outputs.tags }}
