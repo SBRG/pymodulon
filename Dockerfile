@@ -3,7 +3,7 @@ FROM $BASE_CONTAINER
 
 LABEL maintainer="Anand Sastry <avsastry@eng.ucsd.edu>"
 
-ARG PYMODULON_VERSION=0.2.0.dev0
+ARG PYMODULON_VERSION=0.2.0
 
 USER root
 
