@@ -31,29 +31,56 @@
    :alt: pre-commit
 
 What is an iModulon?
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 To learn about iModulons, how they are computed, and what they can tell you, see our `about page <https://imodulondb.org/about.html>`_.
 
 Installation
-~~~~~~~~~~~~
+------------
+
+With Docker
+~~~~~~~~~~~
+
+The easiest way to get started with PyModulon is using the Docker container. 
+
+1. Install `Docker <https://docs.docker.com/get-docker/>`_
+2. Open terminal and navigate to your work folder
+3. Run the following commands to start a Jupyter notebook server::
+
+	docker run -p 8888:8888 -v "${PWD}":/home/jovyan/work sbrg/pymodulon
+	
+4. Copy the URL from terminal to connect to the Jupyter notebook
+5. Navigate to the ``work`` folder, which has your current directory mounted.
+6. To close the notebook, press ``Ctrl+C`` in terminal
+
+With Pip
+~~~~~~~~
 
 You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows::
 
-        pip install pymodulon
+        python -m pip install pymodulon
+	
+With Conda
+~~~~~~~~~~
 
 Alternatively, you can install using `Conda <http://anaconda.org/>`_::
 
-        conda install -c avsastry -c conda-forge pymodulon
+        conda install -c conda-forge pymodulon
 
 We recommend installing through a conda environment::
 
 	conda create -n pymodulon -c conda-forge pymodulon
 	conda activate pymodulon
 
-(Optional) Install other dependencies::
+Optional Dependencies
+~~~~~~~~~~~~~~~~~~~~~
 
-	conda install -c anaconda graphviz
-	conda install -c bioconda meme blast
+Some features of PyModulon require additional dependencies. Follow the links below for installation instructions.
+
+1. `GraphViz <https://graphviz.org/download/>`_
+2. `NCBI BLAST <https://blast.ncbi.nlm.nih.gov/Blast.cgi?PAGE_TYPE=BlastDocs&DOC_TYPE=Download>`_
+3. `MEME Suite <https://meme-suite.org/meme/doc/install.html?man_type=web>`_
+
+This step is not necessary if you use the Docker container.
 
 Documentation
 -------------
@@ -63,36 +90,19 @@ Development
 -----------
 If you would like to assist in development, please install `pre-commit <https://pre-commit.com/>`_ to ensure code style and consistency.
 
-Since **PyModulon** is currently under development, the recommended method to
-install **PyModulon** is to use the editable ``pip`` installation within a `virtual environment
-<http://docs.python-guide.org/en/latest/dev/virtualenvs/>`_ or `conda
-environment <https://docs.conda.io/en/latest/>`_.
-
-First initialize the conda environment::
-
-    conda create -n pymodulon-dev python=3.8
-    conda activate pymodulon-dev
-
-(Optional) Install other dependencies::
-
-	conda install -c anaconda graphviz
-	conda install -c bioconda meme blast
-
-Next, download the github repository::
+We recommend using an editable pip installation for development::
 
 	git clone https://github.com/SBRG/pymodulon.git
-
-Then install with ``pip`` using the ``-e`` flag::
-
+	cd pymodulon
 	python -m pip install -e .
-
+	
 This method of installation will automatically update your
 package each time you pull from this repository.
 
 To update your code, run the following from your local **PyModulon** folder::
 
 	git pull
-
+	
 
 Cite
 ----
