@@ -37,9 +37,7 @@ def barplot(
     projects=None,
     highlight=None,
     ax=None,
-    savefig=False,
     legend_kwargs=None,
-    savefig_kwargs=None,
 ):
     """
     Creates an overlaid scatter and barplot for a set of values (either gene
@@ -59,13 +57,8 @@ def barplot(
         Project(s) to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool
-        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
-
 
     Returns
     -------
@@ -87,8 +80,6 @@ def barplot(
     if ax is None:
         figsize = (len(values) / 15 + 0.5, 2)
         fig, ax = plt.subplots(figsize=figsize)
-    else:
-        fig = ax.figure
 
     # Get ymin and max
     ymin = values.min()
@@ -216,22 +207,11 @@ def barplot(
     # X-axis
     ax.hlines(0, xmin, xmax, color="k")
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
 def plot_expression(
-    ica_data,
-    gene,
-    projects=None,
-    highlight=None,
-    ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    ica_data, gene, projects=None, highlight=None, ax=None, legend_kwargs=None
 ):
     """
     Creates a barplot showing an gene's expression across the compendium
@@ -248,12 +228,8 @@ def plot_expression(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -277,21 +253,12 @@ def plot_expression(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
         legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
     )
 
 
 def plot_activities(
-    ica_data,
-    imodulon,
-    projects=None,
-    highlight=None,
-    ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    ica_data, imodulon, projects=None, highlight=None, ax=None, legend_kwargs=None
 ):
     """
     Creates a barplot showing an iModulon's activity across the compendium
@@ -308,12 +275,8 @@ def plot_activities(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -336,21 +299,12 @@ def plot_activities(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
         legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
     )
 
 
 def plot_metadata(
-    ica_data,
-    column,
-    projects=None,
-    highlight=None,
-    ax=None,
-    savefig=False,
-    legend_kwargs=None,
-    savefig_kwargs=None,
+    ica_data, column, projects=None, highlight=None, ax=None, legend_kwargs=None
 ):
     """
     Creates a barplot for values in the sample table
@@ -367,12 +321,8 @@ def plot_metadata(
         Name(s) of projects to `highlight` (default: None)
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -400,9 +350,7 @@ def plot_metadata(
         projects=projects,
         highlight=highlight,
         ax=ax,
-        savefig=savefig,
         legend_kwargs=legend_kwargs,
-        savefig_kwargs=savefig_kwargs,
     )
 
 
@@ -416,10 +364,8 @@ def plot_regulon_histogram(
     hist_label=("Not regulated", "Regulon Genes"),
     color=("#aaaaaa", "salmon"),
     alpha=0.7,
-    savefig=False,
     ax_font_kwargs=None,
     legend_kwargs=None,
-    savefig_kwargs=None,
 ):
     """
     Plots a histogram of regulon vs non-regulon genes by iModulon weighting.
@@ -452,14 +398,10 @@ def plot_regulon_histogram(
     alpha: float, optional
         Sets the opacity of the histogram (0 = transparent, 1 = opaque).
         Passed on to :func:`matplotlib.pyplot.hist`
-    savefig: str or bool, optional
-        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axes labels
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -474,8 +416,6 @@ def plot_regulon_histogram(
     # If ax is None, create ax on which to generate histogram
     if ax is None:
         fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
 
     # If bins is None, generate optimal number of bins
     if bins is None:
@@ -569,10 +509,6 @@ def plot_regulon_histogram(
     # Add legend
     ax.legend(**legend_kwargs)
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -596,12 +532,10 @@ def scatterplot(
     ylabel="",
     ax=None,
     legend=True,
-    savefig=False,
     ax_font_kwargs=None,
     scatter_kwargs=None,
     label_font_kwargs=None,
     legend_kwargs=None,
-    savefig_kwargs=None,
 ):
     """
     Generates a scatter-plot of the data given, with options for coloring by
@@ -639,8 +573,6 @@ def scatterplot(
         Axes object to plot on, otherwise use current Axes
     legend: bool
         Show legend
-    savefig: str or bool, optional
-        Save figure to provided path
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axis labels
     scatter_kwargs: dict, optional
@@ -650,8 +582,6 @@ def scatterplot(
         :func:`matplotlib.pyplot.text`
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -661,8 +591,6 @@ def scatterplot(
 
     if ax is None:
         fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
 
     if show_labels == "auto":
         show_labels = len(x) <= 20
@@ -819,10 +747,6 @@ def scatterplot(
 
     if legend or fit_line:
         ax.legend(**legend_kwargs)
-
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
 
     return ax
 
@@ -1418,9 +1342,7 @@ def plot_dima(
 ###############
 
 # TODO: Add kind=bar to plot top explained variance
-def plot_explained_variance(
-    ica_data, pc=True, ax=None, savefig=False, savefig_kwargs=None
-):
+def plot_explained_variance(ica_data, pc=True, ax=None):
     """
     Plots the cumulative explained variance for independent components and,
     optionally, principal components
@@ -1433,10 +1355,6 @@ def plot_explained_variance(
         If True, plot cumulative explained variance of independent components
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1446,8 +1364,6 @@ def plot_explained_variance(
 
     if not ax:
         fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
 
     # Get IC explained variance
     ic_var = []
@@ -1475,10 +1391,6 @@ def plot_explained_variance(
     ax.set_ylim([0, 1])
     ax.set_xlim([0, len(ic_var)])
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -1494,11 +1406,9 @@ def compare_imodulons_vs_regulons(
     vline=0.6,
     hline=0.6,
     ax=None,
-    savefig=False,
     scatter_kwargs=None,
     ax_font_kwargs=None,
     legend_kwargs=None,
-    savefig_kwargs=None,
 ):
     """
     Compare the overlaps between iModulons and their linked regulons
@@ -1528,16 +1438,12 @@ def compare_imodulons_vs_regulons(
         Draw a dashed horizontal line
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
     scatter_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.scatter`
     ax_font_kwargs: dict, optional
         Additional keyword arguments for axes labels
     legend_kwargs: dict, optional
         Additional keyword arguments passed to :func:`matplotlib.pyplot.legend`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -1548,8 +1454,6 @@ def compare_imodulons_vs_regulons(
     # Set up axis
     if not ax:
         fig, ax = plt.subplots(figsize=(5, 5))
-    else:
-        fig = ax.figure
 
     # Handle kwargs
     if scatter_kwargs is None:
@@ -1651,10 +1555,6 @@ def compare_imodulons_vs_regulons(
     bbox_to_anchor_ivr = legend_kwargs.pop("bbox_to_anchor", (1, 1))
     ax.legend(bbox_to_anchor=bbox_to_anchor_ivr, **legend_kwargs)
 
-    # Save figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
-
     return ax
 
 
@@ -1662,7 +1562,7 @@ def compare_imodulons_vs_regulons(
 # Cluster Activities #
 ######################
 
-# TODO: Figure out savefig for this plot
+
 def cluster_activities(
     ica_data,
     correlation_method="spearman",
@@ -2101,11 +2001,9 @@ def metadata_boxplot(
     use_cols=None,
     return_results=False,
     ax=None,
-    savefig=False,
     box_kwargs=None,
     strip_kwargs=None,
     swarm_kwargs=None,
-    savefig_kwargs=None,
 ):
     """
     Uses a decision tree regressor to automatically cluster iModulon activities
@@ -2137,16 +2035,12 @@ def metadata_boxplot(
         Return a dataframe describing the classifications
     ax: ~matplotlib.axes.Axes, optional
         Axes object to plot on, otherwise use current Axes
-    savefig: str or bool, optional
-        Save figure to provided path
     box_kwargs: dict, optional
         Additional keyword arguments passed to :func:`seaborn.boxplot`
     strip_kwargs: dict, optional
         Additional keyword arguments passed to :func:`seaborn.stripplot`
     swarm_kwargs: dict, optional
         Additional keyword arguments passed to :func:`seaborn.swarmplot`
-    savefig_kwargs: dict, optional
-        Additional keyword arguments passed to :func:`matplotlib.pyplot.savefig`
 
     Returns
     -------
@@ -2158,8 +2052,6 @@ def metadata_boxplot(
 
     if not ax:
         fig, ax = plt.subplots()
-    else:
-        fig = ax.figure
 
     if show_points is True:
         show_points = "strip"
@@ -2218,10 +2110,6 @@ def metadata_boxplot(
         )
 
     ax.set_ylabel("")
-
-    # Save Figure
-    if savefig:
-        _save_figures(fig, savefig, savefig_kwargs)
 
     if return_results:
         return ax, df_classes
@@ -2479,21 +2367,6 @@ def _mod_freedman_diaconis(ica_data, imodulon):
         xmax = thresh + width
 
     return np.arange(xmin, xmax + width, width)
-
-
-def _save_figures(fig, filename, savefig_kwargs):
-    """Helper function for saving figures as files"""
-
-    if savefig_kwargs is None:
-        savefig_kwargs = {}
-
-    if isinstance(filename, str):
-        savefig_kwargs["fname"] = filename
-    elif "fname" not in savefig_kwargs.keys():
-        savefig_kwargs["fname"] = "./plot.svg"
-
-    # Plot current figure instance using savefig_kwargs
-    fig.savefig(**savefig_kwargs)
 
 
 ##########################
