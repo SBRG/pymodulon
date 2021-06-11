@@ -34,31 +34,30 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
         If true, modifies the model to prepare for export.
         Not recommended for use with your main model variable.
     tfcomplex_to_gene: dict, optional
-        dictionary pointing complex TRN entries
-        to matching gene names in the gene table
-        ex: {"FlhDC":"flhD"}
+        dictionary pointing complex TRN entries to matching gene names in the gene
+        table (ex: {"FlhDC":"flhD"})
 
     Returns
     -------
     table_issues: pd.DataFrame
         Each row corresponds to an issue with one of the main class elements.
         Columns:
-            - Table: which table or other variable the issue is in
-            - Missing Column: the column of the Table with the issue
-                (not case sensitive; capitalization is ignored).
-            - Solution: Unless "CRITICAL" is in this cell, the site behavior
-                if the issue remained is described here.
+        * Table: which table or other variable the issue is in
+        * Missing Column: the column of the Table with the issue (not case
+        sensitive; capitalization is ignored).
+        * Solution: Unless "CRITICAL" is in this cell, the site behavior if the
+        issue remained is described here.
     tf_issues: pd.DataFrame
         Each row corresponds to a regulator that is used in the imodulon_table.
         Columns:
-            - in_trn: whether the regulator is in the model.trn. Regulators not
-                in the TRN will be ignored in the site's histograms and gene tables.
-            - has_link: whether the regulator has a link in tf_links. If not, no
-                link to external regulator databases will be shown.
-            - has_gene: whether the regulator can be matched to a gene in the model.
-                If this is false, then there will be no regulator scatter plot on the
-                site. You can link TF complexes to one of their genes using the
-                tfcomplex_to_gene input.
+        * in_trn: whether the regulator is in the model.trn. Regulators not
+        in the TRN will be ignored in the site's histograms and gene tables.
+        * has_link: whether the regulator has a link in tf_links. If not, no
+        link to external regulator databases will be shown.
+        * has_gene: whether the regulator can be matched to a gene in the model.
+        If this is false, then there will be no regulator scatter plot on the
+        site. You can link TF complexes to one of their genes using the
+        tfcomplex_to_gene input.
     missing_g_links: pd.Series
         The genes on this list don't have links in the gene_links. Their gene pages
         for these genes will not display links.

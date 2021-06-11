@@ -71,6 +71,7 @@ We have provided an example workflow `here <https://github.com/avsastry/modulome
    tutorials/comparing_imodulons.ipynb
    tutorials/creating_the_gene_table.ipynb
    tutorials/additional_functions.ipynb
+   tutorials/creating_an_imodulondb_dashboard.ipynb
 
 
 .. toctree::
