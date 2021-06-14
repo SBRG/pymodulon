@@ -21,6 +21,9 @@
 .. image:: https://img.shields.io/readthedocs/pymodulon?logo=Read%20The%20Docs&style=plastic
     :target: https://pymodulon.readthedocs.io/en/latest/
     :alt: Documentation Status
+    
+.. image:: https://img.shields.io/codecov/c/github/sbrg/pymodulon?logo=codecov&style=plastic
+   :target: https://codecov.io/github/sbrg/pymodulon
 
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=plastic
    :target: https://github.com/pre-commit/pre-commit
