@@ -52,13 +52,17 @@ The easiest way to get started with PyModulon is using the Docker container.
 
 1. Install `Docker <https://docs.docker.com/get-docker/>`_
 2. Open terminal and navigate to your work folder
-3. Run the following commands to start a Jupyter notebook server::
+3. Run the following commands to start a `Jupyter Notebook <https://jupyter.org/>`_ server::
 
 	docker run -p 8888:8888 -v "${PWD}":/home/jovyan/work sbrg/pymodulon
+	
+   Alternatively, you can start a `JupyterLab <https://jupyter.org/>`_ server::
+   
+        docker run -p 8888:8888 -v "${PWD}":/home/jovyan/work -e JUPYTER_ENABLE_LAB=yes sbrg/pymodulon
 
 4. Copy the URL from terminal to connect to the Jupyter notebook
 5. Navigate to the ``work`` folder, which has your current directory mounted.
-6. To close the notebook, press ``Ctrl+C`` in terminal
+6. To close the notebook, press ``Ctrl+C`` in terminal. All changes made to files in your current directory are saved to your local machine.
 
 With Pip
 ~~~~~~~~
