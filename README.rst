@@ -40,14 +40,14 @@ Installation
 With Docker
 ~~~~~~~~~~~
 
-The easiest way to get started with PyModulon is using the Docker container. 
+The easiest way to get started with PyModulon is using the Docker container.
 
 1. Install `Docker <https://docs.docker.com/get-docker/>`_
 2. Open terminal and navigate to your work folder
 3. Run the following commands to start a Jupyter notebook server::
 
 	docker run -p 8888:8888 -v "${PWD}":/home/jovyan/work sbrg/pymodulon
-	
+
 4. Copy the URL from terminal to connect to the Jupyter notebook
 5. Navigate to the ``work`` folder, which has your current directory mounted.
 6. To close the notebook, press ``Ctrl+C`` in terminal
@@ -58,7 +58,7 @@ With Pip
 You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows::
 
         python -m pip install pymodulon
-	
+
 With Conda
 ~~~~~~~~~~
 
@@ -95,14 +95,14 @@ We recommend using an editable pip installation for development::
 	git clone https://github.com/SBRG/pymodulon.git
 	cd pymodulon
 	python -m pip install -e .
-	
+
 This method of installation will automatically update your
 package each time you pull from this repository.
 
 To update your code, run the following from your local **PyModulon** folder::
 
 	git pull
-	
+
 
 Cite
 ----
