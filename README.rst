@@ -9,11 +9,11 @@
 .. image:: https://img.shields.io/pypi/v/pymodulon?logo=PyPi&style=plastic
     :target: https://pypi.org/project/pymodulon/
     :alt: PyPI
-    
+
 .. image:: https://img.shields.io/conda/vn/conda-forge/pymodulon?logo=anaconda&style=plastic
     :target: https://conda.anaconda.org/conda-forge
     :alt: Conda installation
-    
+
 .. image:: https://img.shields.io/docker/v/sbrg/pymodulon?label=Docker&logo=Docker&sort=semver&style=plastic
     :target: https://hub.docker.com/r/sbrg/pymodulon
     :alt: Docker container
@@ -21,7 +21,7 @@
 .. image:: https://img.shields.io/readthedocs/pymodulon?logo=Read%20The%20Docs&style=plastic
     :target: https://pymodulon.readthedocs.io/en/latest/
     :alt: Documentation Status
-    
+
 .. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=plastic
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
