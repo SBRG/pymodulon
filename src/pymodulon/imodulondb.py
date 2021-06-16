@@ -186,13 +186,14 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
     if model.sample_table.columns.str.lower().duplicated().any():
         logging.warning(
             "Critical issue: Duplicated column names"
-            " (case insensitive) in sample_table")
+            " (case insensitive) in sample_table"
+        )
         table_issues = table_issues.append(
             {
                 "Table": "Sample",
                 "Missing Column": "N/A - Duplicated Columns Exist",
                 "Solution": "Column names (case insensitive) should not "
-                    "be duplicated. Pay special attention the 'sample' column."
+                "be duplicated. Pay special attention the 'sample' column.",
             },
             ignore_index=True,
         )
@@ -328,8 +329,14 @@ def imodulondb_compatibility(model, inplace=False, tfcomplex_to_gene=None):
     return table_issues, tf_issues, missing_g_links, missing_DOIs
 
 
-def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene=None,
-    skip_iMs=False, skip_genes=False):
+def imodulondb_export(
+    model,
+    path=".",
+    cat_order=None,
+    tfcomplex_to_gene=None,
+    skip_iMs=False,
+    skip_genes=False,
+):
 
     """
     Generates the iModulonDB page for the data and exports to the path.
@@ -359,10 +366,6 @@ def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene=None,
     None: None
     """
 
-    # silence warnings
-    pd_option = pd.options.mode.chained_assignment
-    pd.options.mode.chained_assignment = None
-
     if tfcomplex_to_gene is None:
         tfcomplex_to_gene = {}
     model1 = model.copy()
@@ -374,18 +377,18 @@ def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene=None,
 
     print("Done writing main site files. Writing plot files...")
 
-    if not(skip_iMs and skip_genes):
+    if not (skip_iMs and skip_genes):
         print(
             "Two progress bars will appear below. The second will take "
             "significantly longer than the first."
         )
 
-    if not(skip_iMs):
+    if not (skip_iMs):
         print("Writing iModulon page files (1/2)")
 
         imdb_generate_im_files(model1, folder, "start", tfcomplex_to_gene)
 
-    if not(skip_genes):
+    if not (skip_genes):
         print("Writing Gene page files (2/2)")
 
         imdb_generate_gene_files(model1, folder)
@@ -396,9 +399,6 @@ def imodulondb_export(model, path=".", cat_order=None, tfcomplex_to_gene=None,
             model1.imodulondb_table["dataset_folder"],
         )
     )
-
-    # reset warnings
-    pd.options.mode.chained_assignment = pd_option
 
 
 ###############################
@@ -485,7 +485,7 @@ def imdb_iM_table(imodulon_table, cat_order=None):
             "precision",
             "recall",
         ]
-    ]
+    ].copy()
     im_table.index.name = "k"
     im_table.category = im_table.category.fillna("Uncharacterized")
 
@@ -1581,8 +1581,8 @@ def imdb_regulon_scatter_df(model, k, tfcomplex_to_genename=None):
     res = res.sort_values("R2", axis=1, ascending=False)
     res = res[pd.Index(["A"]).append(res.columns.drop("A"))]
 
-    if 'sample' in model.sample_table.columns:
-        res = res.rename(model.sample_table['sample'].to_dict())
+    if "sample" in model.sample_table.columns:
+        res = res.rename(model.sample_table["sample"].to_dict())
 
     return res
 
@@ -1832,8 +1832,8 @@ def make_im_directory(
         reg_scatter.to_csv(folder + str(k) + "_reg_scatter.csv")
     model.M[k].to_csv(folder + str(k) + "_gene_weights.csv")
     a_k = model.A.loc[k]
-    if 'sample' in model.sample_table.columns:
-        a_k.index = a_k.index.to_series().map(model.sample_table['sample'].to_dict())
+    if "sample" in model.sample_table.columns:
+        a_k.index = a_k.index.to_series().map(model.sample_table["sample"].to_dict())
     a_k.to_csv(folder + str(k) + "_activity.csv")
 
 
