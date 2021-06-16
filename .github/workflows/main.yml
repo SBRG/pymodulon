@@ -115,6 +115,7 @@ jobs:
     needs: [test, docs]
     runs-on: ubuntu-latest
     name: Publish package to Python Packaging Index (PyPi)
+    if: startsWith(github.ref, 'ref/tags/v')
     steps:
       -
         name: Checkout
@@ -164,6 +165,7 @@ jobs:
     needs: [publish-pypi]
     name: Build and push Docker images to registries
     runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       -
         name: Checkout

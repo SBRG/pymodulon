@@ -2,33 +2,41 @@
 **PyModulon** - Python package for analyzing and visualizing iModulons
 ======================================================================
 
-.. image:: https://img.shields.io/pypi/v/pymodulon
-    :target: https://pypi.org/project/pymodulon
-    :alt: PyPI
-
-.. image:: https://img.shields.io/pypi/pyversions/pymodulon
-    :target: https://pypi.org/project/pymodulon
+.. image:: https://img.shields.io/pypi/pyversions/pymodulon?logo=Python&style=plastic
+    :target: https://www.python.org/downloads/
     :alt: PyPI - Python Version
 
-.. image:: https://img.shields.io/github/license/sbrg/pymodulon
-    :target: https://opensource.org/licenses/MIT
-    :alt: MIT License
+.. image:: https://img.shields.io/pypi/v/pymodulon?logo=PyPi&style=plastic
+    :target: https://pypi.org/project/pymodulon/
+    :alt: PyPI
 
-.. image:: https://img.shields.io/readthedocs/pymodulon
-    :target: https://pymodulon.readthedocs.io/en/latest/
-    :alt: Documentation Status
-
-.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
-    :target: https://github.com/psf/black
-    :alt: Black code style
-
-.. image:: https://anaconda.org/conda-forge/pymodulon/badges/installer/conda.svg
+.. image:: https://img.shields.io/conda/vn/conda-forge/pymodulon?logo=anaconda&style=plastic
     :target: https://conda.anaconda.org/conda-forge
     :alt: Conda installation
 
-.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white
+.. image:: https://img.shields.io/docker/v/sbrg/pymodulon?label=Docker&logo=Docker&sort=semver&style=plastic
+    :target: https://hub.docker.com/r/sbrg/pymodulon
+    :alt: Docker container
+
+.. image:: https://img.shields.io/readthedocs/pymodulon?logo=Read%20The%20Docs&style=plastic
+    :target: https://pymodulon.readthedocs.io/en/latest/
+    :alt: Documentation Status
+
+.. image:: https://img.shields.io/codecov/c/github/sbrg/pymodulon?logo=codecov&style=plastic
+   :target: https://codecov.io/github/sbrg/pymodulon
+
+.. image:: https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit&logoColor=white&style=plastic
    :target: https://github.com/pre-commit/pre-commit
    :alt: pre-commit
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg?style=plastic
+    :target: https://github.com/psf/black
+    :alt: Black code style
+
+.. image:: https://img.shields.io/github/license/sbrg/pymodulon?logo=license&style=plastic
+    :target: https://opensource.org/licenses/MIT
+    :alt: MIT License
+
 
 What is an iModulon?
 --------------------
@@ -44,13 +52,13 @@ The easiest way to get started with PyModulon is using the Docker container.
 
 1. Install `Docker <https://docs.docker.com/get-docker/>`_
 2. Open terminal and navigate to your work folder
-3. Run the following commands to start a Jupyter notebook server::
+3. Run the following commands to start a `Jupyter Notebook <https://jupyter.org/>`_ server::
 
 	docker run -p 8888:8888 -v "${PWD}":/home/jovyan/work sbrg/pymodulon
 
 4. Copy the URL from terminal to connect to the Jupyter notebook
 5. Navigate to the ``work`` folder, which has your current directory mounted.
-6. To close the notebook, press ``Ctrl+C`` in terminal
+6. To close the notebook, press ``Ctrl+C`` in terminal. All changes made to files in your current directory are saved to your local machine.
 
 With Pip
 ~~~~~~~~
