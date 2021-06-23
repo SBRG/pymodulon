@@ -115,7 +115,7 @@ jobs:
     needs: [test, docs]
     runs-on: ubuntu-latest
     name: Publish package to Python Packaging Index (PyPi)
-    if: startsWith(github.ref, 'ref/tags/v')
+    if: startsWith(github.ref, 'refs/tags/v')
     steps:
       -
         name: Checkout
