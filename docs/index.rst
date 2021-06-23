@@ -73,7 +73,7 @@ You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ usi
 With Conda
 ~~~~~~~~~~
 
-Alternatively, you can install using `Conda <http://anaconda.org/>`_::
+Alternatively, you can install using `Conda <https://conda.io/projects/conda/en/latest/user-guide/install/index.html>`_::
 
         conda install -c conda-forge pymodulon
 
