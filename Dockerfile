@@ -3,15 +3,15 @@ FROM $BASE_CONTAINER
 
 LABEL maintainer="Anand Sastry <avsastry@eng.ucsd.edu>"
 
-ARG PYMODULON_VERSION=0.2.0
+ARG PYMODULON_VERSION=0.2.1
 
 USER root
 
 # Install GraphViz, ncbi-blast, cm-super+dvipng for latex labels,
-# cpanminus+libexpat1+zlib1g-dev for MEME
+# openmpi+cpanminus+libexpat1+zlib1g-dev for MEME
 RUN apt-get update --yes && \
     apt-get install --yes --no-install-recommends dvipng cm-super graphviz ncbi-blast+ \
-        cpanminus libexpat1-dev zlib1g-dev && \
+        libopenmpi-dev cpanminus libexpat1-dev zlib1g-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # Install MEME pre-requisites
