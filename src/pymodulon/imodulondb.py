@@ -809,7 +809,15 @@ def imdb_gene_table_df(model, k):
 
     # sort
     columns = []
-    for c in ["gene_weight", "gene_name", "gene_product", "cog", "operon", "regulator"]:
+    for c in [
+        "gene_weight",
+        "gene_name",
+        "old_locus_tag",
+        "gene_product",
+        "cog",
+        "operon",
+        "regulator",
+    ]:
         if c in res.columns:
             columns.append(c)
     res = res[columns]
@@ -1981,6 +1989,9 @@ def imdb_gene_basics_df(model, g):
         )
     else:
         res.loc["link"] = np.nan
+
+    if model.imodulondb_table["organism_folder"] == "s_acidocaldarius":
+        res.loc["old_locus_tag"] = row.old_locus_tag
 
     res.fillna(value="<i>Not Available</i>", inplace=True)
     return res
