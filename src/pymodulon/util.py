@@ -294,7 +294,7 @@ def explained_variance(
             ica_data.A.loc[k, samples].values.reshape(1, len(samples)),
         )
         ma_arrs[k] = ma_arr
-        ma_weights[k] = np.sum(ma_arr ** 2)
+        ma_weights[k] = np.sum(ma_arr**2)
 
     # Sum components in order of most important component first
     sorted_mods = sorted(ma_weights, key=ma_weights.get, reverse=True)
