@@ -95,7 +95,7 @@ def barplot(
         # Sort data by project/condition to ensure replicates are together
         metadata = sample_table.loc[:, ["project", "condition"]]
         metadata = metadata.sort_values(["project", "condition"])
-        metadata["name"] = metadata.project + " - " + metadata.condition
+        metadata["name"] = metadata.project + " - " + metadata.condition.astype(str)
 
         # Coerce highlight to iterable
         if highlight is None:
