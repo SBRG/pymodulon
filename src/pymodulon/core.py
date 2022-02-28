@@ -1129,7 +1129,7 @@ class IcaData(object):
         """
 
         # Check that gene exists
-        if gene not in self.X.index:
+        if gene not in self.gene_names:
             gene = self.name2num(gene)
 
         return self.M.columns[self.M_binarized.loc[gene] == 1].to_list()
