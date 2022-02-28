@@ -1160,7 +1160,7 @@ class IcaData(object):
 
         final_list = []
         for g in gene_list:
-            g_names = gene_table.gene_name.apply(lambda x: x.casefold())
+            g_names = gene_table.gene_name.str.casefold()
             loci = gene_table[g_names == g.casefold()].index
 
             # Ensure only one locus maps to this gene
