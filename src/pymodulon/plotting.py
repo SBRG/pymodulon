@@ -833,7 +833,7 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
 
     # Update colors for COG groups
     if "COG" in ica_data.gene_table.columns and "groups" not in kwargs:
-        mod_cogs = ica_data.gene_table.loc[component_genes].COG
+        mod_cogs = ica_data.gene_table.loc[list(component_genes)].COG
         hidden_cogs = pd.Series("hidden", index=other_genes)
         all_cogs = pd.concat([mod_cogs, hidden_cogs])
         # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
