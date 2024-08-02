@@ -774,6 +774,11 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
     ax: ~matplotlib.axes.Axes
         :class:`~matplotlib.axes.Axes` containing the scatterplot
     """
+    # Check to see if ica_data object has chromosomes specified, in which case
+    # call chromosomally aware plotting function
+    if type(ica_data.chrom) != type(None):
+        return plot_gene_weights_chrom(ica_data, imodulon, by, xaxis, xname, **kwargs)
+    
     # Check that iModulon exists
     if imodulon in ica_data.M.columns:
         y = ica_data.M[imodulon]
@@ -2405,3 +2410,187 @@ def _set_xaxis(xaxis, y):
         )
 
     return x
+
+
+def plot_gene_weights_chrom(ica_data, imodulon, by="start", xaxis=None, xname="", **kwargs):
+    """
+    Plot gene weights on a scatter plot.
+
+    Parameters
+    ----------
+    ica_data: ~pymodulon.core.IcaData
+        :class:`~pymodulon.core.IcaData` object
+    imodulon : int or str
+        `iModulon` name
+    by: 'log-tpm-norm', 'length', or 'start'
+        Property to plot on x-axis. Superceded by `xaxis`
+    xaxis: list, dict or ~pandas.Series, optional
+        Values on custom x-axis
+    xname: str, optional
+        Name of x-axis if using custom x-axis
+    **kwargs:
+        Additional keyword arguments passed to :func:`pymodulon.plotting.scatterplot`
+    Returns
+    -------
+    ax: ~matplotlib.axes.Axes
+        :class:`~matplotlib.axes.Axes` containing the scatterplot
+    """
+    chr_info = ica_data.chrom
+    
+    # Check that iModulon exists
+    if imodulon in ica_data.M.columns:
+        y = ica_data.M[imodulon]
+        ylabel = f"{imodulon} Gene Weight"
+    else:
+        raise ValueError(f"iModulon does not exist: {imodulon}")
+    
+    # Get genes in the iModulon
+    bin_M = ica_data.M_binarized
+    component_genes = list(bin_M[imodulon].loc[bin_M[imodulon] == 1].index)
+    other_genes = list(bin_M[imodulon].loc[bin_M[imodulon] == 0].index)
+
+    # If experimental `xaxis` parameter is used, use custom values for x-axis
+    if xaxis is not None:
+        x = _set_xaxis(xaxis=xaxis, y=y)
+        xlabel = xname
+
+    else:
+        #  Ensure 'by' has a valid input and assign x, xlabel accordingly
+        if by == "log-tpm":
+            x = ica_data.log_tpm.mean(axis=1)
+            xlabel = "Mean Expression"
+        elif by == "log-tpm-norm":
+            x = ica_data.X.mean(axis=1)
+            xlabel = "Mean Centered Expression"
+        elif by == "length":
+            x = np.log10(ica_data.gene_table.length)
+            xlabel = "Gene Length (log10-scale)"
+        elif by == "start":
+            if type(chr_info) != type(None):
+                x = ica_data.gene_table[["start", "chr"]]
+                x = x.apply(lambda x: x.start+chr_info.loc[x.chr, "location"], axis=1)
+            else:
+                x = ica_data.gene_table.start
+            xlabel = "Gene Start"
+        else:
+            raise ValueError(
+                '"by" must be "log-tpm", "log-tpm-norm", "length", ' 'or "start"'
+            )
+
+    # Override specific kwargs (their implementation is different
+    # in this function)
+    show_labels_pgw = kwargs.pop("show_labels", "auto")
+    adjust_labels_pgw = kwargs.pop("adjust_labels", True)
+    legend_kwargs_pgw = kwargs.pop("legend_kwargs", {})
+    label_font_kwargs_pgw = kwargs.pop("label_font_kwargs", {})
+
+    kwargs["show_labels"] = kwargs["adjust_labels"] = False
+
+    # Remove xlabel and ylabel kwargs if provided
+    kwargs.pop("xlabel", None)
+    kwargs.pop("ylabel", None)
+
+    # Default legend should be on the side of the plot
+    if (
+        "bbox_to_anchor" not in legend_kwargs_pgw.keys()
+        and "loc" not in legend_kwargs_pgw.keys()
+    ):
+        legend_kwargs_pgw.update({"bbox_to_anchor": (1, 1), "loc": 2})
+        kwargs["legend_kwargs"] = legend_kwargs_pgw
+
+    # Update colors for COG groups
+    if "COG" in ica_data.gene_table.columns and "groups" not in kwargs:
+        mod_cogs = ica_data.gene_table.loc[component_genes].COG
+        hidden_cogs = pd.Series("hidden", index=other_genes)
+        all_cogs = pd.concat([mod_cogs, hidden_cogs])
+        # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
+        kwargs.update({"groups": all_cogs, "colors": ica_data.cog_colors})
+
+    # Scatter Plot
+    ax = scatterplot(x, y, xlabel=xlabel, ylabel=ylabel, **kwargs)
+
+    # Add thresholds to scatter-plot (dashed lines)
+    xmin, xmax = ax.get_xlim()
+    ymin, ymax = ax.get_ylim()
+
+    thresh = ica_data.thresholds[imodulon]
+    if thresh != 0:
+        ax.hlines(
+            [thresh, -thresh],
+            xmin=xmin,
+            xmax=xmax,
+            colors="k",
+            linestyles="dashed",
+            linewidth=1,
+        )
+
+    ax.set_xlim(xmin, xmax)
+    ax.set_ylim(ymin, ymax)
+
+    texts = []
+    expand_kwargs = {"expand_objects": (1.2, 1.4), "expand_points": (1.3, 1.3)}
+
+    # Add labels: Put gene name if components contain under 20 genes
+    if show_labels_pgw is True or (
+        show_labels_pgw is not False and len(component_genes) <= 20
+    ):
+        for gene in component_genes:
+
+            # Add labels
+            text_kwargs = label_font_kwargs_pgw.copy()
+
+            if "fontstyle" not in text_kwargs:
+                text_kwargs.update({"fontstyle": "normal"})
+
+            # Italicize gene if there is a defined name (not locus tag)
+            try:
+                gene_name = ica_data.gene_table.loc[gene, "gene_name"]
+
+                if gene_name != gene:
+                    text_kwargs.update({"fontstyle": "italic"})
+
+            except KeyError:
+                gene_name = gene
+
+            # Set default fontsize
+            if "fontsize" not in text_kwargs:
+                text_kwargs.update({"fontsize": 12})
+
+            texts.append(
+                ax.text(
+                    x[gene],
+                    ica_data.M.loc[gene, imodulon],
+                    gene_name,
+                    **text_kwargs,
+                )
+            )
+
+        expand_kwargs["expand_text"] = (1.4, 1.4)
+
+    # Add labels: Repel texts from other text and points
+    rect = ax.add_patch(
+        Rectangle(
+            xy=(xmin, -abs(thresh)),
+            width=xmax - xmin,
+            height=2 * abs(thresh),
+            fill=False,
+            linewidth=0,
+        )
+    )
+
+    if adjust_labels_pgw:
+        adjust_text(
+            texts=texts,
+            add_objects=[rect],
+            ax=ax,
+            arrowprops=dict(arrowstyle="-", color="k", lw=0.5),
+            only_move={"objects": "y"},
+            **expand_kwargs,
+        )
+
+    if type(chr_info) != type(None):
+        for chromosome in chr_info.index:
+            ax.axvline(x = chr_info.loc[chromosome, "location"], color = 'k', linestyle='-',alpha=.1)
+        ax.set_xticks(chr_info.location, labels=chr_info.index, fontsize=8, rotation=315)
+        
+    return ax

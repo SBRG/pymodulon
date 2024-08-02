@@ -44,6 +44,7 @@ class IcaData(object):
         imodulondb_table=None,
         gene_links=None,
         tf_links=None,
+        chrom=None
     ):
         """
         Initialize IcaData object
@@ -94,6 +95,11 @@ class IcaData(object):
         tf_links : dict, optional
             Dictionary of TFs (from the TRN) to links in a database (default:
             None)
+        eukaryotic: flag marking if the organism is eukaryotic or not for use in several functions
+        chrom: lengths of the chromosomes of the organism for plotting purposes, should be a 
+            dataframe or dictionary with indices of the chromosomes and then the lengths of each
+            chromosome as well as the sum of the start location of each chromosome (cumulative sum of
+            lengths in the order of desired plotting of the chromosomes)
         """
 
         #########################
@@ -255,6 +261,7 @@ class IcaData(object):
                         "goldenrod",
                         "chocolate",
                         "orange",
+                        'navy',
                     ],
                 )
             )
@@ -271,6 +278,14 @@ class IcaData(object):
                         params[k2] = v2
                 self._motif_info[k1] = MotifInfo(**params)
 
+        # If the organism is eukaryotic or has multiple gene contigs the user would like to utilize for downstream functions,
+        # set chromosome lengths from provided dataframe
+        if chrom is None:
+            self._chrom = None
+        else:
+            self.chrom = chrom
+    
+    
     @property
     def M(self):
         """Get M matrix"""
@@ -440,6 +455,7 @@ class IcaData(object):
 
         # mark that our cutoffs are no longer optimized since the TRN
         self._cutoff_optimized = False
+        
 
     # Motif information
     @property
@@ -450,6 +466,44 @@ class IcaData(object):
     @motif_info.setter
     def motif_info(self, info):
         self._motif_info = info
+
+    @property
+    def chrom(self):
+        """Get table with chromosome sizes"""
+        return self._chrom
+
+    @chrom.setter
+    def chrom(self, chrom):
+        if type(chrom) == type(None):
+            self._chrom = None
+        else:
+            chrom = _check_table(chrom, "chrom")
+    
+            if type(self.gene_table) == type(None) or 'chr' not in self.gene_table.columns:
+                logging.warning(
+                    'Chromosome data not being set as the gene table is '
+                    'not present or does not have a chr column'    
+                )
+            else:
+                index = set(self.gene_table.chr)
+                if set(chrom.index) != set(self.gene_table.chr.values):
+                    logging.warning(
+                        'Chromosome data not being set as the gene table does '
+                        'not have the same values in the chr column as the chrom '
+                        'table has as indices.'
+                    )
+                else:
+                    if 'location' not in chrom.columns:
+                         logging.warning(
+                            'Chromosome data not being set as the chrom table does '
+                            'not have the location data of the chromosomes. This should '
+                            'be a cumulative sum of the chromosome sizes in order for your '
+                             'organism'
+                        ) 
+                    else:
+                        self._chrom = chrom
+        
+        
 
     def _update_imodulon_names(self, new_names):
         """
