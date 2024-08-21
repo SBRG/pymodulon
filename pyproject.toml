@@ -18,7 +18,6 @@ build-backend = "setuptools.build_meta"
 [tool.black]
 line-length = 88
 python-version = [
-    "py36",
     "py37",
     "py38"
 ]
@@ -80,7 +79,7 @@ envlist =
     clean,
     lint,
     pypi-description,
-    py3{6,7,8},
+    py3{7,8},
     docs,
     report
 isolated_build = true
@@ -89,7 +88,6 @@ skip_missing_interpreters = true
 
 [gh-actions]
 python =
-    3.6: py36
     3.7: py37
     3.8: py38
 
@@ -104,8 +102,8 @@ setenv =
     PY_COLORS={env:PY_COLORS:1}
 usedevelop = true
 depends =
-    py3{6,7,8}: clean
-    report: py3{6,7,8}
+    py3{7,8}: clean
+    report: py3{7,8}
 
 
 [testenv:clean]
@@ -131,7 +129,7 @@ commands =
     pre-commit run --show-diff-on-failure --all-files
 
 
-[testenv:py3{6,7,8}]
+[testenv:py3{7,8}]
 description = Run tests under {basepython}.
 extras = tests
 deps = pytest
