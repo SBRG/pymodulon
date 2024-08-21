@@ -7,6 +7,7 @@ import re
 import urllib
 from io import StringIO
 
+import numpy as np
 import pandas as pd
 
 
@@ -262,3 +263,188 @@ def uniprot_id_mapping(
     # Only keep one uniprot ID per gene
     mapping = mapping.sort_values(output_name).drop_duplicates(input_name)
     return mapping
+
+def gff2pandas_yeast(gff_file, feature="CDS", index=None):
+    """
+    Converts GFF file(s) to a Pandas DataFrame
+    Parameters
+    ----------
+    gff_file : str or list
+        Path(s) to GFF file
+    feature: str or list
+        Name(s) of features to keep (default = "CDS")
+    index : str, optional
+        Column or attribute to use as index
+
+    Returns
+    -------
+    df_gff: ~pandas.DataFrame
+        GFF formatted as a DataFrame
+    """
+
+    # Argument checking
+    if isinstance(gff_file, str):
+        gff_file = [gff_file]
+
+    if isinstance(feature, str):
+        feature = [feature]    
+
+    result = []
+
+    for gff in gff_file:
+        with open(gff, "r") as f:
+            lines = f.readlines()
+
+        # Get lines to skip
+        skiprow = list(np.where(np.array([line.startswith("#") for line in lines])==True)[0])
+
+        # Read GFF
+        names = [
+            "accession",
+            "source",
+            "feature",
+            "start",
+            "end",
+            "score",
+            "strand",
+            "phase",
+            "attributes",
+        ]
+        DF_gff = pd.read_csv(gff, sep="\t", skiprows=skiprow, names=names, header=None)
+        
+        # Filter for CDSs
+        DF_cds = DF_gff[DF_gff.feature.isin(feature)]
+
+        # Also filter for genes to get old_locus_tag
+        DF_gene = DF_gff[DF_gff.feature == "gene"].reset_index()
+        DF_gene["locus_tag"] = DF_gene.attributes.apply(
+            _get_attr, attr_id="locus_tag", ignore=True
+        )
+        DF_gene["old_locus_tag"] = DF_gene.attributes.apply(
+            _get_attr, attr_id="old_locus_tag", ignore=True
+        )
+        DF_gene = DF_gene[["locus_tag", "old_locus_tag"]]
+        DF_gene = DF_gene[DF_gene.locus_tag.notnull()]
+
+        # Sort by start position
+        DF_cds = DF_cds.sort_values("start")
+
+        # Extract attribute information
+        DF_cds["locus_tag"] = DF_cds.attributes.apply(_get_attr, attr_id="locus_tag")
+
+        DF_cds["gene_name"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="gene", ignore=True
+        )
+
+        DF_cds["gene_product"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="product", ignore=True
+        )
+
+        DF_cds["ncbi_protein"] = DF_cds.attributes.apply(
+            _get_attr, attr_id="protein_id", ignore=True
+        )
+
+        # Merge in old_locus_tag
+        DF_cds = pd.merge(DF_cds, DF_gene, how="left", on="locus_tag", sort=False)
+
+        result.append(DF_cds)
+
+    DF_gff = pd.concat(result)
+    DF_gff = DF_gff.sort_values(["locus_tag", "feature"])
+    
+    #combine gene product from CDS to mRNA feature line
+    for locus in DF_gff.locus_tag.unique():
+        subset = DF_gff[DF_gff.locus_tag==locus]
+        if len(subset.feature.unique())>1:
+            ls = list(subset.gene_product.unique())
+            ls.remove(None)
+            if subset.iloc[-1].gene_product == None:
+                loc = subset.iloc[-1].name
+                DF_gff.loc[loc, "gene_product"] = ls[0]
+                
+
+    if index:
+        if DF_gff[index].duplicated().any():
+            logging.warning("Duplicate {} detected. Dropping duplicates.".format(index))
+            DF_gff = DF_gff.drop_duplicates(index, keep='last')
+        DF_gff.set_index("locus_tag", drop=True, inplace=True)
+        
+    df_chromosomes = _get_chr(gff_file)
+    display(df_chromosomes)
+    DF_gff["chr"] = df_chromosomes.chr
+
+    return DF_gff
+
+            
+def _get_chr(gff_file):
+    for gff in gff_file:
+        with open(gff, "r") as f:
+            lines = f.readlines()
+
+        # Get lines to skip
+        skiprow = list(np.where(np.array([line.startswith("#") for line in lines])==True)[0])
+
+        # Read GFF
+        names = [
+            "accession",
+            "source",
+            "feature",
+            "start",
+            "end",
+            "score",
+            "strand",
+            "phase",
+            "attributes",
+        ]
+        DF_gff = pd.read_csv(gff, sep="\t", skiprows=skiprow, names=names, header=None)
+        
+        current_chrom = 0
+        for line in DF_gff.index:
+            if "chromosome=" in DF_gff.loc[line].attributes:
+                current_chrom = _get_attr(DF_gff.loc[line].attributes, "chromosome")
+            elif "genome=mitochondrion" in DF_gff.loc[line].attributes:
+                current_chrom = "MT"
+            elif "locus_tag" in DF_gff.loc[line].attributes:
+                DF_gff.loc[line, "locus_tag"] = _get_attr(DF_gff.loc[line].attributes, "locus_tag")
+                DF_gff.loc[line, "chr"] = current_chrom
+        return DF_gff[["locus_tag", "chr"]].drop_duplicates("locus_tag").dropna().set_index("locus_tag")
+
+    
+def get_chrom_sizes(gff_file):
+    for gff in gff_file:
+        with open(gff, "r") as f:
+            lines = f.readlines()
+
+        # Get lines to skip
+        skiprow = list(np.where(np.array([line.startswith("#") for line in lines])==True)[0])
+
+        # Read GFF
+        names = [
+            "accession",
+            "source",
+            "feature",
+            "start",
+            "end",
+            "score",
+            "strand",
+            "phase",
+            "attributes",
+        ]
+        DF_gff = pd.read_csv(gff, sep="\t", skiprows=skiprow, names=names, header=None)
+        
+        DF_chrom_sizes = pd.DataFrame()
+        
+        current_chrom = 0
+        for line in DF_gff.index:
+            if "chromosome=" in DF_gff.loc[line].attributes:
+                current_chrom = _get_attr(DF_gff.loc[line].attributes, "chromosome")
+                DF_chrom_sizes.loc[current_chrom, "length"] = DF_gff.loc[line].end
+
+            elif "genome=mitochondrion" in DF_gff.loc[line].attributes:
+                current_chrom = "MT"
+                DF_chrom_sizes.loc[current_chrom, "length"] = DF_gff.loc[line].end
+        
+        DF_chrom_sizes["location"] = DF_chrom_sizes.length.cumsum()
+        DF_chrom_sizes["location"] = DF_chrom_sizes.apply(lambda x: x.location-x.length, axis=1)
+        
+        return DF_chrom_sizes
