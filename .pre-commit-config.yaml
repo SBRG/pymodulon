@@ -10,7 +10,7 @@ ci:
 
 repos:
     - repo: https://github.com/pre-commit/pre-commit-hooks
-      rev: v2.9.0
+      rev: v4.1.0
       hooks:
       - id: check-added-large-files
         args: ['--maxkb=100000']
