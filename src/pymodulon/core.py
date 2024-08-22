@@ -662,7 +662,7 @@ class IcaData(object):
             ~self.imodulon_table.index.isin(enrichment.index)
         ]
         keep_cols = self.imodulon_table.loc[
-            enrichment.index, set(self.imodulon_table.columns) - set(enrichment.columns)
+            enrichment.index, list(set(self.imodulon_table.columns) - set(enrichment.columns))
         ]
         df_top_enrich = pd.concat([enrichment, keep_cols], axis=1)
         new_table = pd.concat([keep_rows, df_top_enrich], sort=False)

@@ -108,7 +108,7 @@ def barplot(
         metadata["x"] = np.cumsum(~metadata[["name"]].duplicated())
 
         # Get heights for barplot
-        bar_vals = metadata.groupby("x").mean()
+        bar_vals = metadata.groupby("x").mean(numeric_only=True)
 
         # Add colors and names
         bar_vals["name"] = metadata.drop_duplicates("name").name.values
@@ -838,7 +838,7 @@ def plot_gene_weights(ica_data, imodulon, by="start", xaxis=None, xname="", **kw
 
     # Update colors for COG groups
     if "COG" in ica_data.gene_table.columns and "groups" not in kwargs:
-        mod_cogs = ica_data.gene_table.loc[component_genes].COG
+        mod_cogs = ica_data.gene_table.loc[list(component_genes)].COG
         hidden_cogs = pd.Series("hidden", index=other_genes)
         all_cogs = pd.concat([mod_cogs, hidden_cogs])
         # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
@@ -1688,6 +1688,9 @@ def cluster_activities(
             agg_cluster_auto_threshold = clone(agg_cluster_base).set_params(
                 distance_threshold=row.threshold
             )
+
+            # Ensure all column names are strings
+            distance_matrix.columns = distance_matrix.columns.astype(str)
             agg_cluster_auto_threshold.fit(distance_matrix)
             n_clusters = agg_cluster_auto_threshold.n_clusters_
             auto_threshold_df.loc[row.Index, "n_clusters"] = n_clusters
@@ -2160,7 +2163,7 @@ def _encode_metadata(
 def _train_classifier(component, features, max_leaf_nodes=3):
     # Run Decision Tree Regressor
     clf = DecisionTreeRegressor(
-        min_samples_leaf=2, criterion="mae", max_leaf_nodes=max_leaf_nodes
+        min_samples_leaf=2, criterion="absolute_error", max_leaf_nodes=max_leaf_nodes
     )
     clf.fit(features, component)
     return clf
@@ -2500,7 +2503,7 @@ def plot_gene_weights_chrom(ica_data, imodulon, by="start", xaxis=None, xname=""
 
     # Update colors for COG groups
     if "COG" in ica_data.gene_table.columns and "groups" not in kwargs:
-        mod_cogs = ica_data.gene_table.loc[component_genes].COG
+        mod_cogs = ica_data.gene_table.loc[list(component_genes)].COG
         hidden_cogs = pd.Series("hidden", index=other_genes)
         all_cogs = pd.concat([mod_cogs, hidden_cogs])
         # colors = {cog:ica_data.cog_colors[cog] for cog in sorted(mod_cogs.unique())}
