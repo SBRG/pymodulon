@@ -465,7 +465,7 @@ def plot_regulon_histogram(
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
     reg_arr = ica_data.M[imodulon].loc[list(reg_genes)]
-    non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
+    non_reg_arr = ica_data.M[imodulon].loc[list(non_reg_genes)]
 
     if kind == "overlap":
         ax.hist(
