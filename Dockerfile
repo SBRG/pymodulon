@@ -35,7 +35,7 @@ RUN cd meme-5.3.3 && \
 ENV PATH="${HOME}/meme/bin:${HOME}/meme/libexec/meme-5.3.3:${PATH}"
 
 # Define pymodulon version
-ARG PYMODULON_VERSION=0.2.1
+ARG PYMODULON_VERSION=1.0.0
 
 # Install pymodulon and requirements
 RUN echo $PYMODULON_VERSION
