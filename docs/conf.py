@@ -120,6 +120,8 @@ html_extra_path = ["robots.txt"]
 # -- Options for linkcheck --------------------------------------------------
 linkcheck_ignore = [
     r"^https://doi.org/+",  # Always redirects
+    r'http://regulondb.ccg.unam.mx/', # As of 8/22/24, regulonDB works, but
+                                      # long loading times cause check issues
 ]
 
 # -- NBSphinx -----------------------------------------------------------------
