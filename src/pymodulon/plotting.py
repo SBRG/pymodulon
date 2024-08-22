@@ -464,7 +464,7 @@ def plot_regulon_histogram(
 
     # Histogram
     non_reg_genes = set(ica_data.gene_names) - reg_genes
-    reg_arr = ica_data.M[imodulon].loc[reg_genes]
+    reg_arr = ica_data.M[imodulon].loc[list(reg_genes)]
     non_reg_arr = ica_data.M[imodulon].loc[non_reg_genes]
 
     if kind == "overlap":
@@ -1967,7 +1967,7 @@ def cluster_activities(
 
         # now we can add in the singleton iModulons to our new A matrix
         singleton_ims = set(list(ica_data.A.index)) - set(all_clustered_ims)
-        cluster_A_df = cluster_A_df.append(ica_data.A.loc[list(singleton_ims)])
+        cluster_A_df = pd.concat([cluster_A_df, ica_data.A.loc[list(singleton_ims)]])
 
         # add to kwargs
         dima_kwargs["alternate_A"] = cluster_A_df
