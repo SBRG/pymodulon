@@ -9,7 +9,7 @@ on:
         py-act:
           description: 'Python 3.X for GH Actions'
           required: false
-          default: '3.8'
+          default: '3.7'
         pip_opts:
           description: Install options (pip)
           required: false

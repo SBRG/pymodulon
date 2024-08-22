@@ -63,20 +63,24 @@ The easiest way to get started with PyModulon is using the Docker container.
 With Pip
 ~~~~~~~~
 
-You can install PyModulon from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows::
+You can install PyModulon (0.2.1) from `PyPI <https://pypi.org/project/pymodulon/>`_ using ``pip`` as follows::
 
         python -m pip install pymodulon
+
+If you would like to run eukaryotic iModulon analysis, you should install PyModulon (1.0.0) as follows::
+
+	pip install https://github.com/SBRG/pymodulon/archive/refs/tags/v1.0.0.tar.gz
 
 With Conda
 ~~~~~~~~~~
 
-Alternatively, you can install using `Conda <http://anaconda.org/>`_::
+Alternatively, you can install PyModulon (0.2.1) using `Conda <http://anaconda.org/>`_::
 
         conda install -c conda-forge pymodulon
 
 We recommend installing through a conda environment::
 
-	conda create -n pymodulon -c conda-forge pymodulon
+	conda create -n pymodulon -c conda-forge python=3.7 pymodulon
 	conda activate pymodulon
 
 Optional Dependencies
