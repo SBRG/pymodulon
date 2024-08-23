@@ -370,7 +370,6 @@ def gff2pandas_yeast(gff_file, feature="CDS", index=None):
         DF_gff.set_index("locus_tag", drop=True, inplace=True)
         
     df_chromosomes = _get_chr(gff_file)
-    display(df_chromosomes)
     DF_gff["chr"] = df_chromosomes.chr
 
     return DF_gff
