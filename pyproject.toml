@@ -117,6 +117,7 @@ commands =
 
 [testenv:lint]
 description = Lint code via pre-commit hooks, finishing with isort --> black --> flake8
+basepython = python3.7
 skip_install = true
 passenv = *
 setenv =
