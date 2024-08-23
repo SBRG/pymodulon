@@ -2,7 +2,7 @@
 # See https://pre-commit.com/hooks.html for more hooks
 minimum_pre_commit_version: '2.9.0'
 default_language_version:
-    python: 3.7
+    python: python3.8
 exclude: 'tests/data/.*|src/pymodulon/data/.*|.bumpversion.cfg'
 
 ci:
