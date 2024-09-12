@@ -50,9 +50,10 @@ def cog2str(cog):
         "U": "Intracellular trafficking, secretion, and vesicular transport",
         "V": "Defense mechanisms",
         "W": "Extracellular structures",
-        "X": "No COG annotation",
+        "X": "Mobilome: prophages, transposons",
         "Y": "Nuclear structure",
         "Z": "Cytoskeleton",
+        "-": "No COG annotation",
     }
 
     return cog_dict[cog]
